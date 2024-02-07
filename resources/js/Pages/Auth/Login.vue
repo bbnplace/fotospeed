@@ -14,7 +14,7 @@ defineProps({
 });
 
 const form = useForm({
-    email: '',
+    mobile: '',
     password: '',
     remember: false,
 });
@@ -38,14 +38,14 @@ const submit = () => {
             <div>
                 <div>
                 <VTextField
-                    id="email"
-                    v-model="form.email"
-                    label="Email"
+                    id="mobile"
+                    v-model="form.mobile"
+                    label="Mobile Number"
                     variant="outlined"
-                    autocomplete="username"
-                    hide-details
-                    :error-messages="form.errors.email"
-                    append-inner-icon="mdi-email"
+                    autocomplete="phone"
+                    :hide-details="form.errors.mobile == undefined"
+                    :error-messages="form.errors.mobile"
+                    append-inner-icon="mdi-cellphone"
                 ></VTextField>
             </div>
             </div>
@@ -53,12 +53,12 @@ const submit = () => {
             <div class="mt-4">
                 <VTextField
                     id="password"
-                    :type="showPassword ? 'text' : 'password'"
+                    type="password"
                     v-model="form.password"
                     label="Password"
                     variant="outlined"
                     autocomplete="current-password"
-                    hide-details
+                    :hide-details="form.errors.password == undefined"
                     :error-messages="form.errors.password"
                     append-inner-icon="mdi-lock"
                 ></VTextField>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
+use App\Models\State;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
@@ -21,7 +23,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'states' => State::getStatesArray(),
+        ]);
     }
 
     /**
@@ -33,14 +37,19 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email:rfc,dns|max:255|unique:'.User::class,
+            'mobile' => 'required|numeric|digits_between:9,14|unique:'.User::class,
+            'state' => 'required|string|exists:states,name|max:32',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'mobile' => $request->mobile,
+            'state_id' => (State::where('name', $request->state)->first(['id']))->id,
             'password' => Hash::make($request->password),
+            'role_id' => (Role::where('name', 'Customer')->first(['id']))->id,
         ]);
 
         event(new Registered($user));

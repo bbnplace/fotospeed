@@ -4,13 +4,18 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+
+const states = usePage().props.states;
+console.log(usePage().props)
 
 const form = useForm({
     name: '',
+    mobile: '',
     email: '',
     password: '',
     password_confirmation: '',
+    state: '',
 });
 
 const submit = () => {
@@ -26,64 +31,83 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="name" value="Name" />
-
-                <TextInput
+                <VTextField
                     id="name"
-                    type="text"
-                    class="mt-1 block w-full"
                     v-model="form.name"
-                    required
-                    autofocus
+                    label="Full Name"
+                    variant="outlined"
                     autocomplete="name"
-                />
-
-                <InputError class="mt-2" :message="form.errors.name" />
+                    :hide-details="form.errors.name == undefined"
+                    :error-messages="form.errors.name"
+                    append-inner-icon="mdi-account"
+                ></VTextField>
             </div>
 
             <div class="mt-4">
-                <InputLabel for="email" value="Email" />
+                <VTextField
+                    id="mobile"
+                    v-model="form.mobile"
+                    label="Mobile Number"
+                    variant="outlined"
+                    autocomplete="tel"
+                    :hide-details="form.errors.mobile == undefined"
+                    :error-messages="form.errors.mobile"
+                    append-inner-icon="mdi-cellphone"
+                ></VTextField>
+            </div>
 
-                <TextInput
+            <div class="mt-4">
+                <VTextField
                     id="email"
-                    type="email"
-                    class="mt-1 block w-full"
                     v-model="form.email"
-                    required
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+                    label="Email"
+                    variant="outlined"
+                    autocomplete="off"
+                    :hide-details="form.errors.email == undefined"
+                    :error-messages="form.errors.email"
+                    append-inner-icon="mdi-email"
+                ></VTextField>
             </div>
-
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
+                <VAutocomplete
+                    id="state"
+                    label="State"
+                    v-model="form.state"
+                    :items="states"
+                    variant="outlined"
+                    :hide-details="form.errors.state == undefined"
+                    :error-messages="form.errors.state"
+                    density="compact"
+                >
+                </VAutocomplete>
+            </div>
+            <VDivider class="border-opacity-75 my-8"></VDivider>
+            <div class="mt-4">
+                <VTextField
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
                     v-model="form.password"
-                    required
+                    label="Password"
+                    variant="outlined"
                     autocomplete="new-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
+                    :hide-details="form.errors.password == undefined"
+                    :error-messages="form.errors.password"
+                    append-inner-icon="mdi-lock"
+                ></VTextField>
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password_confirmation" value="Confirm Password" />
-
-                <TextInput
+                <VTextField
                     id="password_confirmation"
                     type="password"
-                    class="mt-1 block w-full"
                     v-model="form.password_confirmation"
-                    required
+                    label="Confirm Password"
+                    variant="outlined"
                     autocomplete="new-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                    :hide-details="form.errors.password_confirmation == undefined"
+                    :error-messages="form.errors.password_confirmation"
+                    append-inner-icon="mdi-lock"
+                ></VTextField>
             </div>
 
             <div class="flex items-center justify-end mt-4">

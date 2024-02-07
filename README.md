@@ -75,6 +75,10 @@ php artisan make:model SmsTemplate -m
 php artisan make:model EmailTemplate -m
 php artisan make:model Login -m
 php artisan make:model Item -m
+php artisan make:model Report -m
+php artisan make:model DailyReport -m
+php artisan make:model MonthlyReport -m
+php artisan make:model YearlyReport -m
 
 php artisan make:seeder StateSeeder
 php artisan make:seeder UserSeeder

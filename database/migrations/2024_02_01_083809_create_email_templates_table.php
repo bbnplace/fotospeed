@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('email_templates', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique();
+            $table->text('template')->index();
             $table->timestamps();
         });
     }
