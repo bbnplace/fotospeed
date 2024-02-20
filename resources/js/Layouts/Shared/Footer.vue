@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-6">
-                    2024 © Indigo Africa
+                    Powered by <a href="https://cecula.com" target="_blank">Cecula</a> Bespoke.
             </div>
             <div class="col-md-6">
                 <div class="text-md-end footer-links d-none d-md-block">

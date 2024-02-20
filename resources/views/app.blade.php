@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <title inertia>{{ config('app.name', 'Indigo OMS') }}</title>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- Scripts -->
         @routes

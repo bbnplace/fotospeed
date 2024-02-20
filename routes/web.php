@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\FileUploadsController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,12 +21,13 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    // return Inertia::render('Welcome', [
+    //     'canLogin' => Route::has('login'),
+    //     'canRegister' => Route::has('register'),
+    //     'laravelVersion' => Application::VERSION,
+    //     'phpVersion' => PHP_VERSION,
+    // ]);
+    return Redirect::route('login');
 });
 
 Route::get('/dashboard', function () {
@@ -33,6 +38,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications');
+
+    Route::get('/create-order', [OrdersController::class, 'add'])->name('order.add');
+
+    Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/admin.php';

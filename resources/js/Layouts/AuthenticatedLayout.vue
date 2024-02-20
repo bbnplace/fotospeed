@@ -3,11 +3,6 @@ import '@/../scss/app.scss';
 import '@/../scss/icons.scss';
 
 import { ref, onMounted } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 import Topbar from '@/Layouts/Shared/Topbar.vue';
 import LeftSidebar from '@/Layouts/Shared/LeftSidebar.vue';
@@ -17,6 +12,11 @@ import Footer from  '@/Layouts/Shared/Footer.vue';
 import '@/head';
 import '@/indigo';
 import ThemeCustomizer from '@/layout';
+
+const props = defineProps({
+    menus: Object
+});
+
 onMounted(()=>{
     new ThemeCustomizer().init();
 })
@@ -25,10 +25,12 @@ onMounted(()=>{
 <template>
     <div class="wrapper">
         <Topbar></Topbar>
-        <LeftSidebar></LeftSidebar>
+        <LeftSidebar :menus="props.menus"></LeftSidebar>
         <div class="content-page">
             <div class="content">
-                <slot />
+                <div class="container-fluid p-2">
+                    <slot />
+                </div>
             </div>
             <Footer></Footer>
         </div>
