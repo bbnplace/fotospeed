@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Category::class)->constrained('categories')->onUpdate('cascade')->onDelete('cascade');
             $table->string('name')->index();
-            $table->text('description')->index()->nullable();
+            $table->text('description')->fulltext()->nullable();
             $table->string('height')->index();
             $table->string('weight')->index();
             $table->integer('print_price')->index();
