@@ -31,12 +31,19 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
 
     // Groups Management Module
     Route::get('/panel/groups', [GroupsController::class, 'index'])->name('groups');
+    Route::post('panel/groups', [GroupsController::class, 'records'])->name('group.records');
     Route::get('panel/group/add', [GroupsController::class, 'add'])->name('group.add');
+    Route::post('panel/group/add', [GroupsController::class, 'store'])->name('group.add');
     Route::get('panel/group/{id}/edit', [GroupsController::class, 'edit'])->name('group.edit');
     Route::get('panel/group/{id}', [GroupsController::class, 'view'])->name('group.view');
 
     // SMS Template Management Module
     Route::get('/panel/sms-templates', [SmsTemplatesController::class, 'index'])->name('sms-templates');
+    Route::post('panel/sms-templates', [SmsTemplatesController::class, 'records'])->name('sms-templates.records');
+    Route::get('panel/sms-template/add', [SmsTemplatesController::class, 'add'])->name('sms-template.add');
+    Route::post('panel/sms-template/add', [SmsTemplatesController::class, 'store'])->name('sms-template.add');
+    Route::get('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'edit'])->name('sms-template.edit');
+    Route::get('panel/sms-template/{id}', [SmsTemplatesController::class, 'view'])->name('sms-template.view');
 
     // Email Template Management Module
     Route::get('/panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');

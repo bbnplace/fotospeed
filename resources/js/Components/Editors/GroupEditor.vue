@@ -50,7 +50,7 @@ const props = defineProps<{
 const form = useForm({
     id: props.group ? props.group.id : "",
     name: props.group ? props.group.name : "",
-    state: props.group ? props.group.description : "",
+    description: props.group ? props.group.description : "",
 });
 
 const submit = () => {
