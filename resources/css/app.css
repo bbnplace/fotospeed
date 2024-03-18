@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.v-progress-circular {
+    margin: 1rem auto;
+}
+
+.dz-preview {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #0594be;
+    color: aliceblue;
+    border-radius: 5px;
+    margin-bottom: 4px;
+    display: none !important;
+}
+
+.dz-preview div {
+    margin: 0 5px;
+}
+
+.dz-preview  .dz-details {
+    width: 300px;
+}
+
+.dz-preview img {
+    border-radius: 3px;
+}
+
+.img-upload {
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #1d1d1d;
+    color: aliceblue;
+    /* border-radius: 5px; */
+    margin-bottom: 4px;
+}
+
+.even {
+    background-color: aliceblue;
+    color: #0594be;
+    /* border: #0594be solid 1px; */
+}

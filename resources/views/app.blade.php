@@ -6,7 +6,8 @@
 
         <!-- Scripts -->
         @routes
-        {{--  @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])  --}}
+        @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
+        {{--  <script type="module" src="{{env('APP_URL')}}/build/assets/app-GffVBZX0.js"></script>  --}}
         @inertiaHead
     </head>
     <body>

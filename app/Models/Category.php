@@ -17,4 +17,18 @@ class Category extends Model
     {
         return $this->hasMany(Item::class);
     }
+
+    public static function getCategoriesArray()
+    {
+        $categories = [];
+        $categoriesCollection = self::get('name');
+        if(!empty($categoriesCollection))
+        {
+            foreach($categoriesCollection as $category){
+                array_push($categories, $category->name);
+            }
+        }
+
+        return $categories;
+    }
 }

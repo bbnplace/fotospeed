@@ -57,11 +57,6 @@ const menus = [
                 route: "staff"
             },
             {
-                icon: "mdi-sitemap",
-                name: "Branches",
-                route: "branches"
-            },
-            {
                 icon: "mdi-shape",
                 name: "Item Categories",
                 route: "categories"
@@ -70,6 +65,16 @@ const menus = [
                 icon: "mdi-list-box-outline",
                 name: "Items",
                 route: "items"
+            },
+            {
+                icon: "mdi-sitemap",
+                name: "Branches",
+                route: "branches"
+            },
+            {
+                icon: "mdi-map-marker",
+                name: "States",
+                route: "states"
             }
         ]
     }

@@ -30,4 +30,12 @@ class FileUploadsController extends Controller
             'path' => $path
         ];
     }
+
+    public function get($path, $type)
+    {
+        $data = Storage::get($path);
+        return response($data, 200, [
+            'Content-Type' => $type
+        ]);
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\FileUploadsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OrdersController;
@@ -44,6 +45,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/create-order', [OrdersController::class, 'add'])->name('order.add');
 
     Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
+    Route::get('/file/{path}/{type}', [FileUploadsController::class, 'get'])->name('file.load');
+
+    // Item Categories Management
+    
 });
 
 require __DIR__.'/auth.php';

@@ -1,5 +1,5 @@
 <template>
-    <div id="myDropzone" class="my-5 p-5 gap-3">
+    <div id="myDropzone" class="my-3 p-5 gap-3">
         <div>
             <v-icon
                 size="x-large"
@@ -21,7 +21,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import { Dropzone } from 'dropzone';
 
-const emit = defineEmits(['fileAnalyzed']);
+const emit = defineEmits(['fileUploaded']);
 const props = defineProps({
 
 });
@@ -40,6 +40,7 @@ const inputData = reactive({
     uploadedFile: "",
     codes: {},
     fileInfo: {},
+    dataURL: ''
 });
 
 const initDropzone = () => {
@@ -69,15 +70,17 @@ const handleUploadProgress = (file, progress, bytesSent) => {
 }
 
 const handleSuccess =  async (file, response) => {
+    // console.log(file)
     uploadingFile = false;
     fileAction.value = "";
 
     inputData.fileInfo = {
         name: file.name,
-        size: file.size,
+        size: formatBytes(file.size),
         type: file.type
     }
     inputData.uploadedFile = response.path;
+    inputData.dataURL = file.dataURL;
 
     // Run a method to goto system and read first line of the file to extract heading.
     const payload = {
@@ -94,23 +97,33 @@ const handleError = (file, error) => {
     console.error('File upload error:', error);
 }
 
+const formatBytes = bytes => {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 
 </script>
 
 <style scoped>
 #myDropzone {
-  border: 2px solid #3d3d3d;
+  border: 2px solid #0594be;
   padding: 20px;
-  background-color: #d4d4d4;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 15px;
+  border-radius: 8px;
   font-size: 16px;
 }
 
-.v-progress-circular {
-  margin: 1rem auto;
-}
+
+
+
 </style>
