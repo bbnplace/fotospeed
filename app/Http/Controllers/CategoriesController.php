@@ -9,6 +9,10 @@ use Inertia\Inertia;
 
 class CategoriesController extends Controller
 {
+    protected $rules = [
+        'name' => 'required|string|unique:categories,name|min:2|max:64'
+    ];
+
     public function index()
     {
         return Inertia::render('Backend/Category/List', [
@@ -48,11 +52,12 @@ class CategoriesController extends Controller
         $categories = $query->take($itemsPerPage)
             ->skip($itemsPerPage * ($page - 1))
             ->get([
+                'id',
                 'name',
             ]);
 
         return [
-            'categories' => $categories,
+            'records' => $categories,
             'totalRecords' => $categoriesCount,
         ];
     }
@@ -96,9 +101,7 @@ class CategoriesController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|unique:categories,name|min:2|max:64'
-        ]);
+        $validated = $request->validate($this->rules);
 
         Category::create($validated);
 
@@ -114,9 +117,7 @@ class CategoriesController extends Controller
 
     public function update(Request $request, $ref)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|unique:categories,name|min:2|max:64'
-        ]);
+        $validated = $request->validate($this->rules);
 
         $category = Category::where('id', $ref)->first();
     }

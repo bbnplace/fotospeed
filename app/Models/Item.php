@@ -14,6 +14,7 @@ class Item extends Model
         'name',
         'description',
         'height',
+        'width',
         'weight',
         'print_price',
         'sheet_price',

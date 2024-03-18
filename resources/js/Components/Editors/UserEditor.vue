@@ -81,7 +81,6 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
-
             <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                 Register
             </PrimaryButton>
@@ -104,7 +103,8 @@ interface UserEditor {
 }
 
 const props = defineProps<{
-    user?: UserEditor
+    user?: UserEditor,
+    userType: string
 }>()
 
 const states = usePage().props.states;
@@ -115,12 +115,13 @@ const form = useForm({
     email: props.user ? props.user.email : "",
     password: props.user ? props.user.password : "",
     password_confirmation: props.user ? props.user.password_confirmation : "",
-    state: props.user ? props.user.state : "",
+    state: props.user ? props.user.state.name : "",
+    role: props.userType,
 });
 
 const submit = () => {
-    form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+    form.post(route('user.register'), {
+        // onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
 

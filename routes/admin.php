@@ -11,6 +11,7 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\SmsTemplatesController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StatesController;
+use App\Http\Controllers\UserRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'indigo-team'])->group(function (){
@@ -45,7 +46,6 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('/panel/staff', [StaffController::class, 'index'])->name('staff');
     Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
     Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
-    Route::post('panel/staff/add', [StaffController::class, 'store'])->name('staff.store');
     Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
     Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
 
@@ -75,8 +75,12 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
 
     // Items Management Module
     Route::get('/panel/items', [ItemsController::class, 'index'])->name('items');
+    Route::post('/panel/items', [ItemsController::class, 'records'])->name('items.records');
     Route::get('panel/item/add', [ItemsController::class, 'add'])->name('item.add');
+    Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
     Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
+
+    Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
 });
 
