@@ -34,8 +34,6 @@ const props = defineProps<{
     state?: State
 }>()
 
-const states = usePage().props.states;
-
 const form = useForm({
     id: props.state ? props.state.id : "",
     name: props.state ? props.state.name : "",

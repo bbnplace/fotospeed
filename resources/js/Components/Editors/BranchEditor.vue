@@ -53,7 +53,7 @@ const states = usePage().props.states;
 const form = useForm({
     id: props.branch ? props.branch.id : "",
     name: props.branch ? props.branch.name : "",
-    state: props.branch ? props.branch.state : "",
+    state: props.branch ? props.branch.state.name : "",
 });
 
 const submit = () => {

@@ -59,7 +59,9 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
 
     // Branch Management Module
     Route::get('/panel/branches', [BranchesController::class, 'index'])->name('branches');
+    Route::post('panel/branches', [BranchesController::class, 'records'])->name('branches.records');
     Route::get('panel/branch/add', [BranchesController::class, 'add'])->name('branch.add');
+    Route::post('panel/branch/add', [BranchesController::class, 'store'])->name('branch.store');
     Route::get('panel/branch/{id}/edit', [BranchesController::class, 'edit'])->name('branch.edit');
     Route::get('panel/branch/{id}', [BranchesController::class, 'view'])->name('branch.view');
 
