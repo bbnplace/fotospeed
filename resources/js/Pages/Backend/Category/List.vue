@@ -111,7 +111,7 @@ const editItem = item => {
 }
 
 const viewDetail = item => {
-    router.get(route('category.detail', item.id));
+    router.get(route('category.view', item.id));
 }
 
 // Deleting selected contacts

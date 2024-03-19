@@ -58,7 +58,6 @@ class CustomersController extends Controller
             ->skip($customerPerPage * ($page - 1))
             ->get();
 
-            dd($customerCount);
         return [
             'records' => $customer,
             'totalRecords' => $customerCount,
@@ -74,11 +73,19 @@ class CustomersController extends Controller
 
     private function getCustomerInfo($customerId)
     {
-        $user = User::where('id', $customerId)->first();
+        $query = User::query();
+        $query->where('id', $customerId);
+        $query->with(['role' => function ($query) {
+            $query->select('id', 'name');
+        }]);
+        $query->with(['state' => function ($query) {
+            $query->select('id', 'name');
+        }]);
+        $user = $query->first();
 
         return [
             'states' => State::getStatesArray(),
-            'user' => $user
+            'customer' => $user
         ];
     }
 
