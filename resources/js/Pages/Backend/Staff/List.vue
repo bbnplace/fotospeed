@@ -1,7 +1,9 @@
 <template>
     <Head title="Staff"></Head>
     <BackendLayout>
-        <Link :href="route('staff.add')">Register Staff</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('staff.add')" class="btn btn-primary">Register Staff</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Staff </v-sheet>

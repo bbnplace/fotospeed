@@ -1,7 +1,9 @@
 <template>
     <Head title="Items"></Head>
     <BackendLayout>
-        <Link :href="route('item.add')">Add Item</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('item.add')" class="btn btn-primary">Add Item</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Items </v-sheet>

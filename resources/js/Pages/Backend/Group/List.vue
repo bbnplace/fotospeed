@@ -1,8 +1,9 @@
 <template>
     <Head title="Groups"></Head>
     <BackendLayout>
-        <Link :href="route('group.add')">Create Group</Link>
-
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('group.add')" class="btn btn-primary">Create Group</Link>
+        </div>
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Group </v-sheet>
                 <v-text-field

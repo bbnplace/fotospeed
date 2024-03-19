@@ -11,6 +11,7 @@ class BranchesController extends Controller
 {
     protected $rules = [
         'name' => 'required|string|unique:branches,name|min:2|max:64',
+        'address' => 'required|string|min:10|max:200',
         'state' => 'required|string|exists:states,name|min:2|max:64',
     ];
 
@@ -76,6 +77,7 @@ class BranchesController extends Controller
         $state = State::where('name', $request->state)->first();
         Branch::create([
             'name' => $request->name,
+            'address' => $request->address,
             'state_id' => $state->id
         ]);
 
@@ -101,6 +103,6 @@ class BranchesController extends Controller
 
     public function update(Request $request, $ref)
     {
-        
+
     }
 }

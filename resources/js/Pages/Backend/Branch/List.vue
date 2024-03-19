@@ -1,7 +1,9 @@
 <template>
     <Head title="Branches"></Head>
     <BackendLayout>
-        <Link :href="route('branch.add')">Add Branch</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('branch.add')" class="btn btn-primary">Add Branch</Link>
+        </div>
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Branch </v-sheet>
                 <v-text-field
@@ -76,6 +78,11 @@ const headers = [
     {
         title: "Branch",
         key: "name",
+        sortable: true
+    },
+    {
+        title: "Address",
+        key: "address",
         sortable: true
     },
     {

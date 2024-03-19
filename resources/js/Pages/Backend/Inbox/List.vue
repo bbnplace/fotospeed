@@ -1,7 +1,9 @@
 <template>
-    <Head title="Inbox"></Head>
+    <Head title="Messages"></Head>
     <BackendLayout>
-        <Link :href="route('message.write')">Write Message</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('message.write')" class="btn btn-primary">Write Message</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Messages</v-sheet>

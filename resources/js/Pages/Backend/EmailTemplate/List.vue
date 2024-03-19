@@ -1,7 +1,9 @@
 <template>
     <Head title="Email Templates"></Head>
     <BackendLayout>
-        <Link :href="route('email-template.add')">Create Email Template</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('email-template.add')" class="btn btn-primary">Create Email Template</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Email Template </v-sheet>

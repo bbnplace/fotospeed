@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->text('address');
             $table->foreignIdFor(State::class)->constrained('states')->onDelete('restrict')->onDelete('cascade');
             $table->timestamps();
         });

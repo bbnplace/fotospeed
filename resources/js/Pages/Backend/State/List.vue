@@ -1,7 +1,9 @@
 <template>
     <Head title="States"></Head>
     <BackendLayout>
-        <Link :href="route('state.add')">Add State</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('state.add')" class="btn btn-primary">Add State</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter State </v-sheet>

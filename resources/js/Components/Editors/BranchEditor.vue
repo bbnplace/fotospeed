@@ -12,6 +12,17 @@
             ></VTextField>
         </div>
         <div class="mt-4">
+            <VTextarea
+                id="address"
+                v-model="form.address"
+                label="Office Address"
+                variant="outlined"
+                :hide-details="form.errors.address == undefined"
+                :error-messages="form.errors.address"
+                density="compact"
+            ></VTextarea>
+        </div>
+        <div class="mt-4">
             <VAutocomplete
                 id="state"
                 label="State"
@@ -41,7 +52,11 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 interface Branch {
     id: Number,
     name: String,
-    state: String
+    address: String,
+    state: {
+        id: Number,
+        name: String
+    }
 }
 
 const props = defineProps<{
@@ -53,6 +68,7 @@ const states = usePage().props.states;
 const form = useForm({
     id: props.branch ? props.branch.id : "",
     name: props.branch ? props.branch.name : "",
+    address: props.branch ? props.branch.address : "",
     state: props.branch ? props.branch.state.name : "",
 });
 

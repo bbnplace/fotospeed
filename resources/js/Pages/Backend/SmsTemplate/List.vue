@@ -1,7 +1,9 @@
 <template>
     <Head title="SMS Templates"></Head>
     <BackendLayout>
-        <Link :href="route('sms-template.add')">Create SMS Template</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('sms-template.add')" class="btn btn-primary">Create SMS Template</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter SMS Template </v-sheet>

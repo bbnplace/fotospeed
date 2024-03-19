@@ -1,7 +1,9 @@
 <template>
     <Head title="Item Categories"></Head>
     <BackendLayout>
-        <Link :href="route('category.add')">Add Category</Link>
+        <div class="d-flex flex-row-reverse my-3">
+            <Link :href="route('category.add')" class="btn btn-primary">Add Category</Link>
+        </div>
 
         <div class="d-flex mb-6t">
             <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Category </v-sheet>
