@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class, 'staff_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignIdFor(User::class)->constrained('users')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignIdFor(OrderStatus::class);
             $table->integer('total_cost');
             $table->timestamps();

@@ -16,7 +16,7 @@
                     <VAutocomplete
                         id="category"
                         v-model="form.category"
-                        label="Name"
+                        label="Category"
                         :items="categories"
                         variant="outlined"
                         :hide-details="form.errors.category == undefined"

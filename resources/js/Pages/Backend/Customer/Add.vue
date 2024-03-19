@@ -2,7 +2,7 @@
     <Head title="Register Customer"></Head>
     <BackendLayout>
         <Centralize snippetTitle="Register Customer">
-            <UserEditor></UserEditor>
+            <UserEditor userType="Customer"></UserEditor>
         </Centralize>
     </BackendLayout>
 </template>

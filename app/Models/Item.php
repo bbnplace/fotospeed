@@ -25,4 +25,18 @@ class Item extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public static function getItemsArray()
+    {
+        $items = [];
+        $itemsCollection = self::get('name');
+        if(!empty($itemsCollection))
+        {
+            foreach($itemsCollection as $item){
+                array_push($items, $item->name);
+            }
+        }
+
+        return $items;
+    }
 }

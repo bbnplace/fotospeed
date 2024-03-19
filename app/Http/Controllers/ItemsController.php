@@ -24,7 +24,7 @@ class ItemsController extends Controller
     public function index()
     {
         return Inertia::render('Backend/Item/List', [
-            'endpoint' => route('items.records')
+            'endpoint' => route('items.records'),
         ]);
     }
 

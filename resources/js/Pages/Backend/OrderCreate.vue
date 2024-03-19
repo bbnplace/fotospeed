@@ -49,7 +49,7 @@
 
 <script setup>
 import { reactive } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
 import OrderForm from '@/Components/OrderForm.vue';
@@ -77,10 +77,7 @@ const updatePageData = (pageObject, object) => {
     object.pageNo = pageObject.pageNumber;
 }
 
-const items = [
-    'Item One',
-    'Item Two'
-];
+const items = usePage().props.items;
 
 const submitOrder = () => {
 

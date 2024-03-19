@@ -18,15 +18,28 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
 
     // Orders Management Module
     Route::get('/panel/orders', [OrdersController::class, 'index'])->name('orders');
+    Route::post('/panel/orders', [OrdersController::class, 'records'])->name('order.records');
 
     // Customers Management Module
     Route::get('/panel/customers', [CustomersController::class, 'index'])->name('customers');
+    Route::post('panel/customers', [CustomersController::class, 'records'])->name('customers.records');
     Route::get('panel/customer/add', [CustomersController::class, 'add'])->name('customer.add');
     Route::get('panel/customer/{id}/edit', [CustomersController::class, 'edit'])->name('customer.edit');
     Route::get('panel/customer/{id}', [CustomersController::class, 'view'])->name('customer.view');
 
+
+    // Staff Management Module
+    Route::get('/panel/staff', [StaffController::class, 'index'])->name('staff');
+    Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
+    Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
+    Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
+    Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
+
+
     // Messaging Module
     Route::get('/panel/messages', [MessagesController::class, 'index'])->name('messages');
+    Route::post('panel/messages', [MessagesController::class, 'records'])->name('messages.records');
+    Route::get('/panel/write-messages', [MessagesController::class, 'write'])->name('message.write');
 
 
     // Groups Management Module
@@ -47,14 +60,12 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
 
     // Email Template Management Module
     Route::get('/panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
+    Route::post('panel/email-templates', [EmailTemplatesController::class, 'records'])->name('email-templates.records');
+    Route::get('panel/email-template/add', [EmailTemplatesController::class, 'add'])->name('email-template.add');
+    Route::post('panel/email-template/add', [EmailTemplatesController::class, 'store'])->name('email-template.add');
+    Route::get('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'edit'])->name('email-template.edit');
+    Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
 
-
-    // Staff Management Module
-    Route::get('/panel/staff', [StaffController::class, 'index'])->name('staff');
-    Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
-    Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
-    Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
-    Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
 
     // Branch Management Module
     Route::get('/panel/states', [StatesController::class, 'index'])->name('states');
