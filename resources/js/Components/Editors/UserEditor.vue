@@ -99,7 +99,10 @@ interface UserEditor {
     email: String,
     password: String,
     password_confirmation: String,
-    state: String,
+    state: {
+        id: Number,
+        name: String
+    },
 }
 
 const props = defineProps<{

@@ -9,12 +9,6 @@ use Inertia\Inertia;
 
 class BranchesController extends Controller
 {
-    protected $rules = [
-        'name' => 'required|string|unique:branches,name|min:2|max:64',
-        'address' => 'required|string|min:10|max:200',
-        'state' => 'required|string|exists:states,name|min:2|max:64',
-    ];
-
     public function index()
     {
         return Inertia::render('Backend/Branch/List', [
@@ -72,7 +66,11 @@ class BranchesController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate($this->rules);
+        $request->validate([
+            'name' => 'required|string|unique:branches,name|min:2|max:64',
+            'address' => 'required|string|min:10|max:200',
+            'state' => 'required|string|exists:states,name|min:2|max:64',
+        ]);
 
         $state = State::where('name', $request->state)->first();
         Branch::create([
@@ -85,24 +83,54 @@ class BranchesController extends Controller
     }
 
 
-    public function edit($ref)
+    public function edit($id)
+    {
+        return Inertia::render('Backend/Branch/Edit', $this->getBranchInfo($id));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $state = State::where('name', $request->state)->first();
+
+        $branch = Branch::where('id', $id)->first();
+        if (empty($branch)) {
+            return redirect()->route('branches')->with('note', 'Select a branch to edit');
+        }
+
+        $request->validate([
+            'name' => $branch->name != $request->name ? 'required|string|unique:branches,name|min:2|max:64' : 'required|string|min:2|max:64',
+            'address' => 'required|string|min:10|max:200',
+            'state' => 'required|string|exists:states,name|min:2|max:64',
+        ]);
+
+        $branch->name = $request->name;
+        $branch->address = $request->address;
+        $branch->state_id = $state->id;
+        $branch->save();
+
+        return redirect()->route('branch.view', [$id])->with('note', 'Updated.');
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/Branch/Detail', $this->getBranchInfo($id));
+    }
+
+
+    private function getBranchInfo($branchId)
     {
         $query = Branch::query();
-        $query->where('id', $ref);
+        $query->where('id', $branchId);
         $query->with(['state' => function ($query) {
             $query->select('id', 'name');
         }]);
 
         $branch = $query->first();
 
-        return Inertia::render('Backend/Branch/Edit', [
+        return [
             'states' => State::getStatesArray(),
             'branch' => $branch
-        ]);
+        ];
     }
 
-    public function update(Request $request, $ref)
-    {
-
-    }
 }

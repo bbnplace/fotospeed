@@ -26,7 +26,7 @@ import { useForm, usePage, Link } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 interface State {
-    id: Number,
+    id?: Number,
     name: String
 }
 
@@ -40,9 +40,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('state.add'), {
-        onFinish: () => {},
-    });
+    if(props.state) {
+        form.put(route('state.edit', [props.state.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('state.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 

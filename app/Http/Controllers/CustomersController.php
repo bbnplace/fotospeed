@@ -72,14 +72,28 @@ class CustomersController extends Controller
         ]);
     }
 
-
-    public function edit($ref)
+    private function getCustomerInfo($customerId)
     {
-        $user = User::where('id', $ref)->first();
+        $user = User::where('id', $customerId)->first();
 
-        return Inertia::render('Backend/Customer/Edit', [
+        return [
             'states' => State::getStatesArray(),
             'user' => $user
-        ]);
+        ];
+    }
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/Customer/Edit', $this->getCustomerInfo($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/Customer/Detail', $this->getCustomerInfo($id));
+    }
+
+    public function update(Request $request, $id)
+    {
+
     }
 }

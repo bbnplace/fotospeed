@@ -73,9 +73,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('branch.add'), {
-        onFinish: () => {},
-    });
+    if(props.branch) {
+        form.put(route('branch.edit', [props.branch.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('branch.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 

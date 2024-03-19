@@ -75,12 +75,41 @@ class SmsTemplatesController extends Controller
         return redirect()->route('sms-templates')->with('status', 'SMS Template Created');
     }
 
-
-    public function edit($ref)
+    private function getSmsTemplate($templateId)
     {
-        $smsTemplate = SmsTemplate::where('id', $ref)->first();
-        return Inertia::render('Backend/SmsTemplate/Edit', [
+        $smsTemplate = SmsTemplate::where('id', $templateId)->first();
+        return [
             'smsTemplate' => $smsTemplate,
+        ];
+    }
+
+    public function update(Request $request, $id)
+    {
+        $smsTemplate = SmsTemplate::where('id', $id)->first();
+        if(empty($smsTemplate)){
+            return redirect()->route('sms-templates')->with('note', 'Select the sms template you want to edit');
+        }
+
+        // In the event where the template name changed, user should be notified
+        $request->validate([
+            'name' => $smsTemplate->name != $request->name ? 'required|string|unique:sms_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
+            'template' => 'required|string|min:1|max:1530'
         ]);
+
+        $smsTemplate->name = $request->name;
+        $smsTemplate->template = $request->template;
+        $smsTemplate->save();
+
+        return redirect()->route('sms-template.view', [$id])->with('note', 'Updated.');
+    }
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/SmsTemplate/Edit', $this->getSmsTemplate($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/SmsTemplate/Detail', $this->getSmsTemplate($id));
     }
 }

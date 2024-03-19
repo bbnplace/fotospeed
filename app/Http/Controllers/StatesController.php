@@ -75,14 +75,22 @@ class StatesController extends Controller
         return redirect()->route('states')->with('status', 'New State Added');
     }
 
-
-    public function edit($ref)
+    private function getState($id)
     {
-        $state = State::where('id', $ref)->first();
-
-        return Inertia::render('Backend/State/Edit', [
+        $state = State::where('id', $id)->first();
+        return [
             'state' => $state
-        ]);
+        ];
+    }
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/State/Edit', $this->getState($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/State/Detail', $this->getState($id));
     }
 
     public function update(Request $request, $ref)

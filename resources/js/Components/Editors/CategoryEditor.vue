@@ -40,9 +40,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('category.add'), {
-        onFinish: () => {},
-    });
+    if(props.category) {
+        form.put(route('category.edit', [props.category.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('category.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 

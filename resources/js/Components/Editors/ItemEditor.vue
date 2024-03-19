@@ -123,7 +123,10 @@ import { useForm, usePage } from '@inertiajs/vue3';
 interface ItemEditor {
     id: Number,
     name: String,
-    category: String,
+    category: {
+        id: Number,
+        name: String
+    },
     description?: String,
     height: String,
     width: String,
@@ -153,9 +156,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('item.store'), {
-        onFinish: () => {},
-    });
+    if(props.item) {
+        form.put(route('item.edit', [props.item.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('item.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 

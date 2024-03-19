@@ -102,20 +102,59 @@ class ItemsController extends Controller
         return redirect()->route('items')->with('status', 'Item Registered');
     }
 
-
-    public function edit($ref)
+    private function getItem($id)
     {
         $query = Item::query();
-        $query->where('id', $ref);
+        $query->where('id', $id);
         $query->with(['category' => function($query){
             $query->select('id', 'name');
         }]);
 
         $item = $query->first();
 
-        return Inertia::render('Backend/Item/Edit', [
+        return [
             'item' => $item,
             'categories' => Category::getCategoriesArray(),
-        ]);
+        ];
+    }
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/Item/Edit', $this->getItem($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/Item/Detail', $this->getItem($id));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $item = Item::where('id', $id)->first();
+        if (empty($item)) {
+            return redirect()->route('items')->with('note', 'Select an item to edit.');
+        }
+
+        // Validate the submitted data
+        if ($item->name == $request->name) {
+            $this->rules['name'] = 'string|required|min:2|max:64';
+        }
+        $request->validate($this->rules);
+
+        $category = Category::where('name', $request->category)->first();
+
+        // Save changes
+        $item->category_id = $category->id;
+        $item->name = $request->name;
+        $item->description = $request->description;
+        $item->height = $request->height;
+        $item->width = $request->width;
+        $item->weight = $request->weight;
+        $item->print_price = $request->print_price;
+        $item->sheet_price = $request->sheet_price;
+        $item->cover_print_price = $request->cover_print_price;
+        $item->save();
+
+        return redirect()->route('item.view')->with('note', 'Updated.');
     }
 }

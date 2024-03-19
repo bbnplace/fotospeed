@@ -9,9 +9,6 @@ use Inertia\Inertia;
 
 class CategoriesController extends Controller
 {
-    protected $rules = [
-        'name' => 'required|string|unique:categories,name|min:2|max:64'
-    ];
 
     public function index()
     {
@@ -101,24 +98,47 @@ class CategoriesController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->rules);
+        $validated = $request->validate([
+            'name' => 'required|string|unique:categories,name|min:2|max:64'
+        ]);
 
         Category::create($validated);
 
         return redirect()->route('categories');
     }
 
+    private function getCategory($categoryId)
+    {
+        return [
+            'category' => Category::where('id', $categoryId)->first()
+        ];
+    }
+
     public function edit($ref)
     {
-        return Inertia::render('Backend/Category/Edit', [
-            'category' => Category::where('id', $ref)->first()
-        ]);
+        return Inertia::render('Backend/Category/Edit', $this->getCategory($ref));
+    }
+
+    public function view($ref)
+    {
+        return Inertia::render('Backend/Category/Detail', $this->getCategory($ref));
     }
 
     public function update(Request $request, $ref)
     {
-        $validated = $request->validate($this->rules);
-
         $category = Category::where('id', $ref)->first();
+
+        if (empty($category)) {
+            return redirect()->route('branches')->with('note', 'Select a branch to edit');
+        }
+
+        $request->validate([
+            'name' => $request->name != $category->name ? 'required|string|unique:categories,name|min:2|max:64' : 'required|string|min:2|max:64',
+        ]);
+
+        $category->name = $request->name;
+        $category->save();
+
+        return redirect()->route('category.view', [$ref])->with('note', 'Updated.');
     }
 }

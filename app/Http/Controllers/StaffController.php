@@ -72,11 +72,10 @@ class StaffController extends Controller
         ]);
     }
 
-
-    public function edit($ref)
+    private function getStaffInfo($id)
     {
         $query = User::query();
-        $query->where('id', $ref);
+        $query->where('id', $id);
         $query->with(['role' => function ($query) {
             $query->select('id', 'name');
         }]);
@@ -85,9 +84,24 @@ class StaffController extends Controller
         }]);
         $user = $query->first();
 
-        return Inertia::render('Backend/Staff/Edit', [
+        return [
             'states' => State::getStatesArray(),
             'staff' => $user
-        ]);
+        ];
+    }
+
+    public function edit($ref)
+    {
+        return Inertia::render('Backend/Staff/Edit', $this->getStaffInfo($ref));
+    }
+
+    public function view($ref)
+    {
+        return Inertia::render('Backend/Staff/Detail', $this->getStaffInfo($ref));
+    }
+
+    public function update(Request $request, $id)
+    {
+
     }
 }

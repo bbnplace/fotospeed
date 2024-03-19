@@ -76,12 +76,43 @@ class GroupsController extends Controller
         return redirect()->route('groups')->with('status', 'Group Created');
     }
 
-
-    public function edit($ref)
+    public function getGroup($groupId)
     {
-        $group = Group::where('id', $ref)->first();
-        return Inertia::render('Backend/Group/Edit', [
+        $group = Group::where('id', $groupId)->first();
+
+        return [
             'group' => $group,
+        ];
+    }
+
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/Group/Edit', $this->getGroup($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/Group/Detail', $this->getGroup($id));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $group = Group::where('id', $id)->first();
+
+        if(empty($group)){
+            return redirect()->route('groups')->with('note', 'Select the group you want to edit');
+        }
+
+        $request->validate([
+            'name' => $group->name != $request->name ? 'required|string|unique:groups,name|min:2|max:64' : 'required|string|min:2|max:64',
+            'description' => 'nullable|string|min:36|max:1000'
         ]);
+
+        $group->name = $request->name;
+        $group->description = $request->description;
+        $group->save();
+
+        return redirect()->route('group.view', [$id])->with('note', 'Updated.');
     }
 }

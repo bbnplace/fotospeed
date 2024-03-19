@@ -25,6 +25,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::post('panel/customers', [CustomersController::class, 'records'])->name('customers.records');
     Route::get('panel/customer/add', [CustomersController::class, 'add'])->name('customer.add');
     Route::get('panel/customer/{id}/edit', [CustomersController::class, 'edit'])->name('customer.edit');
+    Route::put('panel/customer/{id}/edit', [CustomersController::class, 'update'])->name('customer.edit');
     Route::get('panel/customer/{id}', [CustomersController::class, 'view'])->name('customer.view');
 
 
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
     Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
     Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
+    Route::put('panel/staff/{id}/edit', [StaffController::class, 'update'])->name('staff.edit');
     Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
 
 
@@ -48,6 +50,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/group/add', [GroupsController::class, 'add'])->name('group.add');
     Route::post('panel/group/add', [GroupsController::class, 'store'])->name('group.add');
     Route::get('panel/group/{id}/edit', [GroupsController::class, 'edit'])->name('group.edit');
+    Route::put('panel/group/{id}/edit', [GroupsController::class, 'update'])->name('group.edit');
     Route::get('panel/group/{id}', [GroupsController::class, 'view'])->name('group.view');
 
     // SMS Template Management Module
@@ -56,6 +59,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/sms-template/add', [SmsTemplatesController::class, 'add'])->name('sms-template.add');
     Route::post('panel/sms-template/add', [SmsTemplatesController::class, 'store'])->name('sms-template.add');
     Route::get('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'edit'])->name('sms-template.edit');
+    Route::put('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'update'])->name('sms-template.edit');
     Route::get('panel/sms-template/{id}', [SmsTemplatesController::class, 'view'])->name('sms-template.view');
 
     // Email Template Management Module
@@ -64,6 +68,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/email-template/add', [EmailTemplatesController::class, 'add'])->name('email-template.add');
     Route::post('panel/email-template/add', [EmailTemplatesController::class, 'store'])->name('email-template.add');
     Route::get('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'edit'])->name('email-template.edit');
+    Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
     Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
 
 
@@ -73,6 +78,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/state/add', [StatesController::class, 'add'])->name('state.add');
     Route::post('panel/state/add', [StatesController::class, 'store'])->name('state.store');
     Route::get('panel/state/{id}/edit', [StatesController::class, 'edit'])->name('state.edit');
+    Route::put('panel/state/{id}/edit', [StatesController::class, 'update'])->name('state.edit');
     Route::get('panel/state/{id}', [StatesController::class, 'view'])->name('state.view');
 
     // Branch Management Module
@@ -81,6 +87,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/branch/add', [BranchesController::class, 'add'])->name('branch.add');
     Route::post('panel/branch/add', [BranchesController::class, 'store'])->name('branch.store');
     Route::get('panel/branch/{id}/edit', [BranchesController::class, 'edit'])->name('branch.edit');
+    Route::put('panel/branch/{id}/edit', [BranchesController::class, 'update'])->name('branch.edit');
     Route::get('panel/branch/{id}', [BranchesController::class, 'view'])->name('branch.view');
 
     // Branches Management Module
@@ -89,7 +96,8 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('/panel/category/add', [CategoriesController::class, 'add'])->name('category.add');
     Route::post('/panel/category/add', [CategoriesController::class, 'store'])->name('category.store');
     Route::get('/panel/category/{ref}/edit', [CategoriesController::class, 'edit'])->name('category.edit');
-    Route::put('/panel/category/{ref}/edit', [CategoriesController::class, 'edit'])->name('category.update');
+    Route::put('/panel/category/{ref}/edit', [CategoriesController::class, 'update'])->name('category.edit');
+    Route::get('panel/category/{id}', [CategoriesController::class, 'view'])->name('category.view');
 
     // Items Management Module
     Route::get('/panel/items', [ItemsController::class, 'index'])->name('items');
@@ -97,6 +105,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/item/add', [ItemsController::class, 'add'])->name('item.add');
     Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
     Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
+    Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');

@@ -53,9 +53,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('email-template.add'), {
-        onFinish: () => {},
-    });
+    if(props.emailTemplate) {
+        form.put(route('email-template.edit', [props.emailTemplate.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('email-template.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 

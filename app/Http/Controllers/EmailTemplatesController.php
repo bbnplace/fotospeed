@@ -8,10 +8,6 @@ use Inertia\Inertia;
 
 class EmailTemplatesController extends Controller
 {
-    protected $rules = [
-        'name' => 'required|string|unique:groups,name|min:2|max:64',
-        'template' => 'required|string|min:1|max:1530'
-    ];
 
     public function index()
     {
@@ -67,7 +63,10 @@ class EmailTemplatesController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->rules);
+        $validated = $request->validate([
+            'name' => 'required|string|unique:email_templates,name|min:2|max:64',
+            'template' => 'required|string|min:1|max:1530'
+        ]);
 
         // Save the record to database
         EmailTemplate::create($validated);
@@ -75,12 +74,43 @@ class EmailTemplatesController extends Controller
         return redirect()->route('email-templates')->with('status', 'Email Template Created');
     }
 
-
-    public function edit($ref)
+    private function getEmailTemplate($templateId)
     {
-        $emailTemplate = EmailTemplate::where('id', $ref)->first();
-        return Inertia::render('Backend/EmailTemplate/Edit', [
+        $emailTemplate = EmailTemplate::where('id', $templateId)->first();
+
+        return [
             'emailTemplate' => $emailTemplate,
+        ];
+    }
+
+    public function update(Request $request, $id)
+    {
+        $emailTemplate = EmailTemplate::where('id', $id)->first();
+        if(empty($emailTemplate)){
+            return redirect()->route('email-templates')->with('note', 'Select the email template you want to edit');
+        }
+
+        // In the event where the template name changed, user should be notified
+        $request->validate([
+            'name' => $emailTemplate->name != $request->name ? 'required|string|unique:email_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
+            'template' => 'required|string|min:1|max:1530'
         ]);
+
+        $emailTemplate->name = $request->name;
+        $emailTemplate->template = $request->template;
+        $emailTemplate->save();
+
+        return redirect()->route('email-template.view', [$id])->with('note', 'Updated.');
+    }
+
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/EmailTemplate/Edit', $this->getEmailTemplate($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/EmailTemplate/Detail', $this->getEmailTemplate($id));
     }
 }

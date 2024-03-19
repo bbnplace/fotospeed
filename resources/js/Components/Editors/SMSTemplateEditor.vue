@@ -53,9 +53,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('sms-template.add'), {
-        onFinish: () => {},
-    });
+    if(props.smsTemplate) {
+        form.put(route('sms-template.edit', [props.smsTemplate.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('sms-template.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 

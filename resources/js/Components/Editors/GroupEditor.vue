@@ -54,9 +54,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('group.add'), {
-        onFinish: () => {},
-    });
+    if(props.group) {
+        form.put(route('group.edit', [props.group.id]), {
+            onFinish: () => {},
+        });
+    } else {
+        form.post(route('group.add'), {
+            onFinish: () => {},
+        });
+    }
 };
 </script>
 
