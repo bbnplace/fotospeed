@@ -60,12 +60,19 @@
             </VCol>
         </VRow>
     </BackendLayout>
+    <Dialog
+        :dialogData="deleteDialog"
+        :show="dialog"
+        @deleteConfirmed="deleteRecords"
+        @deleteCancelled="closeDialog"
+    ></Dialog>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
+import Dialog from '@/Components/Dialog.vue';
 
 const selected = ref([]);
 const itemsPerPage = ref(25);
@@ -73,6 +80,7 @@ const totalRecords = ref(0);
 const loadedRecords = ref([]);
 let loading = ref(false);
 const search = ref("");
+const dialog = ref(false);
 
 const headers = [
     {
@@ -128,8 +136,17 @@ const deleteRecords = item => {
     router.post(route('group.delete'), form);
 }
 
+const deleteDialog = {
+    title: "Confirm Delete",
+    body: "Are you sure you want to delete the selected groups?"
+}
+
+const closeDialog = () => {
+    console.log("Closing dialog")
+    dialog.value = false
+}
+
+const showDialog = () => {
+    dialog.value = true;
+}
 </script>
-
-<style lang="scss" scoped>
-
-</style>

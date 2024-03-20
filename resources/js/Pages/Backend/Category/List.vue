@@ -23,7 +23,7 @@
             <v-icon
                 size="small"
                 title="Delete"
-                @click="()=>{confirmDelete = true; dialog = true;}"
+                @click="showDialog"
             >
                 mdi-delete
             </v-icon>
@@ -61,12 +61,20 @@
             </VCol>
         </VRow>
     </BackendLayout>
+
+    <Dialog
+        :dialogData="deleteDialog"
+        :show="dialog"
+        @deleteConfirmed="deleteRecords"
+        @deleteCancelled="closeDialog"
+    ></Dialog>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
+import Dialog from '@/Components/Dialog.vue';
 
 const selected = ref([]);
 const itemsPerPage = ref(25);
@@ -74,6 +82,8 @@ const totalRecords = ref(0);
 const loadedRecords = ref([]);
 let loading = ref(false);
 const search = ref("");
+const dialog = ref(false);
+// const confirmDelete = ref(false)
 
 const headers = [
     {
@@ -116,17 +126,28 @@ const viewDetail = item => {
 
 // Deleting selected contacts
 const deleteRecords = item => {
-    const form = reactive({
-        contacts: item
-    });
+    console.log("User is deleting")
+    // const form = reactive({
+    //     contacts: item
+    // });
 
-    dialog.value = false; confirmDelete.value = false;
-    router.post(route('category.delete'), form);
+    // dialog.value = false; confirmDelete.value = false;
+    // router.post(route('category.delete'), form);
 }
 
+const deleteDialog = {
+    title: "Confirm Delete",
+    body: "Are you sure you want to delete the selected categories?"
+}
+
+const closeDialog = () => {
+    console.log("Closing dialog")
+    dialog.value = false
+}
+
+const showDialog = () => {
+    dialog.value = true;
+}
 
 </script>
 
-<style lang="scss" scoped>
-
-</style>
