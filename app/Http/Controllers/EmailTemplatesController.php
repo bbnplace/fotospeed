@@ -113,4 +113,9 @@ class EmailTemplatesController extends Controller
     {
         return Inertia::render('Backend/EmailTemplate/Detail', $this->getEmailTemplate($id));
     }
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
 }

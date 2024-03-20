@@ -65,7 +65,7 @@
     <Dialog
         :dialogData="deleteDialog"
         :show="dialog"
-        @deleteConfirmed="deleteRecords"
+        @deleteConfirmed="deleteRecords(selected.value)"
         @deleteCancelled="closeDialog"
     ></Dialog>
 </template>
@@ -125,14 +125,12 @@ const viewDetail = item => {
 }
 
 // Deleting selected contacts
-const deleteRecords = item => {
-    console.log("User is deleting")
-    // const form = reactive({
-    //     contacts: item
-    // });
-
-    // dialog.value = false; confirmDelete.value = false;
-    // router.post(route('category.delete'), form);
+const deleteRecords = items => {
+    router.delete(route('categories.delete'), {
+        data: {
+            ids: items
+        }
+    })
 }
 
 const deleteDialog = {
@@ -141,7 +139,6 @@ const deleteDialog = {
 }
 
 const closeDialog = () => {
-    console.log("Closing dialog")
     dialog.value = false
 }
 

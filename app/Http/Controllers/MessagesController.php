@@ -54,4 +54,9 @@ class MessagesController extends Controller
             'totalRecords' => $messagesCount,
         ];
     }
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
 }

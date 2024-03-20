@@ -107,4 +107,10 @@ class StatesController extends Controller
 
         return redirect()->route('states')->with('status', 'State Updated');
     }
+
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
 }

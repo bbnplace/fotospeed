@@ -59,29 +59,6 @@ class CategoriesController extends Controller
         ];
     }
 
-    public function delete(Request $request)
-    {
-        $categories = $request->categories;
-
-        if (!empty($categories)) {
-            foreach ($categories as $categoryId) {
-                $category = Category::where('id', $categoryId)->first();
-                if (!empty($category)) {
-                    $category->delete();
-                }
-            }
-        }
-
-        $confirmationMessage = [
-            'type' => 'success',
-            'title' => 'Item Category Deleted',
-            'text' => "The Item Category have been permanently deleted.",
-            'continueTo' => route('categories')
-        ];
-
-        return Redirect::route('contacts.feedback')->with('event', $confirmationMessage);
-    }
-
     public function detail($ref)
     {
         $category = Category::where('id', $ref)->first();
@@ -140,5 +117,10 @@ class CategoriesController extends Controller
         $category->save();
 
         return redirect()->route('category.view', [$ref])->with('note', 'Updated.');
+    }
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
     }
 }

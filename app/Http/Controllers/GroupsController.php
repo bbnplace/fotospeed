@@ -115,4 +115,9 @@ class GroupsController extends Controller
 
         return redirect()->route('group.view', [$id])->with('note', 'Updated.');
     }
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
 }

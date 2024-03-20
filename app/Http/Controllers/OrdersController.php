@@ -75,4 +75,10 @@ class OrdersController extends Controller
 
         ]);
     }
+
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
 }

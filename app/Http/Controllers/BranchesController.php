@@ -133,4 +133,9 @@ class BranchesController extends Controller
         ];
     }
 
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
+
 }

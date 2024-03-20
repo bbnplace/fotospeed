@@ -22,7 +22,7 @@
             <v-icon
                 size="small"
                 title="Delete"
-                @click="()=>{confirmDelete = true; dialog = true;}"
+                @click="showDialog"
             >
                 mdi-delete
             </v-icon>
@@ -63,7 +63,7 @@
     <Dialog
         :dialogData="deleteDialog"
         :show="dialog"
-        @deleteConfirmed="deleteRecords"
+        @deleteConfirmed="deleteRecords(selected.value)"
         @deleteCancelled="closeDialog"
     ></Dialog>
 </template>
@@ -127,13 +127,12 @@ const viewDetail = item => {
 }
 
 // Deleting selected contacts
-const deleteRecords = item => {
-    const form = reactive({
-        contacts: item
-    });
-
-    dialog.value = false; confirmDelete.value = false;
-    router.post(route('group.delete'), form);
+const deleteRecords = items => {
+    router.delete(route('groups.delete'), {
+        data: {
+            ids: items
+        }
+    })
 }
 
 const deleteDialog = {
@@ -142,7 +141,6 @@ const deleteDialog = {
 }
 
 const closeDialog = () => {
-    console.log("Closing dialog")
     dialog.value = false
 }
 

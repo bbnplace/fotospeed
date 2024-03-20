@@ -157,4 +157,9 @@ class ItemsController extends Controller
 
         return redirect()->route('item.view')->with('note', 'Updated.');
     }
+
+    public function delete(Request $request)
+    {
+        dd($request->all());
+    }
 }

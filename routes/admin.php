@@ -27,6 +27,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/customer/{id}/edit', [CustomersController::class, 'edit'])->name('customer.edit');
     Route::put('panel/customer/{id}/edit', [CustomersController::class, 'update'])->name('customer.edit');
     Route::get('panel/customer/{id}', [CustomersController::class, 'view'])->name('customer.view');
+    Route::delete('panel/customers/delete', [CustomersController::class, 'delete'])->name('customers.delete');
 
 
     // Staff Management Module
@@ -36,12 +37,14 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
     Route::put('panel/staff/{id}/edit', [StaffController::class, 'update'])->name('staff.edit');
     Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
+    Route::delete('panel/staff/delete', [StaffController::class, 'delete'])->name('staff.delete');
 
 
     // Messaging Module
     Route::get('panel/messages', [MessagesController::class, 'index'])->name('messages');
     Route::post('panel/messages', [MessagesController::class, 'records'])->name('messages.records');
     Route::get('panel/write-messages', [MessagesController::class, 'write'])->name('message.write');
+    Route::delete('panel/messages/delete', [MessagesController::class, 'delete'])->name('messages.delete');
 
 
     // Groups Management Module
@@ -52,6 +55,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/group/{id}/edit', [GroupsController::class, 'edit'])->name('group.edit');
     Route::put('panel/group/{id}/edit', [GroupsController::class, 'update'])->name('group.edit');
     Route::get('panel/group/{id}', [GroupsController::class, 'view'])->name('group.view');
+    Route::delete('panel/groups/delete', [GroupsController::class, 'delete'])->name('groups.delete');
 
     // SMS Template Management Module
     Route::get('panel/sms-templates', [SmsTemplatesController::class, 'index'])->name('sms-templates');
@@ -61,6 +65,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'edit'])->name('sms-template.edit');
     Route::put('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'update'])->name('sms-template.edit');
     Route::get('panel/sms-template/{id}', [SmsTemplatesController::class, 'view'])->name('sms-template.view');
+    Route::delete('panel/sms-templates/delete', [SmsTemplatesController::class, 'delete'])->name('sms-templates.delete');
 
     // Email Template Management Module
     Route::get('panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
@@ -70,6 +75,8 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'edit'])->name('email-template.edit');
     Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
     Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
+    Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
+
 
 
     // Branch Management Module
@@ -80,6 +87,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/state/{id}/edit', [StatesController::class, 'edit'])->name('state.edit');
     Route::put('panel/state/{id}/edit', [StatesController::class, 'update'])->name('state.edit');
     Route::get('panel/state/{id}', [StatesController::class, 'view'])->name('state.view');
+    Route::delete('panel/states/delete', [StatesController::class, 'delete'])->name('states.delete');
 
     // Branch Management Module
     Route::get('panel/branches', [BranchesController::class, 'index'])->name('branches');
@@ -89,8 +97,9 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/branch/{id}/edit', [BranchesController::class, 'edit'])->name('branch.edit');
     Route::put('panel/branch/{id}/edit', [BranchesController::class, 'update'])->name('branch.edit');
     Route::get('panel/branch/{id}/detail', [BranchesController::class, 'view'])->name('branch.view');
+    Route::delete('panel/branches/delete', [BranchesController::class, 'delete'])->name('branches.delete');
 
-    // Branches Management Module
+    // Categories Management Module
     Route::get('panel/categories', [CategoriesController::class, 'index'])->name('categories');
     Route::post('panel/categories', [CategoriesController::class, 'records'])->name('categories.records');
     Route::get('panel/category/add', [CategoriesController::class, 'add'])->name('category.add');
@@ -98,6 +107,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/category/{ref}/edit', [CategoriesController::class, 'edit'])->name('category.edit');
     Route::put('panel/category/{ref}/edit', [CategoriesController::class, 'update'])->name('category.edit');
     Route::get('panel/category/{id}', [CategoriesController::class, 'view'])->name('category.view');
+    Route::delete('panel/categories/delete', [CategoriesController::class, 'delete'])->name('categories.delete');
 
     // Items Management Module
     Route::get('panel/items', [ItemsController::class, 'index'])->name('items');
@@ -107,6 +117,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
     Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
+    Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
 });
