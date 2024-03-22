@@ -116,6 +116,10 @@ class EmailTemplatesController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            EmailTemplate::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('email-templates')->with('note', 'Selected email templates have been deleted');
+        }
     }
 }

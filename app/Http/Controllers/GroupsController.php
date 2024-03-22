@@ -118,6 +118,10 @@ class GroupsController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            Group::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('groups')->with('note', 'Selected groups have been deleted');
+        }
     }
 }

@@ -111,6 +111,10 @@ class StatesController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            State::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('states')->with('note', 'Selected states have been deleted');
+        }
     }
 }

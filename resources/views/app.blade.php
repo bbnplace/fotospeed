@@ -3,15 +3,16 @@
     <head>
         <title inertia>{{ config('app.name', 'Indigo OMS') }}</title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-cZNb2Zeu.css">
 
         <!-- Scripts -->
         @routes
-        @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
-        {{--  <script type="module" src="{{env('APP_URL')}}/build/assets/app-GffVBZX0.js"></script>  --}}
+        {{--  @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])  --}}
         @inertiaHead
     </head>
     <body>
          @inertia
          <div id="mod"></div>
     </body>
+    <script src="{{ env('APP_URL') }}/build/assets/app-B4DZ4YKz.js" type="module"></script>
 </html>

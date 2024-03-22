@@ -108,6 +108,10 @@ class StaffController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            User::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('staff')->with('note', 'Selected staff have been deleted');
+        }
     }
 }

@@ -135,7 +135,11 @@ class BranchesController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            Branch::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('branches')->with('note', 'Selected branches have been deleted');
+        }
     }
 
 }

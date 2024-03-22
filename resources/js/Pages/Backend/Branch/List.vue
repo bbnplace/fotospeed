@@ -132,10 +132,14 @@ const viewDetail = item => {
 }
 
 // Deleting selected branches
-const deleteRecords = items => {
+const deleteRecords = (items) => {
     router.delete(route('branches.delete'), {
         data: {
             ids: items
+        },
+        onFinish: (d)=>{
+            closeDialog();
+            loadRecords({page, itemsPerPage, sortBy});
         }
     })
 }

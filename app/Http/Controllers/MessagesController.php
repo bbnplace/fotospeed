@@ -57,6 +57,10 @@ class MessagesController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            Message::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('messages')->with('note', 'Selected messages have been deleted');
+        }
     }
 }

@@ -113,9 +113,12 @@ class SmsTemplatesController extends Controller
         return Inertia::render('Backend/SmsTemplate/Detail', $this->getSmsTemplate($id));
     }
 
-
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            SmsTemplate::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('sms-templates')->with('note', 'Selected sms templates have been deleted');
+        }
     }
 }

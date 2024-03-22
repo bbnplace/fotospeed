@@ -79,6 +79,10 @@ class OrdersController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            Order::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('orders')->with('note', 'Selected orders have been deleted');
+        }
     }
 }

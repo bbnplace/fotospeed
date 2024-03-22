@@ -106,6 +106,10 @@ class CustomersController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            User::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('customers')->with('note', 'Selected customers have been deleted');
+        }
     }
 }

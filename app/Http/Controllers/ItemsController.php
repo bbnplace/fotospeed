@@ -160,6 +160,10 @@ class ItemsController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            Item::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('items')->with('note', 'Selected items have been deleted');
+        }
     }
 }

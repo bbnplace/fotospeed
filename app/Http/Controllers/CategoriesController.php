@@ -121,6 +121,10 @@ class CategoriesController extends Controller
 
     public function delete(Request $request)
     {
-        dd($request->all());
+        if (!empty($request->ids)) {
+            Category::whereIn('id', $request->ids)->delete();
+
+            return redirect()->route('categories')->with('note', 'Selected categories have been deleted');
+        }
     }
 }
