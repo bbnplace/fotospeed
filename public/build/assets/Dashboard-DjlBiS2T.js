@@ -1,0 +1,1 @@
+import{o as e,f as a,a as t,u as s,F as o,b as r,Z as n}from"./app-B4DZ4YKz.js";const c=r("div",null,null,-1),m={__name:"Dashboard",setup(l){return(_,u)=>(e(),a(o,null,[t(s(n),{title:"Dashboard"}),c],64))}};export{m as default};
