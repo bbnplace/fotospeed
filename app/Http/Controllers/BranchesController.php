@@ -12,7 +12,8 @@ class BranchesController extends Controller
     public function index()
     {
         return Inertia::render('Backend/Branch/List', [
-            'endpoint' => route('branches.records')
+            'endpoint' => route('branches.records'),
+            'status' => session('status')
         ]);
     }
 
@@ -79,7 +80,7 @@ class BranchesController extends Controller
             'state_id' => $state->id
         ]);
 
-        return redirect()->route('branches')->with('status', 'Successful');
+        return redirect()->route('branches')->with('status', $request->name . ' branch has been registered.');
     }
 
 
@@ -136,9 +137,9 @@ class BranchesController extends Controller
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
-            Branch::whereIn('id', $request->ids)->delete();
+            // Branch::whereIn('id', $request->ids)->delete();
 
-            return redirect()->route('branches')->with('note', 'Selected branches have been deleted');
+            return redirect()->route('branches', [], 303)->with('status', 'Selected branches have been deleted');
         }
     }
 

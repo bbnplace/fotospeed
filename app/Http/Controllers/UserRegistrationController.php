@@ -36,6 +36,8 @@ class UserRegistrationController extends Controller
             'state_id' => $state->id
         ]);
 
+        // TODO: Send login link to the customer's mobile number and email.
+
         return redirect()->route($this->determineRedirectRoute($request->role))
             ->with('status', 'Account Created');
     }

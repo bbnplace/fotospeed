@@ -31,7 +31,7 @@ password: Code2024Lab
 
 # Database
 CREATE USER 'booker'@'localhost' IDENTIFIED WITH mysql_native_password BY '9cT@6g#Wx2*pY$Eh';
-GRANT ALL PRIVILEGES ON indigo.* TO 'booker'@'localhost';
+GRANT ALL PRIVILEGES ON indigooms.* TO 'booker'@'localhost';
 FLUSH PRIVILEGES;
 
 
@@ -57,5 +57,10 @@ php artisan make:seeder UserSeeder
 # indigo-oms
 
 
+certbot --apache -d booking.indigoafrica.net -d booking.indigoafrica.net
 
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/booking.indigoafrica.net/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/booking.indigoafrica.net/privkey.pem
 
+/etc/apache2/sites-available/booking.indigoafrica.net.conf

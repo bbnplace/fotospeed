@@ -5,7 +5,7 @@
             <Link :href="route('branch.add')" class="btn btn-primary">Add Branch</Link>
         </div>
         <div class="d-flex mb-6t">
-            <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Branch </v-sheet>
+            <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Branch</v-sheet>
                 <v-text-field
                     v-model="search"
                     append-inner-icon="mdi-magnify"
@@ -15,6 +15,7 @@
                     class="ma-2"
                     density="compact"
                     variant="outlined"
+                    @focus="showSnackbar('Focused')"
                 ></v-text-field>
 
         </div>
@@ -66,13 +67,16 @@
         @deleteConfirmed="deleteRecords(selected.value)"
         @deleteCancelled="closeDialog"
     ></Dialog>
+    <Snackbar :data="snackbarOption"></Snackbar>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Dialog from '@/Components/Dialog.vue';
+import Snackbar from '@/Components/Snackbar.vue';
+import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 
 const selected = ref([]);
 const itemsPerPage = ref(25);
@@ -81,6 +85,7 @@ const loadedRecords = ref([]);
 let loading = ref(false);
 const search = ref("");
 const dialog = ref(false);
+const pageNo = ref(1);
 
 const headers = [
     {
@@ -110,6 +115,7 @@ let source = null;
 const loadRecords = async ({page, itemsPerPage, sortBy}) => {
     const payload = {page, itemsPerPage, sortBy, search}
     loading = true;
+    pageNo.value = page;
     if(source) source.cancel('Request cancelled by user');
     source = axios.CancelToken.source();
     const response = await axios.post(usePage().props.endpoint, payload, {
@@ -139,7 +145,17 @@ const deleteRecords = (items) => {
         },
         onFinish: (d)=>{
             closeDialog();
-            loadRecords({page, itemsPerPage, sortBy});
+            const obj = {
+                page: pageNo.value,
+                itemsPerPage: itemsPerPage.value,
+                sortBy: []
+            }
+            loadRecords(obj);
+
+            // confirm that this point is hit.
+            showSnackbar("Selected branches have been deleted")
+
+            selected.value = [];
         }
     })
 }
@@ -156,5 +172,4 @@ const closeDialog = () => {
 const showDialog = () => {
     dialog.value = true;
 }
-
 </script>

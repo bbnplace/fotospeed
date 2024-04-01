@@ -67,6 +67,7 @@
         @deleteConfirmed="deleteRecords(selected.value)"
         @deleteCancelled="closeDialog"
     ></Dialog>
+    <Snackbar :data="snackbarOption"></Snackbar>
 </template>
 
 <script setup>
@@ -74,6 +75,8 @@ import { ref } from 'vue';
 import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Dialog from '@/Components/Dialog.vue';
+import Snackbar from '@/Components/Snackbar.vue';
+import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 
 const selected = ref([]);
 const itemsPerPage = ref(25);
@@ -137,6 +140,17 @@ const deleteRecords = items => {
     router.delete(route('messages.delete'), {
         data: {
             ids: items
+        },
+        onFinish: (d)=>{
+            closeDialog();
+            const obj = {
+                page: pageNo.value,
+                itemsPerPage: itemsPerPage.value,
+                sortBy: []
+            }
+            loadRecords(obj);
+            showSnackbar("Selected messages have been deleted");
+            selected.value = [];
         }
     })
 }
@@ -153,5 +167,6 @@ const closeDialog = () => {
 const showDialog = () => {
     dialog.value = true;
 }
+
 </script>
 
