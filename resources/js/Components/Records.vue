@@ -73,21 +73,24 @@ import Dialog from '@/Components/Dialog.vue';
 import Snackbar from '@/Components/Snackbar.vue';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 
+// Load record data from props
+const recordProps = defineProps({
+    data: Object
+});
+const props = recordProps.data;
+
+
+
+// Records List
 const selected = ref([]);
 const itemsPerPage = ref(25);
 const totalRecords = ref(0);
 const loadedRecords = ref([]);
 let loading = ref(false);
 const search = ref("");
-const dialog = ref(false);
 const pageNo = ref(1);
 
-const recordProps = defineProps({
-    data: Object
-})
-
-const props = recordProps.data;
-
+// Function for loading and filtering records from datasource
 let source = null;
 const loadRecords = async ({page, itemsPerPage, sortBy}) => {
     const payload = {page, itemsPerPage, sortBy, search}
@@ -106,15 +109,17 @@ const loadRecords = async ({page, itemsPerPage, sortBy}) => {
     loading = false;
 }
 
+// Link to the Edit Item View
 const editItem = item => {
     router.get(route(props.endpoint.edit, item.id))
 }
 
+// Linking to the details view
 const viewDetail = item => {
     router.get(route(props.endpoint.detail, item.id));
 }
 
-// Deleting selected branches
+// Deleting selected Items
 const deleteRecords = (items) => {
     router.delete(route(props.endpoint.delete), {
         data: {
@@ -135,6 +140,10 @@ const deleteRecords = (items) => {
     })
 }
 
+
+
+// Dialog
+const dialog = ref(false);
 const deleteDialog = {
     title: "Confirm Delete",
     body: `Are you sure you want to delete the selected ${props.name.plural.toLowerCase()}?`
@@ -148,4 +157,3 @@ const showDialog = () => {
     dialog.value = true;
 }
 </script>
-

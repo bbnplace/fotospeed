@@ -1,35 +1,17 @@
 <template>
     <Head title="Email Templates"></Head>
     <BackendLayout>
-        <Records :data="listResource"></Records>
+        <Records :data="dataResources"></Records>
     </BackendLayout>
 </template>
 
 <script setup>
-import { usePage, Head, Link, router } from "@inertiajs/vue3";
+import { usePage, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Records from  '@/Components/Records.vue';
 
-const headers = [
-    {
-        title: "Name",
-        key: "name",
-        sortable: true
-    },
-    {
-        title: "Template",
-        key: "template",
-        sortable: false
-    },
-    {
-        title: "Actions",
-        key: "actions",
-        sortable: false,
-        width: '100px'
-    },
-];
 
-const listResource = {
+const dataResources = {
     endpoint: {
         records: usePage().props.endpoint,
         add: "email-template.add",
@@ -37,7 +19,24 @@ const listResource = {
         delete: "email-templates.delete",
         detail: "email-template.view"
     },
-    headers,
+    headers: [
+        {
+            title: "Name",
+            key: "name",
+            sortable: true
+        },
+        {
+            title: "Template",
+            key: "template",
+            sortable: false
+        },
+        {
+            title: "Actions",
+            key: "actions",
+            sortable: false,
+            width: '100px'
+        },
+    ],
     name: {
         singular: "Email Template",
         plural: "Email Templates"
