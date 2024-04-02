@@ -1,89 +1,14 @@
 <template>
     <Head title="Groups"></Head>
     <BackendLayout>
-        <div class="d-flex flex-row-reverse my-3">
-            <Link :href="route('group.add')" class="btn btn-primary">Create Group</Link>
-        </div>
-        <div class="d-flex mb-6t">
-            <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Group </v-sheet>
-                <v-text-field
-                    v-model="search"
-                    append-inner-icon="mdi-magnify"
-                    hide-details
-                    placeholder="Filter Group"
-                    type="text"
-                    class="ma-2"
-                    density="compact"
-                    variant="outlined"
-                ></v-text-field>
-
-        </div>
-        <div class="flex gap-5 ml-5" v-if="selected.value && selected.value.length > 0">
-            <v-icon
-                size="small"
-                title="Delete"
-                @click="showDialog"
-            >
-                mdi-delete
-            </v-icon>
-        </div>
-        <VRow>
-            <VCol>
-                <VDataTableServer
-                    v-model="selected.value"
-                    :items="loadedRecords"
-                    :loading="loading"
-                    :items-length="totalRecords"
-                    v-model:items-per-page="itemsPerPage"
-                    :search="search"
-                    :headers="headers"
-                    item-value="id"
-                    @update:options="loadRecords"
-                    show-select>
-                    <template v-slot:item.actions="{ item }">
-                            <v-icon
-                                size="small"
-                                class="me-2"
-                                @click="viewDetail(item)"
-                            >
-                                mdi-eye
-                            </v-icon>
-                            <v-icon
-                                size="small"
-                                class="me-2"
-                                @click="editItem(item)"
-                            >
-                                mdi-pencil
-                            </v-icon>
-                        </template>
-                </VDataTableServer>
-            </VCol>
-        </VRow>
+        <Records :data="listResource"></Records>
     </BackendLayout>
-    <Dialog
-        :dialogData="deleteDialog"
-        :show="dialog"
-        @deleteConfirmed="deleteRecords(selected.value)"
-        @deleteCancelled="closeDialog"
-    ></Dialog>
-    <Snackbar :data="snackbarOption"></Snackbar>
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
-import Dialog from '@/Components/Dialog.vue';
-import Snackbar from '@/Components/Snackbar.vue';
-import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
-
-const selected = ref([]);
-const itemsPerPage = ref(25);
-const totalRecords = ref(0);
-const loadedRecords = ref([]);
-let loading = ref(false);
-const search = ref("");
-const dialog = ref(false);
+import Records from  '@/Components/Records.vue';
 
 const headers = [
     {
@@ -104,62 +29,19 @@ const headers = [
     },
 ];
 
-let source = null;
-const loadRecords = async ({page, itemsPerPage, sortBy}) => {
-    const payload = {page, itemsPerPage, sortBy, search}
-    loading = true;
-    if(source) source.cancel('Request cancelled by user');
-    source = axios.CancelToken.source();
-    const response = await axios.post(usePage().props.endpoint, payload, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        cancelToken: source.token
-    });
-    loadedRecords.value = response.data.records;
-    totalRecords.value = response.data.totalRecords
-    loading = false;
-}
-
-const editItem = item => {
-    router.get(route('group.edit', item.id))
-}
-
-const viewDetail = item => {
-    router.get(route('group.view', item.id));
-}
-
-// Deleting selected contacts
-const deleteRecords = items => {
-    router.delete(route('groups.delete'), {
-        data: {
-            ids: items
-        },
-        onFinish: (d)=>{
-            closeDialog();
-            const obj = {
-                page: pageNo.value,
-                itemsPerPage: itemsPerPage.value,
-                sortBy: []
-            }
-            loadRecords(obj);
-            showSnackbar("Selected groups have been deleted");
-            selected.value = [];
-        }
-    })
-}
-
-const deleteDialog = {
-    title: "Confirm Delete",
-    body: "Are you sure you want to delete the selected groups?"
-}
-
-const closeDialog = () => {
-    dialog.value = false
-}
-
-const showDialog = () => {
-    dialog.value = true;
+const listResource = {
+    endpoint: {
+        records: usePage().props.endpoint,
+        add: "group.add",
+        edit: "group.edit",
+        delete: "groups.delete",
+        detail: "group.view"
+    },
+    headers,
+    name: {
+        singular: "Group",
+        plural: "Groups"
+    }
 }
 
 </script>

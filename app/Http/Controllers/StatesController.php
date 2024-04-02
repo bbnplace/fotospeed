@@ -16,7 +16,8 @@ class StatesController extends Controller
     public function index()
     {
         return Inertia::render('Backend/State/List', [
-            'endpoint' => route('state.records')
+            'endpoint' => route('state.records'),
+            'note' => session('note')
         ]);
     }
 
@@ -72,7 +73,7 @@ class StatesController extends Controller
 
         State::create($validated);
 
-        return redirect()->route('states')->with('status', 'New State Added');
+        return redirect()->route('states')->with('note', 'New State Added');
     }
 
     private function getState($id)
@@ -105,7 +106,7 @@ class StatesController extends Controller
         $state->name = $request->name;
         $state->save();
 
-        return redirect()->route('states')->with('status', 'State Updated');
+        return redirect()->route('states')->with('note', 'State Updated');
     }
 
 

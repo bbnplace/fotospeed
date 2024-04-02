@@ -12,7 +12,8 @@ class CustomersController extends Controller
     public function index()
     {
         return Inertia::render('Backend/Customer/List', [
-            'endpoint' => route('customers.records')
+            'endpoint' => route('customers.records'),
+            'note' => session('note')
         ]);
     }
 

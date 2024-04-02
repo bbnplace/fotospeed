@@ -11,13 +11,14 @@ class GroupsController extends Controller
 
     protected $rules = [
         'name' => 'required|string|unique:groups,name|min:2|max:64',
-        'description' => 'nullable|string|min:36|max:1000'
+        'description' => 'nullable|string|min:10|max:1000'
     ];
 
     public function index()
     {
         return Inertia::render('Backend/Group/List', [
-            'endpoint' => route('group.records')
+            'endpoint' => route('group.records'),
+            'note' => session('note')
         ]);
     }
 
@@ -73,7 +74,7 @@ class GroupsController extends Controller
         // Save the record to database
         Group::create($validated);
 
-        return redirect()->route('groups')->with('status', 'Group Created');
+        return redirect()->route('groups')->with('note', 'Group Created');
     }
 
     public function getGroup($groupId)

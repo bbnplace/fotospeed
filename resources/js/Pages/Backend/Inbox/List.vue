@@ -85,6 +85,7 @@ const loadedRecords = ref([]);
 let loading = ref(false);
 const search = ref("");
 const dialog = ref(false);
+const pageNo = ref(1);
 
 const headers = [
     {

@@ -12,6 +12,7 @@ class MessagesController extends Controller
     {
         return Inertia::render('Backend/Inbox/List', [
             'endpoint' => route('messages.records'),
+            'note' => session('note')
         ]);
     }
 

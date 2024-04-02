@@ -12,7 +12,8 @@ class StaffController extends Controller
     public function index()
     {
         return Inertia::render('Backend/Staff/List', [
-            'endpoint' => route('staff.records')
+            'endpoint' => route('staff.records'),
+            'note' => session('note')
         ]);
     }
 

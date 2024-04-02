@@ -25,6 +25,7 @@ class ItemsController extends Controller
     {
         return Inertia::render('Backend/Item/List', [
             'endpoint' => route('items.records'),
+            'note' => session('note')
         ]);
     }
 
@@ -99,7 +100,7 @@ class ItemsController extends Controller
             'cover_print_price' => $request->cover_print_price,
         ]);
 
-        return redirect()->route('items')->with('status', 'Item Registered');
+        return redirect()->route('items')->with('note', 'Item Registered');
     }
 
     private function getItem($id)

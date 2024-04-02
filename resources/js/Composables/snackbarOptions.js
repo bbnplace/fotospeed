@@ -14,4 +14,8 @@ export const showSnackbar = text => {
     snackbarOption.id = snackbarRef++;
 }
 
+export const hideSnackbar = () => {
+    snackbarOption.text = "";
+    snackbarOption.show = false;
+}
 

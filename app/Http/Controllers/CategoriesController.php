@@ -13,7 +13,8 @@ class CategoriesController extends Controller
     public function index()
     {
         return Inertia::render('Backend/Category/List', [
-            'endpoint' => route('categories.records')
+            'endpoint' => route('categories.records'),
+            'note' => session('note')
         ]);
     }
 
@@ -81,7 +82,7 @@ class CategoriesController extends Controller
 
         Category::create($validated);
 
-        return redirect()->route('categories');
+        return redirect()->route('categories')->with('note', $request->name . ' has been created.');
     }
 
     private function getCategory($categoryId)

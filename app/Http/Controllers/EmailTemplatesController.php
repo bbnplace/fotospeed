@@ -12,7 +12,8 @@ class EmailTemplatesController extends Controller
     public function index()
     {
         return Inertia::render('Backend/EmailTemplate/List', [
-            'endpoint' => route('email-templates.records')
+            'endpoint' => route('email-templates.records'),
+            'note' => session('note')
         ]);
     }
 
@@ -71,7 +72,7 @@ class EmailTemplatesController extends Controller
         // Save the record to database
         EmailTemplate::create($validated);
 
-        return redirect()->route('email-templates')->with('status', 'Email Template Created');
+        return redirect()->route('email-templates')->with('note', 'Email Template Created');
     }
 
     private function getEmailTemplate($templateId)

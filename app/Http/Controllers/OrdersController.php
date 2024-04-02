@@ -13,6 +13,7 @@ class OrdersController extends Controller
     {
         return Inertia::render('Backend/Order/List', [
             'endpoint' => route('order.records'),
+            'note' => session('note')
         ]);
     }
 

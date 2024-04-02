@@ -16,7 +16,8 @@ class SmsTemplatesController extends Controller
     public function index()
     {
         return Inertia::render('Backend/SmsTemplate/List', [
-            'endpoint' => route('sms-templates.records')
+            'endpoint' => route('sms-templates.records'),
+            'note' => session('note')
         ]);
     }
 
@@ -72,7 +73,7 @@ class SmsTemplatesController extends Controller
         // Save the record to database
         SmsTemplate::create($validated);
 
-        return redirect()->route('sms-templates')->with('status', 'SMS Template Created');
+        return redirect()->route('sms-templates')->with('note', 'SMS Template Created');
     }
 
     private function getSmsTemplate($templateId)

@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { reactive, onMounted, watch } from  'vue';
 import { usePage } from '@inertiajs/vue3';
+import { hideSnackbar } from '@/Composables/snackbarOptions.js';
 
 interface SnackbarData {
     text: String,
@@ -51,11 +52,15 @@ const _hideSnackbar = () => {
 
 watch(()=>props.data.id, () => {
     if(props.data.show) _showSnackbar(props.data.text);
+});
+
+watch(()=>_snackbar.show, (newVal, oldVal) => {
+    if(!newVal) hideSnackbar();
 })
 
 onMounted(()=>{
-    const status = usePage().props.status;
-    if(status)
+    const status = usePage().props.note;
+    if(status !== null)
     {
         _showSnackbar(status)
     }
