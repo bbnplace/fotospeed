@@ -17,8 +17,10 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained('users')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignIdFor(Item::class);
+            $table->json('detail');
             $table->foreignIdFor(OrderStatus::class);
-            $table->integer('total_cost');
+            $table->integer('total_cost')->nullable();
             $table->timestamps();
         });
     }

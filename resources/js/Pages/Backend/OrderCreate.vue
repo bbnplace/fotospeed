@@ -13,7 +13,7 @@
         <VRow>
             <VCol>
                 <VAutocomplete
-                    v-model="orderForm.item"
+                    v-model="masterForm.item"
                     label="Item"
                     :items="items"
                     variant="outlined"
@@ -37,26 +37,30 @@
 
         </template>
         <DropzoneUploader @fileUploaded="handleData"></DropzoneUploader>
+
         <div class="flex flex-row-reverse">
             <VBtn
                 color="blue-darken-1"
                 @click="submitOrder"
             >Save</VBtn>
         </div>
-        <!-- {{ orderForm }} -->
     </BackendLayout>
 </template>
 
 <script setup>
 import { reactive } from 'vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, router, useForm } from '@inertiajs/vue3';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
 import OrderForm from '@/Components/OrderForm.vue';
 
 const orderForm = reactive({
     orderFiles: [],
-    item: ""
+});
+
+const masterForm = useForm({
+    item: "",
+    files: []
 })
 
 const handleData = data => {
@@ -79,8 +83,26 @@ const updatePageData = (pageObject, object) => {
 
 const items = usePage().props.items;
 
-const submitOrder = () => {
 
+const submitOrder = () => {
+    // To reduce size of submitted data, cut out the dataURL from each file before submitting
+    const fileData = [];
+
+    orderForm.orderFiles.forEach(element => {
+        const file = { ...element.file }
+        file.dataURL = undefined;
+
+        fileData.push({
+            file,
+            note: element.note,
+            pageNo: element.pageNo,
+            copies: element.copies
+        })
+    });
+    masterForm.files = fileData;
+
+    // Submit the order data to endpoint
+    masterForm.post(route("order.add"));
 }
 
 </script>

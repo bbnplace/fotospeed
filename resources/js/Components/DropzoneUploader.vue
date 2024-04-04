@@ -19,17 +19,19 @@
 <script setup>
 // This component uploads file and emits the file name, path and other meta data through a file-analyzed event.
 import { ref, onMounted, reactive } from 'vue';
+import { usePage } from  '@inertiajs/vue3';
 import { Dropzone } from 'dropzone';
 
 const emit = defineEmits(['fileUploaded']);
 const props = defineProps({
-
 });
+
 
 let fileUploadProgress = 0;
 let uploadingFile = false;
 let readingFile = ref(false);
 let fileAction = ref("");
+const csrfToken = usePage().props.stkn
 
 onMounted(()=>{
     initDropzone()
@@ -49,7 +51,7 @@ const initDropzone = () => {
         paramName: "files", // Name that will be used to transfer the file
         // Additional Dropzone options...
         headers: {
-            'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content,
+            'X-CSRF-TOKEN': csrfToken,
         },
         success: handleSuccess,
         error: handleError
@@ -70,7 +72,6 @@ const handleUploadProgress = (file, progress, bytesSent) => {
 }
 
 const handleSuccess =  async (file, response) => {
-    // console.log(file)
     uploadingFile = false;
     fileAction.value = "";
 

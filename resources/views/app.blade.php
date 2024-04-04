@@ -2,7 +2,6 @@
 <html lang="en">
     <head>
         <title inertia>{{ config('app.name', 'Indigo OMS') }}</title>
-        <meta name="csrf-token" content="{{ csrf_token() }}">
         {{--  <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-cZNb2Zeu.css">  --}}
 
         <!-- Scripts -->

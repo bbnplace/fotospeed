@@ -1,175 +1,85 @@
 <template>
     <Head title="Inbox"></Head>
     <BackendLayout>
-
-        <div class="d-flex mb-6t">
-            <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter Messages</v-sheet>
-                <v-text-field
-                    v-model="search"
-                    append-inner-icon="mdi-magnify"
-                    hide-details
-                    placeholder="Filter Messages"
-                    type="text"
-                    class="ma-2"
-                    density="compact"
-                    variant="outlined"
-                ></v-text-field>
-
-        </div>
-        <div class="flex gap-5 ml-5" v-if="selected.value && selected.value.length > 0">
-            <v-icon
-                size="small"
-                title="Delete"
-                @click="showDialog"
-            >
-                mdi-delete
-            </v-icon>
-        </div>
-        <VRow>
-            <VCol>
-                <VDataTableServer
-                    v-model="selected.value"
-                    :items="loadedRecords"
-                    :loading="loading"
-                    :items-length="totalRecords"
-                    v-model:items-per-page="itemsPerPage"
-                    :search="search"
-                    :headers="headers"
-                    item-value="id"
-                    @update:options="loadRecords"
-                    show-select>
-                    <template v-slot:item.actions="{ item }">
-                            <v-icon
-                                size="small"
-                                class="me-2"
-                                @click="viewDetail(item)"
-                            >
-                                mdi-eye
-                            </v-icon>
-                            <v-icon
-                                size="small"
-                                class="me-2"
-                                @click="replyMessage(item)"
-                            >
-                                mdi-pencil
-                            </v-icon>
-                        </template>
-                </VDataTableServer>
-            </VCol>
-        </VRow>
+        <Records :data="dataResources"></Records>
     </BackendLayout>
-    <Dialog
-        :dialogData="deleteDialog"
-        :show="dialog"
-        @deleteConfirmed="deleteRecords(selected.value)"
-        @deleteCancelled="closeDialog"
-    ></Dialog>
-    <Snackbar :data="snackbarOption"></Snackbar>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { usePage, Head, Link, router } from "@inertiajs/vue3";
+import { usePage, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
-import Dialog from '@/Components/Dialog.vue';
-import Snackbar from '@/Components/Snackbar.vue';
-import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
+import Records from  '@/Components/Records.vue';
 
-const selected = ref([]);
-const itemsPerPage = ref(25);
-const totalRecords = ref(0);
-const loadedRecords = ref([]);
-let loading = ref(false);
-const search = ref("");
-const dialog = ref(false);
-const pageNo = ref(1);
-
-const headers = [
-    {
-        title: "Customer",
-        key: "user.name",
-        sortable: true
+const dataResources = {
+    endpoint: {
+        records: usePage().props.endpoint,
+        add: "order.add",
+        edit: "order.edit",
+        delete: "orders.delete",
+        detail: "order.view"
     },
-    {
-        title: "Items",
-        key: "order.item.name",
-        sortable: true
-    },
-    {
-        title: "Total Cost",
-        key: "total_cost",
-        sortable: true
-    },
-    {
-        title: "Status",
-        key: "orderStatus.name",
-        sortable: true
-    },
-    {
-        title: "Actions",
-        key: "actions",
-        sortable: false,
-        width: '100px'
-    },
-];
-
-let source = null;
-const loadRecords = async ({page, itemsPerPage, sortBy}) => {
-    const payload = {page, itemsPerPage, sortBy, search}
-    loading = true;
-    if(source) source.cancel('Request cancelled by user');
-    source = axios.CancelToken.source();
-    const response = await axios.post(usePage().props.endpoint, payload, {
-        headers: {
-            "Content-Type": "application/json"
+    headers: [
+        {
+            title: "Customer",
+            key: "user.name",
+            sortable: true
         },
-        cancelToken: source.token
-    });
-    loadedRecords.value = response.data.records;
-    totalRecords.value = response.data.totalRecords
-    loading = false;
-}
-
-const replyMessage = item => {
-    // router.get(route('customer.edit', item.id))
-}
-
-const viewDetail = item => {
-    router.get(route('order.detail', item.id));
-}
-
-// Deleting selected contacts
-const deleteRecords = items => {
-    router.delete(route('orders.delete'), {
-        data: {
-            ids: items
+        {
+            title: "Items",
+            key: "order.item.name",
+            sortable: true
         },
-        onFinish: (d)=>{
-            closeDialog();
-            const obj = {
-                page: pageNo.value,
-                itemsPerPage: itemsPerPage.value,
-                sortBy: []
-            }
-            loadRecords(obj);
-            showSnackbar("Selected orders have been deleted");
-            selected.value = [];
-        }
-    })
+        {
+            title: "Total Cost",
+            key: "total_cost",
+            sortable: true
+        },
+        {
+            title: "Status",
+            key: "orderStatus.name",
+            sortable: true
+        },
+        {
+            title: "Actions",
+            key: "actions",
+            sortable: false,
+            width: '100px'
+        },
+    ],
+    name: {
+        singular: "Order",
+        plural: "Orders"
+    }
 }
 
-const deleteDialog = {
-    title: "Confirm Delete",
-    body: "Are you sure you want to delete the selected orders?"
-}
+// const replyMessage = item => {
+//     // router.get(route('customer.edit', item.id))
+// }
 
-const closeDialog = () => {
-    dialog.value = false
-}
+// const viewDetail = item => {
+//     router.get(route('order.detail', item.id));
+// }
 
-const showDialog = () => {
-    dialog.value = true;
-}
+// // Deleting selected contacts
+// const deleteRecords = items => {
+//     router.delete(route('orders.delete'), {
+//         data: {
+//             ids: items
+//         },
+//         onFinish: (d)=>{
+//             closeDialog();
+//             const obj = {
+//                 page: pageNo.value,
+//                 itemsPerPage: itemsPerPage.value,
+//                 sortBy: []
+//             }
+//             loadRecords(obj);
+//             showSnackbar("Selected orders have been deleted");
+//             selected.value = [];
+//         }
+//     })
+// }
+
 
 </script>
 

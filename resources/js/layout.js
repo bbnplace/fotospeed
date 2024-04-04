@@ -16,7 +16,6 @@ export default class ThemeCustomizer {
   }
 
   initConfig() {
-    // console.log(window.defaultConfig);
     this.defaultConfig = JSON.parse(JSON.stringify(window.defaultConfig));
     this.config = JSON.parse(JSON.stringify(window.config));
     this.setSwitchFromConfig();

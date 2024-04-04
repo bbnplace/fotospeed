@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications');
 
     Route::get('/create-order', [OrdersController::class, 'add'])->name('order.add');
+    Route::post('/create-order', [OrdersController::class, 'store'])->name('order.add');
 
     Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
     Route::get('/file/{path}/{type}', [FileUploadsController::class, 'get'])->name('file.load');

@@ -67,14 +67,29 @@ class OrdersController extends Controller
     {
         return Inertia::render('Backend/OrderCreate', [
             'items' => Item::getItemsArray(),
+            'stkn' => csrf_token()
         ]);
     }
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
-
+            'item' => 'string|required|exists:items,name|min:2|max:64',
+            'files' => 'required|array',
         ]);
+
+        // Get Item ID
+        $item = Item::where('name', $request->item)->first();
+        Order::create([
+            'user_id' =>  auth()->user()->id,
+            'item_id' => $item->id,
+            'order_status_id' => 1,
+            'detail' => json_encode($request->all()),
+            'total_cost' => 0,
+        ]);
+
+        return redirect(route('orders'))->with('note', 'Order Submitted');
     }
 
 

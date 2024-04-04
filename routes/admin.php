@@ -77,8 +77,6 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
     Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
 
-
-
     // Branch Management Module
     Route::get('panel/states', [StatesController::class, 'index'])->name('states');
     Route::post('panel/states', [StatesController::class, 'records'])->name('state.records');
