@@ -13,4 +13,18 @@ class EmailTemplate extends Model
         'name',
         'template'
     ];
+
+    public static function getEmailTemplatesArray()
+    {
+        $emailTemplates = [];
+        $emailTemplatesCollection = self::get('name');
+        if(!empty($emailTemplatesCollection))
+        {
+            foreach($emailTemplatesCollection as $emailTemplate){
+                array_push($emailTemplates, $emailTemplate->name);
+            }
+        }
+
+        return $emailTemplates;
+    }
 }

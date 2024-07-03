@@ -1,26 +1,15 @@
 <template>
-   <form @submit.prevent="submit">
+    <form @submit.prevent="submit">
         <div>
             <VTextField
                 id="name"
                 v-model="form.name"
-                label="Template Name"
+                label="Role Name"
                 variant="outlined"
                 autocomplete="name"
                 :hide-details="form.errors.name == undefined"
                 :error-messages="form.errors.name"
             ></VTextField>
-        </div>
-        <div class="mt-4">
-            <VTextarea
-                id="template"
-                v-model="form.template"
-                label="SMS Template"
-                variant="outlined"
-                :hide-details="form.errors.template == undefined"
-                :error-messages="form.errors.template"
-                density="compact"
-            ></VTextarea>
         </div>
 
         <div class="flex items-center justify-end mt-4">
@@ -36,29 +25,27 @@
 import { useForm, usePage, Link } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 
-interface SMSTemplateEditor {
-    id?: Number,
-    name: String,
-    template: String
+interface Role {
+    id: Number,
+    name: String
 }
 
 const props = defineProps<{
-    smsTemplate: SMSTemplateEditor
+    role?: Role
 }>()
 
 const form = useForm({
-    id: props.smsTemplate ? props.smsTemplate.id: "",
-    name: props.smsTemplate ? props.smsTemplate.name: "",
-    template: props.smsTemplate ? props.smsTemplate.template: "",
+    id: props.role ? props.role.id : "",
+    name: props.role ? props.role.name : "",
 });
 
 const submit = () => {
-    if(props.smsTemplate) {
-        form.put(route('sms-template.edit', [props.smsTemplate.id]), {
+    if(props.role) {
+        form.put(route('role.edit', [props.role.id]), {
             onFinish: () => {},
         });
     } else {
-        form.post(route('sms-template.add'), {
+        form.post(route('role.add'), {
             onFinish: () => {},
         });
     }

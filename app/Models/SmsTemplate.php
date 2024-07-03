@@ -13,4 +13,18 @@ class SmsTemplate extends Model
         'name',
         'template'
     ];
+
+    public static function getSmsTemplatesArray()
+    {
+        $smsTemplates = [];
+        $smsTemplatesCollection = self::get('name');
+        if(!empty($smsTemplatesCollection))
+        {
+            foreach($smsTemplatesCollection as $smsTemplate){
+                array_push($smsTemplates, $smsTemplate->name);
+            }
+        }
+
+        return $smsTemplates;
+    }
 }

@@ -62,9 +62,19 @@ const menus = [
                 route: "categories"
             },
             {
+                icon: "mdi-briefcase-account",
+                name: "Roles",
+                route: "roles"
+            },
+            {
                 icon: "mdi-list-box-outline",
                 name: "Items",
                 route: "items"
+            },
+            {
+                icon: "mdi-cog-outline",
+                name: "Processes",
+                route: "processes"
             },
             {
                 icon: "mdi-sitemap",

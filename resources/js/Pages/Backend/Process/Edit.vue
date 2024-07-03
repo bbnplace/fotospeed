@@ -1,8 +1,8 @@
 <template>
-    <Head title="Edit Item"></Head>
+    <Head title="Edit Process"></Head>
     <BackendLayout>
-        <Panel snippetTitle="Edit Item">
-            <ItemEditor :item="item"></ItemEditor>
+        <Panel snippetTitle="Edit Process">
+            <ProcessEditor :process="process"></ProcessEditor>
         </Panel>
     </BackendLayout>
 </template>
@@ -11,8 +11,8 @@
 import { usePage, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
-import ItemEditor from "@/Components/Editors/ItemEditor.vue";
+import ProcessEditor from "@/Components/Editors/ProcessEditor.vue";
 
-const item = usePage().props.item;
+const process = usePage().props.processes;
 
 </script>

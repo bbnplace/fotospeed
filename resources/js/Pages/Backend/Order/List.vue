@@ -26,7 +26,7 @@ const dataResources = {
         },
         {
             title: "Items",
-            key: "order.item.name",
+            key: "item.name",
             sortable: true
         },
         {
@@ -36,8 +36,8 @@ const dataResources = {
         },
         {
             title: "Status",
-            key: "orderStatus.name",
-            sortable: true
+            key: "order_status.name",
+            sortable: false
         },
         {
             title: "Actions",

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class OrdersController extends Controller
@@ -29,6 +31,9 @@ class OrdersController extends Controller
 
         $query = Order::query();
         $query->with(['user' => function ($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['item' => function ($query){
             $query->select('id', 'name');
         }]);
         $query->with(['orderStatus' => function ($query){
@@ -65,7 +70,7 @@ class OrdersController extends Controller
 
     public function add()
     {
-        return Inertia::render('Backend/OrderCreate', [
+        return Inertia::render('Backend/Order/Add', [
             'items' => Item::getItemsArray(),
             'stkn' => csrf_token()
         ]);
@@ -87,11 +92,56 @@ class OrdersController extends Controller
             'order_status_id' => 1,
             'detail' => json_encode($request->all()),
             'total_cost' => 0,
+            'date' => date("d"),
+            'month' => date("n"),
+            'year' => date("Y")
         ]);
 
         return redirect(route('orders'))->with('note', 'Order Submitted');
     }
 
+    private function getOrder($id)
+    {
+        $query = Order::query();
+        $query->where('id', $id);
+        $query->with(['item' => function($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['user' => function ($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['orderStatus' => function ($query){
+            $query->select('id', 'name');
+        }]);
+
+        $order = $query->first();
+        $orderDetail = json_decode($order->detail);
+        if(!empty($orderDetail->files)) {
+            for($i=0; $i<count($orderDetail->files); $i++)
+            {
+                $data = Storage::get($orderDetail->files[$i]->file->uploadedFile);
+                $orderDetail->files[$i]->file->dataURL = sprintf('data:%s;base64,%s', $orderDetail->files[$i]->file->fileInfo->type, base64_encode($data));
+            }
+        }
+
+        return [
+            'order' => $order,
+            'orderDetail' => $orderDetail,
+            'items' => Item::getItemsArray(),
+            'orderStatuses' => OrderStatus::getOrderStatusesArray(),
+            'stkn' => csrf_token(),
+        ];
+    }
+
+    public function edit($id)
+    {
+        return Inertia::render('Backend/Order/Edit', $this->getOrder($id));
+    }
+
+    public function view($id)
+    {
+        return Inertia::render('Backend/Order/Detail', $this->getOrder($id));
+    }
 
     public function delete(Request $request)
     {

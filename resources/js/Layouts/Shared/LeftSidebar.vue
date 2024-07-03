@@ -39,14 +39,14 @@
                 <li class="side-nav-item">
                     <Link :href="route('dashboard')" class="side-nav-link">
                         <VIcon icon="mdi-view-dashboard"></VIcon>
-                        <span> Dashboard </span>
+                        <span> Dashboard</span>
                     </Link>
                 </li>
                 <template v-for="(menu, index) in props.menus" :key="index">
                     <li class="side-nav-title mt-3">{{ menu.heading }}</li>
 
-                    <li class="side-nav-item" v-for="(link, i) in menu.links" :key="i">
-                        <Link :href="route(link.route)" class="side-nav-link">
+                    <li class="side-nav-item" v-for="(link, i) in menu.links" :key="i" :class="{'menuitem-active': $page.url.startsWith('/panel/' + link.route)}">
+                        <Link :href="route(link.route)" class="side-nav-link" :class="{'active': $page.url.startsWith('/panel/' + link.route)}">
                             <VIcon :icon="link.icon"></VIcon>
                             <span> {{ link.name }} </span>
                         </Link>
@@ -82,5 +82,9 @@ const props = defineProps({
     display: flex !important;
     justify-content: center;
     align-items: center;
+}
+
+.green {
+    background-color: green;
 }
 </style>

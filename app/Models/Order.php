@@ -14,7 +14,10 @@ class Order extends Model
         'item_id',
         'order_status_id',
         'total_cost',
-        'detail'
+        'detail',
+        'date',
+        'month',
+        'year',
     ];
 
     public function user()
@@ -27,8 +30,8 @@ class Order extends Model
         return $this->belongsTo(OrderStatus::class);
     }
 
-    public function itemOrders()
+    public function item()
     {
-        return $this->hasMany(ItemOrder::class);
+        return $this->belongsTo(Item::class);
     }
 }

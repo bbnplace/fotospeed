@@ -12,4 +12,18 @@ class Role extends Model
     protected $fillable = ['name'];
 
     public $timestamps = false;
+
+    public static function getRolesArray()
+    {
+        $roles = [];
+        $rolesCollection = self::get('name');
+        if(!empty($rolesCollection))
+        {
+            foreach($rolesCollection as $role){
+                array_push($roles, $role->name);
+            }
+        }
+
+        return $roles;
+    }
 }

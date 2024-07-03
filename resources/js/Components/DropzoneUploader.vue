@@ -21,6 +21,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import { usePage } from  '@inertiajs/vue3';
 import { Dropzone } from 'dropzone';
+import { v4 as uuidv4 } from 'uuid';
 
 const emit = defineEmits(['fileUploaded']);
 const props = defineProps({
@@ -82,6 +83,7 @@ const handleSuccess =  async (file, response) => {
     }
     inputData.uploadedFile = response.path;
     inputData.dataURL = file.dataURL;
+    inputData.id = uuidv4();
 
     // Run a method to goto system and read first line of the file to extract heading.
     const payload = {

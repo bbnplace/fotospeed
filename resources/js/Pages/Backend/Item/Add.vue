@@ -14,6 +14,3 @@ import Panel from "@/Layouts/Shared/Panel.vue";
 import ItemEditor from "@/Components/Editors/ItemEditor.vue";
 </script>
 
-<style lang="scss" scoped>
-
-</style>

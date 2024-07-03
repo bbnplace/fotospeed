@@ -1,8 +1,5 @@
 <template>
     <Head title="Create Order"></Head>
-    <BackendLayout>
-        Create Order
-
         <div class="flex flex-row-reverse">
             <VBtn
                 color="blue-darken-1"
@@ -47,22 +44,24 @@
             >Save</VBtn>
         </div>
         <!-- {{ orderForm.orderFiles }} -->
-    </BackendLayout>
 </template>
 
 <script setup>
 import { reactive } from 'vue';
 import { Head, usePage, router, useForm } from '@inertiajs/vue3';
-import BackendLayout from '@/Layouts/BackendLayout.vue';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
 import OrderForm from '@/Components/OrderForm.vue';
 
+const props = defineProps({
+    order: Object
+});
+
 const orderForm = reactive({
-    orderFiles: [],
+    orderFiles: props.order ? props.order.files : [],
 });
 
 const masterForm = useForm({
-    item: "",
+    item: props.order ? props.order.item : "",
     files: []
 })
 
@@ -100,8 +99,12 @@ const submitOrder = () => {
     });
     masterForm.files = fileData;
 
-    // Submit the order data to endpoint
-    masterForm.post(route("order.add"));
+    if (props.order) {
+
+    } else {
+        // Submit the order data to endpoint
+        masterForm.post(route("order.add"));
+    }
 }
 
 const removeImage = data => {

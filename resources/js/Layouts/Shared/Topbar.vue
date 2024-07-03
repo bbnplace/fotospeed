@@ -202,7 +202,7 @@
                         <h5 class="my-0">
                             {{ name }}
                         </h5>
-                        <h6 class="my-0 fw-normal">Founder</h6>
+                        <!-- <h6 class="my-0 fw-normal">Founder</h6> -->
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated profile-dropdown">

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\FileUploadsController;
+use App\Http\Controllers\FileDownloadsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProfileController;
@@ -45,9 +46,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/create-order', [OrdersController::class, 'add'])->name('order.add');
     Route::post('/create-order', [OrdersController::class, 'store'])->name('order.add');
+    Route::get('/order/{id}', [OrdersController::class, 'view'])->name('order.view');
+    Route::get('/order/{id}/edit', [OrdersController::class, 'edit'])->name('order.edit');
+    Route::delete('/orders/delete', [OrdersController::class, 'delete'])->name('orders.delete');
 
     Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
     Route::get('/file/{path}/{type}', [FileUploadsController::class, 'get'])->name('file.load');
+    Route::get('/file/download', [FileDownloadsController::class, 'download'])->name('file.download');
 
     // Item Categories Management
 

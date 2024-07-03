@@ -107,7 +107,7 @@ class CategoriesController extends Controller
         $category = Category::where('id', $ref)->first();
 
         if (empty($category)) {
-            return redirect()->route('branches')->with('note', 'Select a branch to edit');
+            return redirect()->route('categories')->with('note', 'Select a category to edit');
         }
 
         $request->validate([

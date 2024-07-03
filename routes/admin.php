@@ -8,6 +8,8 @@ use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\ProcessesController;
+use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SmsTemplatesController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StatesController;
@@ -116,6 +118,26 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
     Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
+
+    // Processes Management Module
+    Route::get('panel/processes', [ProcessesController::class, 'index'])->name('processes');
+    Route::post('panel/processes', [ProcessesController::class, 'records'])->name('processes.records');
+    Route::get('panel/process/add', [ProcessesController::class, 'add'])->name('process.add');
+    Route::post('panel/process/add', [ProcessesController::class, 'store'])->name('process.store');
+    Route::get('panel/process/{id}/edit', [ProcessesController::class, 'edit'])->name('process.edit');
+    Route::put('panel/process/{id}/edit', [ProcessesController::class, 'update'])->name('process.edit');
+    Route::get('panel/process/{id}', [ProcessesController::class, 'view'])->name('process.view');
+    Route::delete('panel/processes/delete', [ProcessesController::class, 'delete'])->name('processes.delete');
+
+    // Roles Management
+    Route::get('panel/roles', [RolesController::class, 'index'])->name('roles');
+    Route::post('panel/roles', [RolesController::class, 'records'])->name('roles.records');
+    Route::get('panel/role/add', [RolesController::class, 'add'])->name('role.add');
+    Route::post('panel/role/add', [RolesController::class, 'store'])->name('role.store');
+    Route::get('panel/role/{id}/edit', [RolesController::class, 'edit'])->name('role.edit');
+    Route::put('panel/role/{id}/edit', [RolesController::class, 'update'])->name('role.edit');
+    Route::get('panel/role/{id}', [RolesController::class, 'view'])->name('role.view');
+    Route::delete('panel/roles/delete', [RolesController::class, 'delete'])->name('roles.delete');
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
 });

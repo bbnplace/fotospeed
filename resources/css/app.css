@@ -46,3 +46,7 @@
     color: #0594be;
     /* border: #0594be solid 1px; */
 }
+
+input[type='text'], input[type='text']:focus {
+    background-color: transparent;
+}
