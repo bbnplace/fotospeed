@@ -15,9 +15,15 @@ class ProcessesController extends Controller
         'name' => 'string|required|unique:items,name|min:2|max:64',
         'role' => 'string|required|exists:roles,name|min:2|max:64',
         'description' => 'nullable|string|min:24|max:1000',
-        'nextProcess' => 'nullable|string|exists:roles,name|min:2|max:64',
-        'smsTemplate' => 'nullable|string|exists:roles,name|min:2|max:64',
-        'emailTemplate' => 'nullable|string|exists:roles,name|min:2|max:64',
+        'nextProcess' => 'nullable|string|exists:order_statuses,name|min:2|max:64',
+        'smsTeam' => 'nullable|boolean',
+        'smsTemplate' => 'nullable|string|exists:sms_templates,name|min:2|max:64',
+        'emailTeam' => 'nullable|boolean',
+        'emailTemplate' => 'nullable|string|exists:email_templates,name|min:2|max:64',
+        'smsCustomer' => 'nullable|boolean',
+        'customerSmsTemplate' => 'nullable|string|exists:sms_templates,name|min:2|max:64',
+        'emailCustomer' => 'nullable|boolean',
+        'customerEmailTemplate' => 'nullable|string|exists:email_templates,name|min:2|max:64',
     ];
 
     public function index(){
@@ -41,12 +47,12 @@ class ProcessesController extends Controller
         $query->with(['role' => function ($query) {
             $query->select('id', 'name');
         }]);
-        $query->with(['smsTemplate' => function ($query) {
-            $query->select('id', 'name');
-        }]);
-        $query->with(['emailTemplate' => function ($query) {
-            $query->select('id', 'name');
-        }]);
+        // $query->with(['smsTemplate' => function ($query) {
+        //     $query->select('id', 'name');
+        // }]);
+        // $query->with(['emailTemplate' => function ($query) {
+        //     $query->select('id', 'name');
+        // }]);
         $query->with(['nextProcess' => function ($query) {
             $query->select('id', 'name');
         }]);
@@ -96,21 +102,29 @@ class ProcessesController extends Controller
     {
         $validated = $request->validate($this->rules);
 
-        $nextProcess = OrderStatus::where('name', $request->nextprocess)->first();
+        $nextProcess = OrderStatus::where('name', $request->nextProcess)->first();
         $role = Role::where('name', $request->role)->first();
-        $smsTemplate = SmsTemplate::where('name', $request->smstemplate)->first();
-        $emailTemplate = EmailTemplate::where('name', $request->emailtemplate)->first();
+        $teamSmsTemplate = SmsTemplate::where('name', $request->smsTemplate)->first();
+        $teamEmailTemplate = EmailTemplate::where('name', $request->emailTemplate)->first();
+        $customerSmsTemplate = SmsTemplate::where('name', $request->customerSmsTemplate)->first();
+        $customerEmailTemplate = EmailTemplate::where('name', $request->customerEmailTemplate)->first();
 
         OrderStatus::create([
             'role_id' => $role->id,
             'name' => $request->name,
             'description' => $request->description,
-            'sms_template_id' => $smsTemplate->id,
-            'email_template_id' => $emailTemplate->id,
-            'next_process' => $nextProcess->id,
+            'sms_template_id' => $teamSmsTemplate->id,
+            'email_template_id' => $teamEmailTemplate->id,
+            'next_process' => $nextProcess->id ?? null,
+            'sms_team' => $request->smsTeam,
+            'email_team' => $request->emailTeam,
+            'sms_customer' => $request->smsCustomer,
+            'email_customer' => $request->emailCustomer,
+            'customer_sms_template_id' => $customerSmsTemplate->id ?? null,
+            'customer_email_template_id' => $customerEmailTemplate->id ?? null,
         ]);
 
-        return redirect()->route('processes')->with('note', 'Process Registered');
+        return redirect()->route('processes')->with('note', $request->name . 'Process Registered');
     }
 
     private function getProcess($id)
@@ -124,6 +138,12 @@ class ProcessesController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['emailTemplate' => function($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['customerSmsTemplate' => function($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['customerEmailTemplate' => function($query){
             $query->select('id', 'name');
         }]);
         $query->with(['nextProcess' => function($query){
@@ -164,22 +184,30 @@ class ProcessesController extends Controller
         }
         $request->validate($this->rules);
 
-        $nextProcess = OrderStatus::where('name', $request->nextprocess)->first();
+        $nextProcess = OrderStatus::where('name', $request->nextProcess)->first();
         $role = Role::where('name', $request->role)->first();
-        $smsTemplate = SmsTemplate::where('name', $request->smstemplate)->first();
-        $emailTemplate = EmailTemplate::where('name', $request->emailtemplate)->first();
+        $smsTemplate = SmsTemplate::where('name', $request->smsTemplate)->first();
+        $emailTemplate = EmailTemplate::where('name', $request->emailTemplate)->first();
+        $customerSmsTemplate = SmsTemplate::where('name', $request->customerSmsTemplate)->first();
+        $customerEmailTemplate = EmailTemplate::where('name', $request->customerEmailTemplate)->first();
 
 
         // Save changes
         $process->name = $request->name;
         $process->description = $request->description;
-        $process->team = $role->id;
+        $process->role_id = $role->id;
         $process->sms_template_id = $smsTemplate->id;
         $process->email_template_id = $emailTemplate->id;
-        $process->next_process = $nextProcess->id;
+        $process->next_process = $nextProcess->id ?? null;
+        $process->sms_team = $request->smsTeam;
+        $process->email_team = $request->emailTeam;
+        $process->sms_customer = $request->smsCustomer;
+        $process->email_customer = $request->emailCustomer;
+        $process->customer_sms_template_id = $customerSmsTemplate->id ?? null;
+        $process->customer_email_template_id = $customerEmailTemplate->id ?? null;
         $process->save();
 
-        return redirect()->route('process.view')->with('note', 'Updated.');
+        return redirect()->route('process.view', $process->id)->with('note', 'Updated.');
     }
 
     public function delete(Request $request)

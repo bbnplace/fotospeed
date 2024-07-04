@@ -2,7 +2,7 @@
     <Head title="Register Staff"></Head>
     <BackendLayout>
         <Centralize snippetTitle="Register Staff">
-            <UserEditor userType="Reception"></UserEditor>
+            <StaffEditor></StaffEditor>
         </Centralize>
     </BackendLayout>
 </template>
@@ -11,7 +11,7 @@
 import { usePage, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Centralize from "@/Layouts/Shared/Centralize.vue";
-import UserEditor from "@/Components/Editors/UserEditor.vue";
+import StaffEditor from "@/Components/Editors/StaffEditor.vue";
 </script>
 
 <style lang="scss" scoped>

@@ -36,6 +36,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/staff', [StaffController::class, 'index'])->name('staff');
     Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
     Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
+    Route::post('panel/staff/add', [StaffController::class, 'store'])->name('staff.add');
     Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
     Route::put('panel/staff/{id}/edit', [StaffController::class, 'update'])->name('staff.edit');
     Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');

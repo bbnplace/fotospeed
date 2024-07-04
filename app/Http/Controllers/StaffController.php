@@ -2,13 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
+use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class StaffController extends Controller
 {
+    protected $rules = [
+        'name' => 'required|string|min:5|max:64',
+        'mobile' => 'required|numeric|digits_between:7,16|unique:users,mobile',
+        'email' => 'required|string|email:rfc,dns|unique:users,email',
+        'branch' => 'required|string|min:5|max:64|exists:branches,name',
+        'role' => 'required|string|min:5|max:64|exists:roles,name',
+        'password' => 'required|string|min:8|max:64|confirmed',
+        'password_confirmation' => 'required',
+    ];
+
     public function index()
     {
         return Inertia::render('Backend/Staff/List', [
@@ -69,8 +82,33 @@ class StaffController extends Controller
     public function add()
     {
         return Inertia::render('Backend/Staff/Add', [
-            'states' => State::getStatesArray()
+            'states' => State::getStatesArray(),
+            'branches' => Branch::getBranchesArray(),
+            'roles' => Role::getRolesArray(),
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate($this->rules);
+
+        $role = Role::where('name', $request->role)->first();
+        $branch = Branch::where('name', $request->branch)->first();
+        // $state = State::where('name', $request->state)->first();
+
+        User::create([
+            'role_id' => $role->id,
+            'name' => $request->name,
+            'email' => $request->email,
+            'mobile' => $request->mobile,
+            'state_id' => $branch->state_id,
+            'password' => Hash::make($request->password),
+            'branch_id' => $branch->id,
+        ]);
+
+        // TODO: Send login link to the customer's mobile number and email.
+
+        return redirect()->route('staff')->with('status', 'Account Created');
     }
 
     private function getStaffInfo($id)
@@ -83,11 +121,16 @@ class StaffController extends Controller
         $query->with(['state' => function ($query) {
             $query->select('id', 'name');
         }]);
+        $query->with(['branch' => function ($query) {
+            $query->select('id', 'name');
+        }]);
         $user = $query->first();
 
         return [
             'states' => State::getStatesArray(),
-            'staff' => $user
+            'staff' => $user,
+            'branches' => Branch::getBranchesArray(),
+            'roles' => Role::getRolesArray(),
         ];
     }
 
@@ -103,6 +146,37 @@ class StaffController extends Controller
 
     public function update(Request $request, $id)
     {
+        $rules = [
+            'name' => 'required|string|min:5|max:64',
+            'mobile' => 'required|numeric|digits_between:7,16|exists:users,mobile',
+            'email' => 'required|string|email:rfc,dns|exists:users,email',
+            'branch' => 'required|string|min:5|max:64|exists:branches,name',
+            'role' => 'required|string|min:5|max:64|exists:roles,name',
+            'password' => 'nullable|string|min:8|max:64|confirmed',
+            'password_confirmation' => 'nullable',
+        ];
+
+        $request->validate($rules);
+
+        // Find user with the submitted ID
+        $role = Role::where('name', $request->role)->first();
+        $branch = Branch::where('name', $request->branch)->first();
+
+        $user = User::where('id', $id)->where('mobile', $request->mobile)->first();
+        $user->role_id = $role->id;
+        $user->branch_id = $branch->id;
+        $user->state_id = $branch->state_id;
+        $user->name = $request->name;
+
+        if (!empty($request->password)) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        // TODO: Send login link to the customer's mobile number and email.
+
+        return redirect()->route('staff.view', [$user->id])->with('status', 'Staff Data Updated');
 
     }
 

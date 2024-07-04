@@ -13,6 +13,6 @@ import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import ProcessEditor from "@/Components/Editors/ProcessEditor.vue";
 
-const process = usePage().props.processes;
+const process = usePage().props.process;
 
 </script>

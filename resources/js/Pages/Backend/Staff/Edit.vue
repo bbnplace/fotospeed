@@ -2,7 +2,7 @@
     <Head title="Update Staff Info"></Head>
     <BackendLayout>
         <Centralize snippetTitle="Update Staff Info">
-            <UserEditor :userType="staff.role.name" :user="staff"></UserEditor>
+            <StaffEditor :user="staff"></StaffEditor>
         </Centralize>
     </BackendLayout>
 </template>
@@ -11,7 +11,7 @@
 import { usePage, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Centralize from "@/Layouts/Shared/Centralize.vue";
-import UserEditor from "@/Components/Editors/UserEditor.vue";
+import StaffEditor from "@/Components/Editors/StaffEditor.vue";
 
 const staff = usePage().props.staff
 

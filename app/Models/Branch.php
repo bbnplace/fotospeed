@@ -19,4 +19,15 @@ class Branch extends Model
     {
         return $this->belongsTo(State::class);
     }
+
+    public static function getBranchesArray()
+    {
+        $branches = self::orderBy('name', 'asc')->get();
+        $branchesArray = [];
+        foreach ($branches as $branch) {
+            array_push($branchesArray, $branch->name);
+        }
+
+        return $branchesArray;
+    }
 }

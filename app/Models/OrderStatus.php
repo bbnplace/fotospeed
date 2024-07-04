@@ -15,7 +15,13 @@ class OrderStatus extends Model
         'role_id',
         'sms_template_id',
         'email_template_id',
-        'next_process'
+        'next_process',
+        'sms_team',
+        'email_team',
+        'sms_customer',
+        'email_customer',
+        'customer_sms_template_id',
+        'customer_email_template_id',
     ];
 
     public $timestamps = false;
@@ -40,9 +46,19 @@ class OrderStatus extends Model
         return $this->belongsTo(EmailTemplate::class);
     }
 
+    public function customerSmsTemplate()
+    {
+        return $this->belongsTo(SmsTemplate::class);
+    }
+
+    public function customerEmailTemplate()
+    {
+        return $this->belongsTo(EmailTemplate::class);
+    }
+
     public function nextProcess()
     {
-        return $this->belongsTo(OrderStatus::class);
+        return $this->belongsTo(OrderStatus::class, 'next_process');
     }
 
     public static function getOrderStatusesArray()
