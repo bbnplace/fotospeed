@@ -21,8 +21,8 @@ class UserSeeder extends Seeder
             'mobile' => '08183172770',
             'email' => 'admin@indigoafrica.net',
             'password' => Hash::make('pass1234'),
-            // 'state_id' => 1,
-            // 'role_id' => 6,
+            'state_id' => 1,
+            'role_id' => 6,
         ]);
     }
 }

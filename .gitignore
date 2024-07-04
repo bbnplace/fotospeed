@@ -18,3 +18,6 @@ yarn-error.log
 /.vscode
 /test.php
 /Credentials.md
+/.env.clone
+/dev.sql
+/storage
