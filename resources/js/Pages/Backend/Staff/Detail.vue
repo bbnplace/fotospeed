@@ -3,12 +3,15 @@
     <BackendLayout>
         <Centralize :snippet-title="staff.name">
             <VRow>
-                <VCol cols="6">Staff Name<br />{{ staff.name }}</VCol>
-                <VCol cols="6">State<br />{{ staff.state.name }}</VCol>
+                <VCol cols="6"><b>Staff Name</b><br />{{ staff.name }}</VCol>
+                <VCol cols="6"><b>Branch</b><br />{{ staff.branch.name }}, {{ staff.state.name }}</VCol>
             </VRow>
             <VRow>
-                <VCol cols="6">Email<br />{{ staff.email }}</VCol>
-                <VCol cols="6">Mobile<br />{{ staff.mobile }}</VCol>
+                <VCol cols="6"><b>Email</b><br />{{ staff.email }}</VCol>
+                <VCol cols="6"><b>Mobile</b><br />{{ staff.mobile }}</VCol>
+            </VRow>
+            <VRow>
+                <VCol cols="6"><b>Department</b><br />{{ staff.role.name }}</VCol>
             </VRow>
             <div class="mt-3">
                 <Link :href="route('staff.edit', staff.id)" class="btn btn-secondary">Modify</Link>

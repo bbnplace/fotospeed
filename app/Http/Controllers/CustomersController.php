@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class CustomersController extends Controller
 {
+
     public function index()
     {
         return Inertia::render('Backend/Customer/List', [
@@ -102,7 +105,35 @@ class CustomersController extends Controller
 
     public function update(Request $request, $id)
     {
+        $rules = [
+            'name' => 'required|string|min:5|max:64',
+            'mobile' => 'required|numeric|digits_between:7,16|exists:users,mobile',
+            'email' => 'required|string|email:rfc,dns|exists:users,email',
+            'state' => 'required|string|min:1|max:64|exists:states,name',
+            'password' => 'nullable|string|min:8|max:64|confirmed',
+            'password_confirmation' => 'nullable',
+            'role' => 'required|string|min:5|max:64|exists:roles,name',
+        ];
 
+        $request->validate($rules);
+
+        $role = Role::where('name', $request->role)->first();
+        $state = State::where('name', $request->state)->first();
+
+        $user = User::where('id', $id)->where('mobile', $request->mobile)->first();
+        $user->role_id = $role->id;
+        $user->state_id = $state->id;
+        $user->name = $request->name;
+
+        if (!empty($request->password)) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        // TODO: Send login link to the customer's mobile number and email.
+
+        return redirect()->route('customer.view', [$user->id])->with('status', 'Customer Data Updated');
     }
 
     public function delete(Request $request)

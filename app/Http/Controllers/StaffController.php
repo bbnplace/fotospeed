@@ -150,7 +150,7 @@ class StaffController extends Controller
             'name' => 'required|string|min:5|max:64',
             'mobile' => 'required|numeric|digits_between:7,16|exists:users,mobile',
             'email' => 'required|string|email:rfc,dns|exists:users,email',
-            'branch' => 'required|string|min:5|max:64|exists:branches,name',
+            'branch' => 'required|string|min:2|max:64|exists:branches,name',
             'role' => 'required|string|min:5|max:64|exists:roles,name',
             'password' => 'nullable|string|min:8|max:64|confirmed',
             'password_confirmation' => 'nullable',

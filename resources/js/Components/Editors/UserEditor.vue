@@ -52,6 +52,7 @@
             </VAutocomplete>
         </div>
         <VDivider class="border-opacity-75 my-8"></VDivider>
+        <div v-if="props.user" :style="{color: 'orange', backgroundColor: '#3d3d3d', padding: '5px 10px', borderRadius: '5px'}">Leave the Password fields empty if you do not intend to change the Customer's password.</div>
         <div class="mt-4">
             <VTextField
                 id="password"
@@ -82,7 +83,7 @@
 
         <div class="flex items-center justify-end mt-4">
             <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                Register
+                {{ props.user ? 'Save' : 'Register'}}
             </PrimaryButton>
         </div>
     </form>
@@ -123,9 +124,15 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('user.register'), {
-        // onFinish: () => form.reset('password', 'password_confirmation'),
-    });
+    if (props.user) {
+        form.put(route('customer.edit', [props.user.id]), {
+            // onFinish: () => form.reset('password', 'password_confirmation'),
+        });
+    } else {
+        form.post(route('user.register'), {
+            // onFinish: () => form.reset('password', 'password_confirmation'),
+        });
+    }
 };
 
 

@@ -1,8 +1,8 @@
 <template>
     <Head title="Order"></Head>
     <BackendLayout>
-            <template v-if="orderForm.orderFiles">
-            <VRow>
+        <template>
+            <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
                         :orderImage="orderFile.file"
@@ -14,7 +14,6 @@
                     ></OrderForm>
                 </VCol>
             </VRow>
-
         </template>
     </BackendLayout>
 </template>

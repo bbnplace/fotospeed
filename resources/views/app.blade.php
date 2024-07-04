@@ -2,16 +2,16 @@
 <html lang="en">
     <head>
         <title inertia>{{ config('app.name', 'Indigo OMS') }}</title>
-        {{--  <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-cZNb2Zeu.css">  --}}
+        <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-wSQI8ytw.css">
 
         <!-- Scripts -->
         @routes
-        @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
+        {{--  @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])  --}}
         @inertiaHead
     </head>
     <body>
          @inertia
          <div id="mod"></div>
     </body>
-    {{--  <script src="{{ env('APP_URL') }}/build/assets/app-B4DZ4YKz.js" type="module"></script>  --}}
+    <script src="{{ env('APP_URL') }}/build/assets/app-u7kuxOoz.js" type="module"></script>
 </html>

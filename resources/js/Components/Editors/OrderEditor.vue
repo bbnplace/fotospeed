@@ -4,7 +4,7 @@
             <VBtn
                 color="blue-darken-1"
                 @click="submitOrder"
-            >Save</VBtn>
+            >Submit</VBtn>
         </div>
         <h4 class="mt-3">Select Item</h4>
         <VRow>
@@ -41,7 +41,7 @@
             <VBtn
                 color="blue-darken-1"
                 @click="submitOrder"
-            >Save</VBtn>
+            >Submit</VBtn>
         </div>
         <!-- {{ orderForm.orderFiles }} -->
 </template>
