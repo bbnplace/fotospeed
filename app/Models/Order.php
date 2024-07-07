@@ -18,6 +18,10 @@ class Order extends Model
         'date',
         'month',
         'year',
+        'name',
+        'note',
+        'delivery_date',
+        'branch_id'
     ];
 
     public function user()
@@ -33,5 +37,10 @@ class Order extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

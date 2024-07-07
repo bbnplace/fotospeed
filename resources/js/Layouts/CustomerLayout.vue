@@ -13,7 +13,7 @@ const menus = [
         links: [
             {
                 icon: "mdi-cart-variant",
-                name: "Orders",
+                name: "My Orders",
                 route: "orders"
             },
             {

@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\CustomerOrdersController;
+use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\FileUploadsController;
 use App\Http\Controllers\FileDownloadsController;
 use App\Http\Controllers\NotificationsController;
@@ -48,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/create-order', [OrdersController::class, 'store'])->name('order.add');
     Route::get('/order/{id}', [OrdersController::class, 'view'])->name('order.view');
     Route::get('/order/{id}/edit', [OrdersController::class, 'edit'])->name('order.edit');
+    Route::put('/order/{id}/edit', [OrdersController::class, 'update'])->name('order.edit');
     Route::delete('/orders/delete', [OrdersController::class, 'delete'])->name('orders.delete');
 
     Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
@@ -55,6 +59,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/file/download', [FileDownloadsController::class, 'download'])->name('file.download');
 
     // Item Categories Management
+    Route::post('/customer/data', [CustomersController::class, 'findByMobile'])->name('customer.find');
+
+    Route::get('/client/home', [CustomerDashboardController::class, 'home'])->name('customer.home');
+    Route::get('/client/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');
+    Route::get('/client/my-orders', [CustomerOrdersController::class, 'index'])->name('customer.my-orders');
+    Route::get('/client/{id}', [CustomerOrdersController::class, 'view'])->name('client.order.view');
+    Route::get('/client/{id}/edit', [CustomerOrdersController::class, 'edit'])->name('client.order.edit');
+    Route::put('/client/{id}/edit', [CustomerOrdersController::class, 'update'])->name('client.order.edit');
+    Route::post('/client/orders', [CustomerDashboardController::class, 'records'])->name('customer.order-records');
 
 });
 

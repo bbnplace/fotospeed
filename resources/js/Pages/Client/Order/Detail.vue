@@ -1,0 +1,42 @@
+<template>
+    <Head title="Order"></Head>
+    <ClientLayout>
+        <template>
+            <VRow v-if="orderForm.orderFiles">
+                <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
+                    <OrderForm
+                        :orderImage="orderFile.file"
+                        view="Detail"
+                        @pageRemoved="removeImage"
+                        @pageDataUpdated="(data) => {
+                            updatePageData(data, orderFile)
+                        }"
+                    ></OrderForm>
+                </VCol>
+            </VRow>
+        </template>
+    </ClientLayout>
+</template>
+
+<script setup>
+import { reactive } from 'vue';
+import { usePage, Head } from "@inertiajs/vue3";
+import ClientLayout from "@/Layouts/ClientLayout.vue";
+import OrderForm from '@/Components/OrderForm.vue';
+
+const orderDetail = usePage().props.orderDetail;
+const orderForm = reactive({
+    orderFiles: orderDetail.files,
+});
+
+const removeImage = data => {
+    for (let index = 0; index < orderForm.orderFiles.length; index++) {
+        const element = orderForm.orderFiles[index];
+
+        if (element.file.id == data.id) {
+            orderForm.orderFiles.splice(index, 1); // Main Line
+        }
+    }
+}
+</script>
+

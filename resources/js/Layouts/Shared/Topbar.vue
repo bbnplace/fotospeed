@@ -248,9 +248,7 @@ import { usePage, useForm, Link } from  '@inertiajs/vue3';
 const userProps = usePage().props.auth.user;
 const name = userProps.name;
 
-const form = useForm({
-
-})
+const form = useForm({})
 const submitForm = () => {
     form.post(route('logout'));
 }

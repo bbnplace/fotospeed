@@ -6,9 +6,6 @@
 
 <script setup>
 import AuthenticatedLayout from './AuthenticatedLayout.vue';
-import { usePage } from '@inertiajs/vue3';
-
-const role = usePage().props.auth.user.role;
 
 const menus = [
     {

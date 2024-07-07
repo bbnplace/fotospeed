@@ -144,4 +144,14 @@ class CustomersController extends Controller
             return redirect()->route('customers')->with('note', 'Selected customers have been deleted');
         }
     }
+
+
+    public function findByMobile(Request $request)
+    {
+        return User::where('mobile', $request->mobile)->first([
+            'name',
+            'email',
+            'mobile'
+        ]);
+    }
 }

@@ -90,6 +90,26 @@ let loading = ref(false);
 const search = ref("");
 const pageNo = ref(1);
 
+// const actions = {
+//     edit: true,
+//     delete: true,
+//     view: true
+// }
+
+// if(props.actions != undefined) {
+//     if (props.actions.edit != undefined) {
+//         actions.edit = props.actions.edit
+//     }
+
+//     if (props.actions.view != undefined) {
+//         actions.view = props.actions.view
+//     }
+
+//     if (props.actions.delete != undefined) {
+//         actions.delete = props.actions.delete
+//     }
+// }
+
 // Function for loading and filtering records from datasource
 let source = null;
 const loadRecords = async ({page, itemsPerPage, sortBy}) => {

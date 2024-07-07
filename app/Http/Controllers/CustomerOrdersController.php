@@ -8,12 +8,11 @@ use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
-class OrdersController extends Controller
+class CustomerOrdersController extends Controller
 {
     protected $rules = [
         'item' => 'string|required|exists:items,name|min:2|max:64',
@@ -23,13 +22,14 @@ class OrdersController extends Controller
         'name' => 'string|required|min:3|max:32',
         'note' => 'string|nullable|max:2000',
         'date' => 'string|nullable|max:64',
-        'delivery_date' => 'string'
+        'delivery_date' => 'string',
+        'branch' => 'string|required|exists:branches,name',
     ];
 
     public function index()
     {
-        return Inertia::render('Backend/Order/List', [
-            'endpoint' => route('order.records'),
+        return Inertia::render('Client/Order/List', [
+            'endpoint' => route('customer.order-records'),
             'note' => session('note')
         ]);
     }
@@ -45,6 +45,7 @@ class OrdersController extends Controller
         $search = $request->search;
 
         $query = Order::query();
+        $query->where('user_id', auth()->user()->id);
         $query->with(['user' => function ($query){
             $query->select('id', 'name');
         }]);
@@ -80,6 +81,7 @@ class OrdersController extends Controller
         ];
     }
 
+
     private function getMinAndMaxDeliveryDate ()
     {
         $twoDaysTime = 3600 * 24 * 2;
@@ -95,12 +97,12 @@ class OrdersController extends Controller
     {
 
         // TODO: Define a setting that will allow Administrator to setup the minimum delivery date.
-        return Inertia::render('Backend/Order/Add', [
+        return Inertia::render('Client/Order/Add', [
             'items' => Item::getItemsArray(),
+            'branches' => Branch::getBranchesArray(),
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
-            'branches' => Branch::getBranchesArray(),
         ]);
     }
 
@@ -120,6 +122,7 @@ class OrdersController extends Controller
             }
         }
 
+        // Get Branch
         $branch = Branch::where('name', $request->branch)->first();
 
         Order::create([
@@ -137,10 +140,9 @@ class OrdersController extends Controller
             'delivery_date' => $request->date,
         ]);
 
-        $additionalMsg = $role->name == 'Customer' ? "You will receive invoice shortly." :  "";
-        return redirect(route(($role->name == 'Customer' ? 'customer.my-orders' : 'orders')))
-            ->with('note', 'Order Submitted.' . $additionalMsg);
+        return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');
     }
+
 
     private function getOrder($id)
     {
@@ -169,14 +171,10 @@ class OrdersController extends Controller
             }
         }
 
-        $nextProcess = OrderStatus::where('id', $order->orderStatus->next_process)->first(['name']);
-
         return [
             'order' => $order,
-            'nextProcess' => $nextProcess->name ?? null,
             'orderDetail' => $orderDetail,
             'items' => Item::getItemsArray(),
-            'branches' => Branch::getBranchesArray(),
             'orderStatuses' => OrderStatus::getOrderStatusesArray(),
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
@@ -186,62 +184,11 @@ class OrdersController extends Controller
 
     public function edit($id)
     {
-        return Inertia::render('Backend/Order/Edit', $this->getOrder($id));
+        return Inertia::render('Client/Order/Edit', $this->getOrder($id));
     }
 
     public function view($id)
     {
-        return Inertia::render('Backend/Order/Detail', $this->getOrder($id));
+        return Inertia::render('Client/Order/Detail', $this->getOrder($id));
     }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate($this->rules);
-
-        // Get Item ID
-        $item = Item::where('name', $request->item)->first();
-        // Get user role
-        $role = Role::where('id', auth()->user()->role_id)->first();
-        if (!empty($request->customerMobile) && $role->name != 'Customer') {
-            $customerData = User::where('mobile', $request->customerData)->first();
-            if (empty($customerData)) {
-                // Return with validation error
-            }
-        }
-
-        $order = Order::where('id', $id)->first();
-
-        if (empty($order)) {
-            return redirect(route('orders'));
-        }
-
-        $branch = Branch::where('name', $request->branch)->first();
-
-        // TODO: If this update is made by receptionist or management, check for price change and notify customer of the bill
-        $order->name = $request->name;
-        $order->note = $request->note;
-        $order->item_id = $item->id;
-        $order->branch_id = $branch->id;
-        $order->order_status_id = 1;
-        $order->detail = json_encode($request->all());
-        $order->delivery_date = $request->date;
-
-        if (!in_array($role->name, ['Customer', 'Production'])) {
-            $order->total_cost = $request->price;
-        }
-
-        $order->save();
-
-        return redirect(route('orders'))->with('note', 'Order Updated');
-    }
-
-    public function delete(Request $request)
-    {
-        if (!empty($request->ids)) {
-            Order::whereIn('id', $request->ids)->delete();
-
-            return redirect()->route('orders')->with('note', 'Selected orders have been deleted');
-        }
-    }
-
 }

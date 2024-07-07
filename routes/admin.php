@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\ItemsController;
+use App\Http\Controllers\JobProcessTransferController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProcessesController;
@@ -129,6 +130,7 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::put('panel/process/{id}/edit', [ProcessesController::class, 'update'])->name('process.edit');
     Route::get('panel/process/{id}', [ProcessesController::class, 'view'])->name('process.view');
     Route::delete('panel/processes/delete', [ProcessesController::class, 'delete'])->name('processes.delete');
+    Route::post('panel/forward', [JobProcessTransferController::class, 'forward'])->name('process.forward');
 
     // Roles Management
     Route::get('panel/roles', [RolesController::class, 'index'])->name('roles');

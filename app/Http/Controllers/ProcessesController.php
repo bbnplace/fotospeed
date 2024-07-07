@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmailTemplate;
+use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\SmsTemplate;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -113,8 +115,8 @@ class ProcessesController extends Controller
             'role_id' => $role->id,
             'name' => $request->name,
             'description' => $request->description,
-            'sms_template_id' => $teamSmsTemplate->id,
-            'email_template_id' => $teamEmailTemplate->id,
+            'sms_template_id' => $teamSmsTemplate->id ?? null,
+            'email_template_id' => $teamEmailTemplate->id ?? null,
             'next_process' => $nextProcess->id ?? null,
             'sms_team' => $request->smsTeam,
             'email_team' => $request->emailTeam,
@@ -124,7 +126,7 @@ class ProcessesController extends Controller
             'customer_email_template_id' => $customerEmailTemplate->id ?? null,
         ]);
 
-        return redirect()->route('processes')->with('note', $request->name . 'Process Registered');
+        return redirect()->route('processes')->with('note', $request->name . ' Process Registered');
     }
 
     private function getProcess($id)
@@ -196,8 +198,8 @@ class ProcessesController extends Controller
         $process->name = $request->name;
         $process->description = $request->description;
         $process->role_id = $role->id;
-        $process->sms_template_id = $smsTemplate->id;
-        $process->email_template_id = $emailTemplate->id;
+        $process->sms_template_id = $smsTemplate->id ?? null;
+        $process->email_template_id = $emailTemplate->id ?? null;
         $process->next_process = $nextProcess->id ?? null;
         $process->sms_team = $request->smsTeam;
         $process->email_team = $request->emailTeam;
@@ -217,5 +219,20 @@ class ProcessesController extends Controller
 
             return redirect()->route('processes')->with('note', 'Selected processes have been deleted');
         }
+    }
+
+    
+
+    public function cancel(Request $request)
+    {
+        $order = Order::where('id', $request->orderId)->first();
+        $orderStatus = OrderStatus::where('name', 'Cancelled')->first();
+
+        $order->order_status_id = $orderStatus->id;
+        $order->save();
+
+        return [
+            'status' => 'Cancelled and Closed',
+        ];
     }
 }

@@ -1,7 +1,12 @@
 <template>
     <Head title="Order"></Head>
     <BackendLayout>
-        <template>
+        <Panel>
+            <VRow>
+                <VCol cols="12" md="6">
+                    {{ orderDetail.customerData.name }}'s Order
+                </VCol>
+            </VRow>
             <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
@@ -14,16 +19,68 @@
                     ></OrderForm>
                 </VCol>
             </VRow>
-        </template>
+        </Panel>
+
+        <Panel>
+            <VRow class="mt-5">
+            <VCol cols="12" md="6">
+                <VRow >
+                    <VCol>
+                        {{ orderDetail.customerData.name }}
+                        {{ orderDetail.customerMobile}}
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
+                        <b>Branch</b><br />
+                        {{ order.branch.name }}
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
+                        <b>Order Name</b><br />
+                        {{ orderDetail.name }}
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
+                        <b>Note</b><br />
+                        {{ orderDetail.note }}
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol cols="12" sm="6" v-if="$page.props.auth.user.role != 'Customer'">
+                        <b>Price</b><br />
+                        {{ orderDetail.price }}
+                    </VCol>
+                </VRow>
+            </VCol>
+
+            <VCol cols="12" md="6">
+                <b>Delivery Date</b><br />
+                {{ orderDetail.date }}
+            </VCol>
+        </VRow>
+        <VRow v-if="$page.props.nextProcess != 'Completed' && $page.props.nextProcess != 'Camcelled'">
+            <VCol>
+                <VBtn
+                    color="blue-darken-1"
+                    @click="submitOrder"
+                >Forward To {{ $page.props.nextProcess }}</VBtn>
+            </VCol>
+        </VRow>
+        </Panel>
     </BackendLayout>
 </template>
 
 <script setup>
 import { reactive } from 'vue';
-import { usePage, Head } from "@inertiajs/vue3";
+import { usePage, useForm, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import OrderForm from '@/Components/OrderForm.vue';
+import Panel from '@/Layouts/Shared/Panel.vue';
 
+const order = usePage().props.order;
 const orderDetail = usePage().props.orderDetail;
 const orderForm = reactive({
     orderFiles: orderDetail.files,
@@ -37,6 +94,14 @@ const removeImage = data => {
             orderForm.orderFiles.splice(index, 1); // Main Line
         }
     }
+}
+
+const form = useForm({
+    orderId: order.id
+});
+
+const submitOrder = () => {
+    form.post(route('process.forward'));
 }
 </script>
 
