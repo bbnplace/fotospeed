@@ -24,6 +24,7 @@ class CustomerOrdersController extends Controller
         'date' => 'string|nullable|max:64',
         'delivery_date' => 'string',
         'branch' => 'string|required|exists:branches,name',
+        'deliveryAddress' => 'string|nullable|max:200',
     ];
 
     public function index()
@@ -138,6 +139,7 @@ class CustomerOrdersController extends Controller
             'month' => date("n"),
             'year' => date("Y"),
             'delivery_date' => $request->date,
+            'delivery_address' => $request->deliveryAddress,
         ]);
 
         return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');

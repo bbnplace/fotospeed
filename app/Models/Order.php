@@ -21,7 +21,8 @@ class Order extends Model
         'name',
         'note',
         'delivery_date',
-        'branch_id'
+        'branch_id',
+        'delivery_address',
     ];
 
     public function user()

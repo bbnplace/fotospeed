@@ -63,7 +63,11 @@
         </VRow>
         <VRow v-if="$page.props.nextProcess != 'Completed' && $page.props.nextProcess != 'Camcelled'">
             <VCol>
-                <VBtn
+                <VBtn v-if="$page.props.nextProcess == 'Billing'"
+                    color="blue-darken-1"
+                    @click="submitOrder"
+                >Send Invoice</VBtn>
+                <VBtn v-else
                     color="blue-darken-1"
                     @click="submitOrder"
                 >Forward To {{ $page.props.nextProcess }}</VBtn>

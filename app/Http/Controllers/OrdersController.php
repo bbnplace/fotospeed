@@ -23,7 +23,8 @@ class OrdersController extends Controller
         'name' => 'string|required|min:3|max:32',
         'note' => 'string|nullable|max:2000',
         'date' => 'string|nullable|max:64',
-        'delivery_date' => 'string'
+        'delivery_date' => 'string',
+        'deliveryAddress' => 'string|nullable|max:200'
     ];
 
     public function index()
@@ -135,6 +136,7 @@ class OrdersController extends Controller
             'month' => date("n"),
             'year' => date("Y"),
             'delivery_date' => $request->date,
+            'delivery_address' => $request->deliveryAddress,
         ]);
 
         $additionalMsg = $role->name == 'Customer' ? "You will receive invoice shortly." :  "";
@@ -222,9 +224,9 @@ class OrdersController extends Controller
         $order->note = $request->note;
         $order->item_id = $item->id;
         $order->branch_id = $branch->id;
-        $order->order_status_id = 1;
         $order->detail = json_encode($request->all());
         $order->delivery_date = $request->date;
+        $order->delivery_address = $request->deliveryAddress;
 
         if (!in_array($role->name, ['Customer', 'Production'])) {
             $order->total_cost = $request->price;
@@ -232,7 +234,7 @@ class OrdersController extends Controller
 
         $order->save();
 
-        return redirect(route('orders'))->with('note', 'Order Updated');
+        return redirect(route(($role->name == 'Customer' ? 'customer.my-orders' : 'orders')))->with('note', 'Order Updated');
     }
 
     public function delete(Request $request)

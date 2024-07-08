@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\OrderStatus;
+use App\Models\InvoiceStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class OrderStatusesSeeder extends Seeder
+class InvoiceStatusSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,11 +16,11 @@ class OrderStatusesSeeder extends Seeder
         $statuses = [
             [
                 'id' => 1,
-                'name' => 'New'
+                'name' => 'Unpaid'
             ],
             [
                 'id' => 2,
-                'name' => 'Completed'
+                'name' => 'Paid'
             ],
             [
                 'id' => 3,
@@ -29,7 +29,7 @@ class OrderStatusesSeeder extends Seeder
         ];
 
         foreach ($statuses as $status) {
-            OrderStatus::create($status);
+            InvoiceStatus::create($status);
         }
     }
 }

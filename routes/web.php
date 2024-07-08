@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AutoLoginController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerOrdersController;
@@ -38,6 +39,8 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/al/{token}', [AutoLoginController::class, 'autoLogin'])->name('auto.login');
 
 
 Route::middleware('auth')->group(function () {

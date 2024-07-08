@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\User;
+use AshAllenDesign\ShortURL\Facades\ShortURL;
 use CeculaSyncApiClient\SyncAccount;
 use CeculaSyncApiClient\SyncSms;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+use Ramsey\Uuid\Uuid;
 
 class JobProcessTransferController extends Controller
 {
@@ -14,6 +19,7 @@ class JobProcessTransferController extends Controller
     private $order;
     private $nextProcess;
     private $team;
+    private $autoSignInUrl;
 
     public function forward(Request $request)
     {
@@ -25,6 +31,20 @@ class JobProcessTransferController extends Controller
 
         // Get the Team for the Next Process
         $this->team = User::where('branch_id', $this->order->branch_id)->where('role_id', $this->nextProcess->role_id)->get();
+
+        if ($this->nextProcess->name == "Billing") {
+            // Generate Unique temporary token to enable the user automatically sign in to make payment
+            $this->generateAndShortenSignedUrl();
+
+            // Generate Invoice Record for the user
+            $invoice = Invoice::create([
+                'user_id' => $this->customer->id,
+                'order_id' => $this->order->id,
+                'track_id' => (string) Uuid::uuid4(),
+                'invoice_status_id' => 1, // 1 Represents Unpaid
+                'description' => 'Invoice for Order ' . $this->order->name
+            ]);
+        }
 
         // Get Team SMS for the Next Process
         if ($this->nextProcess->sms_team) {
@@ -48,6 +68,9 @@ class JobProcessTransferController extends Controller
         $this->order->order_status_id = $this->nextProcess->id;
         $this->order->save();
 
+        if ($this->nextProcess->name == 'Billing') {
+            return redirect(route('order.view', [$request->orderId]))->with('note', 'Invoice link Sent');
+        }
         return redirect(route('order.view', [$request->orderId]))->with('note', 'Order moved to ' . $this->nextProcess->name);
     }
 
@@ -62,7 +85,6 @@ class JobProcessTransferController extends Controller
             }
             $this->sendSms($teamSms, $contacts);
         }
-
     }
 
     private function sendCustomerSms()
@@ -76,6 +98,8 @@ class JobProcessTransferController extends Controller
 
         // TODO: Prepare and send sms notification to customer
         $message = $this->prepareSms($smsTemplate);
+
+        // dd($message);
 
         // $syncAccount = new SyncAccount();
         // dd($syncAccount->getCeculaBalance());
@@ -116,6 +140,8 @@ class JobProcessTransferController extends Controller
             'customer_email' => $this->customer->email,
             'customer_mobile' => $this->customer->mobile,
             'order_branch' => $this->order->branch->name,
+            'price' => $this->order->total_cost,
+            'invoice_link' => $this->autoSignInUrl,
         ];
     }
 
@@ -132,5 +158,35 @@ class JobProcessTransferController extends Controller
         }
 
         return $message;
+    }
+
+    private function generateSignedUrl()
+    {
+        $user = User::where('id', $this->customer->id)->first();
+        $token = Str::random(60);
+        $user->auto_login_token = $token;
+        $user->auto_login_token_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        // Generate Signed URL
+        return URL::temporarySignedRoute(
+            'auto.login'
+            , now()->addMinutes(10)
+            , [
+                'token' => $token
+            ]
+        );
+    }
+
+    private function shortenUrl($autoSigninUrl)
+    {
+        // Shorten the URL
+        $shortUrlObj = ShortURL::destinationUrl($autoSigninUrl)->make();
+        return $shortUrlObj->default_short_url;
+    }
+
+    private function generateAndShortenSignedUrl()
+    {
+        $this->autoSignInUrl = $this->shortenUrl($this->generateSignedUrl());
     }
 }

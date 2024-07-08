@@ -40,34 +40,7 @@
 
         <VRow class="mt-5">
             <VCol cols="12" md="6">
-                <VRow>
-                    <VCol>
-                        <VAutocomplete
-                            v-model="masterForm.branch"
-                            label="Select Branch"
-                            :items="branches"
-                            variant="outlined"
-                            density="compact"
-                            :hide-details="masterForm.errors.branch == undefined"
-                            :error-messages="masterForm.errors.branch"
-                        ></VAutocomplete>
-                    </VCol>
-                </VRow>
-                <VRow  v-if="$page.props.auth.user.role != 'Customer'">
-                    <VCol>
-                        <VTextField
-                            id="customerMobile"
-                            v-model="masterForm.customerMobile"
-                            label="Customer Mobile"
-                            variant="outlined"
-                            autocomplete="off"
-                            @blur="getCustomerInfo"
-                            :hide-details="masterForm.errors.customerMobile == undefined"
-                            :error-messages="masterForm.errors.customerMobile"
-                        ></VTextField>
-                        {{ masterForm.customerData.name }}
-                    </VCol>
-                </VRow>
+
                 <VRow>
                     <VCol>
                         <VTextField
@@ -106,6 +79,47 @@
                             :hide-details="masterForm.errors.price == undefined"
                             :error-messages="masterForm.errors.price"
                         ></VTextField>
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
+                        <VAutocomplete
+                            v-model="masterForm.branch"
+                            label="Select Branch"
+                            :items="branches"
+                            variant="outlined"
+                            density="compact"
+                            :hide-details="masterForm.errors.branch == undefined"
+                            :error-messages="masterForm.errors.branch"
+                        ></VAutocomplete>
+                    </VCol>
+                </VRow>
+                <VRow  v-if="$page.props.auth.user.role != 'Customer'">
+                    <VCol>
+                        <VTextField
+                            id="customerMobile"
+                            v-model="masterForm.customerMobile"
+                            label="Customer Mobile"
+                            variant="outlined"
+                            autocomplete="off"
+                            @blur="getCustomerInfo"
+                            :hide-details="masterForm.errors.customerMobile == undefined"
+                            :error-messages="masterForm.errors.customerMobile"
+                        ></VTextField>
+                        {{ masterForm.customerData.name }}
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
+                        <VTextarea
+                            id="deliveryAddress"
+                            v-model="masterForm.deliveryAddress"
+                            label="Delivery Address"
+                            variant="outlined"
+                            autocomplete="off"
+                            :hide-details="masterForm.errors.deliveryAddress == undefined"
+                            :error-messages="masterForm.errors.deliveryAddress"
+                        ></VTextarea>
                     </VCol>
                 </VRow>
             </VCol>
@@ -168,7 +182,7 @@ const masterForm = useForm({
     note: props.order ? props.order.note : "",
     btnTag: props.order ? "Save" : "Submit",
     date: new Date((props.order ? props.order.date : "")),
-    timezone: (new Date()).getTimezoneOffset()
+    deliveryAddress: props.order ? props.order.deliveryAddress : ""
 })
 
 const handleData = data => {

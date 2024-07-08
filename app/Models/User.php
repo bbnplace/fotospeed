@@ -27,6 +27,8 @@ class User extends Authenticatable
         'role_id',
         'state_id',
         'branch_id',
+        'auto_login_token_expires_at',
+        'auto_login_token'
     ];
 
     /**
