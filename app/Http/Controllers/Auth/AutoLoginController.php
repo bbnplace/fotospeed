@@ -32,10 +32,9 @@ class AutoLoginController extends Controller
         // Redirect to the intended page or homepage
         // Get list of open invoices.
         $invoices = Invoice::where('user_id', auth()->user()->id)->where('invoice_status_id', 1)->get();
-        dd($invoices->count());
-        if ($invoices->count()) {
-            # code...
+        if ($invoices->count() == 1) {
+            return redirect(route('customer.invoice', [$invoices[0]->id]));
         }
-        return redirect(route('customer.my-orders'));
+        return redirect(route('customer.invoices'));
     }
 }

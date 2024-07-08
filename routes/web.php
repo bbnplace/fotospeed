@@ -37,9 +37,9 @@ Route::get('/', function () {
     return Redirect::route('login');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/al/{token}', [AutoLoginController::class, 'autoLogin'])->name('auto.login');
 

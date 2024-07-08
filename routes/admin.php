@@ -16,8 +16,12 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StatesController;
 use App\Http\Controllers\UserRegistrationController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::middleware(['auth', 'indigo-team'])->group(function (){
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
     // Orders Management Module
     Route::get('panel/orders', [OrdersController::class, 'index'])->name('orders');
