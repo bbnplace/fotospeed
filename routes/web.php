@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AutoLoginController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\CustomerInvoicesController;
 use App\Http\Controllers\CustomerOrdersController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\FileUploadsController;
@@ -65,12 +66,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/customer/data', [CustomersController::class, 'findByMobile'])->name('customer.find');
 
     Route::get('/client/home', [CustomerDashboardController::class, 'home'])->name('customer.home');
-    Route::get('/client/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');
-    Route::get('/client/my-orders', [CustomerOrdersController::class, 'index'])->name('customer.my-orders');
-    Route::get('/client/{id}', [CustomerOrdersController::class, 'view'])->name('client.order.view');
-    Route::get('/client/{id}/edit', [CustomerOrdersController::class, 'edit'])->name('client.order.edit');
-    Route::put('/client/{id}/edit', [CustomerOrdersController::class, 'update'])->name('client.order.edit');
-    Route::post('/client/orders', [CustomerDashboardController::class, 'records'])->name('customer.order-records');
+    Route::get('/client-order/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');
+    Route::get('/client-order/my-orders', [CustomerOrdersController::class, 'index'])->name('customer.my-orders');
+    Route::get('/client-order/{id}', [CustomerOrdersController::class, 'view'])->name('client.order.view');
+    Route::get('/client-order/{id}/edit', [CustomerOrdersController::class, 'edit'])->name('client.order.edit');
+    Route::put('/client-order/{id}/edit', [CustomerOrdersController::class, 'update'])->name('client.order.edit');
+    Route::post('/client-order/orders', [CustomerDashboardController::class, 'records'])->name('customer.order-records');
+
+    // Customer Invoice
+    // Route::get('/client/home', [CustomerInvoiceController::class, 'home'])->name('customer.home');
+    Route::get('/client-invoice/invoices', [CustomerInvoicesController::class, 'index'])->name('customer.invoices');
+    Route::post('/client-invoice/invoices', [CustomerInvoicesController::class, 'records'])->name('customer.invoice-records');
+    Route::get('/client-invoice/invoice/{id}', [CustomerInvoicesController::class, 'view'])->name('customer.invoice');
 
 });
 

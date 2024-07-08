@@ -8,4 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class InvoiceStatus extends Model
 {
     use HasFactory;
+
+    public static function getInvoiceStatusesArray()
+    {
+        $invoiceStatuses = [];
+        $invoiceStatusesCollection = self::get('name');
+        if(!empty($invoiceStatusesCollection))
+        {
+            foreach($invoiceStatusesCollection as $invoiceStatus){
+                array_push($invoiceStatuses, $invoiceStatus->name);
+            }
+        }
+
+        return $invoiceStatuses;
+    }
 }

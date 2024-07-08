@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,12 @@ class AutoLoginController extends Controller
         $user->save();
 
         // Redirect to the intended page or homepage
+        // Get list of open invoices.
+        $invoices = Invoice::where('user_id', auth()->user()->id)->where('invoice_status_id', 1)->get();
+        dd($invoices->count());
+        if ($invoices->count()) {
+            # code...
+        }
         return redirect(route('customer.my-orders'));
     }
 }

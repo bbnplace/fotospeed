@@ -21,11 +21,12 @@
             </VRow>
         </Panel>
 
-        <Panel>
-            <VRow class="mt-5">
+        <Panel snippetTitle="Details">
+            <VRow>
             <VCol cols="12" md="6">
                 <VRow >
                     <VCol>
+                        <b>Client</b><br />
                         {{ orderDetail.customerData.name }}
                         {{ orderDetail.customerMobile}}
                     </VCol>
@@ -66,7 +67,7 @@
                 <VBtn v-if="$page.props.nextProcess == 'Billing'"
                     color="blue-darken-1"
                     @click="submitOrder"
-                >Send Invoice</VBtn>
+                >Issue Invoice</VBtn>
                 <VBtn v-else
                     color="blue-darken-1"
                     @click="submitOrder"

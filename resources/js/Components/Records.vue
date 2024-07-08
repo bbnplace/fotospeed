@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-row-reverse my-3">
+    <div class="d-flex flex-row-reverse my-3" v-if="props.endpoint.add">
         <Link :href="route(props.endpoint.add)" class="btn btn-primary">Add {{ props.name.singular }}</Link>
     </div>
     <div class="d-flex mb-6t">
@@ -17,7 +17,7 @@
 
     </div>
     <div class="flex gap-5 ml-5" v-if="selected.value && selected.value.length > 0">
-        <v-icon
+        <v-icon  v-if="props.endpoint.delete"
             size="small"
             title="Delete"
             @click="showDialog"
@@ -39,14 +39,14 @@
                 @update:options="loadRecords"
                 show-select>
                 <template v-slot:item.actions="{ item }">
-                        <v-icon
+                        <v-icon v-if="props.endpoint.detail"
                             size="small"
                             class="me-2"
                             @click="viewDetail(item)"
                         >
                             mdi-eye
                         </v-icon>
-                        <v-icon
+                        <v-icon v-if="props.endpoint.edit"
                             size="small"
                             class="me-2"
                             @click="editItem(item)"
