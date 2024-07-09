@@ -36,8 +36,10 @@ class SmsTemplatesController extends Controller
             if (!empty($search)) {
                 $searchTerm = $search['_value'];
                 if (!empty($searchTerm)) {
-                   $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm));
-                   $query->where('template', 'LIKE', sprintf('%%%s%%', $searchTerm));
+                   $query->where(function ($query) use ($searchTerm){
+                        $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm))
+                              ->orWhere('template', 'LIKE', sprintf('%%%s%%', $searchTerm));
+                   });
                 }
             }
 

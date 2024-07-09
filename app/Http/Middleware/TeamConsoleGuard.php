@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminPanelGuard
+class TeamConsoleGuard
 {
     /**
      * Handle an incoming request.
@@ -15,10 +15,10 @@ class AdminPanelGuard
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->isAdmin()) {
+        if (auth()->check() && !auth()->user()->isCustomer()) {
             return $next($request);
         }
 
-        return redirect()->route('dashboard.restricted');
+        return redirect()->route('customer.my-orders');
     }
 }

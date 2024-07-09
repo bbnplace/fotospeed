@@ -62,7 +62,7 @@
                 {{ orderDetail.date }}
             </VCol>
         </VRow>
-        <VRow v-if="$page.props.nextProcess != 'Completed' && $page.props.nextProcess != 'Camcelled'">
+        <VRow v-if="$page.props.order.order_status.name != 'Completed' && $page.props.nextProcess != 'Cancelled'">
             <VCol>
                 <VBtn v-if="$page.props.nextProcess == 'Billing'"
                     color="blue-darken-1"

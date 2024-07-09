@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CustomersController;
@@ -18,7 +19,8 @@ use App\Http\Controllers\UserRegistrationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::middleware(['auth', 'indigo-team'])->group(function (){
+
+Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
@@ -34,18 +36,6 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/customer/{id}/edit', [CustomersController::class, 'edit'])->name('customer.edit');
     Route::put('panel/customer/{id}/edit', [CustomersController::class, 'update'])->name('customer.edit');
     Route::get('panel/customer/{id}', [CustomersController::class, 'view'])->name('customer.view');
-    Route::delete('panel/customers/delete', [CustomersController::class, 'delete'])->name('customers.delete');
-
-
-    // Staff Management Module
-    Route::get('panel/staff', [StaffController::class, 'index'])->name('staff');
-    Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
-    Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
-    Route::post('panel/staff/add', [StaffController::class, 'store'])->name('staff.add');
-    Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
-    Route::put('panel/staff/{id}/edit', [StaffController::class, 'update'])->name('staff.edit');
-    Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
-    Route::delete('panel/staff/delete', [StaffController::class, 'delete'])->name('staff.delete');
 
 
     // Messaging Module
@@ -65,25 +55,35 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/group/{id}', [GroupsController::class, 'view'])->name('group.view');
     Route::delete('panel/groups/delete', [GroupsController::class, 'delete'])->name('groups.delete');
 
-    // SMS Template Management Module
-    Route::get('panel/sms-templates', [SmsTemplatesController::class, 'index'])->name('sms-templates');
-    Route::post('panel/sms-templates', [SmsTemplatesController::class, 'records'])->name('sms-templates.records');
-    Route::get('panel/sms-template/add', [SmsTemplatesController::class, 'add'])->name('sms-template.add');
-    Route::post('panel/sms-template/add', [SmsTemplatesController::class, 'store'])->name('sms-template.add');
-    Route::get('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'edit'])->name('sms-template.edit');
-    Route::put('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'update'])->name('sms-template.edit');
-    Route::get('panel/sms-template/{id}', [SmsTemplatesController::class, 'view'])->name('sms-template.view');
-    Route::delete('panel/sms-templates/delete', [SmsTemplatesController::class, 'delete'])->name('sms-templates.delete');
 
-    // Email Template Management Module
-    Route::get('panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
-    Route::post('panel/email-templates', [EmailTemplatesController::class, 'records'])->name('email-templates.records');
-    Route::get('panel/email-template/add', [EmailTemplatesController::class, 'add'])->name('email-template.add');
-    Route::post('panel/email-template/add', [EmailTemplatesController::class, 'store'])->name('email-template.add');
-    Route::get('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'edit'])->name('email-template.edit');
-    Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
-    Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
-    Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
+    // Items Management Module
+    Route::get('panel/items', [ItemsController::class, 'index'])->name('items');
+    Route::post('panel/items', [ItemsController::class, 'records'])->name('items.records');
+    Route::get('panel/item/add', [ItemsController::class, 'add'])->name('item.add');
+    Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
+    Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
+    Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
+    Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
+    Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
+
+    Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
+
+    Route::get('panel/restricted', [PermissionsController::class, 'restrictionNotice'])->name('dashboard.restricted');
+});
+
+
+Route::middleware(['auth', 'admin.only'])->group(function (){
+    Route::delete('panel/customers/delete', [CustomersController::class, 'delete'])->name('customers.delete');
+
+    // Staff Management Module
+    Route::get('panel/staff', [StaffController::class, 'index'])->name('staff');
+    Route::post('panel/staff', [StaffController::class, 'records'])->name('staff.records');
+    Route::get('panel/staff/add', [StaffController::class, 'add'])->name('staff.add');
+    Route::post('panel/staff/add', [StaffController::class, 'store'])->name('staff.add');
+    Route::get('panel/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
+    Route::put('panel/staff/{id}/edit', [StaffController::class, 'update'])->name('staff.edit');
+    Route::get('panel/staff/{id}', [StaffController::class, 'view'])->name('staff.view');
+    Route::delete('panel/staff/delete', [StaffController::class, 'delete'])->name('staff.delete');
 
     // Branch Management Module
     Route::get('panel/states', [StatesController::class, 'index'])->name('states');
@@ -115,16 +115,6 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/category/{id}', [CategoriesController::class, 'view'])->name('category.view');
     Route::delete('panel/categories/delete', [CategoriesController::class, 'delete'])->name('categories.delete');
 
-    // Items Management Module
-    Route::get('panel/items', [ItemsController::class, 'index'])->name('items');
-    Route::post('panel/items', [ItemsController::class, 'records'])->name('items.records');
-    Route::get('panel/item/add', [ItemsController::class, 'add'])->name('item.add');
-    Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
-    Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
-    Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
-    Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
-    Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
-
     // Processes Management Module
     Route::get('panel/processes', [ProcessesController::class, 'index'])->name('processes');
     Route::post('panel/processes', [ProcessesController::class, 'records'])->name('processes.records');
@@ -146,6 +136,24 @@ Route::middleware(['auth', 'indigo-team'])->group(function (){
     Route::get('panel/role/{id}', [RolesController::class, 'view'])->name('role.view');
     Route::delete('panel/roles/delete', [RolesController::class, 'delete'])->name('roles.delete');
 
-    Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
+    // SMS Template Management Module
+    Route::get('panel/sms-templates', [SmsTemplatesController::class, 'index'])->name('sms-templates');
+    Route::post('panel/sms-templates', [SmsTemplatesController::class, 'records'])->name('sms-templates.records');
+    Route::get('panel/sms-template/add', [SmsTemplatesController::class, 'add'])->name('sms-template.add');
+    Route::post('panel/sms-template/add', [SmsTemplatesController::class, 'store'])->name('sms-template.add');
+    Route::get('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'edit'])->name('sms-template.edit');
+    Route::put('panel/sms-template/{id}/edit', [SmsTemplatesController::class, 'update'])->name('sms-template.edit');
+    Route::get('panel/sms-template/{id}', [SmsTemplatesController::class, 'view'])->name('sms-template.view');
+    Route::delete('panel/sms-templates/delete', [SmsTemplatesController::class, 'delete'])->name('sms-templates.delete');
+
+    // Email Template Management Module
+    Route::get('panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
+    Route::post('panel/email-templates', [EmailTemplatesController::class, 'records'])->name('email-templates.records');
+    Route::get('panel/email-template/add', [EmailTemplatesController::class, 'add'])->name('email-template.add');
+    Route::post('panel/email-template/add', [EmailTemplatesController::class, 'store'])->name('email-template.add');
+    Route::get('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'edit'])->name('email-template.edit');
+    Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
+    Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
+    Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
 });
 

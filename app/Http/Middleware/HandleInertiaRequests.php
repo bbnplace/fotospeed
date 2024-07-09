@@ -37,7 +37,7 @@ class HandleInertiaRequests extends Middleware
                 'email' => $userData->email,
                 'mobile' => $userData->mobile,
                 'name' => $userData->name,
-                'branch_id' => $userData->branchId,
+                'branch_id' => $userData->branch_id,
                 'role' => $role->name,
                 'role_ref' => $userData->role_id,
             ];

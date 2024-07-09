@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\JobReceived;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\User;
@@ -23,7 +24,6 @@ class JobProcessTransferController extends Controller
 
     public function forward(Request $request)
     {
-        // TODO: Get the ID of the order
         $this->order = Order::where('id', $request->orderId)->first();
         $this->nextProcess = $this->order->orderStatus->nextProcess;
 
@@ -64,6 +64,7 @@ class JobProcessTransferController extends Controller
         }
 
         // TODO: Send Push Notification to members of the targetted team
+        $this->sendPush();
 
         $this->order->order_status_id = $this->nextProcess->id;
         $this->order->save();
@@ -76,9 +77,9 @@ class JobProcessTransferController extends Controller
 
     private function sendTeamSms()
     {
-        $teamSms = $this->nextProcess->smsTemplate->template;
-        $contacts = [];
-        if (!empty($this->team)) {
+        if ($this->team->count() > 0) {
+            $teamSms = $this->nextProcess->smsTemplate->template;
+            $contacts = [];
             foreach($this->team as $teamMember)
             {
                 array_push($contacts, $teamMember->mobile);
@@ -95,37 +96,60 @@ class JobProcessTransferController extends Controller
 
     private function sendSms(String $smsTemplate, $recipient)
     {
+        if (count($recipient) > 0) {
+            $message = $this->prepareMessage($smsTemplate);
 
-        // TODO: Prepare and send sms notification to customer
-        $message = $this->prepareSms($smsTemplate);
+            $syncAccount = new SyncAccount();
+            // dd($syncAccount->getCeculaBalance());
+            // TODO: If balance is low, notify Admins that the balance on Cecula Sync is low.
 
-        // dd($message);
-
-        // $syncAccount = new SyncAccount();
-        // dd($syncAccount->getCeculaBalance());
-
-        $syncSms = new SyncSms();
-        $response = $syncSms->sendSMS($message, $recipient);
+            $syncSms = new SyncSms();
+            $response = $syncSms->sendSMS($message, $recipient);
+            // TODO: Do something with the response - like maintaining a log for auditing purpose
+        }
     }
 
     private function sendTeamEmail()
     {
-        $teamEmailTemplate = $this->nextProcess->emailTemplate->template;
+        if ($this->team->count() > 0) {
+            $teamEmailTemplate = $this->nextProcess->emailTemplate->template;
+            $emails = [];
+            foreach($this->team as $teamMember)
+            {
+                array_push($emails, $teamMember->email);
+            }
+
+            $this->sendEmail($teamEmailTemplate, $emails);
+        }
     }
 
     private function sendCustomerEmail()
     {
         $customerEmailTemplate = $this->nextProcess->customerEmailTemplate->template;
+        $this->sendEmail($customerEmailTemplate, [$this->customer->email]);
     }
 
-    private function sendEmail(String $template)
+    private function sendEmail(String $emailTemplate, Array $emails)
     {
+        if (count($emails)> 0) {
+            $message = $this->prepareMessage($emailTemplate);
 
+            foreach ($emails as $email)
+            {
+                // TODO: Implement sending of email to each recipient
+            }
+        }
     }
 
     private function sendPush()
     {
-
+        $message = sprintf(
+            "Job %s is now %s%s."
+            , $this->order->name
+            , ($this->nextProcess->name == 'Completed' ? '' : 'ready for ')
+            , $this->nextProcess->name
+        );
+        broadcast(new JobReceived($message, $this->order->branch_id))->toOthers();
     }
 
     private function matchTemplateKeyWithValues()
@@ -145,7 +169,7 @@ class JobProcessTransferController extends Controller
         ];
     }
 
-    private function prepareSms(String $template)
+    private function prepareMessage(String $template)
     {
         $message = $template;
         $templateMatches = $this->matchTemplateKeyWithValues();

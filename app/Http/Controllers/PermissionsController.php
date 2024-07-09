@@ -13,4 +13,11 @@ class PermissionsController extends Controller
 
         ]);
     }
+
+    public function restrictionNotice()
+    {
+        return Inertia::render('AdminOnly', [
+            
+        ]);
+    }
 }

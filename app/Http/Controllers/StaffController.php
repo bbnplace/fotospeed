@@ -43,22 +43,24 @@ class StaffController extends Controller
         $query = User::query();
         $query->whereNot('role_id', 6);
         $query->whereNot('role_id', 1);
+
+        if (!empty($search)) {
+            $searchTerm = $search['_value'];
+            if (!empty($searchTerm)) {
+               $query->where(function($query) use($searchTerm){
+                    $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm))
+                         ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $searchTerm))
+                         ->orWhere('email', 'LIKE', sprintf('%%%s%%', $searchTerm));
+               });
+            }
+        }
+
         $query->with(['role' => function ($query) {
             $query->select('id', 'name');
         }]);
         $query->with(['state' => function ($query) {
             $query->select('id', 'name');
         }]);
-
-
-        if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
-               $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm));
-               $query->where('mobile', 'LIKE', sprintf('%%%s%%', $searchTerm));
-               $query->where('email', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            }
-        }
 
         if (!empty($sortBys)) {
             foreach ($sortBys as $sortBy) {

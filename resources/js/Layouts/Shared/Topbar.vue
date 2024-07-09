@@ -41,14 +41,14 @@
             </button>
 
             <!-- Topbar Search Form -->
-            <div class="app-search dropdown d-none d-lg-block">
+            <!-- <div class="app-search dropdown d-none d-lg-block">
                 <form>
                     <div class="input-group">
                         <input type="search" class="form-control dropdown-toggle" placeholder="Search..." id="top-search">
                         <span class="ri-search-line search-icon"></span>
                     </div>
                 </form>
-            </div>
+            </div> -->
         </div>
 
         <ul class="topbar-menu d-flex align-items-center gap-3">
@@ -241,10 +241,16 @@
         </ul>
     </div>
 </div>
+<Snackbar :data="snackbarOption"></Snackbar>
 </template>
 
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { usePage, useForm, Link } from  '@inertiajs/vue3';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
+
 const userProps = usePage().props.auth.user;
 const name = userProps.name;
 
@@ -252,6 +258,32 @@ const form = useForm({})
 const submitForm = () => {
     form.post(route('logout'));
 }
+
+window.Pusher = Pusher;
+
+const echo = new Echo({
+  broadcaster: 'pusher',
+  key: import.meta.env.VITE_PUSHER_APP_KEY,
+  cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+  encrypted: true,
+});
+
+const message = ref(null);
+
+onMounted(() => {
+    const branchId = usePage().props.auth.user.branch_id;
+    echo.private(`notify.${branchId}`)
+        .listen('JobReceived', (e) => {
+            // message.value = e.message;
+            console.log(e.message); // Handle the received message
+            showSnackbar(e.message);
+        });
+});
+
+onBeforeUnmount(() => {
+    const branchId = usePage().props.auth.user.branch_id;
+    echo.private(`notify.${branchId}`).stopListening('JobReceived');
+});
 </script>
 
 <style lang="scss" scoped>
