@@ -271,18 +271,24 @@ const echo = new Echo({
 const message = ref(null);
 
 onMounted(() => {
+    // Listening for branch event as message is passed through different processing stages.
     const branchId = usePage().props.auth.user.branch_id;
     echo.private(`notify.${branchId}`)
         .listen('JobReceived', (e) => {
-            // message.value = e.message;
-            console.log(e.message); // Handle the received message
             showSnackbar(e.message);
         });
+
+    // Notifying user when there is a new order
+    echo.private(`new-order.${branchId}`)
+    .listen('AnnounceNewOrder', (e) => {
+        showSnackbar(e.message);
+    });
 });
 
 onBeforeUnmount(() => {
     const branchId = usePage().props.auth.user.branch_id;
     echo.private(`notify.${branchId}`).stopListening('JobReceived');
+    echo.private(`new-order.${branchId}`).stopListening('AnnounceNewOrder');
 });
 </script>
 

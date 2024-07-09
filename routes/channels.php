@@ -24,3 +24,7 @@ Broadcast::channel('notify.{branchId}', function ($user, $branchId) {
     return (int) $user->branch_id === (int) $branchId;
 });
 
+Broadcast::channel('new-order.{branchId}', function ($user, $branchId) {
+    return (int) $user->branch_id === (int) $branchId && ($user->isReception() || $user->isManagement());
+});
+

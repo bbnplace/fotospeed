@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AnnounceNewOrder;
 use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Order;
@@ -96,7 +97,6 @@ class CustomerOrdersController extends Controller
 
     public function add()
     {
-
         // TODO: Define a setting that will allow Administrator to setup the minimum delivery date.
         return Inertia::render('Client/Order/Add', [
             'items' => Item::getItemsArray(),
@@ -142,7 +142,16 @@ class CustomerOrdersController extends Controller
             'delivery_address' => $request->deliveryAddress,
         ]);
 
+        $this->sendOrderNotification();
+
         return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');
+    }
+
+    // This method will broadcast a notification about this order to  the Reception at the target branch
+    private function sendOrderNotification()
+    {
+        $message = sprintf("You just received a new Order");
+        broadcast(new AnnounceNewOrder($message, auth()->user()->branch_id))->toOthers();
     }
 
 
