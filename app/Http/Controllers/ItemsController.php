@@ -16,9 +16,9 @@ class ItemsController extends Controller
         'height' => 'required|string|min:3|max:12',
         'width' => 'required|string|min:3|max:12',
         'weight' => 'nullable|string|min:3|max:12',
-        'print_price' => 'required|string|min:3|max:12',
-        'sheet_price' => 'required|string|min:3|max:12',
-        'cover_print_price' => 'required|string|min:3|max:12',
+        'print_price' => 'required|integer|digits_between:2,9',
+        'sheet_price' => 'required|integer|digits_between:2,9',
+        'cover_print_price' => 'required|integer|digits_between:2,9',
     ];
 
     public function index()
@@ -156,7 +156,7 @@ class ItemsController extends Controller
         $item->cover_print_price = $request->cover_print_price;
         $item->save();
 
-        return redirect()->route('item.view')->with('note', 'Updated.');
+        return redirect()->route('item.view', [$item->id])->with('note', 'Updated.');
     }
 
     public function delete(Request $request)

@@ -56,15 +56,6 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::delete('panel/groups/delete', [GroupsController::class, 'delete'])->name('groups.delete');
 
 
-    // Items Management Module
-    Route::get('panel/items', [ItemsController::class, 'index'])->name('items');
-    Route::post('panel/items', [ItemsController::class, 'records'])->name('items.records');
-    Route::get('panel/item/add', [ItemsController::class, 'add'])->name('item.add');
-    Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
-    Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
-    Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
-    Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
-    Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
 
@@ -74,6 +65,16 @@ Route::middleware(['auth', 'team.console'])->group(function (){
 
 Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::delete('panel/customers/delete', [CustomersController::class, 'delete'])->name('customers.delete');
+
+    // Items Management Module
+    Route::get('panel/items', [ItemsController::class, 'index'])->name('items');
+    Route::post('panel/items', [ItemsController::class, 'records'])->name('items.records');
+    Route::get('panel/item/add', [ItemsController::class, 'add'])->name('item.add');
+    Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
+    Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
+    Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
+    Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
+    Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
 
     // Staff Management Module
     Route::get('panel/staff', [StaffController::class, 'index'])->name('staff');

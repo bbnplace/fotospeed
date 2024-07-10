@@ -15,9 +15,9 @@
                 <VCol cols="4">Weight<br />{{ item.weight }}</VCol>
             </VRow>
             <VRow>
-                <VCol cols="4">Print Price<br />{{ item.print_price }}</VCol>
-                <VCol cols="4">Sheet Price<br />{{ item.sheet_price }}</VCol>
-                <VCol cols="4">Cover Print<br />{{ item.cover_print_price }}</VCol>
+                <VCol cols="4">Print Price<br />₦{{ item.print_price }}</VCol>
+                <VCol cols="4">Sheet Price<br />₦{{ item.sheet_price }}</VCol>
+                <VCol cols="4">Cover Print<br />₦{{ item.cover_print_price }}</VCol>
             </VRow>
             <div class="mt-3">
                 <Link :href="route('item.edit', item.id)" class="btn btn-secondary">Modify</Link>

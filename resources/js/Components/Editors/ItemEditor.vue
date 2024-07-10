@@ -65,7 +65,7 @@
                     <VTextField
                         id="weight"
                         v-model="form.weight"
-                        label="Weight"
+                        label="Weight (Optional)"
                         variant="outlined"
                         :hide-details="form.errors.weight == undefined"
                         :error-messages="form.errors.weight"
@@ -80,6 +80,7 @@
                         v-model="form.print_price"
                         label="Print Price"
                         variant="outlined"
+                        prefix="₦"
                         :hide-details="form.errors.print_price == undefined"
                         :error-messages="form.errors.print_price"
                     ></VTextField>
@@ -90,6 +91,7 @@
                         v-model="form.sheet_price"
                         label="Sheet Price"
                         variant="outlined"
+                        prefix="₦"
                         :hide-details="form.errors.sheet_price == undefined"
                         :error-messages="form.errors.sheet_price"
                     ></VTextField>
@@ -100,6 +102,7 @@
                         v-model="form.cover_print_price"
                         label="Cover Print Price"
                         variant="outlined"
+                        prefix="₦"
                         :hide-details="form.errors.cover_print_price == undefined"
                         :error-messages="form.errors.cover_print_price"
                     ></VTextField>
