@@ -87,7 +87,7 @@ class OrdersController extends Controller
         $thirtyDaysTime = 3600 * 24 * 30;
 
         return [
-            'min' => date("Y-m-d", time() + $twoDaysTime),
+            'min' => date("Y-m-d", time()),
             'max' => date("Y-m-d", time() + $thirtyDaysTime),
         ];
     }
