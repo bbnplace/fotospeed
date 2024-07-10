@@ -1,0 +1,1 @@
+import{o as e,c as r,a as t,u as a,F as o,Z as m}from"./app-jZIL3PwJ.js";import{_ as s}from"./BackendLayout-gzF-IG2X.js";import"./indigo-8qloE7ZG.js";import"./ApplicationLogo-3aX1vfh3.js";import"./_plugin-vue_export-helper-x3n3nnut.js";const d={__name:"Edit",setup(c){return(n,_)=>(e(),r(o,null,[t(a(m),{title:""}),t(s)],64))}};export{d as default};

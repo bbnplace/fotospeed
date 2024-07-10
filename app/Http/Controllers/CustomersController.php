@@ -14,10 +14,16 @@ class CustomersController extends Controller
 
     public function index()
     {
-        return Inertia::render('Backend/Customer/List', [
-            'endpoint' => route('customers.records'),
-            'note' => session('note')
-        ]);
+        if (auth()->user()->isAdmin()) {
+            return Inertia::render('Backend/Customer/List', [
+                'endpoint' => route('customers.records'),
+                'note' => session('note')
+            ]);
+        } else {
+            return Inertia::render('Backend/Customer/Finder', [
+                'endpoint' => route('customer.search')
+            ]);
+        }
     }
 
     public function records(Request $request)
@@ -154,6 +160,19 @@ class CustomersController extends Controller
             'name',
             'email',
             'mobile'
+        ]);
+    }
+
+    public function findCustomerByMobileOrName(Request $request)
+    {
+        $query = User::query();
+        $query->where('role_id', (Role::where('name', 'Customer')->first())->id);
+        $query->where('mobile', $request->keyphrase);
+        $query->with('branch', function ($query){
+            $query->select('id', 'name');
+        });
+        return $query->first([
+            'id', 'name', 'mobile'
         ]);
     }
 }

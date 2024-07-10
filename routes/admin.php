@@ -29,13 +29,11 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('panel/orders', [OrdersController::class, 'index'])->name('orders');
     Route::post('panel/orders', [OrdersController::class, 'records'])->name('order.records');
 
-    // Customers Management Module
+    // Customer Management
     Route::get('panel/customers', [CustomersController::class, 'index'])->name('customers');
-    Route::post('panel/customers', [CustomersController::class, 'records'])->name('customers.records');
     Route::get('panel/customer/add', [CustomersController::class, 'add'])->name('customer.add');
-    Route::get('panel/customer/{id}/edit', [CustomersController::class, 'edit'])->name('customer.edit');
-    Route::put('panel/customer/{id}/edit', [CustomersController::class, 'update'])->name('customer.edit');
     Route::get('panel/customer/{id}', [CustomersController::class, 'view'])->name('customer.view');
+    Route::post('panel/find-customer', [CustomersController::class, 'findCustomerByMobileOrName'])->name('customer.search');
 
 
     // Messaging Module
@@ -64,7 +62,6 @@ Route::middleware(['auth', 'team.console'])->group(function (){
 
 
 Route::middleware(['auth', 'admin.only'])->group(function (){
-    Route::delete('panel/customers/delete', [CustomersController::class, 'delete'])->name('customers.delete');
 
     // Items Management Module
     Route::get('panel/items', [ItemsController::class, 'index'])->name('items');
@@ -75,6 +72,12 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
     Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
+
+    // Customers Management Module
+    Route::post('panel/customers', [CustomersController::class, 'records'])->name('customers.records');
+    Route::get('panel/customer/{id}/edit', [CustomersController::class, 'edit'])->name('customer.edit');
+    Route::put('panel/customer/{id}/edit', [CustomersController::class, 'update'])->name('customer.edit');
+    Route::delete('panel/customers/delete', [CustomersController::class, 'delete'])->name('customers.delete');
 
     // Staff Management Module
     Route::get('panel/staff', [StaffController::class, 'index'])->name('staff');
