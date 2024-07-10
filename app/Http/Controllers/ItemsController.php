@@ -15,7 +15,7 @@ class ItemsController extends Controller
         'description' => 'required|string|min:24|max:1000',
         'height' => 'required|string|min:3|max:12',
         'width' => 'required|string|min:3|max:12',
-        'weight' => 'required|string|min:3|max:12',
+        'weight' => 'nullable|string|min:3|max:12',
         'print_price' => 'required|string|min:3|max:12',
         'sheet_price' => 'required|string|min:3|max:12',
         'cover_print_price' => 'required|string|min:3|max:12',
