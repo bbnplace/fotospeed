@@ -1,12 +1,7 @@
 <template>
     <Head title="Order"></Head>
     <BackendLayout>
-        <Panel>
-            <VRow>
-                <VCol cols="12" md="6">
-                    {{ orderDetail.customerData.name }}'s Order
-                </VCol>
-            </VRow>
+        <Panel :snippet-title="`${order.user.name}'s Order`">
             <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
@@ -27,8 +22,8 @@
                 <VRow >
                     <VCol>
                         <b>Client</b><br />
-                        {{ orderDetail.customerData.name }}
-                        {{ orderDetail.customerMobile}}
+                        {{ order.user.name }}
+                        {{ order.user.mobile}}
                     </VCol>
                 </VRow>
                 <VRow>
@@ -40,25 +35,25 @@
                 <VRow>
                     <VCol>
                         <b>Order Number</b><br />
-                        {{ orderDetail.orderNumber }}
+                        {{ order.order_number }}
                     </VCol>
                 </VRow>
                 <VRow>
                     <VCol>
                         <b>Order Name</b><br />
-                        {{ orderDetail.name }}
+                        {{ order.name }}
                     </VCol>
                 </VRow>
                 <VRow>
                     <VCol>
                         <b>Note</b><br />
-                        {{ orderDetail.note }}
+                        {{ order.note }}
                     </VCol>
                 </VRow>
                 <VRow>
                     <VCol cols="12" sm="6" v-if="$page.props.auth.user.role != 'Customer'">
                         <b>Price</b><br />
-                        {{ orderDetail.price }}
+                        ₦{{ orderDetail.price }}
                     </VCol>
                 </VRow>
             </VCol>

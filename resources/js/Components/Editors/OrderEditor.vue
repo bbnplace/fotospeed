@@ -36,9 +36,10 @@
                 </VCol>
             </VRow>
         </template>
+        <!-- {{ orderForm.orderFiles}} -->
         <DropzoneUploader @fileUploaded="handleData"></DropzoneUploader>
-
-        <VRow class="mt-5">
+        <div class="text-red" v-if="masterForm.errors.files">{{ masterForm.errors.files }}</div>
+        <VRow class="mt-4">
             <VCol cols="12" md="6">
                 <VRow v-if="$page.props.auth.user.role != 'Customer'">
                     <VCol>
@@ -159,7 +160,7 @@
                 @click="submitOrder"
             >{{ masterForm.btnTag }}</VBtn>
         </div>
-        <!-- {{ orderForm.orderFiles }} -->
+
           <!-- {{ masterForm }} -->
 </template>
 
@@ -220,13 +221,17 @@ const submitOrder = () => {
     const fileData = [];
 
     orderForm.orderFiles.forEach(element => {
-        const file = { ...element.file, note: element.note, pageNumber: element.pageNo }
-        file.dataURL = undefined;
+        let file = element.file;
+        if(element.pageNo && element.note){
+            file = { ...element.file, note: element.note, pageNumber: element.pageNo }
+            file.dataURL = undefined;
+        }
 
         fileData.push({
             file
         })
     });
+
     masterForm.files = fileData;
 
     if (props.order) {

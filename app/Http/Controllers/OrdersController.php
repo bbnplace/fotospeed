@@ -17,14 +17,14 @@ class OrdersController extends Controller
 {
     protected $rules = [
         'item' => 'string|required|exists:items,name|min:2|max:64',
-        'files' => 'required|array',
+        'files' => 'nullable|array',
         'customerMobile' => 'nullable|string|min:7|max:14|exists:users,mobile',
         'price' => 'nullable|integer',
         'name' => 'string|required|min:3|max:32',
         'note' => 'string|nullable|max:2000',
         'date' => 'string|nullable|max:64',
         'delivery_date' => 'string',
-        'deliveryAddress' => 'string|nullable|max:200',
+        'deliveryAddress' => 'string|required|max:200',
         'orderNumber' => 'integer|nullable|digits_between:1,16',
     ];
 
@@ -113,13 +113,9 @@ class OrdersController extends Controller
 
         // Get Item ID
         $item = Item::where('name', $request->item)->first();
-        // Get user role
-        $role = Role::where('id', auth()->user()->role_id)->first();
-        if (!empty($request->customerMobile) && $role->name != 'Customer') {
-            $customerData = User::where('mobile', $request->customerData)->first();
-            if (empty($customerData)) {
-                // Return with validation error
-            }
+
+        if (!auth()->user()->isCustomer()) {
+            $customerData = User::where('mobile', $request->customerMobile)->first();
         }
 
         $branch = Branch::where('name', $request->branch)->first();
@@ -127,12 +123,12 @@ class OrdersController extends Controller
         Order::create([
             'name' => $request->name,
             'note' => $request->note,
-            'user_id' => $role->name == 'Customer' ? auth()->user()->id :  $customerData->id,
+            'user_id' => auth()->user()->isCustomer() ? auth()->user()->id :  $customerData->id,
             'item_id' => $item->id,
             'branch_id' => $branch->id,
             'order_status_id' => 1,
             'detail' => json_encode($request->all()),
-            'total_cost' => $role->name == 'Customer' ? 0 :  $request->price,
+            'total_cost' => auth()->user()->isCustomer() ? 0 :  $request->price,
             'date' => date("d"),
             'month' => date("n"),
             'year' => date("Y"),
@@ -141,8 +137,8 @@ class OrdersController extends Controller
             'order_number' => $request->orderNumber,
         ]);
 
-        $additionalMsg = $role->name == 'Customer' ? "You will receive invoice shortly." :  "";
-        return redirect(route(($role->name == 'Customer' ? 'customer.my-orders' : 'orders')))
+        $additionalMsg = auth()->user()->isCustomer() ? "You will receive invoice shortly." :  "";
+        return redirect(route((auth()->user()->isCustomer() ? 'customer.my-orders' : 'orders')))
             ->with('note', 'Order Submitted.' . $additionalMsg);
     }
 
@@ -229,7 +225,10 @@ class OrdersController extends Controller
         $order->detail = json_encode($request->all());
         $order->delivery_date = $request->date;
         $order->delivery_address = $request->deliveryAddress;
-        $order->order_number = $request->orderNumber;
+
+        if ((string) $order->order_number !== (string) $request->orderNumber){
+            $order->order_number = $request->orderNumber;
+        }
 
         if (!in_array($role->name, ['Customer', 'Production'])) {
             $order->total_cost = $request->price;
