@@ -157,7 +157,7 @@ class JobProcessTransferController extends Controller
         return [
             'customer_name' => $this->customer->name,
             'order_name' => $this->order->name,
-            'order_number' => '#' . $this->order->id,
+            'order_number' => '#' . $this->order->order_number,
             'delivery_address' => $this->order->delivery_address,
             'order_status' => $this->order->orderStatus->name,
             'next_process' => $this->nextProcess->name,

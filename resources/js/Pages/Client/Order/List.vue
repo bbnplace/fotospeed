@@ -20,7 +20,7 @@ const dataResources = {
     },
     headers: [
         {
-            title: "Order Number",
+            title: "Order#",
             key: "order_number",
             sortable: true
         },
