@@ -24,7 +24,8 @@ class OrdersController extends Controller
         'note' => 'string|nullable|max:2000',
         'date' => 'string|nullable|max:64',
         'delivery_date' => 'string',
-        'deliveryAddress' => 'string|nullable|max:200'
+        'deliveryAddress' => 'string|nullable|max:200',
+        'orderNumber' => 'integer|nullable|digits_between:1,16',
     ];
 
     public function index()
@@ -137,6 +138,7 @@ class OrdersController extends Controller
             'year' => date("Y"),
             'delivery_date' => $request->date,
             'delivery_address' => $request->deliveryAddress,
+            'order_number' => $request->orderNumber,
         ]);
 
         $additionalMsg = $role->name == 'Customer' ? "You will receive invoice shortly." :  "";
@@ -227,6 +229,7 @@ class OrdersController extends Controller
         $order->detail = json_encode($request->all());
         $order->delivery_date = $request->date;
         $order->delivery_address = $request->deliveryAddress;
+        $order->order_number = $request->orderNumber;
 
         if (!in_array($role->name, ['Customer', 'Production'])) {
             $order->total_cost = $request->price;

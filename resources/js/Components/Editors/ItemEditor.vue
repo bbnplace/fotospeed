@@ -39,7 +39,7 @@
                     ></VTextarea>
                 </VCol>
             </VRow>
-            <h4 class="mt-3">Size and Weight</h4>
+            <h4 class="mt-3">Size and Weight (include units)</h4>
             <VRow>
                 <VCol cols="12" sm="4">
                     <VTextField

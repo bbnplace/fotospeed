@@ -23,6 +23,7 @@ class Order extends Model
         'delivery_date',
         'branch_id',
         'delivery_address',
+        'order_number',
     ];
 
     public function user()

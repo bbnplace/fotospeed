@@ -40,7 +40,19 @@
 
         <VRow class="mt-5">
             <VCol cols="12" md="6">
-
+                <VRow v-if="$page.props.auth.user.role != 'Customer'">
+                    <VCol>
+                        <VTextField
+                            id="orderNumber"
+                            v-model="masterForm.orderNumber"
+                            label="Reference Number"
+                            variant="outlined"
+                            autocomplete="off"
+                            :hide-details="masterForm.errors.orderNumber == undefined"
+                            :error-messages="masterForm.errors.orderNumber"
+                        ></VTextField>
+                    </VCol>
+                </VRow>
                 <VRow>
                     <VCol>
                         <VTextField
@@ -94,7 +106,7 @@
                         ></VAutocomplete>
                     </VCol>
                 </VRow>
-                <VRow  v-if="$page.props.auth.user.role != 'Customer'">
+                <VRow v-if="$page.props.auth.user.role != 'Customer'">
                     <VCol>
                         <VTextField
                             id="customerMobile"
@@ -182,7 +194,8 @@ const masterForm = useForm({
     note: props.order ? props.order.note : "",
     btnTag: props.order ? "Save" : "Submit",
     date: new Date((props.order ? props.order.date : "")),
-    deliveryAddress: props.order ? props.order.deliveryAddress : ""
+    deliveryAddress: props.order ? props.order.deliveryAddress : "",
+    orderNumber: props.order ? props.order.orderNumber : ""
 })
 
 const handleData = data => {

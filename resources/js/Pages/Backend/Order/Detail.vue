@@ -39,6 +39,12 @@
                 </VRow>
                 <VRow>
                     <VCol>
+                        <b>Order Number</b><br />
+                        {{ orderDetail.orderNumber }}
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
                         <b>Order Name</b><br />
                         {{ orderDetail.name }}
                     </VCol>

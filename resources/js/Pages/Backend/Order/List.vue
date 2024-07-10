@@ -20,6 +20,11 @@ const dataResources = {
     },
     headers: [
         {
+            title: "Order #",
+            key: "order_number",
+            sortable: true
+        },
+        {
             title: "Customer",
             key: "user.name",
             sortable: true
