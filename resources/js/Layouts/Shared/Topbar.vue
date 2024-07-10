@@ -212,24 +212,17 @@
                     </div>
 
                     <!-- item-->
-                    <a href="{{ route('second', ['pages', 'profile']) }}" class="dropdown-item">
+                    <a :href="route('profile.edit')" class="dropdown-item">
                         <i class="ri-account-circle-line fs-18 align-middle me-1"></i>
                         <span>My Account</span>
                     </a>
 
                     <!-- item-->
-                    <a href="{{ route('second', ['pages', 'profile']) }}" class="dropdown-item">
+                    <a :href="route('profile.edit')" class="dropdown-item">
                         <i class="ri-settings-4-line fs-18 align-middle me-1"></i>
                         <span>Settings</span>
                     </a>
 
-                    <!-- item-->
-                    <!-- <a href="{{ route('second', ['pages', 'faq']) }}" class="dropdown-item">
-                        <i class="ri-customer-service-2-line fs-18 align-middle me-1"></i>
-                        <span>Support</span>
-                    </a> -->
-
-                    <!-- item-->
                     <form>
                         <Link href="#" @click.prevent="submitForm" class="dropdown-item">
                             <i class="ri-logout-box-line fs-18 align-middle me-1"></i>

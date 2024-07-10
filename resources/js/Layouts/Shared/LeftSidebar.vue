@@ -46,7 +46,7 @@
                     <li class="side-nav-title mt-3">{{ menu.heading }}</li>
 
                     <li class="side-nav-item" v-for="(link, i) in menu.links" :key="i" :class="{'menuitem-active': $page.url.startsWith('/panel/' + link.route)}">
-                        <Link :href="route(link.route)" class="side-nav-link" :class="{'active': $page.url.startsWith('/panel/' + link.route)}">
+                        <Link :href="route(link.route)" class="side-nav-link" :class="{'active': $page.url.startsWith('/panel/' + link.route)}" v-if="link.adminOnly ? userProps.isAdmin : true">
                             <VIcon :icon="link.icon"></VIcon>
                             <span> {{ link.name }} </span>
                         </Link>
@@ -61,11 +61,13 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 const props = defineProps({
     menus: Object
 });
+
+const userProps = usePage().props.auth.user
 
 </script>
 

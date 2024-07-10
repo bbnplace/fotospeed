@@ -14,17 +14,20 @@ const menus = [
             {
                 icon: "mdi-account-group",
                 name: "Customers",
-                route: "customers"
+                route: "customers",
+                adminOnly: false
             },
             {
                 icon: "mdi-cart-variant",
                 name: "Orders",
-                route: "orders"
+                route: "orders",
+                adminOnly: false
             },
             {
                 icon: "mdi-inbox",
                 name: "Inbox",
-                route: "messages"
+                route: "messages",
+                adminOnly: false
             }
         ]
     },
@@ -34,17 +37,20 @@ const menus = [
             {
                 icon: "mdi-group",
                 name: "Groups",
-                route: "groups"
+                route: "groups",
+                adminOnly: false
             },
             {
                 icon: "mdi-message-processing",
                 name: "SMS Templates",
-                route: "sms-templates"
+                route: "sms-templates",
+                adminOnly: true
             },
             {
                 icon: "mdi-email-edit",
                 name: "Email Templates",
-                route: "email-templates"
+                route: "email-templates",
+                adminOnly: true
             }
         ]
     },
@@ -54,37 +60,50 @@ const menus = [
             {
                 icon: "mdi-account-tie-woman",
                 name: "Staff",
-                route: "staff"
+                route: "staff",
+                adminOnly: true
             },
             {
                 icon: "mdi-shape",
                 name: "Item Categories",
-                route: "categories"
+                route: "categories",
+                adminOnly: true
             },
             {
                 icon: "mdi-briefcase-account",
                 name: "Roles",
-                route: "roles"
+                route: "roles",
+                adminOnly: true
             },
             {
                 icon: "mdi-list-box-outline",
                 name: "Items",
-                route: "items"
+                route: "items",
+                adminOnly: true
             },
             {
                 icon: "mdi-cog-outline",
                 name: "Processes",
-                route: "processes"
+                route: "processes",
+                adminOnly: true
             },
             {
                 icon: "mdi-sitemap",
                 name: "Branches",
-                route: "branches"
+                route: "branches",
+                adminOnly: true
             },
             {
                 icon: "mdi-map-marker",
                 name: "States",
-                route: "states"
+                route: "states",
+                adminOnly: true
+            },
+            {
+                icon: "mdi-account",
+                name: "Profile",
+                route: "profile.edit",
+                adminOnly: false
             }
         ]
     }

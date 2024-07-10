@@ -40,6 +40,8 @@ class HandleInertiaRequests extends Middleware
                 'branch_id' => $userData->branch_id,
                 'role' => $role->name,
                 'role_ref' => $userData->role_id,
+                'isAdmin' => $userData->isAdmin(),
+                'isClient' => $userData->isCustomer()
             ];
         }
 
