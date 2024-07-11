@@ -8,20 +8,20 @@
                 <!-- Logo light -->
                 <a href="/" class="logo-light">
                     <span class="logo-lg">
-                        <img src="/images/logo.png" alt="logo">
+                        <ApplicationLogo  class="w-9 h-9 fill-current text-gray-500"></ApplicationLogo>
                     </span>
                     <span class="logo-sm">
-                        <img src="/images/logo-sm.png" alt="small logo">
+                        <ApplicationLogo  class="w-9 h-9 fill-current text-gray-500"></ApplicationLogo>
                     </span>
                 </a>
 
                 <!-- Logo Dark -->
                 <a href="/" class="logo-dark">
                     <span class="logo-lg">
-                        <img src="/images/logo-dark.png" alt="dark logo">
+                        <ApplicationLogo  class="w-9 h-9 fill-current text-gray-500"></ApplicationLogo>
                     </span>
                     <span class="logo-sm">
-                        <img src="/images/logo-sm.png" alt="small logo">
+                        <ApplicationLogo  class="w-9 h-9 fill-current text-gray-500"></ApplicationLogo>
                     </span>
                 </a>
             </div>
@@ -53,14 +53,14 @@
 
         <ul class="topbar-menu d-flex align-items-center gap-3">
             <li class="dropdown d-lg-none">
-                <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                <!-- <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                     <i class="ri-search-line fs-22"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-animated dropdown-lg p-0">
                     <form class="p-3">
                         <input type="search" class="form-control" placeholder="Search ..." aria-label="Recipient's username">
                     </form>
-                </div>
+                </div> -->
             </li>
 
 
@@ -196,7 +196,7 @@
             <li class="dropdown">
                 <a class="nav-link dropdown-toggle arrow-none nav-user px-2" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                     <span class="account-user-avatar">
-                        <!-- <img src="/images/users/avatar-1.jpg" alt="user-image" width="32" class="rounded-circle"> -->
+                         <VIcon icon="mdi-account-circle" size="30"></VIcon>
                     </span>
                     <span class="d-lg-flex flex-column gap-1 d-none">
                         <h5 class="my-0">
@@ -243,9 +243,11 @@ import { usePage, useForm, Link } from  '@inertiajs/vue3';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 const userProps = usePage().props.auth.user;
 const name = userProps.name;
+const branchId = usePage().props.auth.user.branch_id;
 
 const form = useForm({})
 const submitForm = () => {
@@ -265,7 +267,6 @@ const message = ref(null);
 
 onMounted(() => {
     // Listening for branch event as message is passed through different processing stages.
-    const branchId = usePage().props.auth.user.branch_id;
     echo.private(`notify.${branchId}`)
         .listen('JobReceived', (e) => {
             showSnackbar(e.message);
@@ -279,7 +280,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-    const branchId = usePage().props.auth.user.branch_id;
     echo.private(`notify.${branchId}`).stopListening('JobReceived');
     echo.private(`new-order.${branchId}`).stopListening('AnnounceNewOrder');
 });

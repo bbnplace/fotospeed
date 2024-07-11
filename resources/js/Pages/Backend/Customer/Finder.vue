@@ -21,17 +21,20 @@
             </form>
         </Panel>
 
-        <Panel v-if="data.customer.name">
-            <VRow>
-                <VCol cols="6"><b>Customer Name</b><br />{{ data.customer.name }}</VCol>
-                <VCol cols="6"><b>State</b><br />{{ data.customer.state.name }}</VCol>
-            </VRow>
-            <VRow>
-                <VCol cols="6"><b>Email</b><br />{{ data.customer.email }}</VCol>
-                <VCol cols="6"><b>Mobile</b><br />{{ data.customer.mobile }}</VCol>
-            </VRow>
-            <div class="mt-3">
-                <Link :href="route('customer.edit', data.customer.id)" class="btn btn-secondary">Modify</Link>
+        <Panel snippetTitle="Search Result">
+            <div v-if="data.searchState">{{ data.searchState }}</div>
+            <div v-if="data.customer">
+                <VRow>
+                    <VCol cols="6"><b>Customer Name</b><br />{{ data.customer.name }}</VCol>
+                    <VCol cols="6"><b>State</b><br />{{ data.customer.state.name }}</VCol>
+                </VRow>
+                <VRow>
+                    <VCol cols="6"><b>Email</b><br />{{ data.customer.email }}</VCol>
+                    <VCol cols="6"><b>Mobile</b><br />{{ data.customer.mobile }}</VCol>
+                </VRow>
+                <div class="mt-3">
+                    <Link :href="route('customer.edit', data.customer.id)" class="btn btn-secondary">Modify</Link>
+                </div>
             </div>
         </Panel>
 
@@ -48,11 +51,15 @@ import axios from "axios";
 let loading = false;
 const data = reactive({
     keyphrase: "",
-    customer: {}
+    customer: null,
+    searchState: ""
 })
 
 let source = null;
 const findCustomer = async () => {
+    data.customer = {}; // Empty the customer data if any
+    data.searchState = "";
+
     const payload = {
         keyphrase: data.keyphrase
     }
@@ -69,6 +76,7 @@ const findCustomer = async () => {
     });
 
     data.customer = response.data.customer
+    data.searchState = data.customer ? '' : 'No customer with the number ' + data.keyphrase;
     loading = false;
 }
 
