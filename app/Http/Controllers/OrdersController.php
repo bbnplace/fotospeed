@@ -47,6 +47,36 @@ class OrdersController extends Controller
         $search = $request->search;
 
         $query = Order::query();
+
+        // ADMINISTRATORS CAN VIEW ORDERS ACROSS BRANCHES.
+        // If the user is not an Administrator, Limit their view to orders from their branch.
+        if (!auth()->user()->isAdmin())
+        {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+
+        // MANAGERS SHOULD BE ABLE TO VIEW ALL ORDERS WITHIN THEIR BRANCH
+
+        // If the user is not one that can view all orders, fetch orders for their specific role
+        if (!auth()->user()->canViewAllOrders())
+        {
+            $userProcesses = OrderStatus::where('role_id', auth()->user()->role_id)->get(['id']);
+            if($userProcesses->count() == 0)
+            {
+                return [
+                    'records' => [],
+                    'totalRecords' => 0,
+                ];
+            }
+
+            $order_status_ids = [];
+            foreach($userProcesses as $userProcess)
+            {
+                array_push($order_status_ids, $userProcess->id);
+            }
+            $query->whereIn('order_status_id', $order_status_ids);
+        }
+
         $query->with(['user' => function ($query){
             $query->select('id', 'name');
         }]);

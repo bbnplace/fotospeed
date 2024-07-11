@@ -202,14 +202,14 @@
                         <h5 class="my-0">
                             {{ name }}
                         </h5>
-                        <!-- <h6 class="my-0 fw-normal">Founder</h6> -->
+                        <h6 class="my-0 fw-normal">{{ role }}</h6>
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated profile-dropdown">
                     <!-- item-->
-                    <div class=" dropdown-header noti-title">
+                    <!-- <div class=" dropdown-header noti-title">
                         <h6 class="text-overflow m-0">Welcome !</h6>
-                    </div>
+                    </div> -->
 
                     <!-- item-->
                     <a :href="route('profile.edit')" class="dropdown-item">
@@ -247,6 +247,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 const userProps = usePage().props.auth.user;
 const name = userProps.name;
+const role = userProps.role;
 const branchId = usePage().props.auth.user.branch_id;
 
 const form = useForm({})

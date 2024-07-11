@@ -95,4 +95,9 @@ class User extends Authenticatable
     {
         return $this->role->name == 'System Admin';
     }
+
+    public function canViewAllOrders()
+    {
+        return $this->isAdmin() || $this->isManagement() || $this->isReception();
+    }
 }

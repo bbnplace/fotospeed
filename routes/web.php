@@ -10,6 +10,7 @@ use App\Http\Controllers\FileUploadsController;
 use App\Http\Controllers\FileDownloadsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\PaystackController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redirect;
@@ -79,6 +80,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/client-invoice/invoices', [CustomerInvoicesController::class, 'records'])->name('customer.invoice-records');
     Route::get('/client-invoice/invoice/{id}', [CustomerInvoicesController::class, 'view'])->name('customer.invoice');
 
+    // Payment Providers
+    Route::get('/payments/paystackk', [PaystackController::class, 'getConfig'])->name('paystack.config');
 });
 
 require __DIR__.'/auth.php';

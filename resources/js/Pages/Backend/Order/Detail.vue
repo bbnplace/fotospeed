@@ -72,7 +72,11 @@
                 <VBtn v-else
                     color="blue-darken-1"
                     @click="submitOrder"
-                >Forward To {{ $page.props.nextProcess }}</VBtn>
+                >
+                    <template v-if="$page.props.auth.user.isAdmin">Forward To {{ $page.props.nextProcess }}</template>
+                    <template v-else>Mark Completed</template>
+
+                </VBtn>
             </VCol>
         </VRow>
         </Panel>

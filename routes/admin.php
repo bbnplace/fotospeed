@@ -58,6 +58,10 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
 
     Route::get('panel/restricted', [PermissionsController::class, 'restrictionNotice'])->name('dashboard.restricted');
+
+    // Route for forwarding an order to the next process
+    Route::post('panel/forward', [JobProcessTransferController::class, 'forward'])->name('process.forward');
+    Route::get('panel/order/{id}/task-completed', [JobProcessTransferController::class, 'completed'])->name('process.completed');
 });
 
 
@@ -128,7 +132,6 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::put('panel/process/{id}/edit', [ProcessesController::class, 'update'])->name('process.edit');
     Route::get('panel/process/{id}', [ProcessesController::class, 'view'])->name('process.view');
     Route::delete('panel/processes/delete', [ProcessesController::class, 'delete'])->name('processes.delete');
-    Route::post('panel/forward', [JobProcessTransferController::class, 'forward'])->name('process.forward');
 
     // Roles Management
     Route::get('panel/roles', [RolesController::class, 'index'])->name('roles');

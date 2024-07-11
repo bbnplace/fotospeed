@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
+use Inertia\Inertia;
 
 class JobProcessTransferController extends Controller
 {
@@ -21,6 +22,16 @@ class JobProcessTransferController extends Controller
     private $nextProcess;
     private $team;
     private $autoSignInUrl;
+
+    public function completed($id)
+    {
+        $order = Order::where('id', $id)->first();
+
+        return Inertia::render('Backend/Process/Completed', [
+            'newProcess' => $order->orderStatus->name,
+            'orderNumber' => $order->order_number,
+        ]);
+    }
 
     public function forward(Request $request)
     {
@@ -63,7 +74,7 @@ class JobProcessTransferController extends Controller
             $this->sendCustomerEmail();
         }
 
-        // TODO: Send Push Notification to members of the targetted team
+        // Send Push Notification to members of the targetted team
         $this->sendPush();
 
         $this->order->order_status_id = $this->nextProcess->id;
@@ -72,7 +83,7 @@ class JobProcessTransferController extends Controller
         if ($this->nextProcess->name == 'Billing') {
             return redirect(route('order.view', [$request->orderId]))->with('note', 'Invoice link Sent');
         }
-        return redirect(route('order.view', [$request->orderId]))->with('note', 'Order moved to ' . $this->nextProcess->name);
+        return redirect(route('process.completed', [$request->orderId]))->with('note', 'Order moved to ' . $this->nextProcess->name);
     }
 
     private function sendTeamSms()
