@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\JobReceived;
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\OrderLog;
 use App\Models\User;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use CeculaSyncApiClient\SyncAccount;
@@ -73,6 +74,9 @@ class JobProcessTransferController extends Controller
         if ($this->nextProcess->email_customer) {
             $this->sendCustomerEmail();
         }
+
+        // Log the just completed order process [This enables system know who worked on what task]
+        $this->logOrderProcess();
 
         // Send Push Notification to members of the targetted team
         $this->sendPush();
@@ -223,5 +227,14 @@ class JobProcessTransferController extends Controller
     private function generateAndShortenSignedUrl()
     {
         $this->autoSignInUrl = $this->shortenUrl($this->generateSignedUrl());
+    }
+
+    private function logOrderProcess()
+    {
+        OrderLog::create([
+            'order_id' => $this->order->id,
+            'staff_id' => auth()->user()->id,
+            'process_id' => $this->order->order_status_id,
+        ]);
     }
 }

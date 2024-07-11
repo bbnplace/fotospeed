@@ -22,3 +22,4 @@ yarn-error.log
 /dev.sql
 /storage
 /.ceculasync.json
+/app/Http/Controllers/PaystackController.php

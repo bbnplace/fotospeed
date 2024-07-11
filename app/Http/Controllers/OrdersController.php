@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Models\OrderLog;
 use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
@@ -211,6 +212,7 @@ class OrdersController extends Controller
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
+            'activities' => $this->getOrderActivityLog($id)
         ];
     }
 
@@ -276,6 +278,23 @@ class OrdersController extends Controller
 
             return redirect()->route('orders')->with('note', 'Selected orders have been deleted');
         }
+    }
+
+    private function getOrderActivityLog($orderId)
+    {
+        // Fetch the Activity Log for the order. This shows who worked on what.
+        $query = OrderLog::query();
+        $query->where('order_id', $orderId);
+
+        $query->with('staff', function ($query){
+            $query->select('id', 'name');
+        });
+
+        $query->with('process', function ($query){
+            $query->select('id', 'name');
+        });
+
+        return $query->get();
     }
 
 }

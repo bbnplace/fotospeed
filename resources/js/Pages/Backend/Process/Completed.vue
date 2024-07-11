@@ -1,4 +1,5 @@
 <template>
+    <Head title="Process Completed"></Head>
     <BackendLayout>
         <Panel snippetTitle="Completed">
             <div>
@@ -11,7 +12,7 @@
 <script setup>
 import Panel from '@/Layouts/Shared/Panel.vue';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Head } from '@inertiajs/vue3';
 
 const props = usePage().props;
 
