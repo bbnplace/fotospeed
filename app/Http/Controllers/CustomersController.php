@@ -168,11 +168,13 @@ class CustomersController extends Controller
         $query = User::query();
         $query->where('role_id', (Role::where('name', 'Customer')->first())->id);
         $query->where('mobile', $request->keyphrase);
-        $query->with('branch', function ($query){
+        $query->with('state', function ($query){
             $query->select('id', 'name');
         });
-        return $query->first([
-            'id', 'name', 'mobile'
-        ]);
+        $customer =  $query->first();
+
+        return [
+            'customer' => $customer
+        ];
     }
 }
