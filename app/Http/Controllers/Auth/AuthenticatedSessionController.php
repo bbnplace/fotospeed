@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Login;
 use App\Models\Role;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,13 @@ class AuthenticatedSessionController extends Controller
 
         // Get the user's role
         $role = Role::where('id', auth()->user()->role_id)->first();
+
+        Login::create([
+            'user_id' => auth()->user()->id,
+            'session_token' => session()->getId(),
+            'ip_address' => $request->ip()
+        ]);
+
         return redirect()->intended($role->name == "Customer" ? RouteServiceProvider::CUSTOMER_HOME : RouteServiceProvider::HOME);
     }
 
@@ -45,6 +53,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+
+        $this->registerLogout(); // Register the logout
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
@@ -52,5 +63,15 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect(route('login'));
+    }
+
+
+    private function registerLogout()
+    {
+        $session = Login::where('session_token', session()->getId())->first();
+        if($session){
+            $session->logged_out = true;
+            $session->save();
+        }
     }
 }

@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Login extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'session_token',
+        'ip_address',
+        'logged_out'
+    ];
 }
