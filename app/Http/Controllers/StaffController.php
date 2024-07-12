@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
+use App\Models\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -133,6 +134,7 @@ class StaffController extends Controller
             'staff' => $user,
             'branches' => Branch::getBranchesArray(),
             'roles' => Role::getRolesArray(),
+            'logins' => $this->getStaffLogins($id),
         ];
     }
 
@@ -190,5 +192,15 @@ class StaffController extends Controller
 
             return redirect()->route('staff')->with('note', 'Selected staff have been deleted');
         }
+    }
+
+    public function getStaffLogins($staffId)
+    {
+        return Login::where('user_id', $staffId)->orderBy('id', 'desc')->limit(20)->get([
+            'ip_address',
+            'created_at',
+            'updated_at',
+            'logged_out'
+        ]);
     }
 }

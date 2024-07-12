@@ -53,7 +53,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-
         $this->registerLogout(); // Register the logout
 
         Auth::guard('web')->logout();

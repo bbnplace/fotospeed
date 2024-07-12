@@ -67,8 +67,14 @@
                     </VRow>
                     <VRow>
                         <VCol>
+                            <b>Order Created On</b><br />
+                            {{ moment(orderDetail.created_at).format('LL') }}
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
                             <b>Delivery Date</b><br />
-                    {{ orderDetail.date }}
+                            {{ moment(orderDetail.date).format('LL') }}
                         </VCol>
                     </VRow>
                 </VCol>
