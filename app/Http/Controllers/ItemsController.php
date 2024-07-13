@@ -16,9 +16,9 @@ class ItemsController extends Controller
         'height' => 'required|string|min:3|max:12',
         'width' => 'required|string|min:3|max:12',
         'weight' => 'nullable|string|min:3|max:12',
-        'print_price' => 'required|integer|digits_between:2,9',
-        'sheet_price' => 'required|integer|digits_between:2,9',
-        'cover_print_price' => 'required|integer|digits_between:2,9',
+        'print_price' => 'nullable|integer|digits_between:2,9',
+        'sheet_price' => 'nullable|integer|digits_between:2,9',
+        'cover_print_price' => 'nullable|integer|digits_between:2,9',
     ];
 
     public function index()

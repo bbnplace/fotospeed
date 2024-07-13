@@ -116,7 +116,7 @@ class CustomersController extends Controller
         $rules = [
             'name' => 'required|string|min:5|max:64',
             'mobile' => 'required|numeric|digits_between:7,16|exists:users,mobile',
-            'email' => 'required|string|email:rfc,dns|exists:users,email',
+            'email' => 'nullable|string|email:rfc,dns',
             'state' => 'required|string|min:1|max:64|exists:states,name',
             'password' => 'nullable|string|min:8|max:64|confirmed',
             'password_confirmation' => 'nullable',
@@ -132,6 +132,7 @@ class CustomersController extends Controller
         $user->role_id = $role->id;
         $user->state_id = $state->id;
         $user->name = $request->name;
+        $user->email = $request->email;
 
         if (!empty($request->password)) {
             $user->password = Hash::make($request->password);

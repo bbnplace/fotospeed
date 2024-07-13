@@ -30,7 +30,7 @@
             <VTextField
                 id="email"
                 v-model="form.email"
-                label="Email"
+                label="Email (Optional)"
                 variant="outlined"
                 autocomplete="off"
                 :hide-details="form.errors.email == undefined"

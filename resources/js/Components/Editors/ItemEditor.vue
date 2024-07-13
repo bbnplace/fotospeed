@@ -78,7 +78,7 @@
                     <VTextField
                         id="print-price"
                         v-model="form.print_price"
-                        label="Print Price"
+                        label="Print Price (Optional)"
                         variant="outlined"
                         prefix="₦"
                         :hide-details="form.errors.print_price == undefined"
@@ -89,7 +89,7 @@
                     <VTextField
                         id="sheet-price"
                         v-model="form.sheet_price"
-                        label="Sheet Price"
+                        label="Sheet Price (Optional)"
                         variant="outlined"
                         prefix="₦"
                         :hide-details="form.errors.sheet_price == undefined"
@@ -100,7 +100,7 @@
                     <VTextField
                         id="cover-print-price"
                         v-model="form.cover_print_price"
-                        label="Cover Print Price"
+                        label="Cover Print Price (Optional)"
                         variant="outlined"
                         prefix="₦"
                         :hide-details="form.errors.cover_print_price == undefined"

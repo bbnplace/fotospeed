@@ -13,7 +13,7 @@ class UserRegistrationController extends Controller
     protected $rules = [
         'name' => 'required|string|min:5|max:64',
         'mobile' => 'required|numeric|digits_between:7,16|unique:users,mobile',
-        'email' => 'required|string|email:rfc,dns|unique:users,email',
+        'email' => 'nullable|string|email:rfc,dns|unique:users,email',
         'state' => 'required|string|min:1|max:64|exists:states,name',
         'password' => 'required|string|min:8|max:64|confirmed',
         'password_confirmation' => 'required',
