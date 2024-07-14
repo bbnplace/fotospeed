@@ -7,11 +7,14 @@
                 mdi-file
             </v-icon>
         </div>
-        <p>Drop Media File here to upload.</p>
-        <div v-if="readingFile || uploadingFile">
-            <v-progress-circular v-if="readingFile" indeterminate color="red"></v-progress-circular>
-            <v-progress-circular v-if="uploadingFile" :model-value="fileUploadProgress" color="red"></v-progress-circular>
-            <span class="ml-3">{{ fileAction }}</span>
+        <p>Click here or Drop Media File here to upload.</p>
+        <div v-if="readingFile || uploadingFile" class="w-50">
+            <!-- <v-progress-circular v-if="readingFile" indeterminate color="red"></v-progress-circular> -->
+            <v-progress-linear v-if="uploadingFile" :model-value="fileUploadProgress" color="#0594be"></v-progress-linear>
+            <span class="ml-3 w-50">{{ fileAction }}</span>
+        </div>
+        <div v-if="uploadErrors" class="text-red">
+            {{ uploadErrors }}
         </div>
     </div>
 </template>
@@ -28,10 +31,11 @@ const props = defineProps({
 });
 
 
-let fileUploadProgress = 0;
-let uploadingFile = false;
+let fileUploadProgress = ref(0);
+let uploadingFile = ref(false);
 let readingFile = ref(false);
 let fileAction = ref("");
+let uploadErrors = ref("");
 const csrfToken = usePage().props.stkn
 
 onMounted(()=>{
@@ -63,17 +67,18 @@ const initDropzone = () => {
 }
 
 const handleSendingStarted = (file, xhr, formData) => {
-    uploadingFile = true;
+    uploadingFile.value = true;
     fileAction.value = "Uploading File ...";
+    uploadErrors.value = "";
 }
 
 const handleUploadProgress = (file, progress, bytesSent) => {
-    fileUploadProgress = progress;
-    fileAction.value = `${progress}% Uploaded`;
+    fileUploadProgress.value = progress;
+    fileAction.value = `${Math.round(progress)}% Uploaded`;
 }
 
 const handleSuccess =  async (file, response) => {
-    uploadingFile = false;
+    uploadingFile.value = false;
     fileAction.value = "";
 
     inputData.fileInfo = {
@@ -96,8 +101,8 @@ const handleSuccess =  async (file, response) => {
 
 const handleError = (file, error) => {
     // Handle upload errors
-    uploadingFile = false;
-    console.error('File upload error:', error);
+    uploadingFile.value = false;
+    uploadErrors.value = error.message
 }
 
 const formatBytes = bytes => {
