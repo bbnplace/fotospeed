@@ -46,7 +46,7 @@
                         <VTextField
                             id="orderNumber"
                             v-model="masterForm.orderNumber"
-                            label="Reference Number"
+                            label="Reference Number (Optional)"
                             variant="outlined"
                             autocomplete="off"
                             :hide-details="masterForm.errors.orderNumber == undefined"

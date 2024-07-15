@@ -142,6 +142,31 @@
                     ></VTextField>
                     </VCol>
                 </VRow>
+                <h4 class="my-3">Payment Settings</h4>
+                <VRow>
+                    <VCol>
+                        <VTextField
+                        id="paystack_public_key"
+                        v-model="form.paystack_public_key"
+                        label="Paystack Public Key"
+                        variant="outlined"
+                        :hide-details="form.errors.paystack_public_key == undefined"
+                        :error-messages="form.errors.paystack_public_key"
+                    ></VTextField>
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol>
+                        <VTextField
+                        id="paystack_secret_key"
+                        v-model="form.paystack_secret_key"
+                        label="Paystack Secret Key"
+                        variant="outlined"
+                        :hide-details="form.errors.paystack_secret_key == undefined"
+                        :error-messages="form.errors.paystack_secret_key"
+                    ></VTextField>
+                    </VCol>
+                </VRow>
                 <h4 class="my-3">SMS Settings</h4>
                 <VRow>
                     <VCol>
@@ -192,6 +217,8 @@ const form = useForm({
     min_order_processing_days: settings.min_order_processing_days,
     max_order_processing_days: settings.max_order_processing_days,
     cecula_sync_api_key: settings.cecula_sync_api_key,
+    paystack_secret_key: settings.paystack_secret_key,
+    paystack_public_key: settings.paystack_public_key,
     processing: false
 })
 

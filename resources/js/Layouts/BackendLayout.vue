@@ -82,7 +82,7 @@ const menus = [
                 adminOnly: true
             },
             {
-                icon: "mdi-cog-outline",
+                icon: "mdi-cog-transfer",
                 name: "Processes",
                 route: "processes",
                 adminOnly: true

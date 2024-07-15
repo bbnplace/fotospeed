@@ -22,5 +22,7 @@ class Setting extends Model
         'email_password',
         'min_order_processing_days',
         'max_order_processing_days',
+        'paystack_secret_key',
+        'paystack_public_key',
     ];
 }

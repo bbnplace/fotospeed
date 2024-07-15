@@ -21,6 +21,8 @@ class SettingsController extends Controller
         'email_password' => 'nullable|string|min:6|max:124',
         'min_order_processing_days' => 'nullable|integer|digits_between:1,3',
         'max_order_processing_days' => 'nullable|integer|digits_between:1,3',
+        'paystack_secret_key' => 'nullable|string|min:32|max:64',
+        'paystack_public_key' => 'nullable|string|min:32|max:64',
     ];
 
     public function edit()
@@ -50,6 +52,8 @@ class SettingsController extends Controller
         $settings->min_order_processing_days = $request->min_order_processing_days;
         $settings->max_order_processing_days = $request->max_order_processing_days;
         $settings->cecula_sync_api_key = $request->cecula_sync_api_key;
+        $settings->paystack_secret_key = $request->paystack_secret_key;
+        $settings->paystack_public_key = $request->paystack_public_key;
         $settings->save();
 
         return redirect(route('settings'));

@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('email_password')->nullable();
             $table->integer('min_order_processing_days')->default(0); // This setting defines the minimum number of days a client would wait before product is delivered
             $table->integer('max_order_processing_days')->default(0); // This setting defines the number of days a user will have to wait before item is delivered
+            $table->string('paystack_secret_key')->nullable();
+            $table->string('paystack_public_key')->nullable();
             $table->timestamps();
         });
     }
