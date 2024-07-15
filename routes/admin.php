@@ -16,6 +16,7 @@ use App\Http\Controllers\SmsTemplatesController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StatesController;
 use App\Http\Controllers\UserRegistrationController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -162,5 +163,9 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
     Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
     Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
+
+    // Settings
+    Route::get('settings', [SettingsController::class, 'edit'])->name('settings');
+    Route::post('settings', [SettingsController::class, 'update'])->name('settings');
 });
 

@@ -104,6 +104,12 @@ const menus = [
                 name: "Profile",
                 route: "profile.edit",
                 adminOnly: false
+            },
+            {
+                icon: "mdi-cog",
+                name: "Settings",
+                route: "settings",
+                adminOnly: true
             }
         ]
     }
