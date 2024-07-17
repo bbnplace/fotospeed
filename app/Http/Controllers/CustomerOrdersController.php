@@ -27,6 +27,7 @@ class CustomerOrdersController extends Controller
         'delivery_date' => 'string',
         'branch' => 'string|required|exists:branches,name',
         'deliveryAddress' => 'string|nullable|max:200',
+        'quantity' => 'integer|digits_between:1,7',
     ];
 
     public function index()
@@ -142,6 +143,7 @@ class CustomerOrdersController extends Controller
             'year' => date("Y"),
             'delivery_date' => $request->date,
             'delivery_address' => $request->deliveryAddress,
+            'quantity' => $request->quantity,
         ]);
 
         $this->sendOrderNotification();

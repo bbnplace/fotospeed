@@ -81,6 +81,20 @@
                     </VCol>
                 </VRow>
                 <VRow>
+                    <VCol cols="12" sm="6">
+                        <VTextField
+                            id="quantity"
+                            v-model="masterForm.quantity"
+                            label="Quantity"
+                            variant="outlined"
+                            autocomplete="off"
+                            type="number"
+                            :hide-details="masterForm.errors.quantity == undefined"
+                            :error-messages="masterForm.errors.quantity"
+                        ></VTextField>
+                    </VCol>
+                </VRow>
+                <VRow>
                     <VCol cols="12" sm="6" v-if="$page.props.auth.user.role != 'Customer'">
                         <VTextField
                             id="price"
@@ -88,6 +102,7 @@
                             label="Price"
                             variant="outlined"
                             autocomplete="off"
+                            type="number"
                             prefix="₦ "
                             :hide-details="masterForm.errors.price == undefined"
                             :error-messages="masterForm.errors.price"
@@ -115,6 +130,7 @@
                             label="Customer Mobile"
                             variant="outlined"
                             autocomplete="off"
+                            type="tel"
                             @blur="getCustomerInfo"
                             :hide-details="masterForm.errors.customerMobile == undefined"
                             :error-messages="masterForm.errors.customerMobile"
@@ -196,7 +212,8 @@ const masterForm = useForm({
     btnTag: props.order ? "Save" : "Submit",
     date: new Date((props.order ? props.order.date : "")),
     deliveryAddress: props.order ? props.order.deliveryAddress : "",
-    orderNumber: props.order ? props.order.orderNumber : ""
+    orderNumber: props.order ? props.order.orderNumber : "",
+    quantity: props.order ? props.order.quantity : 1,
 })
 
 const handleData = data => {

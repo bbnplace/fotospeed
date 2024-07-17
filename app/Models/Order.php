@@ -24,6 +24,7 @@ class Order extends Model
         'branch_id',
         'delivery_address',
         'order_number',
+        'quantity'
     ];
 
     public function user()

@@ -61,6 +61,12 @@
                 <VCol cols="12" md="6">
                     <VRow>
                         <VCol>
+                            <b>Order Quantity</b><br />
+                            {{ $page.props.order.quantity }}
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
                             <b>Order Status</b><br />
                             {{ $page.props.order.order_status.name }}
                         </VCol>

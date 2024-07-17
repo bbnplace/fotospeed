@@ -1,7 +1,7 @@
 <template>
     <Head title="Order"></Head>
     <ClientLayout>
-        <Panel>
+        <Panel snippetTitle="Order Files">
             <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
@@ -56,17 +56,33 @@
                             ₦{{ orderDetail.price }}
                         </VCol>
                     </VRow>
-                    <VRow>
-                        <VCol cols="12" md="6">
-                            <b>Order Status</b><br />
-                            {{ order.order_status.name }}
-                        </VCol>
-                    </VRow>
                 </VCol>
 
                 <VCol cols="12" md="6">
-                    <b>Delivery Date</b><br />
-                    {{ orderDetail.date }}
+                    <VRow>
+                        <VCol>
+                            <b>Order Quantity</b><br />
+                            {{ $page.props.order.quantity }}
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
+                            <b>Order Status</b><br />
+                            {{ $page.props.order.order_status.name }}
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
+                            <b>Order Created On</b><br />
+                            {{ moment(orderDetail.created_at).format('LL') }}
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
+                            <b>Delivery Date</b><br />
+                            {{ moment(orderDetail.date).format('LL') }}
+                        </VCol>
+                    </VRow>
                 </VCol>
             </VRow>
         </Panel>
@@ -79,6 +95,7 @@ import { usePage, Head } from "@inertiajs/vue3";
 import ClientLayout from "@/Layouts/ClientLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import OrderForm from '@/Components/OrderForm.vue';
+import moment from 'moment';
 
 const order = usePage().props.order;
 const orderDetail = usePage().props.orderDetail;

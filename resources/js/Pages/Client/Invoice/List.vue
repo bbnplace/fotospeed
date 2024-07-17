@@ -41,8 +41,8 @@ const dataResources = {
         },
     ],
     name: {
-        singular: "Order",
-        plural: "Orders"
+        singular: "Invoice",
+        plural: "Invoices"
     }
 }
 </script>

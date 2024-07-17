@@ -28,6 +28,7 @@ class OrdersController extends Controller
         'delivery_date' => 'string',
         'deliveryAddress' => 'string|required|max:200',
         'orderNumber' => 'integer|nullable|digits_between:1,16',
+        'quantity' => 'integer|digits_between:1,7',
     ];
 
     public function index()
@@ -168,6 +169,7 @@ class OrdersController extends Controller
             'delivery_date' => $request->date,
             'delivery_address' => $request->deliveryAddress,
             'order_number' => $request->orderNumber,
+            'quantity' => $request->quantity,
         ]);
 
         $additionalMsg = auth()->user()->isCustomer() ? "You will receive invoice shortly." :  "";
@@ -259,6 +261,7 @@ class OrdersController extends Controller
         $order->detail = json_encode($request->all());
         $order->delivery_date = $request->date;
         $order->delivery_address = $request->deliveryAddress;
+        $order->quantity = $request->quantity;
 
         if ((string) $order->order_number !== (string) $request->orderNumber){
             $order->order_number = $request->orderNumber;
