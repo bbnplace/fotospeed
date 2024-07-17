@@ -24,5 +24,12 @@ class Setting extends Model
         'max_order_processing_days',
         'paystack_secret_key',
         'paystack_public_key',
+        'org_name',
+        'org_address',
+        'org_email',
+        'org_phone',
+        'org_url',
+        'payment_sms_temp',
+        'payment_email_temp',
     ];
 }

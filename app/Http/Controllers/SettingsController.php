@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EmailTemplate;
 use App\Models\Setting;
+use App\Models\SmsTemplate;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -23,13 +25,27 @@ class SettingsController extends Controller
         'max_order_processing_days' => 'nullable|integer|digits_between:1,3',
         'paystack_secret_key' => 'nullable|string|min:32|max:64',
         'paystack_public_key' => 'nullable|string|min:32|max:64',
+        'org_name' => 'nullable|string|max:128',
+        'org_address' => 'nullable|string|max:128',
+        'org_email' => 'nullable|email:dns,rfc|max:128',
+        'org_phone' => 'nullable|string',
+        'org_url' => 'nullable|url',
+        'payment_sms_temp' => 'nullable|string|max:64',
+        'payment_email_temp' => 'nullable|string|max:64',
     ];
 
     public function edit()
     {
         $settings = Setting::first();
+        $smsTemplates = SmsTemplate::getSmsTemplatesArray();
+        $emailTemplates = EmailTemplate::getEmailTemplatesArray();
+        array_unshift($smsTemplates, 'None');
+        array_unshift($emailTemplates, 'None');
+
         return Inertia::render('Backend/Settings/Edit', [
-            'settings' => $settings
+            'settings' => $settings,
+            'smsTemplates' => $smsTemplates,
+            'emailTemplates' => $emailTemplates,
         ]);
     }
 
@@ -54,6 +70,13 @@ class SettingsController extends Controller
         $settings->cecula_sync_api_key = $request->cecula_sync_api_key;
         $settings->paystack_secret_key = $request->paystack_secret_key;
         $settings->paystack_public_key = $request->paystack_public_key;
+        $settings->org_name = $request->org_name;
+        $settings->org_address = $request->org_address;
+        $settings->org_email = $request->org_email;
+        $settings->org_phone = $request->org_phone;
+        $settings->org_url = $request->org_url;
+        $settings->payment_sms_temp = $request->payment_sms_temp == 'None' ? null : $request->payment_sms_temp;
+        $settings->payment_email_temp = $request->payment_email_temp  == 'None' ? null : $request->payment_email_temp;
         $settings->save();
 
         return redirect(route('settings'));

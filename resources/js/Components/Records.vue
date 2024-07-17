@@ -37,7 +37,7 @@
                 :headers="props.headers"
                 item-value="id"
                 @update:options="loadRecords"
-                show-select>
+                :show-select="props.endpoint.delete">
                 <template v-slot:item.actions="{ item }">
                         <v-icon v-if="props.endpoint.detail"
                             size="small"

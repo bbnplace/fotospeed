@@ -41,6 +41,12 @@ const menus = [
                 adminOnly: false
             },
             {
+                icon: "mdi-invoice",
+                name: "Invoices",
+                route: "invoices",
+                adminOnly: false
+            },
+            {
                 icon: "mdi-message-processing",
                 name: "SMS Templates",
                 route: "sms-templates",

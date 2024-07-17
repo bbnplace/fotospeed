@@ -8,6 +8,7 @@ use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -86,12 +87,13 @@ class CustomerOrdersController extends Controller
 
     private function getMinAndMaxDeliveryDate ()
     {
-        $twoDaysTime = 3600 * 24 * 2;
-        $thirtyDaysTime = 3600 * 24 * 30;
+        $settings = Setting::first();
+        $minDeliveryDate = 3600 * 24 * $settings->min_order_processing_days;
+        $maxDeliveryDate = 3600 * 24 * $settings->max_order_processing_days;
 
         return [
-            'min' => date("Y-m-d", time() + $twoDaysTime),
-            'max' => date("Y-m-d", time() + $thirtyDaysTime),
+            'min' => date("Y-m-d", (time() + $minDeliveryDate)),
+            'max' => $maxDeliveryDate < 1 ? -1 : date("Y-m-d", time() + $maxDeliveryDate),
         ];
     }
 

@@ -2,8 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Messaging\EmailClient;
+use App\Messaging\SMSClient;
+use App\Models\EmailTemplate;
+use App\Models\SmsTemplate;
+use App\Models\Setting;
 use App\Models\Invoice;
+use App\Models\InvoiceStatus;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CustomerInvoicesController extends Controller
@@ -79,14 +88,107 @@ class CustomerInvoicesController extends Controller
 
         $invoice = $query->first();
 
+        $settings = Setting::first();
+        $paystack= [
+            'key'=> $settings->paystack_public_key,
+            'reference' => $invoice->track_id, // Get the reference for the invoice
+            'email' => auth()->user()->email,
+            'callback' => '',
+            'close' => true,
+            'amount' => $invoice->order->total_cost,
+        ];
+
         return [
             'invoice' => $invoice,
             'endpoint' => route('customer.find'),
+            'paystack' => $paystack,
+            'company' => [
+                'name' => $settings->org_name,
+                'address' => $settings->org_address,
+                'email' => $settings->org_email,
+                'phone' => $settings->org_phone,
+                'url' => $settings->org_url,
+            ]
         ];
     }
 
     public function view($id)
     {
         return Inertia::render('Client/Invoice/Detail', $this->getInvoice($id));
+    }
+
+    public function paymentCompleted(Request $request)
+    {
+        Log::info($request);
+        if ($request->event == 'charge.success') {
+            # code...
+            $data = $request->data;
+            $customer = $data['customer'];
+            $authorization = $data['authorization'];
+            $reference = $data['reference'];
+            $status = $data['status'];
+
+            // Get the Invoice
+            $invoice = Invoice::where('track_id', $reference)->first();
+            if ($invoice) {
+                if ($status == 'success')
+                {
+                    $invoiceStatus = InvoiceStatus::where('name', 'Paid')->first();
+                    if (empty($invoiceStatus)) {
+                        // TODO: Send mail to site administrator notifying that the status for flagging invoice to paid doe not exist
+                    } else {
+                        $invoice->invoice_status_id = $invoiceStatus->id; // Update the status ID
+                        $invoice->paystack_response = json_encode($request);
+                        $invoice->save();
+
+                        // TODO: Send a push notification to receptionist to notify them that payment has been received.
+
+                        $settings = Setting::first();
+                        $order = Order::where('id', $invoice->order_id)->first();
+                        $nextProcess = $order->orderStatus->nextProcess;
+                        $team = User::where('branch_id', $order->branch_id)->where('role_id', $nextProcess->role_id)->get();
+
+                        $messagingData = [
+                            'customer' => User::where('id', $invoice->user_id)->first(),
+                            'order' => $order,
+                            'nextProcess' => $nextProcess,
+                            'team' => $team,
+                            'url' => '',
+                        ];
+
+                        $email_template_name = $settings->payment_email_temp;
+                        // Send email receipt to customer
+                        if(!empty($email_template_name))
+                        {
+                            // Fetch the email template
+                            $emailTemplate = EmailTemplate::where('name', $email_template_name)->first();
+                            if(!empty($emailTemplate))
+                            {
+                                $emailClient = new EmailClient($messagingData);
+                                $emailClient->sendCustomerEmail($emailTemplate->template);
+                            }
+                        }
+
+                        $sms_template_name = $settings->payment_sms_temp;
+                        // Send sms receipt to customer
+                        if(!empty($sms_template_name))
+                        {
+                            // Fetch the sms template
+                            $smsTemplate = SmsTemplate::where('name', $sms_template_name)->first();
+                            if(!empty($smsTemplate))
+                            {
+                                $smsClient = new SMSClient($messagingData);
+                                $smsClient->sendCustomerSms($smsTemplate->template);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function receipt(Request $request, $id)
+    {
+        return Inertia::render('Client/Invoice/Receipt',$this->getInvoice($id));
     }
 }

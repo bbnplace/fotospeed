@@ -38,7 +38,7 @@
         <div class="pb-3 container">
             <slot />
         </div>
-        <div class="pb-3 container">
+        <div class="mt-3 pb-3 container text-center">
             Copyright 2024. Indigo Africa.
         </div>
 </template>

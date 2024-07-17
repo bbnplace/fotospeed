@@ -81,10 +81,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/client-invoice/invoices', [CustomerInvoicesController::class, 'index'])->name('customer.invoices');
     Route::post('/client-invoice/invoices', [CustomerInvoicesController::class, 'records'])->name('customer.invoice-records');
     Route::get('/client-invoice/invoice/{id}', [CustomerInvoicesController::class, 'view'])->name('customer.invoice');
+    Route::get('/client-invoice/receipt/{id}', [CustomerInvoicesController::class, 'receipt'])->name('customer.receipt');
 
     // Payment Providers
     Route::get('/payments/paystackk', [PaystackController::class, 'getConfig'])->name('paystack.config');
 });
+
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

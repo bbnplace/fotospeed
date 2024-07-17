@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\GroupsController;
+use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\JobProcessTransferController;
 use App\Http\Controllers\MessagesController;
@@ -54,6 +55,10 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('panel/group/{id}', [GroupsController::class, 'view'])->name('group.view');
     Route::delete('panel/groups/delete', [GroupsController::class, 'delete'])->name('groups.delete');
 
+    // Invoice Routes
+    Route::get('panel/invoices', [InvoicesController::class, 'index'])->name('invoices');
+    Route::post('panel/invoices', [InvoicesController::class, 'records'])->name('invoice.records');
+    Route::get('/panel/invoice/{id}', [InvoicesController::class, 'view'])->name('invoice');
 
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');

@@ -1,9 +1,12 @@
 <template>
     <Head title="My Invoice"></Head>
-    <ClientLayout>
-
-        <div class="invoice mt-4">
-            <h1 class="mb-4">Invoice</h1>
+    <BackendLayout>
+        <VRow>
+            <VCol>
+                <Link href="#" @click="goBack">Back</Link>
+            </VCol>
+        </VRow>
+        <Panel snippetTitle="Invoice">
             <VRow>
                 <VCol>
                     <h4>Invoice #</h4>
@@ -61,14 +64,14 @@
                     <Paystack :data="paystackData" @paymentCompleted="handlePaymentCompletion" />
                 </VCol>
             </VRow>
-        </div>
-    </ClientLayout>
+        </Panel>
+    </BackendLayout>
 </template>
 
 <script setup>
-    import { usePage, Head, router } from "@inertiajs/vue3";
-    import ClientLayout from "@/Layouts/ClientLayout.vue";
-    import { ref, computed } from 'vue';
+    import { usePage, Head, router, Link } from "@inertiajs/vue3";
+    import BackendLayout from "@/Layouts/BackendLayout.vue";
+    import Panel from '@/Layouts/Shared/Panel.vue'
     import Paystack from '@/Components/Paystack.vue';
     import moment from 'moment';
 
@@ -100,6 +103,10 @@
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     });
+
+    const goBack = () => {
+        window.history.back()
+    }
 </script>
 
 <style scoped>
