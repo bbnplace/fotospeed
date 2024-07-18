@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\User;
+use App\Report\ReportBuilder;
 use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -31,6 +32,7 @@ class JobProcessTransferController extends Controller
         return Inertia::render('Backend/Process/Completed', [
             'newProcess' => $order->orderStatus->name,
             'orderNumber' => $order->order_number,
+            'order' => $order
         ]);
     }
 
@@ -38,7 +40,6 @@ class JobProcessTransferController extends Controller
     {
         $this->order = Order::where('id', $request->orderId)->first();
         $this->nextProcess = $this->order->orderStatus->nextProcess;
-
         $this->customer = $this->order->user; // Get the customer's data
 
         // Get the Team for the Next Process
@@ -65,6 +66,11 @@ class JobProcessTransferController extends Controller
             'team' => $this->team,
             'url' => $this->autoSignInUrl,
         ];
+
+        // Generate Report for the just completed process
+        if (!empty($this->order->orderStatus->report_as)) {
+            ReportBuilder::build($this->order->orderStatus->report_as);
+        }
 
         // Get Team SMS for the Next Process
         if ($this->nextProcess->sms_team) {

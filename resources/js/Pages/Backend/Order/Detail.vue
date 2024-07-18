@@ -1,7 +1,7 @@
 <template>
     <Head title="Order"></Head>
     <BackendLayout>
-        <Panel :snippet-title="`${order.user.name}'s Order`">
+        <Panel :snippet-title="`Order Files`">
             <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
@@ -14,6 +14,19 @@
                     ></OrderForm>
                 </VCol>
             </VRow>
+            <VRow v-else>
+                <VCol class="text-center">
+                    <h1 class="text-red">Image Files were not uploaded for this Order!</h1>
+                    <p>If you do not have the image files, kindly contact the client using the phone number below.</p>
+                    <p class="mt-4 font-bold">If you have the files and would like to upload them, use the button below.</p>
+                    <p>
+                        <Link 
+                            :href="route('order.edit', [order.id])"
+                            class="btn bg-blue font-bold"
+                        >Upload Images</Link>
+                    </p>
+                </VCol>
+            </VRow>
         </Panel>
 
         <Panel snippetTitle="Details">
@@ -22,7 +35,7 @@
                     <VRow >
                         <VCol>
                             <b>Client</b><br />
-                            {{ order.user.name }}
+                            {{ order.user.name }}<br />
                             {{ order.user.mobile}}
                         </VCol>
                     </VRow>
@@ -125,7 +138,7 @@
 
 <script setup>
 import { reactive } from 'vue';
-import { usePage, useForm, Head } from "@inertiajs/vue3";
+import { usePage, useForm, Head, Link } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import OrderForm from '@/Components/OrderForm.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';

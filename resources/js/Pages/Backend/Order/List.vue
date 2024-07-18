@@ -15,7 +15,7 @@ const dataResources = {
         records: usePage().props.endpoint,
         add: "order.add",
         edit: "order.edit",
-        delete: "orders.delete",
+        // delete: "orders.delete",
         detail: "order.view"
     },
     headers: [

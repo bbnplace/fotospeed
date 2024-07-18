@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Order;
 use App\Models\User;
+use App\Report\ReportBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -140,6 +141,11 @@ class CustomerInvoicesController extends Controller
                         $invoice->invoice_status_id = $invoiceStatus->id; // Update the status ID
                         $invoice->paystack_response = json_encode($request);
                         $invoice->save();
+
+                        $ordersCount = 1; // TODO: Update to reflect the number of Orders the invoice covers
+
+                        // Add to Paid Orders
+                        // ReportBuilder::build('processing', $ordersCount);
 
                         // TODO: Send a push notification to receptionist to notify them that payment has been received.
 

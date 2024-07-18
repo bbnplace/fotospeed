@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class YearlyReport extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'year',
+        'received',
+        'paid',
+        'produced',
+        'delivered',
+        'cancelled',
+    ];
+
+    public $timestamps = false;
 }

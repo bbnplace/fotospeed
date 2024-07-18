@@ -10,7 +10,7 @@
                 <VTabs v-model="tab">
                     <VTab value="organization">Organization</VTab>
                     <VTab value="order">Order</VTab>
-                    <VTab value="file">File</VTab>
+                    <VTab value="file">File Upload</VTab>
                     <VTab value="payment">Payment</VTab>
                     <VTab value="email">Email</VTab>
                     <VTab value="sms">SMS</VTab>

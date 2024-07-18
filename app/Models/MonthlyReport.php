@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class MonthlyReport extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'month',
+        'received',
+        'paid',
+        'produced',
+        'delivered',
+        'cancelled',
+    ];
+
+    public $timestamps = false;
 }

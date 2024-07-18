@@ -5,18 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DailyReport extends Model
+class HourlyReport extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'date',
+        'hour',
         'received',
-        'processing',
+        'paid',
         'produced',
         'delivered',
         'cancelled',
-        'dispatched'
     ];
 
     public $timestamps = false;

@@ -10,6 +10,7 @@ use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
+use App\Report\ReportBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -146,6 +147,10 @@ class CustomerOrdersController extends Controller
             'quantity' => $request->quantity,
         ]);
 
+        // Build report for the newly received order
+        ReportBuilder::build('received');
+
+        // Send Order notification to relevant team
         $this->sendOrderNotification();
 
         return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');

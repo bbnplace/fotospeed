@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             StatesSeeder::class,
             RolesSeeder::class,
             UserSeeder::class,
-            // OrderStatusesSeeder::class,
+            OrderStatusesSeeder::class,
+            ReportsInitializationSeeder::class,
         ]);
     }
 }

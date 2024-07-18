@@ -10,6 +10,7 @@ use App\Models\OrderLog;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Setting;
+use App\Report\ReportBuilder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -171,6 +172,9 @@ class OrdersController extends Controller
             'order_number' => $request->orderNumber,
             'quantity' => $request->quantity,
         ]);
+
+        // Generate Report
+        ReportBuilder::build('received');
 
         $additionalMsg = auth()->user()->isCustomer() ? "You will receive invoice shortly." :  "";
         return redirect(route((auth()->user()->isCustomer() ? 'customer.my-orders' : 'orders')))

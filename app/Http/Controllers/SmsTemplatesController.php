@@ -119,8 +119,10 @@ class SmsTemplatesController extends Controller
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
+            // TODO: Check if the selected template is linked with a process or setting. 
+            // If template is linked, do not delete. User should be requested to unlink
+            // the template before proceeding.
             SmsTemplate::whereIn('id', $request->ids)->delete();
-
             return redirect()->route('sms-templates')->with('note', 'Selected sms templates have been deleted');
         }
     }

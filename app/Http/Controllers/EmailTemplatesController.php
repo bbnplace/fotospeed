@@ -118,8 +118,11 @@ class EmailTemplatesController extends Controller
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
+            // TODO: Check if the selected template is linked with a process or setting. 
+            // If template is linked, do not delete. User should be requested to unlink
+            // the template before proceeding.
+            
             EmailTemplate::whereIn('id', $request->ids)->delete();
-
             return redirect()->route('email-templates')->with('note', 'Selected email templates have been deleted');
         }
     }

@@ -22,6 +22,8 @@ class OrderStatus extends Model
         'email_customer',
         'customer_sms_template_id',
         'customer_email_template_id',
+        'report_as',
+        'report_process'
     ];
 
     public $timestamps = false;

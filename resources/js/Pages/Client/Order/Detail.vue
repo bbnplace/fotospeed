@@ -14,12 +14,24 @@
                     ></OrderForm>
                 </VCol>
             </VRow>
+            <VRow v-else>
+                <VCol class="text-center">
+                    <h1 class="text-red">Image Files were not uploaded for this Order!</h1>
+                    <p>Use the button below to upload files.</p>
+                    <p>
+                        <Link 
+                        :href="route('client.order.edit', [order.id])"
+                        class="btn bg-blue font-bold mt-3"
+                        >Upload Files</Link>
+                    </p>
+                </VCol>
+            </VRow>
         </Panel>
 
         <Panel snippetTitle="Details">
             <VRow>
                 <VCol cols="12" md="6">
-                    <VRow >
+                    <VRow>
                         <VCol>
                             <b>Client</b><br />
                             {{ orderDetail.customerData.name }}
@@ -91,7 +103,7 @@
 
 <script setup>
 import { reactive } from 'vue';
-import { usePage, Head } from "@inertiajs/vue3";
+import { usePage, Head, Link } from "@inertiajs/vue3";
 import ClientLayout from "@/Layouts/ClientLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import OrderForm from '@/Components/OrderForm.vue';

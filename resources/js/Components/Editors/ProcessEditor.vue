@@ -138,6 +138,28 @@
                 </VCol>
             </VRow>
 
+            <VRow>
+                <VCol cols="12" sm="6">
+                    <v-switch
+                        v-model="form.reportProcess"
+                        label="Report Process Completion"
+                        color="#0594be"
+                        hide-details
+                    ></v-switch>
+
+                    <VAutocomplete
+                        id="reportAs"
+                        v-model="form.reportAs"
+                        label="Report As"
+                        :items="reportStates"
+                        variant="outlined"
+                        :hide-details="form.errors.reportAs == undefined"
+                        :error-messages="form.errors.reportAs"
+                        density="compact"
+                        v-if="form.reportProcess"
+                    ></VAutocomplete>
+                </VCol>
+            </VRow>
 
             <VRow>
                 <VCol cols="12" sm="6">
@@ -204,7 +226,9 @@ interface ProcessEditor {
     sms_team: Boolean,
     email_team: Boolean,
     sms_customer: Boolean,
-    email_customer: Boolean
+    email_customer: Boolean,
+    report_process: Boolean,
+    report_as: String,
 }
 
 const props = defineProps<{
@@ -215,6 +239,7 @@ const roles = usePage().props.roles;
 const processes = usePage().props.processes;
 const smsTemplates = usePage().props.smsTemplates;
 const emailTemplates = usePage().props.emailTemplates;
+const reportStates = usePage().props.reportStates;
 
 const form = useForm({
     id: props.process ? props.process.id : "",
@@ -230,6 +255,8 @@ const form = useForm({
     customerSmsTemplate: props.process ? (props.process.customer_sms_template ? props.process.customer_sms_template.name : "") : "",
     emailCustomer: props.process ? (props.process.email_customer ? !!props.process.email_customer : false) : false,
     customerEmailTemplate: props.process ? (props.process.customer_email_template ? props.process.customer_email_template.name : "") : "",
+    reportProcess: props.process ? (props.process.report_process ? !!props.process.report_process : false) : false,
+    reportAs: props.process ? (props.process.report_as ?? '') : '',
 });
 
 const submit = () => {

@@ -8,6 +8,7 @@ use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\SmsTemplate;
 use App\Models\User;
+use App\Report\ReportBuilder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,6 +27,7 @@ class ProcessesController extends Controller
         'customerSmsTemplate' => 'nullable|string|exists:sms_templates,name|min:2|max:64',
         'emailCustomer' => 'nullable|boolean',
         'customerEmailTemplate' => 'nullable|string|exists:email_templates,name|min:2|max:64',
+        'reportProcess' => 'nullable|boolean',
     ];
 
     public function index(){
@@ -97,11 +99,13 @@ class ProcessesController extends Controller
             'roles' => Role::getRolesArray(),
             'smsTemplates' => SmsTemplate::getSmsTemplatesArray(),
             'emailTemplates' => EmailTemplate::getEmailTemplatesArray(),
+            'reportStates' => ReportBuilder::getReportStates(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->rules['reportAs'] = 'nullable|string|unique:order_statuses,report_as|max:32';
         $validated = $request->validate($this->rules);
 
         $nextProcess = OrderStatus::where('name', $request->nextProcess)->first();
@@ -110,6 +114,8 @@ class ProcessesController extends Controller
         $teamEmailTemplate = EmailTemplate::where('name', $request->emailTemplate)->first();
         $customerSmsTemplate = SmsTemplate::where('name', $request->customerSmsTemplate)->first();
         $customerEmailTemplate = EmailTemplate::where('name', $request->customerEmailTemplate)->first();
+
+        // If process is to be reported, check that no other process is using that report name
 
         OrderStatus::create([
             'role_id' => $role->id,
@@ -124,6 +130,8 @@ class ProcessesController extends Controller
             'email_customer' => $request->emailCustomer,
             'customer_sms_template_id' => $customerSmsTemplate->id ?? null,
             'customer_email_template_id' => $customerEmailTemplate->id ?? null,
+            'report_process' => $request->reportProcess,
+            'report_as' => $request->reportProcess ? $request->reportAs : null,
         ]);
 
         return redirect()->route('processes')->with('note', $request->name . ' Process Registered');
@@ -160,6 +168,7 @@ class ProcessesController extends Controller
             'roles' => Role::getRolesArray(),
             'smsTemplates' => SmsTemplate::getSmsTemplatesArray(),
             'emailTemplates' => EmailTemplate::getEmailTemplatesArray(),
+            'reportStates' => ReportBuilder::getReportStates(),
         ];
     }
 
@@ -184,6 +193,12 @@ class ProcessesController extends Controller
         if ($process->name == $request->name) {
             $this->rules['name'] = 'string|required|min:2|max:64';
         }
+        
+        // If saved report_as value is not same as what's received, re-validate
+        if($process->report_as != $request->reportAs)
+        {
+            $this->rules['reportAs'] = 'nullable|string|unique:order_statuses,report_as|max:32';
+        }
         $request->validate($this->rules);
 
         $nextProcess = OrderStatus::where('name', $request->nextProcess)->first();
@@ -207,6 +222,8 @@ class ProcessesController extends Controller
         $process->email_customer = $request->emailCustomer;
         $process->customer_sms_template_id = $customerSmsTemplate->id ?? null;
         $process->customer_email_template_id = $customerEmailTemplate->id ?? null;
+        $process->report_process = $request->reportProcess;
+        $process->report_as = $request->reportProcess ? $request->reportAs : null;
         $process->save();
 
         return redirect()->route('process.view', $process->id)->with('note', 'Updated.');
