@@ -14,6 +14,7 @@
                     <VTab value="payment">Payment</VTab>
                     <VTab value="email">Email</VTab>
                     <VTab value="sms">SMS</VTab>
+                    <VTab value="report">Report</VTab>
                 </VTabs>
                 <v-window v-model="tab" direction="vertical">
                     <v-window-item value="organization">
@@ -302,6 +303,45 @@
                             </VRow>
                         </VCard>
                     </v-window-item>
+                    <v-window-item value="report">
+                        <VCard>
+                            <h4 class="my-3">Report</h4>
+                            <VRow>
+                                <VCol>
+                                    <VCombobox
+                                        v-model="form.reportables"
+                                        label="Select Report Fields to display"
+                                        :items="reportStates"
+                                        :search-input.sync="reportStatusSearch"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        variant="outlined"
+                                        :hide-details="form.errors.reportables == undefined"
+                                        :error-messages="form.errors.reportables"
+                                        max-errors="5"
+                                    ></VCombobox>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VCombobox
+                                        v-model="form.reportViewers"
+                                        label="Who can view reports on dashboard?"
+                                        :items="roles"
+                                        :search-input.sync="reportViewersSearch"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        variant="outlined"
+                                        :hide-details="form.errors.reportViewers == undefined"
+                                        :error-messages="form.errors.reportViewers"
+                                        max-errors="5"
+                                    ></VCombobox>
+                                </VCol>
+                            </VRow>
+                        </VCard>
+                    </v-window-item>
                 </v-window>
                 
                 
@@ -323,7 +363,7 @@ import { Head, usePage, useForm } from '@inertiajs/vue3'
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue'
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
-import { onMounted, onBeforeUnmount, ref, reactive } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
 
 const tab = ref(null);
 
@@ -331,7 +371,11 @@ const props = usePage().props;
 const settings = props.settings;
 const smsTemplates = props.smsTemplates;
 const emailTemplates = props.emailTemplates;
+const reportStates = props.reportStates;
+const roles = props.roles;
 let saveStatus = ref(null);
+const reportStatusSearch = ref(null);
+const reportViewersSearch = ref(null);
 
 const form = useForm({
     max_file_size: settings.max_file_size,
@@ -355,6 +399,8 @@ const form = useForm({
     org_url: settings.org_url,
     payment_sms_temp: settings.payment_sms_temp ?? 'None',
     payment_email_temp: settings.payment_email_temp ?? 'None',
+    reportables: JSON.parse(settings.reportables),
+    reportViewers: JSON.parse(settings.reports_permission),
     processing: false,
 });
 
@@ -365,8 +411,36 @@ const submit = () =>{
             setTimeout(()=>{
                 saveStatus.value = null;
             }, 5000)
+        },
+        onError: (errors) => {
+            handleReportablesError(errors);
+            handleReportViewersError(errors);
         }
     })
+}
+
+const handleReportablesError = (errors) =>{
+    const errorKeys = Object.keys(errors);
+    const invalidReportables = [];
+    errorKeys.forEach(element => {
+        if (element.indexOf('reportables.') === 0) {
+            const parts = element.split('.');
+            invalidReportables.push(form.reportables[parts[1]])
+        }
+    })
+    form.errors.reportables = invalidReportables.length > 0 ? [`The following values are not supported: ${invalidReportables.join(', ')}`] : []
+}
+
+const handleReportViewersError = (errors) =>{
+    const errorKeys = Object.keys(errors);
+    const invalidReportViewers = [];
+    errorKeys.forEach(element => {
+        if (element.indexOf('reportViewers.') === 0) {
+            const parts = element.split('.');
+            invalidReportViewers.push(form.reportViewers[parts[1]])
+        }
+    })
+    form.errors.reportViewers = invalidReportViewers.length > 0 ? [`The following values are not supported: ${invalidReportViewers.join(', ')}`] : []
 }
 
 </script>

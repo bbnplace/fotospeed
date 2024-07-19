@@ -3,56 +3,67 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmailTemplate;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\SmsTemplate;
+use App\Report\ReportBuilder;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SettingsController extends Controller
 {
-    protected $rules = [
-        'max_file_size' => 'required|integer|min:1024|max:102400',
-        'thumbnail_size' => 'required|integer|min:10|max:400',
-        'file_mime_types' => 'required|string|min:2|max:200',
-        'cecula_sync_api_key' => 'nullable|string|min:32|max:64',
-        'email_sender_name' => 'nullable|string|min:2|max:64',
-        'from_email' => 'nullable|email:dns,rfc|max:128',
-        'replyto_email' => 'nullable|email:dns,rfc|max:128',
-        'email_host' => 'nullable|url',
-        'email_port' => 'nullable|integer|digits_between:1,6',
-        'email_password' => 'nullable|string|min:6|max:124',
-        'min_order_processing_days' => 'nullable|integer|digits_between:1,3',
-        'max_order_processing_days' => 'nullable|integer|digits_between:1,3',
-        'paystack_secret_key' => 'nullable|string|min:32|max:64',
-        'paystack_public_key' => 'nullable|string|min:32|max:64',
-        'org_name' => 'nullable|string|max:128',
-        'org_address' => 'nullable|string|max:128',
-        'org_email' => 'nullable|email:dns,rfc|max:128',
-        'org_phone' => 'nullable|string',
-        'org_url' => 'nullable|url',
-        'payment_sms_temp' => 'nullable|string|max:64',
-        'payment_email_temp' => 'nullable|string|max:64',
-    ];
-
     public function edit()
     {
         $settings = Setting::first();
         $smsTemplates = SmsTemplate::getSmsTemplatesArray();
         $emailTemplates = EmailTemplate::getEmailTemplatesArray();
+        $reportStates = ReportBuilder::getReportStates();
         array_unshift($smsTemplates, 'None');
         array_unshift($emailTemplates, 'None');
+        array_unshift($reportStates, 'Received');
 
         return Inertia::render('Backend/Settings/Edit', [
             'settings' => $settings,
             'smsTemplates' => $smsTemplates,
             'emailTemplates' => $emailTemplates,
+            'reportStates' => $reportStates,
+            'roles' => Role::getRolesArray(),
         ]);
     }
 
 
     public function update(Request $request)
     {
-        $request->validate($this->rules);
+        $rules = [
+            'max_file_size' => 'required|integer|min:1024|max:102400',
+            'thumbnail_size' => 'required|integer|min:10|max:400',
+            'file_mime_types' => 'required|string|min:2|max:200',
+            'cecula_sync_api_key' => 'nullable|string|min:32|max:64',
+            'email_sender_name' => 'nullable|string|min:2|max:64',
+            'from_email' => 'nullable|email:dns,rfc|max:128',
+            'replyto_email' => 'nullable|email:dns,rfc|max:128',
+            'email_host' => 'nullable|url',
+            'email_port' => 'nullable|integer|digits_between:1,6',
+            'email_password' => 'nullable|string|min:6|max:124',
+            'min_order_processing_days' => 'nullable|integer|digits_between:1,3',
+            'max_order_processing_days' => 'nullable|integer|digits_between:1,3',
+            'paystack_secret_key' => 'nullable|string|min:32|max:64',
+            'paystack_public_key' => 'nullable|string|min:32|max:64',
+            'org_name' => 'nullable|string|max:128',
+            'org_address' => 'nullable|string|max:128',
+            'org_email' => 'nullable|email:dns,rfc|max:128',
+            'org_phone' => 'nullable|string',
+            'org_url' => 'nullable|url',
+            'payment_sms_temp' => 'nullable|string|max:64',
+            'payment_email_temp' => 'nullable|string|max:64',
+            'reportables' => 'required|array',
+            'reportables.*' => sprintf('in:Received,%s', implode(',', ReportBuilder::getReportStates())),
+            'reportViewers' => 'required|array',
+            'reportViewers.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
+        ];
+
+        $request->validate($rules);
 
         $settings = Setting::first();
 
@@ -77,6 +88,8 @@ class SettingsController extends Controller
         $settings->org_url = $request->org_url;
         $settings->payment_sms_temp = $request->payment_sms_temp == 'None' ? null : $request->payment_sms_temp;
         $settings->payment_email_temp = $request->payment_email_temp  == 'None' ? null : $request->payment_email_temp;
+        $settings->reportables = json_encode($request->reportables);
+        $settings->reports_permission = json_encode($request->reportViewers);
         $settings->save();
 
         return redirect(route('settings'));
