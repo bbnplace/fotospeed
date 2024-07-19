@@ -1,8 +1,3 @@
-<script setup>
-import BackendLayout from '@/Layouts/BackendLayout.vue';
-import { Head } from '@inertiajs/vue3';
-</script>
-
 <template>
     <Head title="Dashboard" />
 
@@ -21,5 +16,23 @@ import { Head } from '@inertiajs/vue3';
                 </div>
             </div>
         </div>
+        <Panel snippetTitle="Report Chart" class="chart-container">
+            <LineChart />
+        </Panel>
     </BackendLayout>
 </template>
+
+<script setup>
+import BackendLayout from '@/Layouts/BackendLayout.vue';
+import Panel from '@/Layouts/Shared/Panel.vue'
+import { Head } from '@inertiajs/vue3';
+import LineChart from '@/Components/LineChart.vue'
+
+</script>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  height: 400px;
+}
+</style>

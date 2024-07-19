@@ -4,6 +4,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\InvoicesController;
@@ -23,9 +24,7 @@ use Inertia\Inertia;
 
 
 Route::middleware(['auth', 'team.console'])->group(function (){
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Orders Management Module
     Route::get('panel/orders', [OrdersController::class, 'index'])->name('orders');
