@@ -15,27 +15,27 @@ use PhpParser\Node\Stmt\TryCatch;
 
 class Report
 {
-    public static function get24HoursReport(Array $reportables): array
+    public static function get24HoursReport(array $reportables): array
     {
         return self::getHourlyReport($reportables, 24);
     }
 
-    public static function get7DaysReport(Array $reportables): array
+    public static function get7DaysReport(array $reportables): array
     {
         return self::getDailyReport($reportables, 7);
     }
 
-    public static function get30DaysReport(Array $reportables): array
+    public static function get30DaysReport(array $reportables): array
     {
         return self::getDailyReport($reportables, 30);
     }
 
-    public static function get90DaysReport(Array $reportables): array
+    public static function get90DaysReport(array $reportables): array
     {
         return self::getDailyReport($reportables, 90);
     }
 
-    public static function getCustomReport(Array $reportables, string $start, string $end): array
+    public static function getCustomReport(array $reportables, string $start, string $end): array
     {
         if (empty($start) || empty($end)) {
             // return [
@@ -48,8 +48,12 @@ class Report
             //     ]
             // ];
             return [
-                'labels'=> [],
-                'datasets' => []
+                'chart' => [
+                    'labels'=> [],
+                    'datasets' => [],
+                ],
+                'records' => [],
+                'reportables' => $reportables,
             ];
         }
 
@@ -70,28 +74,28 @@ class Report
                 $record = HourlyReport::where('hour', '>=', $startDate->format('Y-m-d H'))
                     ->where('hour', '<=', $stopDate->format('Y-m-d H'))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'hour']);
+                    ->get(['hour', ...$reportables]);
                 $period = "hour";
                 break;
             case $numberOfDays <= 61: // Daily Report
                 $record = DailyReport::where('date', '>=', $startDate->format('Y-m-d'))
                     ->where('date', '<=', $stopDate->format('Y-m-d'))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'date']);
+                    ->get(['date', ...$reportables]);
                 $period = "date";
                 break;
             case $numberOfDays < (365 * 3): // Monthly Report
                 $record = MonthlyReport::where('month', '>=', $startDate->format('Y-m'))
                     ->where('month', '<=', $stopDate->format('Y-m'))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'month']);
+                    ->get(['month', ...$reportables]);
                 $period = "month";
                 break;
             default: // Yearly report
                 $record = YearlyReport::where('year', '>=', $startDate->format('Y'))
                     ->where('year', '<=', $stopDate->format('Y'))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'year']);
+                    ->get(['year', ...$reportables]);
                 $period = "year";
         }
 
@@ -100,7 +104,7 @@ class Report
 
 
 
-    public static function getThisYearReport(Array $reportables): array
+    public static function getThisYearReport(array $reportables): array
     {
         $currentDate = Carbon::now();
         $dayOfYear = $currentDate->dayOfYear;
@@ -112,34 +116,34 @@ class Report
                 $period = 'hour';
                 $record = HourlyReport::where('hour', 'LIKE', sprintf('%s%%', date('Y')))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'hour']);
+                    ->get(['hour', ...$reportables]);
                 $record = count($record) < $dayOfYear ? self::augmentHourlyReport($reportables, $record, $dayOfYear) : $record;
                 break;
             case $dayOfYear < 31: // Daily
                 $period = 'date';
                 $record = DailyReport::where('date', 'LIKE', sprintf('%s%%', date('Y')))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'date']);
+                    ->get(['date', ...$reportables]);
                 $record = count($record) < $dayOfYear ? self::augmentDailyReport($reportables, $record, $dayOfYear) : $record;
                 break;
             default: // Monthly
                 $period = 'month';
                 $record = MonthlyReport::where('month', 'LIKE', sprintf('%s%%', date('Y')))
                     ->orderBy('id', 'asc')
-                    ->get([...$reportables, 'month']);
+                    ->get(['month', ...$reportables]);
         }
 
         return self::generateLineChartData($reportables, $record, $period);
     }
 
-    public static function getLastYearReport(Array $reportables): array
+    public static function getLastYearReport(array $reportables): array
     {
         // For this, need to check the date a person signed up for the service. If date is
 
         $period = 'month';
         $record = MonthlyReport::where('month', 'LIKE', sprintf('%s%%', date('Y') - 1))
             ->orderBy('id', 'asc')
-            ->get([...$reportables, 'month']);
+            ->get(['month', ...$reportables]);
         if (count($record)) {
             $record = self::augmentMonthlyReport($reportables, $record, 12 - count($record));
         } else {
@@ -162,7 +166,7 @@ class Report
         return self::generateLineChartData($reportables, $record, $period);
     }
 
-    public static function getAllTimeReport(Array $reportables): array
+    public static function getAllTimeReport(array $reportables): array
     {
         $record = DailyReport::orderBy('id', 'asc')->limit(1)
             ->get(['date']);
@@ -176,22 +180,22 @@ class Report
         {
             case $daysSince <= 48: // Hourly Report
                 $record = HourlyReport::orderBy('id', 'asc')
-                    ->get([...$reportables, 'hour']);
+                    ->get(['hour', ...$reportables]);
                 $period = "hour";
                 break;
             case $daysSince <= 31: // Daily Report
                 $record = DailyReport::orderBy('id', 'asc')
-                    ->get([...$reportables, 'date']);
+                    ->get(['date', ...$reportables]);
                 $period = "date";
                 break;
             case $daysSince < (365 * 3): // Monthly Report
                 $record = MonthlyReport::orderBy('id', 'asc')
-                    ->get([...$reportables, 'month']);
+                    ->get(['month', ...$reportables]);
                 $period = "month";
                 break;
             default: // Yearly report
                 $record = YearlyReport::orderBy('id', 'asc')
-                    ->get([...$reportables, 'year']);
+                    ->get(['year', ...$reportables]);
                 $period = "year";
         }
 
@@ -199,7 +203,7 @@ class Report
     }
 
 
-    private static function augmentMonthlyReport(Array $reportables, $record, $months)
+    private static function augmentMonthlyReport(array $reportables, $record, $months)
     {
         $totalRecords = count($record);
         if ($totalRecords < $months) {
@@ -215,16 +219,16 @@ class Report
             }
 
             $collection = collect($additionalRecords);
-            $objectsArray = $collection->map(function ($item) {
+            $objectsarray = $collection->map(function ($item) {
                 return (object)$item;
             });
         }
 
-        return count($record) ? $objectsArray->merge($record) : $objectsArray;
+        return count($record) ? $objectsarray->merge($record) : $objectsarray;
     }
 
 
-    private static function augmentHourlyReport(Array $reportables, $record, $hours)
+    private static function augmentHourlyReport(array $reportables, $record, $hours)
     {
         $totalRecords = count($record);
         if ($totalRecords < $hours) {
@@ -240,16 +244,16 @@ class Report
             }
 
             $collection = collect($additionalRecords);
-            $objectsArray = $collection->map(function ($item) {
+            $objectsarray = $collection->map(function ($item) {
                 return (object)$item;
             });
         }
 
-        return count($record) ? $objectsArray->merge($record) : $objectsArray;
+        return count($record) ? $objectsarray->merge($record) : $objectsarray;
     }
 
 
-    private static function getHourlyReport(Array $reportables, int $hours)
+    private static function getHourlyReport(array $reportables, int $hours)
     {
         $record = self::getHourlyReportData($reportables, $hours);
         return self::generateLineChartData($reportables, (count($record) < $hours ? self::augmentHourlyReport($reportables, $record, $hours)  : $record), 'hour');
@@ -280,7 +284,7 @@ class Report
         return $carbonDate->format('Y-m');
     }
 
-    private static function initializeReportables(Array $reportables)
+    private static function initializeReportables(array $reportables)
     {
         $reportable = [];
         if(!empty($reportables))
@@ -294,7 +298,7 @@ class Report
     }
 
 
-    private static function augmentDailyReport(Array $reportables, $record, $days)
+    private static function augmentDailyReport(array $reportables, $record, $days)
     {
         $totalRecords = count($record);
         if ($totalRecords < $days) {
@@ -309,29 +313,29 @@ class Report
             }
 
             $collection = collect($additionalRecords);
-            $objectsArray = $collection->map(function ($item) {
+            $objectsarray = $collection->map(function ($item) {
                 return (object)$item;
             });
         }
 
-        return count($record) ? $objectsArray->merge($record) : $objectsArray;
+        return count($record) ? $objectsarray->merge($record) : $objectsarray;
     }
 
 
-    private static function getDailyReport(Array $reportables, int $days): array
+    private static function getDailyReport(array $reportables, int $days): array
     {
         $record = self::getDailyReportData($reportables, $days);
         return self::generateLineChartData($reportables, (count($record) < $days ? self::augmentDailyReport($reportables, $record, $days) : $record), 'date');
     }
 
 
-    private static function getMonthlyReport(Array $reportables, int $months): array
+    private static function getMonthlyReport(array $reportables, int $months): array
     {
         $record = self::getMonthlyReportData($reportables, $months);
         return self::generateLineChartData($reportables, $record, 'month');
     }
 
-    private static function generateLineChartData(Array $reportables, $records, $xkey): array
+    private static function generateLineChartData(array $reportables, $records, $xkey): array
     {
         $data = [];
         $labels = [];
@@ -344,29 +348,30 @@ class Report
         }
 
         if (count($records) > 0) {
-            foreach ($records->toArray() as &$record) {
+            $finalRecord = [];
+            foreach ($records->toarray() as $record) {
+                $localRecord = (array) $record;
                 foreach ($record as $key => $value) {
-                    // dd($record);
                     if ($key == $xkey) {
                         switch ($xkey) {
                             case 'hour':
                                 $date = Carbon::createFromFormat('Y-m-d H', $value);
-                                // $record[$key] = $date->format('h A');
+                                $localRecord[$key] = $date->format('h A');
                                 array_push($labels, $date->format('h A'));
                                 break;
                             case 'date':
                                 $date = Carbon::createFromFormat('Y-m-d', $value);
-                                // $record[$key] = $date->format('M d');
+                                $localRecord[$key] = $date->format('M d');
                                 array_push($labels, $date->format('M d'));
                                 break;
                             case 'month':
                                 $date = Carbon::createFromFormat('Y-m', $value);
-                                // $record[$key] = $date->format('M. Y');
-                                array_push($labels, $date->format('M. Y'));
+                                $localRecord[$key] = $date->format('M, Y');
+                                array_push($labels, $date->format('M, Y'));
                                 break;
                             case 'year':
                                 $date = Carbon::createFromFormat('Y', $value);
-                                // $record[$key] = $date->format('Y');
+                                $localRecord[$key] = $date->format('Y');
                                 array_push($labels, $date->format('Y'));
                                 break;
                         }
@@ -374,6 +379,7 @@ class Report
                         array_push($data[$key], $value);
                     }
                 }
+                array_push($finalRecord, $localRecord);
             }
         }
 
@@ -390,8 +396,12 @@ class Report
         }
 
         return [
-            'labels' => $labels,
-            'datasets' => $datasets,
+            'chart' => [
+                'labels' => $labels,
+                'datasets' => $datasets,
+            ],
+            'records' => $finalRecord,
+            'reportables' => $reportables,
         ];
 
 
@@ -445,63 +455,63 @@ class Report
      /**
      * Get Hourly Report Data
      *
-     * @param Array $reportables Array of fields to fetch
+     * @param array $reportables array of fields to fetch
      * @param integer $hours
      * @return Collection
      */
-    private static function getHourlyReportData(Array $reportables, int $hours): Collection
+    private static function getHourlyReportData(array $reportables, int $hours): Collection
     {
         $totalRecord = HourlyReport::count();
         return HourlyReport::orderBy('id', 'asc')
             ->offset($totalRecord - $hours)
-            ->limit($hours)->get([...$reportables, 'hour']);
+            ->limit($hours)->get(['hour', ...$reportables]);
     }
 
     /**
      * Get Daily Report Data
      *
-     * @param Array $reportables Array of fields to fetch
+     * @param array $reportables array of fields to fetch
      * @param integer $days
      * @return Collection
      */
-    private static function getDailyReportData(Array $reportables, int $days): Collection
+    private static function getDailyReportData(array $reportables, int $days): Collection
     {
         $totalRecord = DailyReport::count();
         return DailyReport::orderBy('id', 'asc')
             ->offset($totalRecord - $days)
-            ->limit($days)->get([...$reportables, 'date']);
+            ->limit($days)->get(['date', ...$reportables]);
     }
 
 
     /**
      * Get Monthly Report Data
      *
-     * @param Array $reportables Array of fields to fetch
+     * @param array $reportables array of fields to fetch
      * @param integer $months
      * @return Collection
      */
-    private static function getMonthlyReportData(Array $reportables, int $months): Collection
+    private static function getMonthlyReportData(array $reportables, int $months): Collection
     {
         $totalRecord = MonthlyReport::count();
         return MonthlyReport::orderBy('id', 'asc')
             ->offset($totalRecord - $months)
-            ->limit($months)->get([...$reportables, 'month']);
+            ->limit($months)->get(['month', ...$reportables]);
     }
 
 
      /**
      * Get Custom Period Report Data
      *
-     * @param Array $reportables Array of fields to fetch
+     * @param array $reportables array of fields to fetch
      * @param DateTime $startDate
      * @param DateTime $endDate
      * @return Collection
      */
-    private static function getCustomPeriodReportData(Array $reportables, DateTime $startDate, DateTime $endDate): Collection
+    private static function getCustomPeriodReportData(array $reportables, DateTime $startDate, DateTime $endDate): Collection
     {
         return DailyReport::where('date', '>=', $startDate->format('Y-m-d'))
             ->where('date', '<=', $endDate->format('Y-m-d'))
             ->orderBy('id', 'asc')
-            ->get([...$reportables, 'date']);
+            ->get(['date', ...$reportables]);
     }
 }

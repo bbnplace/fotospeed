@@ -56,6 +56,9 @@
         <Panel snippetTitle="Report Chart" class="chart-container">
             <LineChart :data="chartData" />
         </Panel>
+        <Panel :snippetTitle="`${key} Records`">
+            <static-records :data="records"></static-records>
+        </Panel>
     </BackendLayout>
 </template>
 
@@ -64,9 +67,12 @@ import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import LineChart from '@/Components/LineChart.vue';
+import StaticRecords from '@/Components/StaticRecords.vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
+import Records from  '@/Components/Records.vue';
 import '@vuepic/vue-datepicker/dist/main.css';
 import axios from 'axios';
+import moment from 'moment';
 
 const props = usePage().props[0] ?? usePage().props;
 const key = props.key;
@@ -74,6 +80,26 @@ const chartData = props.reports[key];
 const periods = props.periods;
 const minDate = props.startDate;
 const reportRequester = props.clientRoute;
+const reportables = props.reportables;
+
+const header = [];
+for (let index = 0; index < reportables.length; index++) {
+    const element = reportables[index];
+    header.push({
+        title: element,
+        key: element,
+        sortable: true
+    })
+}
+
+const records = {
+    records: props.records,
+    search: "",
+    title: `${key} Report`,
+    header: header
+}
+
+
 
 const items = [];
 for (const key in periods) {
@@ -92,6 +118,8 @@ const form = useForm({
 const submitForm = () => {
 
 }
+
+
 
 </script>
 

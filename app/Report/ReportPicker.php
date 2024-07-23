@@ -28,17 +28,15 @@ class ReportPicker
         ];
 
         $targetRef = isset($knownRefs[$ref]) ? $ref : '24hrs';
+        $data = self::getRecords($targetRef, $request->start ?? '', $request->stop ?? '');
 
         return [
-            // 'balance' => auth()->user()->balance,
             'startDate' => !isset($startDate[0]) ? date('Y-m-d') : $startDate[0]->date,
-            // 'totalSent' => 0,
-            // 'totalReceived' => 0,
-            // 'pendingSchedule' => Schedule::where('user_id', $user->id)->where('processed', 0)->count(),
-            // 'subscribableGroups' => Group::where('user_id', $user->id)->where('subscribable', 1)->count(),
             'reports' => [
-                $ref => self::getRecords($targetRef, $request->start ?? '', $request->stop ?? '')
+                $ref => $data['chart'],
             ],
+            'records' => $data['records'],
+            'reportables' => $data['reportables'],
             'key' => $targetRef,
             'periods' => $knownRefs,
             'endpoint' => route('report.json', $ref),
