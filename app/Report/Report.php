@@ -340,7 +340,7 @@ class Report
         $data = [];
         $labels = [];
         $datasets = [];
-        $lineColors = ['#ff2500', '#28a745', '#ff5000', '#ff9000','#ff2500', '#28a745', '#ff5000', '#ff9000'];
+        $lineColors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00','#0000FF', '#4B0082', '#8B00FF'];
 
         foreach ($reportables as $value)
         {
@@ -400,7 +400,7 @@ class Report
                 'labels' => $labels,
                 'datasets' => $datasets,
             ],
-            'records' => $finalRecord,
+            'records' => array_reverse($finalRecord),
             'reportables' => $reportables,
         ];
 
