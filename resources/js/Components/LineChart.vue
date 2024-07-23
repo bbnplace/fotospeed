@@ -22,7 +22,17 @@
   
   const chartOptions = ref({
     responsive: true,
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      layout: {
+        padding: {
+          bottom: 50
+        }
+      }
   })
   </script>
   

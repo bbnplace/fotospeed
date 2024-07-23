@@ -54,7 +54,7 @@
         </div>
         
         <Panel snippetTitle="Report Chart" class="chart-container">
-            <LineChart :data="chartData" class="pb-16" />
+            <LineChart :data="chartData" />
         </Panel>
     </BackendLayout>
 </template>
