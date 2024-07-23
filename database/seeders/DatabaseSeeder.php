@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             OrderStatusesSeeder::class,
             ReportsInitializationSeeder::class,
+            SettingsSeeder::class,
         ]);
     }
 }

@@ -15,6 +15,12 @@ class DashboardController extends Controller
     public function index(Request $request, $ref='24hrs')
     {
         $settings = Setting::first();
+        if (empty($settings->reports_permission)) {
+            $settings->reportables = json_encode(["Received"]);
+            $settings->reports_permission = json_encode(["Administrator", "System Admin"]);
+            $settings->save();
+        }
+        
         $reportViewers = json_decode($settings->reports_permission);
         if (in_array(auth()->user()->role->name, $reportViewers)) {
             // TODO: Needs to be able to determine what records to fetch [Hourly, Daily, Monthly or Yearly]

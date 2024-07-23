@@ -55,28 +55,20 @@ class ReportPicker
         {
             case '7days':
                 return Report::get7DaysReport($reportables);
-                break;
             case '30days':
                 return Report::get30DaysReport($reportables);
-                break;
             case '90days':
                 return Report::get90DaysReport($reportables);
-                break;
             case 'this-year':
                 return Report::getThisYearReport($reportables);
-                break;
             case 'last-year':
                 return Report::getLastYearReport($reportables);
-                break;
             case 'all-time':
                 return Report::getAllTimeReport($reportables);
-                break;
             case 'custom':
                 return Report::getCustomReport($reportables, $from, $to);
-                break;
             default:
                 return Report::get24HoursReport($reportables);
-                break;
         }
     }
 }

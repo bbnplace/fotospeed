@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->json('reportables')->default(json_encode(["Received"]))->after('payment_email_temp'); // This field contains an array of reportable data
-            $table->json('reports_permission')->default(json_encode(['Administrator', 'System Admin']))->after('reportables');
+            $table->json('reportables')->nullable()->after('payment_email_temp'); // This field contains an array of reportable data
+            $table->json('reports_permission')->nullable()->after('reportables');
         });
+
+        // Setting default values programmatically after altering the table
+        DB::table('settings')->update([
+            'reportables' => json_encode(["Received"]),
+            'reports_permission' => json_encode(["Administrator", "System Admin"])
+        ]);
     }
 
     /**
