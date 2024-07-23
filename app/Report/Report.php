@@ -2,53 +2,54 @@
 
 namespace App\Report;
 
-use App\Events\SmsSent;
-use App\Messaging\Conf;
 use App\Models\DailyReport;
 use App\Models\HourlyReport;
 use App\Models\MonthlyReport;
-use App\Models\SentSms;
-use App\Models\User;
 use App\Models\YearlyReport;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Stmt\TryCatch;
 
 class Report
 {
-    public static function get24HoursReport(User $user): array
+    public static function get24HoursReport(Array $reportables): array
     {
-        return self::getHourlyReport($user, 24);
+        return self::getHourlyReport($reportables, 24);
     }
 
-    public static function get7DaysReport(User $user): array
+    public static function get7DaysReport(Array $reportables): array
     {
-        return self::getDailyReport($user, 7);
+        return self::getDailyReport($reportables, 7);
     }
 
-    public static function get30DaysReport(User $user): array
+    public static function get30DaysReport(Array $reportables): array
     {
-        return self::getDailyReport($user, 30);
+        return self::getDailyReport($reportables, 30);
     }
 
-    public static function get90DaysReport(User $user): array
+    public static function get90DaysReport(Array $reportables): array
     {
-        return self::getDailyReport($user, 90);
+        return self::getDailyReport($reportables, 90);
     }
 
-    public static function getCustomReport(User $user, string $start, string $end): array
+    public static function getCustomReport(Array $reportables, string $start, string $end): array
     {
         if (empty($start) || empty($end)) {
+            // return [
+            //     'traffic' => [
+            //         'data' => [],
+            //         'xkey' => [],
+            //         'ykeys' => $reportables,
+            //         'labels' => $reportables,
+            //         'lineColors' => ['#ff2500', '#28a745', '#ff5000', '#ff9000'],
+            //     ]
+            // ];
             return [
-                'traffic' => [
-                    'data' => [],
-                    'xkey' => [],
-                    'ykeys' => ['sent', 'inbox', 'queries', 'subscriptions'],
-                    'labels' => ['Sent SMS', 'Received SMS', 'SMS Queries', 'Subscriptions'],
-                    'lineColors' => ['#ff2500', '#28a745', '#ff5000', '#ff9000'],
-                ]
+                'labels'=> [],
+                'datasets' => []
             ];
         }
 
@@ -69,39 +70,37 @@ class Report
                 $record = HourlyReport::where('hour', '>=', $startDate->format('Y-m-d H'))
                     ->where('hour', '<=', $stopDate->format('Y-m-d H'))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'hour']);
+                    ->get([...$reportables, 'hour']);
                 $period = "hour";
                 break;
             case $numberOfDays <= 61: // Daily Report
                 $record = DailyReport::where('date', '>=', $startDate->format('Y-m-d'))
                     ->where('date', '<=', $stopDate->format('Y-m-d'))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'date']);
+                    ->get([...$reportables, 'date']);
                 $period = "date";
                 break;
             case $numberOfDays < (365 * 3): // Monthly Report
                 $record = MonthlyReport::where('month', '>=', $startDate->format('Y-m'))
                     ->where('month', '<=', $stopDate->format('Y-m'))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'month']);
+                    ->get([...$reportables, 'month']);
                 $period = "month";
                 break;
             default: // Yearly report
                 $record = YearlyReport::where('year', '>=', $startDate->format('Y'))
                     ->where('year', '<=', $stopDate->format('Y'))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'year']);
+                    ->get([...$reportables, 'year']);
                 $period = "year";
         }
 
-            return [
-                'traffic' => self::generateLineChartData($record, $period),
-            ];
+            return self::generateLineChartData($reportables, $record, $period);
     }
 
 
 
-    public static function getThisYearReport(User $user): array
+    public static function getThisYearReport(Array $reportables): array
     {
         $currentDate = Carbon::now();
         $dayOfYear = $currentDate->dayOfYear;
@@ -113,48 +112,43 @@ class Report
                 $period = 'hour';
                 $record = HourlyReport::where('hour', 'LIKE', sprintf('%s%%', date('Y')))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'hour']);
-                $record = count($record) < $dayOfYear ? self::augmentHourlyReport($record, $dayOfYear) : $record;
+                    ->get([...$reportables, 'hour']);
+                $record = count($record) < $dayOfYear ? self::augmentHourlyReport($reportables, $record, $dayOfYear) : $record;
                 break;
             case $dayOfYear < 31: // Daily
                 $period = 'date';
                 $record = DailyReport::where('date', 'LIKE', sprintf('%s%%', date('Y')))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'date']);
-                $record = count($record) < $dayOfYear ? self::augmentDailyReport($record, $dayOfYear) : $record;
+                    ->get([...$reportables, 'date']);
+                $record = count($record) < $dayOfYear ? self::augmentDailyReport($reportables, $record, $dayOfYear) : $record;
                 break;
             default: // Monthly
                 $period = 'month';
                 $record = MonthlyReport::where('month', 'LIKE', sprintf('%s%%', date('Y')))
                     ->orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'month']);
+                    ->get([...$reportables, 'month']);
         }
 
-        return [
-            'traffic' => self::generateLineChartData($record, $period),
-        ];
+        return self::generateLineChartData($reportables, $record, $period);
     }
 
-    public static function getLastYearReport(User $user): array
+    public static function getLastYearReport(Array $reportables): array
     {
         // For this, need to check the date a person signed up for the service. If date is
 
         $period = 'month';
         $record = MonthlyReport::where('month', 'LIKE', sprintf('%s%%', date('Y') - 1))
             ->orderBy('id', 'asc')
-            ->get(['sent', 'inbox', 'queries', 'subscriptions', 'month']);
+            ->get([...$reportables, 'month']);
         if (count($record)) {
-            $record = self::augmentMonthlyReport($record, 12 - count($record));
+            $record = self::augmentMonthlyReport($reportables, $record, 12 - count($record));
         } else {
             $minDate = sprintf("%d-01", date("Y"));
 
             $additionalRecords = [];
             for ($i=12; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    'sent' => 0,
-                    'inbox' => 0,
-                    'queries' => 0,
-                    'subscriptions' => 0,
+                    ...self::initializeReportables($reportables),
                     'month' => self::getPastMonth($minDate, $i),
                 ]);
             }
@@ -165,12 +159,10 @@ class Report
             });
         }
 
-        return [
-            'traffic' => self::generateLineChartData($record, $period),
-        ];
+        return self::generateLineChartData($reportables, $record, $period);
     }
 
-    public static function getAllTimeReport(User $user): array
+    public static function getAllTimeReport(Array $reportables): array
     {
         $record = DailyReport::orderBy('id', 'asc')->limit(1)
             ->get(['date']);
@@ -184,32 +176,30 @@ class Report
         {
             case $daysSince <= 48: // Hourly Report
                 $record = HourlyReport::orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'hour']);
+                    ->get([...$reportables, 'hour']);
                 $period = "hour";
                 break;
             case $daysSince <= 31: // Daily Report
                 $record = DailyReport::orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'date']);
+                    ->get([...$reportables, 'date']);
                 $period = "date";
                 break;
             case $daysSince < (365 * 3): // Monthly Report
                 $record = MonthlyReport::orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'month']);
+                    ->get([...$reportables, 'month']);
                 $period = "month";
                 break;
             default: // Yearly report
                 $record = YearlyReport::orderBy('id', 'asc')
-                    ->get(['sent', 'inbox', 'queries', 'subscriptions', 'year']);
+                    ->get([...$reportables, 'year']);
                 $period = "year";
         }
 
-        return [
-            'traffic' => self::generateLineChartData($record, $period),
-        ];
+        return self::generateLineChartData($reportables, $record, $period);
     }
 
 
-    private static function augmentMonthlyReport($record, $months)
+    private static function augmentMonthlyReport(Array $reportables, $record, $months)
     {
         $totalRecords = count($record);
         if ($totalRecords < $months) {
@@ -219,10 +209,7 @@ class Report
             $additionalRecords = [];
             for ($i=$requiredRecords; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    'sent' => 0,
-                    'inbox' => 0,
-                    'queries' => 0,
-                    'subscriptions' => 0,
+                    ...self::initializeReportables($reportables),
                     'month' => self::getPastMonth($minDate, $i),
                 ]);
             }
@@ -237,7 +224,7 @@ class Report
     }
 
 
-    private static function augmentHourlyReport($record, $hours)
+    private static function augmentHourlyReport(Array $reportables, $record, $hours)
     {
         $totalRecords = count($record);
         if ($totalRecords < $hours) {
@@ -247,10 +234,7 @@ class Report
             $additionalRecords = [];
             for ($i=$requiredRecords; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    'sent' => 0,
-                    'inbox' => 0,
-                    'queries' => 0,
-                    'subscriptions' => 0,
+                    ...self::initializeReportables($reportables),
                     'hour' => self::getPastHour($minDate, $i),
                 ]);
             }
@@ -265,12 +249,10 @@ class Report
     }
 
 
-    private static function getHourlyReport(User $user, int $hours)
+    private static function getHourlyReport(Array $reportables, int $hours)
     {
-        $record = self::getHourlyReportData($user, $hours);
-        return [
-            'traffic' => self::generateLineChartData(count($record) < $hours ? self::augmentHourlyReport($record, $hours)  : $record, 'hour')
-        ];
+        $record = self::getHourlyReportData($reportables, $hours);
+        return self::generateLineChartData($reportables, (count($record) < $hours ? self::augmentHourlyReport($reportables, $record, $hours)  : $record), 'hour');
     }
 
 
@@ -298,8 +280,21 @@ class Report
         return $carbonDate->format('Y-m');
     }
 
+    private static function initializeReportables(Array $reportables)
+    {
+        $reportable = [];
+        if(!empty($reportables))
+        {
+            foreach ($reportables as $value) {
+                $reportable[$value] = 0;
+            }
+        }
 
-    private static function augmentDailyReport($record, $days)
+        return $reportable;
+    }
+
+
+    private static function augmentDailyReport(Array $reportables, $record, $days)
     {
         $totalRecords = count($record);
         if ($totalRecords < $days) {
@@ -308,10 +303,7 @@ class Report
             $additionalRecords = [];
             for ($i=$requiredRecords; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    'sent' => 0,
-                    'inbox' => 0,
-                    'queries' => 0,
-                    'subscriptions' => 0,
+                    ...self::initializeReportables($reportables),
                     'date' => self::getPastDay($minDate, $i),
                 ]);
             }
@@ -326,60 +318,90 @@ class Report
     }
 
 
-    private static function getDailyReport(User $user, int $days): array
+    private static function getDailyReport(Array $reportables, int $days): array
     {
-        $record = self::getDailyReportData($user, $days);
-        return [
-            'traffic' => self::generateLineChartData(count($record) < $days ? self::augmentDailyReport($record, $days) : $record, 'date'),
-        ];
+        $record = self::getDailyReportData($reportables, $days);
+        return self::generateLineChartData($reportables, (count($record) < $days ? self::augmentDailyReport($reportables, $record, $days) : $record), 'date');
     }
 
 
-    private static function getMonthlyReport(User $user, int $months): array
+    private static function getMonthlyReport(Array $reportables, int $months): array
     {
-        $record = self::getMonthlyReportData($user, $months);
-        return [
-            'traffic' => self::generateLineChartData($record, 'month'),
-        ];
+        $record = self::getMonthlyReportData($reportables, $months);
+        return self::generateLineChartData($reportables, $record, 'month');
     }
 
-    private static function generateLineChartData($records, $xkey): array
+    private static function generateLineChartData(Array $reportables, $records, $xkey): array
     {
+        $data = [];
+        $labels = [];
+        $datasets = [];
+        $lineColors = ['#ff2500', '#28a745', '#ff5000', '#ff9000','#ff2500', '#28a745', '#ff5000', '#ff9000'];
+
+        foreach ($reportables as $value)
+        {
+            $data[$value] = [];
+        }
 
         if (count($records) > 0) {
-            foreach ($records as &$record) {
+            foreach ($records->toArray() as &$record) {
                 foreach ($record as $key => $value) {
+                    // dd($record);
                     if ($key == $xkey) {
                         switch ($xkey) {
                             case 'hour':
                                 $date = Carbon::createFromFormat('Y-m-d H', $value);
-                                $record->{$key} = $date->format('h A');
+                                // $record[$key] = $date->format('h A');
+                                array_push($labels, $date->format('h A'));
                                 break;
                             case 'date':
                                 $date = Carbon::createFromFormat('Y-m-d', $value);
-                                $record->{$key} = $date->format('M d');
+                                // $record[$key] = $date->format('M d');
+                                array_push($labels, $date->format('M d'));
                                 break;
                             case 'month':
                                 $date = Carbon::createFromFormat('Y-m', $value);
-                                $record->{$key} = $date->format('M. Y');
+                                // $record[$key] = $date->format('M. Y');
+                                array_push($labels, $date->format('M. Y'));
                                 break;
                             case 'year':
                                 $date = Carbon::createFromFormat('Y', $value);
-                                $record->{$key} = $date->format('Y');
+                                // $record[$key] = $date->format('Y');
+                                array_push($labels, $date->format('Y'));
                                 break;
                         }
+                    } else {
+                        array_push($data[$key], $value);
                     }
                 }
             }
         }
 
+        $colorIndex = 0;
+        foreach ($reportables as $value)
+        {
+            array_push($datasets, [
+                'label' => $value,
+                'backgroundColor' => $lineColors[$colorIndex],
+                'borderColor' => $lineColors[$colorIndex],
+                'data' => $data[$value],
+            ]);
+            $colorIndex++;
+        }
+
         return [
-            'data' => $records,
-            'xkey' => $xkey,
-            'ykeys' => ['sent', 'inbox', 'queries', 'subscriptions'],
-            'labels' => ['Sent SMS', 'Received SMS', 'SMS Queries', 'Subscriptions'],
-            'lineColors' => ['#ff2500', '#28a745', '#ff5000', '#ff9000'],
+            'labels' => $labels,
+            'datasets' => $datasets,
         ];
+
+
+        // return [
+        //     'data' => $records,
+        //     'xkey' => $xkey,
+        //     'ykeys' => $reportables,
+        //     'labels' => $reportables,
+        //     'lineColors' => ['#ff2500', '#28a745', '#ff5000', '#ff9000'],
+        // ];
     }
 
 
@@ -414,8 +436,6 @@ class Report
             } else {
                 $effectiveDate = $effectiveDate->format("Y-m-d H:i:s");
             }
-
-
         }
 
         return $effectiveDate ?? false;
@@ -425,63 +445,63 @@ class Report
      /**
      * Get Hourly Report Data
      *
-     * @param User $user
+     * @param Array $reportables Array of fields to fetch
      * @param integer $hours
      * @return Collection
      */
-    private static function getHourlyReportData(User $user, int $hours): Collection
+    private static function getHourlyReportData(Array $reportables, int $hours): Collection
     {
         $totalRecord = HourlyReport::count();
         return HourlyReport::orderBy('id', 'asc')
             ->offset($totalRecord - $hours)
-            ->limit($hours)->get(['sent', 'inbox', 'queries', 'subscriptions', 'hour']);
+            ->limit($hours)->get([...$reportables, 'hour']);
     }
 
     /**
      * Get Daily Report Data
      *
-     * @param User $user
+     * @param Array $reportables Array of fields to fetch
      * @param integer $days
      * @return Collection
      */
-    private static function getDailyReportData(User $user, int $days): Collection
+    private static function getDailyReportData(Array $reportables, int $days): Collection
     {
         $totalRecord = DailyReport::count();
         return DailyReport::orderBy('id', 'asc')
             ->offset($totalRecord - $days)
-            ->limit($days)->get(['sent', 'inbox', 'queries', 'subscriptions', 'date']);
+            ->limit($days)->get([...$reportables, 'date']);
     }
 
 
     /**
      * Get Monthly Report Data
      *
-     * @param User $user
+     * @param Array $reportables Array of fields to fetch
      * @param integer $months
      * @return Collection
      */
-    private static function getMonthlyReportData(User $user, int $months): Collection
+    private static function getMonthlyReportData(Array $reportables, int $months): Collection
     {
         $totalRecord = MonthlyReport::count();
         return MonthlyReport::orderBy('id', 'asc')
             ->offset($totalRecord - $months)
-            ->limit($months)->get(['sent', 'inbox', 'queries', 'subscriptions', 'month']);
+            ->limit($months)->get([...$reportables, 'month']);
     }
 
 
      /**
      * Get Custom Period Report Data
      *
-     * @param User $user
+     * @param Array $reportables Array of fields to fetch
      * @param DateTime $startDate
      * @param DateTime $endDate
      * @return Collection
      */
-    private static function getCustomPeriodReportData(User $user, DateTime $startDate, DateTime $endDate): Collection
+    private static function getCustomPeriodReportData(Array $reportables, DateTime $startDate, DateTime $endDate): Collection
     {
         return DailyReport::where('date', '>=', $startDate->format('Y-m-d'))
             ->where('date', '<=', $endDate->format('Y-m-d'))
             ->orderBy('id', 'asc')
-            ->get(['sent', 'inbox', 'queries', 'subscriptions', 'date']);
+            ->get([...$reportables, 'date']);
     }
 }

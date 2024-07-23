@@ -67,6 +67,12 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     // Route for forwarding an order to the next process
     Route::post('panel/forward', [JobProcessTransferController::class, 'forward'])->name('process.forward');
     Route::get('panel/order/{id}/task-completed', [JobProcessTransferController::class, 'completed'])->name('process.completed');
+
+    Route::get('/report/{type}', [DashboardController::class, 'report'])->name('report');
+    Route::get('/report/{type}/json', [DashboardController::class, 'getReports'])->name('report.json');
+    Route::get('/report', [DashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', [DashboardController::class, 'home'])->name('dashboard');
+    Route::post('/report/export/file', [DashboardController::class, 'export'])->name('report.export');
 });
 
 

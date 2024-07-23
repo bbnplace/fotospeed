@@ -2,8 +2,8 @@
 
 namespace App\Report;
 
-use App\Models\Group;
-use App\Models\Schedule;
+use App\Models\DailyReport;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,9 +12,9 @@ class ReportPicker
     /**
      * Method that actually feches the Admin Reports
      */
-    public static function reports(Request $request, $user, $clientRoute, $ref='24hrs')
+    public static function reports(Request $request, $clientRoute, $ref='24hrs')
     {
-        $startDate = DB::table(sprintf("report_%d_daily", $user->id))->orderBy('id', 'asc')->limit(1)->get('date');
+        $startDate = DailyReport::orderBy('id', 'asc')->limit(1)->get('date');
 
         $knownRefs = [
             '24hrs' => 'Last 24 Hours',
@@ -30,14 +30,14 @@ class ReportPicker
         $targetRef = isset($knownRefs[$ref]) ? $ref : '24hrs';
 
         return [
-            'balance' => auth()->user()->balance,
+            // 'balance' => auth()->user()->balance,
             'startDate' => !isset($startDate[0]) ? date('Y-m-d') : $startDate[0]->date,
-            'totalSent' => 0,
-            'totalReceived' => 0,
-            'pendingSchedule' => Schedule::where('user_id', $user->id)->where('processed', 0)->count(),
-            'subscribableGroups' => Group::where('user_id', $user->id)->where('subscribable', 1)->count(),
+            // 'totalSent' => 0,
+            // 'totalReceived' => 0,
+            // 'pendingSchedule' => Schedule::where('user_id', $user->id)->where('processed', 0)->count(),
+            // 'subscribableGroups' => Group::where('user_id', $user->id)->where('subscribable', 1)->count(),
             'reports' => [
-                $ref => self::getRecords($targetRef, $user, $request->start ?? '', $request->stop ?? '')
+                $ref => self::getRecords($targetRef, $request->start ?? '', $request->stop ?? '')
             ],
             'key' => $targetRef,
             'periods' => $knownRefs,
@@ -47,33 +47,35 @@ class ReportPicker
         ];
     }
 
-    private static function getRecords($ref, $user, $from='', $to='')
+    private static function getRecords($ref, $from='', $to='')
     {
+        $settings = Setting::first();
+        $reportables = json_decode($settings->reportables);
         switch ($ref)
         {
             case '7days':
-                return Report::get7DaysReport($user);
+                return Report::get7DaysReport($reportables);
                 break;
             case '30days':
-                return Report::get30DaysReport($user);
+                return Report::get30DaysReport($reportables);
                 break;
             case '90days':
-                return Report::get90DaysReport($user);
+                return Report::get90DaysReport($reportables);
                 break;
             case 'this-year':
-                return Report::getThisYearReport($user);
+                return Report::getThisYearReport($reportables);
                 break;
             case 'last-year':
-                return Report::getLastYearReport($user);
+                return Report::getLastYearReport($reportables);
                 break;
             case 'all-time':
-                return Report::getAllTimeReport($user);
+                return Report::getAllTimeReport($reportables);
                 break;
             case 'custom':
-                return Report::getCustomReport($user, $from, $to);
+                return Report::getCustomReport($reportables, $from, $to);
                 break;
             default:
-                return Report::get24HoursReport($user);
+                return Report::get24HoursReport($reportables);
                 break;
         }
     }
