@@ -21,16 +21,14 @@
                 </template>
 
                 <v-list>
-                    <v-list-item
-                    v-for="(item, i) in items"
-                    :key="i"
-                    >
+                    <v-list-item v-for="(item, i) in items" :key="i">
                         <v-list-item-title>
-                            <Link :href="`${route(reportRequester, {email: userEmail, ref: item.slug})}`">{{ item.title }}</Link>
+                            <Link :href="`${route(reportRequester, item.slug)}`">{{ item.title }}</Link>
                         </v-list-item-title>
                     </v-list-item>
                 </v-list>
             </v-menu>
+            
             <div class="d-flex ml-5" v-if="key == 'custom'">
                 <VueDatePicker
                     placeholder="Start Date"
@@ -56,21 +54,23 @@
         </div>
         
         <Panel snippetTitle="Report Chart" class="chart-container">
-            <LineChart :data="chartData" />
+            <LineChart :data="chartData" class="pb-16" />
         </Panel>
     </BackendLayout>
 </template>
 
 <script setup>
 import BackendLayout from '@/Layouts/BackendLayout.vue';
-import Panel from '@/Layouts/Shared/Panel.vue'
-import { Head, usePage } from '@inertiajs/vue3';
-import LineChart from '@/Components/LineChart.vue'
+import Panel from '@/Layouts/Shared/Panel.vue';
+import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
+import LineChart from '@/Components/LineChart.vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+import axios from 'axios';
 
-const props = usePage().props[0];
-const chartData = props.reports.report;
-
+const props = usePage().props[0] ?? usePage().props;
 const key = props.key;
+const chartData = props.reports[key];
 const periods = props.periods;
 const minDate = props.startDate;
 const reportRequester = props.clientRoute;
@@ -81,6 +81,16 @@ for (const key in periods) {
         title: periods[key],
         slug: key
     });
+}
+
+const url = new URL(window.location.href);
+const form = useForm({
+    start: key == 'custom' ? url.searchParams.get('start') : "",
+    stop: url.searchParams.get('stop') ?? new Date()
+})
+
+const submitForm = () => {
+
 }
 
 </script>

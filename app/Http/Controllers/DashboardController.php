@@ -32,8 +32,6 @@ class DashboardController extends Controller
         } else {
             // TODO: If user is not permitted to view report, the user's assigned task appears
         }
-        
-        
     }
 
     public function home(Request $request, $ref='24hrs')
@@ -55,7 +53,7 @@ class DashboardController extends Controller
      */
     public function getReports(Request $request, $ref='24hrs')
     {
-        return ReportPicker::reports($request, auth()->user(), 'report', $ref);
+        return ReportPicker::reports($request, 'report', $ref);
     }
 
 
