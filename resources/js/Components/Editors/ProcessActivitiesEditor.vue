@@ -190,6 +190,7 @@ const saveProcess = () => {
 
     form.name = "";
     processes.splice(processIndex, 1);
+    updateProcesses();
 }
 
 // Add Activity: This function is used to add new activity to a Process.
