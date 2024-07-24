@@ -37,6 +37,7 @@ class ReportPicker
             ],
             'records' => $data['records'],
             'reportables' => $data['reportables'],
+            'totals' => $data['totals'],
             'key' => $targetRef,
             'periods' => $knownRefs,
             'endpoint' => route('report.json', $ref),

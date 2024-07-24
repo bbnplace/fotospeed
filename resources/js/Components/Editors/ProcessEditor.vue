@@ -244,7 +244,7 @@ const reportStates = usePage().props.reportStates;
 const form = useForm({
     id: props.process ? props.process.id : "",
     name: props.process ? props.process.name : "",
-    role: props.process ? props.process.role.name : "",
+    role: props.process ? (props.process.role ? props.process.role.name : "") : "",
     description: props.process ? props.process.description : "",
     nextProcess: props.process ? (props.process.next_process ? props.process.next_process.name : "") : "",
     smsTeam: props.process ? (props.process.sms_team ? !!props.process.sms_team : false) : false,

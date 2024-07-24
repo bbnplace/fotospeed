@@ -1,5 +1,6 @@
 <?php
 
+use App\Config\OrderProcess;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,14 +15,11 @@ return new class extends Migration
         Schema::create('hourly_reports', function (Blueprint $table) {
             $table->id();
             $table->string('hour', 14)->unique();
-            $table->integer('received')->default(0); // To be incremented once order is created
-            $table->integer('processing')->default(0); // To be incremented once payment is received by paystack
-            $table->integer('produced')->default(0); // To be incremented once item is moved to Production.
-            $table->integer('delivered')->default(0); // To be incremented once item status is updated to Delivered.
-            $table->integer('cancelled')->default(0); // To be incremented once an order is cancelled.
-            $table->integer('dispatched')->default(0); // To be incremented once an order has been dispatched.
-            $table->integer('completed')->default(0); // To be incremented once an order has passed through the finishing stage.
-            $table->integer('packaged')->default(0); // To be incremented once an order is packaged.
+
+            $processes = OrderProcess::list();
+            foreach ($processes as $process) {
+                $table->integer(strtolower($process['name']))->default(0);
+            }
         });
     }
 

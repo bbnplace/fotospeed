@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Report;
+use App\Models\OrderStatus;
 
 class ReportBuilder
 {
@@ -22,12 +23,12 @@ class ReportBuilder
      * Build
      * This method increments the value of the relevant fields in the various reports tables
      * 
-     * @param String $field     The name of the field on the reports table. Eg. received, produced, delivered, etc
+     * @param string $field     The name of the field on the reports table. Eg. received, produced, delivered, etc
      * @param int $ordersCount  The number of orders to add to the field
      * 
      * @return void
      */
-    public static function build(String $field, int $ordersCount = 1): void
+    public static function build(string $field, int $ordersCount = 1): void
     {
         $field = strtolower($field);
 
@@ -42,20 +43,20 @@ class ReportBuilder
      * Get Report States
      * This method returns an array of possible states except 'Received' which is 
      * automatically applied to new orders.
-     * @param void
      * 
      * @return array
      */
     public static function getReportStates()
     {
-        return [
-            'Processing',
-            'Produced',
-            'Delivered',
-            'Cancelled',
-            'Dispatched',
-            'Completed',
-            'Packaged',
-        ];
+        return OrderStatus::getOrderStatusesArray();
+        // return [
+        //     'Processing',
+        //     'Produced',
+        //     'Delivered',
+        //     'Cancelled',
+        //     'Dispatched',
+        //     'Completed',
+        //     'Packaged',
+        // ];
     }
 }

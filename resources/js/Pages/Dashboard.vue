@@ -115,11 +115,35 @@ const form = useForm({
     stop: url.searchParams.get('stop') ?? new Date()
 })
 
+// Submiting Search Field
 const submitForm = () => {
-
+    form.get(isEndUser ? route(reportRequester, key) : route(reportRequester, {
+        email: userEmail,
+        ref: key
+    }));
 }
 
+// Exporting Reports to File
+const exportReport = async () => {
+    const payload = {
+        period: key,
+        start: form.start,
+        stop: form.stop,
+    }
 
+    const response = await axios.post(reportProps.exportEndpoint, payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    showSnackbar(response.data.message);
+}
+
+const showSnackbar = text => {
+    elements.snackbarText = text;
+    elements.snackbar = true;
+}
 
 </script>
 

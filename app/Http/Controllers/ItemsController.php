@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\OrderStatus;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -116,6 +118,8 @@ class ItemsController extends Controller
         return [
             'item' => $item,
             'categories' => Category::getCategoriesArray(),
+            'processes' => OrderStatus::getOrderStatusesArray(),
+            'teams' => Role::getRolesArray(),
         ];
     }
 
@@ -166,5 +170,16 @@ class ItemsController extends Controller
 
             return redirect()->route('items')->with('note', 'Selected items have been deleted');
         }
+    }
+
+    public function saveProcessData(Request $request, $id)
+    {
+        $item = Item::find($id);
+        $item->process_data = $request->data;
+        $item->save();
+
+        return [
+            'status' => 'Saved'
+        ];
     }
 }

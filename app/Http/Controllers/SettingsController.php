@@ -21,7 +21,7 @@ class SettingsController extends Controller
         $reportStates = ReportBuilder::getReportStates();
         array_unshift($smsTemplates, 'None');
         array_unshift($emailTemplates, 'None');
-        array_unshift($reportStates, 'Received');
+        // array_unshift($reportStates, 'Received');
 
         return Inertia::render('Backend/Settings/Edit', [
             'settings' => $settings,

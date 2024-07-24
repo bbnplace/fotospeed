@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\OrderStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Config\OrderProcess;
 
 class OrderStatusesSeeder extends Seeder
 {
@@ -13,20 +14,7 @@ class OrderStatusesSeeder extends Seeder
      */
     public function run(): void
     {
-        $statuses = [
-            [
-                'id' => 1,
-                'name' => 'New'
-            ],
-            [
-                'id' => 2,
-                'name' => 'Completed'
-            ],
-            [
-                'id' => 3,
-                'name' => 'Cancelled'
-            ],
-        ];
+        $statuses = OrderProcess::list();
 
         foreach ($statuses as $status) {
             OrderStatus::create($status);

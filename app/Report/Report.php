@@ -38,15 +38,6 @@ class Report
     public static function getCustomReport(array $reportables, string $start, string $end): array
     {
         if (empty($start) || empty($end)) {
-            // return [
-            //     'traffic' => [
-            //         'data' => [],
-            //         'xkey' => [],
-            //         'ykeys' => $reportables,
-            //         'labels' => $reportables,
-            //         'lineColors' => ['#ff2500', '#28a745', '#ff5000', '#ff9000'],
-            //     ]
-            // ];
             return [
                 'chart' => [
                     'labels'=> [],
@@ -54,6 +45,7 @@ class Report
                 ],
                 'records' => [],
                 'reportables' => $reportables,
+                'totals' => []
             ];
         }
 
@@ -152,8 +144,8 @@ class Report
             $additionalRecords = [];
             for ($i=12; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    ...self::initializeReportables($reportables),
                     'month' => self::getPastMonth($minDate, $i),
+                    ...self::initializeReportables($reportables),
                 ]);
             }
 
@@ -213,8 +205,8 @@ class Report
             $additionalRecords = [];
             for ($i=$requiredRecords; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    ...self::initializeReportables($reportables),
                     'month' => self::getPastMonth($minDate, $i),
+                    ...self::initializeReportables($reportables),
                 ]);
             }
 
@@ -238,8 +230,8 @@ class Report
             $additionalRecords = [];
             for ($i=$requiredRecords; $i > 0; $i--) {
                 array_push($additionalRecords, [
-                    ...self::initializeReportables($reportables),
                     'hour' => self::getPastHour($minDate, $i),
+                    ...self::initializeReportables($reportables),
                 ]);
             }
 
@@ -349,6 +341,7 @@ class Report
 
         if (count($records) > 0) {
             $finalRecord = [];
+            $fieldTotals = [];
             foreach ($records->toarray() as $record) {
                 $localRecord = (array) $record;
                 foreach ($record as $key => $value) {
@@ -377,6 +370,7 @@ class Report
                         }
                     } else {
                         array_push($data[$key], $value);
+                        isset($fieldTotals[$key]) ? $fieldTotals[$key] += $value : $fieldTotals[$key] = $value;
                     }
                 }
                 array_push($finalRecord, $localRecord);
@@ -402,16 +396,8 @@ class Report
             ],
             'records' => array_reverse($finalRecord),
             'reportables' => $reportables,
+            'totals' => $fieldTotals,
         ];
-
-
-        // return [
-        //     'data' => $records,
-        //     'xkey' => $xkey,
-        //     'ykeys' => $reportables,
-        //     'labels' => $reportables,
-        //     'lineColors' => ['#ff2500', '#28a745', '#ff5000', '#ff9000'],
-        // ];
     }
 
 

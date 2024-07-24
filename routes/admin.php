@@ -87,6 +87,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
     Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
+    Route::put('panel/item-process/{id}/save', [ItemsController::class,'saveProcessData'])->name('item.saveprocess');
 
     // Customers Management Module
     Route::post('panel/customers', [CustomersController::class, 'records'])->name('customers.records');
