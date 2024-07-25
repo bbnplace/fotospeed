@@ -146,7 +146,7 @@ import axios from 'axios';
 const processes = reactive(usePage().props.processes);
 const teams = usePage().props.teams;
 const retrievedData = usePage().props.item.process_data;
-const processData = retrievedData.length ? JSON.parse(retrievedData) : [];
+const processData = retrievedData == undefined ? [] : JSON.parse(retrievedData);
 
 
 const productProcesses = processData.processes ? reactive(processData.processes) :  reactive([]); // Initial Value to be Populated with fetched data

@@ -159,6 +159,21 @@ class CustomerOrdersController extends Controller
     // This method will broadcast a notification about this order to  the Reception at the target branch
     private function sendOrderNotification()
     {
+        // Get the details of the ordered item and identify all the task that need to be carried out on the new item at this process. Item ID and process name is required.
+        $tasks = Item::getProcessTasks(1, 'New');
+        if (is_array($tasks)) {
+            // Loop through task and drop notification for all teams that should work on the task.
+            foreach ($tasks as $task) {
+                $taskName = $task->name;
+                $taskDescription = $task->description;
+                $team = $task->team;
+
+                // TODO: Get team members from the specified role. If the settings stipulates that order is processed at branch, get team members from branch order was sent to. If settings specifies a specific branch where orders are handled, narrow the collection to the specified branch.
+            }
+        }
+
+
+
         $message = sprintf("You just received a new Order");
         broadcast(new AnnounceNewOrder($message, auth()->user()->branch_id))->toOthers();
     }

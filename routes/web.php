@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PaystackController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Item;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,11 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/test', function(){
+    $data = Item::getProcessTasks(1, 'New');
+    print_r($data);
+});
 
 Route::get('/', function () {
     // return Inertia::render('Welcome', [

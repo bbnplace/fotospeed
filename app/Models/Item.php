@@ -19,6 +19,9 @@ class Item extends Model
         'print_price',
         'sheet_price',
         'cover_print_price',
+        'process_data',
+        'primary_order_processing_branch',
+        'order_processing_branches'
     ];
 
     public function category()
@@ -38,5 +41,26 @@ class Item extends Model
         }
 
         return $items;
+    }
+
+    public static function getItem(int $id)
+    {
+        return self::where('id', $id)->first();
+    }
+
+    public static function getProcessData(int $id)
+    {
+        $item = self::where('id', $id)->first(['process_data']);
+        return json_decode($item->process_data);
+    }
+
+    /**
+     * The Tasks for a Process
+     * @param int $itemId     The ID of the fetched item
+     * @param string $process The name of the process
+     * @return array          An array of tasks
+     */
+    public static function getProcessTasks(int $itemId, string $process) : array {
+        return self::getProcessData($itemId)->tasks->$process;
     }
 }

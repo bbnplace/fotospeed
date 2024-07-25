@@ -108,6 +108,37 @@
                     ></VTextField>
                 </VCol>
             </VRow>
+            <h4 class="mt-3">Processing Units</h4>
+            <VRow>
+                <VCol cols="12" md="6">
+                    <VCombobox
+                        v-model="form.production_branches"
+                        label="Select Branches that can process this item"
+                        :items="branches"
+                        multiple
+                        chips
+                        small-chips
+                        variant="outlined"
+                        :hide-details="form.errors.production_branches == undefined"
+                        :error-messages="form.errors.production_branches"
+                        max-errors="5"
+                        density="compact"
+                    ></VCombobox>
+                </VCol>
+                <VCol cols="12" md="6">
+                    <VAutocomplete
+                        id="branch"
+                        v-model="form.primary_production_branch"
+                        label="Primary Branch"
+                        :items="branches"
+                        variant="outlined"
+                        :hide-details="form.errors.primary_production_branch == undefined"
+                        :error-messages="form.errors.primary_production_branch"
+                        density="compact"
+                    ></VAutocomplete>
+                    <b>Important:</b> In the event that customer selects a center that cannot process this item, this is the center that will receive the order.
+                </VCol>
+            </VRow>
 
             <div class="flex flex-row-reverse mt-3">
                 <VBtn
@@ -136,7 +167,9 @@ interface ItemEditor {
     weight: String,
     print_price: Number,
     sheet_price: Number,
-    cover_print_price: Number
+    cover_print_price: Number,
+    order_processing_branches: string,
+    primary_order_processing_branch: String,
 }
 
 const props = defineProps<{
@@ -144,6 +177,7 @@ const props = defineProps<{
 }>();
 
 const categories = usePage().props.categories;
+const branches = usePage().props.branches;
 
 const form = useForm({
     id: props.item ? props.item.id : "",
@@ -156,6 +190,8 @@ const form = useForm({
     print_price: props.item ? props.item.print_price : "",
     sheet_price: props.item ? props.item.sheet_price : "",
     cover_print_price: props.item ? props.item.cover_print_price : "",
+    production_branches: props.item ? JSON.parse(props.item.order_processing_branches) : [],
+    primary_production_branch: props.item ? props.item.primary_order_processing_branch : ""
 });
 
 const submit = () => {

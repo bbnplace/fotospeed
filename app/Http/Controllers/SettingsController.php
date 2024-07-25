@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\EmailTemplate;
 use App\Models\Role;
 use App\Models\Setting;

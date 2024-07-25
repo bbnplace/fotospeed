@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\OrderStatus;
@@ -11,23 +12,30 @@ use Inertia\Inertia;
 
 class ItemsController extends Controller
 {
-    protected $rules = [
-        'name' => 'string|required|unique:items,name|min:2|max:64',
-        'category' => 'string|required|exists:categories,name|min:2|max:64',
-        'description' => 'required|string|min:24|max:1000',
-        'height' => 'required|string|min:3|max:12',
-        'width' => 'required|string|min:3|max:12',
-        'weight' => 'nullable|string|min:3|max:12',
-        'print_price' => 'nullable|integer|digits_between:2,9',
-        'sheet_price' => 'nullable|integer|digits_between:2,9',
-        'cover_print_price' => 'nullable|integer|digits_between:2,9',
-    ];
+
+    private function getRules()
+    {
+        return [
+            'name' => 'string|required|unique:items,name|min:2|max:64',
+            'category' => 'string|required|exists:categories,name|min:2|max:64',
+            'description' => 'required|string|min:24|max:1000',
+            'height' => 'required|string|min:3|max:12',
+            'width' => 'required|string|min:3|max:12',
+            'weight' => 'nullable|string|min:3|max:12',
+            'print_price' => 'nullable|integer|digits_between:2,9',
+            'sheet_price' => 'nullable|integer|digits_between:2,9',
+            'cover_print_price' => 'nullable|integer|digits_between:2,9',
+            'primary_production_branch' => 'required|string|min:2|max:124|exists:branches,name',
+            'production_branches'=> 'required|array',
+            'production_branches.*' => sprintf('in:%s', implode(',', Branch::getBranchesArray())),
+        ];
+    }
 
     public function index()
     {
         return Inertia::render('Backend/Item/List', [
             'endpoint' => route('items.records'),
-            'note' => session('note')
+            'note' => session('note'),
         ]);
     }
 
@@ -82,12 +90,13 @@ class ItemsController extends Controller
     {
         return Inertia::render('Backend/Item/Add', [
             'categories' => Category::getCategoriesArray(),
+            'branches' => Branch::getBranchesArray(),
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate($this->rules);
+        $request->validate($this->getRules());
         $category = Category::where('name', $request->category)->first();
 
         Item::create([
@@ -100,6 +109,8 @@ class ItemsController extends Controller
             'print_price' => $request->print_price,
             'sheet_price' => $request->sheet_price,
             'cover_print_price' => $request->cover_print_price,
+            'primary_order_processing_branch' => $request->primary_production_branch,
+            'order_processing_branches' => json_encode($request->production_branches),
         ]);
 
         return redirect()->route('items')->with('note', 'Item Registered');
@@ -120,6 +131,7 @@ class ItemsController extends Controller
             'categories' => Category::getCategoriesArray(),
             'processes' => OrderStatus::getOrderStatusesArray(),
             'teams' => Role::getRolesArray(),
+            'branches' => Branch::getBranchesArray(),
         ];
     }
 
@@ -141,10 +153,11 @@ class ItemsController extends Controller
         }
 
         // Validate the submitted data
+        $rules = $this->getRules();
         if ($item->name == $request->name) {
-            $this->rules['name'] = 'string|required|min:2|max:64';
+            $rules['name'] = 'string|required|min:2|max:64';
         }
-        $request->validate($this->rules);
+        $request->validate($rules);
 
         $category = Category::where('name', $request->category)->first();
 
@@ -158,6 +171,8 @@ class ItemsController extends Controller
         $item->print_price = $request->print_price;
         $item->sheet_price = $request->sheet_price;
         $item->cover_print_price = $request->cover_print_price;
+        $item->primary_order_processing_branch = $request->primary_production_branch;
+        $item->order_processing_branches = $request->production_branches;
         $item->save();
 
         return redirect()->route('item.view', [$item->id])->with('note', 'Updated.');

@@ -21,7 +21,29 @@
                         <VCol cols="4"><b>Sheet Price</b><br />₦{{ item.sheet_price }}</VCol>
                         <VCol cols="4"><b>Cover Print</b><br />₦{{ item.cover_print_price }}</VCol>
                     </VRow>
-                    <div class="mt-3">
+                    <VRow>
+                        <VCol ><b>Processing Centers</b><br />
+                            <v-chip-group
+                                selected-class="text-primary"
+                                column
+                            >
+                                <v-chip
+                                v-for="(processingCenter, index) in processingCenters"
+                                :key="index"
+                                >
+                                {{ processingCenter }}
+                                </v-chip>
+                            </v-chip-group>
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
+                            <b>Primary Processing Center</b><br />
+                            <VChip class="mt-1">{{ item.primary_order_processing_branch }}</VChip>
+                        </VCol>
+                    </VRow>
+                    <hr  class="mt-4" />
+                    <div>
                         <Link :href="route('item.edit', item.id)" class="btn btn-secondary">Modify</Link>
                     </div>
                 </Panel>
@@ -42,5 +64,6 @@ import Panel from "@/Layouts/Shared/Panel.vue";
 import ProcessActivitiesEditor from '@/Components/Editors/ProcessActivitiesEditor.vue';
 
 const item = usePage().props.item;
+const processingCenters = item.order_processing_branches ? JSON.parse(item.order_processing_branches) : []
 
 </script>
