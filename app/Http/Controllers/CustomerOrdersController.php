@@ -148,7 +148,7 @@ class CustomerOrdersController extends Controller
         ]);
 
         // Build report for the newly received order
-        ReportBuilder::build('received');
+        ReportBuilder::build('new');
 
         // Send Order notification to relevant team
         $this->sendOrderNotification();

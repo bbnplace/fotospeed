@@ -14,7 +14,6 @@
                 density="compact"
                 variant="outlined"
             ></v-text-field>
-
     </div>
     <div class="flex gap-5 ml-5" v-if="selected.value && selected.value.length > 0">
         <v-icon  v-if="props.endpoint.delete"

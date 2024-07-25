@@ -20,7 +20,6 @@ use App\Http\Controllers\StatesController;
 use App\Http\Controllers\UserRegistrationController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 
 Route::middleware(['auth', 'team.console'])->group(function (){

@@ -87,7 +87,7 @@ class ItemsController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->rules);
+        $request->validate($this->rules);
         $category = Category::where('name', $request->category)->first();
 
         Item::create([
