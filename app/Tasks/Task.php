@@ -3,6 +3,7 @@
 namespace App\Tasks;
 
 use App\Events\AnnounceNewOrder;
+use App\Messaging\TemplateManager;
 use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Order;
@@ -31,14 +32,21 @@ class Task
         if (is_array($tasks)) {
             // Loop through task and drop notification for all teams that should work on the task.
             foreach ($tasks as $task) {
-                $taskName = $task->name;
-                $taskDescription = $task->description;
                 $taskTeam = $task->team;
 
                 // Use Primary Branch if order cannot be processed at branch selected by the customer
                 $branchName = in_array($order->branch->name, $productionBranches) ? $order->branch->name : $primaryBranch;
                 $team = Role::where('name', $taskTeam)->first();
                 $branch = Branch::where('name', $branchName)->first();
+
+                $templateManager = new TemplateManager([
+                    'customer' => $order->user,
+                    'order' => $order,
+                    'team' => $team,
+                ]);
+
+                $taskName = $templateManager->prepareText($task->name);
+                $taskDescription = $templateManager->prepareText($task->description);
 
                 // Drop task for all team members in the category
                 self::createTask($taskName, $taskDescription, $order, $branch, $team);

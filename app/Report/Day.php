@@ -17,7 +17,9 @@ class Day
     public static function build(String $field, int $ordersCount = 1)
     {
         $dailyReport = DailyReport::where('date', date("Y-m-d"))->first();
-        $dailyReport->$field += $ordersCount;
-        $dailyReport->save();
+        if(empty($dailyReport)) {
+            $dailyReport->$field += $ordersCount;
+            $dailyReport->save();
+        }
     }
 }

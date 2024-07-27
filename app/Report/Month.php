@@ -17,7 +17,9 @@ class Month
     public static function build(String $field, int $ordersCount = 1)
     {
         $monthlyReport = MonthlyReport::where('month', date("Y-m"))->first();
-        $monthlyReport->$field += $ordersCount;
-        $monthlyReport->save();
+        if (!empty($monthlyReport)) {
+            $monthlyReport->$field += $ordersCount;
+            $monthlyReport->save();
+        }
     }
 }

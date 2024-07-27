@@ -14,10 +14,13 @@ class Hour
         ]);
     }
 
-    public static function build(String $field, int $ordersCount = 1)
+    public static function build(string $field, int $ordersCount = 1)
     {
+        Log::info(date("Y-m-d H"));
         $hourlyReport = HourlyReport::where('hour', date("Y-m-d H"))->first();
-        $hourlyReport->$field += $ordersCount;
-        $hourlyReport->save();
+        if (!empty($hourlyReport)) {
+            $hourlyReport->$field += $ordersCount;
+            $hourlyReport->save();
+        }
     }
 }

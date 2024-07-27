@@ -1,8 +1,8 @@
 <template>
     <Head title="Task Dashboard" />
     <BackendLayout>
-        <Panel :snippet-title="`${user.role} Team Tasks`">
-            <div>This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept</b> button to pick up a task.</div>
+        <Panel :snippet-title="`${user.role} Tasks`">
+            <div>This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept Task</b> button to pick up a task.</div>
             <VRow v-if="unclaimedTasks.length" class="mt-3">
               <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
                 <VCard :title="task.name" class="p-3" prepend-icon="mdi-checkbox-blank-outline" color="blue-lighten-5">
@@ -38,7 +38,7 @@
 import Sortable from 'sortablejs';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
-import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
+import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import axios from 'axios';
 import moment from 'moment';
@@ -68,12 +68,13 @@ const setRef = (key) => (el) => {
 
 const onEnd = (event) => {
   const { from, to, newIndex, oldIndex } = event;
+  
 
   const fromStatus = from.id;
   const toStatus = to.id;
 
   const draggedItem = columns.value[fromStatus][oldIndex];
-  console.log(`From position ${oldIndex} to ${newIndex}`);
+  // console.log(`From position ${oldIndex} to ${newIndex}`);
 
   if (columns.value[fromStatus] && columns.value[toStatus]) {
     const movedItem = columns.value[fromStatus].splice(oldIndex, 1)[0];
@@ -82,12 +83,33 @@ const onEnd = (event) => {
     console.error('Invalid column status:', fromStatus, toStatus);
   }
 
+  if (from.id === to.id) {
+    return false;
+  }
     updateTaskStatus(draggedItem, fromStatus, toStatus);;
 };
+
+const onMove = (event) => {
+  const { from, to } = event;
+
+  // Prevent moving tasks out of the "Done" column
+  if (from.id === 'Done') {
+    return false; // This will prevent the item from being dragged
+  }
+  
+  // Optionally, prevent moving tasks into "Done" if needed
+  // if (to.id === 'Done') {
+  //   return false;
+  // }
+
+  return true; // Allow the move
+};
+
 
 // Open the task to be worked on
 const showClickedTask = task => {
     console.log(task);
+    router.visit(route('order.view', [task.order_id]))
 }
 
 // Update the status of the task on the server
@@ -150,6 +172,7 @@ onMounted(async () => {
         group: 'tasks',
         animation: 150,
         onEnd,
+        onMove
       });
     } else {
       console.error(`Ref ${status} is not available.`);
@@ -158,11 +181,11 @@ onMounted(async () => {
 
   loadPickedTasks();
 
-  checkNewTaskInterval = setInterval(loadNewTasks, 10000)
+  // checkNewTaskInterval = setInterval(loadNewTasks, 10000)
 });
 
 onUnmounted(() => {
-  clearInterval(checkNewTaskInterval);
+  // clearInterval(checkNewTaskInterval);
 })
 
 </script>
@@ -187,10 +210,10 @@ onUnmounted(() => {
 
 .task-card {
   background-color: #fff;
-  padding: 10px;
-  margin: 5px 0;
+  padding: 15px;
+  margin: 10px 0;
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  cursor: move;
+  cursor: grab;
 }
 </style>

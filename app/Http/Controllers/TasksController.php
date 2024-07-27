@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TasksController extends Controller
 {
@@ -59,6 +60,8 @@ class TasksController extends Controller
             $task->user_id = auth()->user()->id;
             $task->save();
 
+            // TODO: Notify Controller that the task has been accepted. Show the user that accepted the task
+
             return [
                 'status' => 'success'
             ];
@@ -76,6 +79,8 @@ class TasksController extends Controller
         if (!empty($task) && $newStatus !== 0) {
             $task->task_status_id = $newStatus;
             $task->save();
+
+            // Todo: Notify Controller of the change in the status of the task.
 
             $order = Order::find($task->order_id);
 

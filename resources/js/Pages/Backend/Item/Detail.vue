@@ -50,6 +50,7 @@
             </VCol>
             <VCol cols="12" md="6">
                 <ProcessActivitiesEditor />
+                <TemplateCodes />
             </VCol>
         </VRow>
         
@@ -62,6 +63,7 @@ import { usePage, Head, Link } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import ProcessActivitiesEditor from '@/Components/Editors/ProcessActivitiesEditor.vue';
+import TemplateCodes from '@/Components/TemplateCodes.vue'
 
 const item = usePage().props.item;
 const processingCenters = item.order_processing_branches ? JSON.parse(item.order_processing_branches) : []

@@ -21,19 +21,31 @@ class TemplateManager
 
     private function matchTemplateKeyWithValues()
     {
-        return [
-            'customer_name' => $this->customer->name,
-            'order_name' => $this->order->name,
-            'order_number' => '#' . $this->order->order_number,
-            'delivery_address' => $this->order->delivery_address,
-            'order_status' => $this->order->orderStatus->name,
-            'next_process' => $this->nextProcess->name,
-            'customer_email' => $this->customer->email,
-            'customer_mobile' => $this->customer->mobile,
-            'order_branch' => $this->order->branch->name,
-            'price' => $this->order->total_cost,
-            'invoice_link' => $this->autoSignInUrl,
-        ];
+        $matches = [];
+        if (!empty($this->customer)) {
+            $matches['customer_email'] = $this->customer->email;
+            $matches['customer_name'] = $this->customer->name;
+            $matches['customer_mobile'] = $this->customer->mobile;
+        }
+
+        if (!empty($this->order)) {
+            $matches['order_name'] = $this->order->name;
+            $matches['order_number'] = $this->order->order_number;
+            $matches['delivery_address'] = $this->order->delivery_address;
+            $matches['order_status'] = $this->order->orderStatus->name;
+            $matches['order_branch'] = $this->order->branch->name;
+            $matches['price'] = $this->order->total_cost;
+        }
+
+        if (!empty($this->nextProcess)) {
+            $matches['next_process'] = $this->nextProcess->name;
+        }
+
+        if (!empty($this->autoSignInUrl)) {
+            $matches['invoice_link'] = $this->autoSignInUrl;
+        }
+        
+        return $matches;
     }
 
     public function prepareMessage(String $template)
@@ -49,5 +61,10 @@ class TemplateManager
         }
 
         return $message;
+    }
+
+    public function prepareText(string $template)
+    {
+        return $this->prepareMessage($template);
     }
 }

@@ -17,7 +17,9 @@ class Year
     public static function build(String $field, int $ordersCount = 1)
     {
         $yearlyReport = YearlyReport::where('year', date("Y"))->first();
-        $yearlyReport->$field += $ordersCount;
-        $yearlyReport->save();
+        if (!empty($yearlyReport)) {
+            $yearlyReport->$field += $ordersCount;
+            $yearlyReport->save();
+        }
     }
 }
