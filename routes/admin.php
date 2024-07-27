@@ -17,6 +17,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SmsTemplatesController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StatesController;
+use App\Http\Controllers\TasksController;
 use App\Http\Controllers\UserRegistrationController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
@@ -72,6 +73,12 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/report', [DashboardController::class, 'index'])->name('dashboard');
     // Route::get('/dashboard', [DashboardController::class, 'home'])->name('dashboard');
     Route::post('/report/export/file', [DashboardController::class, 'export'])->name('report.export');
+
+    // Task Routes
+    Route::get('/tasks/unassigned', [TasksController::class,'loadTeamTasks'])->name('tasks.team');
+    Route::get('/tasks/accepted', [TasksController::class,'loadTasks'])->name('tasks.usertasks');
+    Route::post('/task/pick', [TasksController::class,'pickTask'])->name('task.pick');
+    Route::post('/task/update', [TasksController::class,'updateTasks'])->name('task.update');
 });
 
 

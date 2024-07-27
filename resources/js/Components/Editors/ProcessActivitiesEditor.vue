@@ -85,6 +85,20 @@
                                     v-model="productProcesses[index].autoStartNextProcess"
                                     label="Trigger Next Process"
                                 ></v-checkbox>
+                                <VAutocomplete
+                                    id="nextProcess"
+                                    v-model="productProcesses[index].nextProcess"
+                                    label="Select Process"
+                                    :items="nextProcesses"
+                                    variant="outlined"
+                                    hide-details
+                                    density="compact"
+                                    aria-autocomplete="off"
+                                    autocomplete="off"
+                                    bg-color="white"
+                                    color="black"
+                                    @blur="updateProcesses"
+                                ></VAutocomplete>
                             </VCol>
                             <VCol>
                                 Send notification to:
@@ -143,6 +157,7 @@ import { usePage} from "@inertiajs/vue3";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import axios from 'axios';
 
+const nextProcesses = usePage().props.nextProcesses;
 const processes = reactive(usePage().props.processes);
 const teams = usePage().props.teams;
 const retrievedData = usePage().props.item.process_data;
@@ -183,7 +198,8 @@ const saveProcess = () => {
         name: form.name,
         activities: [],
         whoCoordinates: "None",
-        autoStartNextProcess: false
+        autoStartNextProcess: false,
+        nextProcess: form.next,
     });
 
     productProcessActivities[form.name] = [];

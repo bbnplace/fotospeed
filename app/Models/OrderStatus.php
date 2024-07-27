@@ -9,6 +9,17 @@ class OrderStatus extends Model
 {
     use HasFactory;
 
+    const STATUS_NEW = 1;
+    const STATUS_BILLING = 2;
+    const STATUS_PREPRESS = 3;
+    const STATUS_PRODUCTION = 4;
+    const STATUS_FINISHING = 5;
+    const STATUS_PACKAGING = 6;
+    const STATUS_DISPATCH = 7;
+    const STATUS_DELIVERED = 8;
+    const STATUS_CANCELLED = 9;
+    const STATUS_RETURNED = 10;
+
     protected $fillable = [
         'name',
         'description',

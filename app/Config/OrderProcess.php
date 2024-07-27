@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Config;
+use App\Models\OrderStatus;
 
 class OrderProcess
 {
@@ -8,47 +9,51 @@ class OrderProcess
     {
         return [
             [
-                'id' => 1,
+                'id' => OrderStatus::STATUS_NEW,
                 'name' => 'New',
-                'next_process' => 2,
+                'next_process' => OrderStatus::STATUS_BILLING,
             ],
             [
-                'id' => 2,
+                'id' => OrderStatus::STATUS_BILLING,
                 'name' => 'Billing',
-                'next_process' => 3,
+                'next_process' => OrderStatus::STATUS_PREPRESS,
             ],
             [
-                'id' => 3,
+                'id' => OrderStatus::STATUS_PREPRESS,
                 'name' => 'Prepress',
-                'next_process' => 4,
+                'next_process' => OrderStatus::STATUS_PRODUCTION,
             ],
             [
-                'id' => 4,
+                'id' => OrderStatus::STATUS_PRODUCTION,
                 'name' => 'Production',
-                'next_process' => 5,
+                'next_process' => OrderStatus::STATUS_FINISHING,
             ],
             [
-                'id' => 5,
+                'id' => OrderStatus::STATUS_FINISHING,
                 'name' => 'Finishing',
-                'next_process' => 6,
+                'next_process' => OrderStatus::STATUS_PACKAGING,
             ],
             [
-                'id' => 6,
+                'id' => OrderStatus::STATUS_PACKAGING,
                 'name' => 'Packaging',
-                'next_process'=> 7,
+                'next_process'=> OrderStatus::STATUS_DISPATCH,
             ],
             [
-                'id' => 7,
+                'id' => OrderStatus::STATUS_DISPATCH,
                 'name' => 'Dispatch',
-                'next_process'=> 8,
+                'next_process'=> OrderStatus::STATUS_DELIVERED,
             ],
             [
-                'id' => 8,
+                'id' => OrderStatus::STATUS_DELIVERED,
                 'name' => 'Delivered'
             ],
             [
-                'id' => 9,
+                'id' => OrderStatus::STATUS_CANCELLED,
                 'name' => 'Cancelled'
+            ],
+            [
+                'id' => OrderStatus::STATUS_RETURNED,
+                'name' => 'Returned'
             ],
         ];
     }

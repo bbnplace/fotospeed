@@ -1,0 +1,196 @@
+<template>
+    <Head title="Task Dashboard" />
+    <BackendLayout>
+        <Panel :snippet-title="`${user.role} Team Tasks`">
+            <div>This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept</b> button to pick up a task.</div>
+            <VRow v-if="unclaimedTasks.length" class="mt-3">
+              <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
+                <VCard :title="task.name" class="p-3" prepend-icon="mdi-checkbox-blank-outline" color="blue-lighten-5">
+                  <p>{{ task.description }}</p>
+                  <p><b>Task Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                  <VBtn color="blue" @click="pickTask(task, index)">Accept Task</VBtn>
+                </VCard>
+              </VCol>
+            </VRow>
+        </Panel>
+        <Panel snippet-title="My Tasks">
+            <div class="kanban-board">
+                <VCard class="column" v-for="(tasks, status) in columns" :key="status" :title="status">
+                    <div class="task-list" :ref="setRef(status)" :id="status">
+                        <div
+                        v-for="task in tasks"
+                        :key="task.id"
+                        class="task-card"
+                        @click="showClickedTask(task)"
+                        >
+                        <h4>{{ task.name }}</h4>
+                        <p>{{ task.description }}</p>
+                        <p><b>Task Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                        </div>
+                    </div>
+                </VCard>
+            </div>
+        </Panel>
+    </BackendLayout>
+</template>
+
+<script setup>
+import Sortable from 'sortablejs';
+import BackendLayout from '@/Layouts/BackendLayout.vue';
+import Panel from '@/Layouts/Shared/Panel.vue';
+import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import axios from 'axios';
+import moment from 'moment';
+
+const user = usePage().props.auth.user;
+const endpoints = usePage().props.endpoints;
+const unclaimedTasks = ref(usePage().props.unclaimedTasks);
+
+
+const columns = ref({
+  Todo: [],
+  Doing: [],
+  Done: [],
+});
+let statusKeys = Object.keys(columns.value);
+
+
+// Ref container to hold references
+const refs = ref({});
+
+// Function to set refs
+const setRef = (key) => (el) => {
+  if (el) {
+    refs.value[key] = el;
+  }
+};
+
+const onEnd = (event) => {
+  const { from, to, newIndex, oldIndex } = event;
+
+  const fromStatus = from.id;
+  const toStatus = to.id;
+
+  const draggedItem = columns.value[fromStatus][oldIndex];
+  console.log(`From position ${oldIndex} to ${newIndex}`);
+
+  if (columns.value[fromStatus] && columns.value[toStatus]) {
+    const movedItem = columns.value[fromStatus].splice(oldIndex, 1)[0];
+    columns.value[toStatus].splice(newIndex, 0, movedItem);
+  } else {
+    console.error('Invalid column status:', fromStatus, toStatus);
+  }
+
+    updateTaskStatus(draggedItem, fromStatus, toStatus);;
+};
+
+// Open the task to be worked on
+const showClickedTask = task => {
+    console.log(task);
+}
+
+// Update the status of the task on the server
+const updateTaskStatus = async (task, fromStatus, toStatus) => {
+    // console.log('Dragged Item:', task);
+    // console.log(`Moved from ${fromStatus} to ${toStatus}`);
+    const payload = { task, fromStatus, toStatus }
+    const response = await axios.post(endpoints.updateTask, payload, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
+    const data = response.data;
+    console.log(data);
+    if (data.status != undefined) {
+      if (data.status == 'success') {
+        console.log("status updated");
+      }
+    }
+}
+
+// Used to load tasks after the components mount
+const loadPickedTasks = async () => {
+  const response = await axios.get(endpoints.accepted);
+  columns.value = response.data;
+}
+
+const loadNewTasks = async () => {
+  const response = await axios.get(endpoints.newTasks);
+  unclaimedTasks.value = response.data.unclaimedTasks ?? [];
+}
+
+const pickTask = async (task, index) => {
+  const payload = {task};
+
+  const response = await axios.post(endpoints.pickTask, payload, {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = response.data;
+  if (data.status != undefined) {
+    if (data.status == 'success') {
+      unclaimedTasks.value.splice(index, 1);
+      loadNewTasks();
+      loadPickedTasks();
+    }
+  }
+}
+
+let checkNewTaskInterval = 0;
+onMounted(async () => {
+  await nextTick(); // Ensure DOM is fully rendered
+
+  statusKeys.forEach((status) => {
+    if (refs.value[status]) {
+      Sortable.create(refs.value[status], {
+        group: 'tasks',
+        animation: 150,
+        onEnd,
+      });
+    } else {
+      console.error(`Ref ${status} is not available.`);
+    }
+  });
+
+  loadPickedTasks();
+
+  checkNewTaskInterval = setInterval(loadNewTasks, 10000)
+});
+
+onUnmounted(() => {
+  clearInterval(checkNewTaskInterval);
+})
+
+</script>
+
+<style scoped>
+.kanban-board {
+  display: flex;
+  justify-content: space-between;
+}
+
+.column {
+  width: 30%;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.task-list {
+  min-height: 200px;
+  user-select: none;
+}
+
+.task-card {
+  background-color: #fff;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: move;
+}
+</style>

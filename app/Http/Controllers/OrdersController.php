@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Setting;
 use App\Report\ReportBuilder;
+use App\Tasks\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -155,7 +156,7 @@ class OrdersController extends Controller
 
         $branch = Branch::where('name', $request->branch)->first();
 
-        Order::create([
+        $order = Order::create([
             'name' => $request->name,
             'note' => $request->note,
             'user_id' => auth()->user()->isCustomer() ? auth()->user()->id :  $customerData->id,
@@ -174,7 +175,10 @@ class OrdersController extends Controller
         ]);
 
         // Generate Report
-        ReportBuilder::build('received');
+        ReportBuilder::build('new');
+
+        // Generate Tasks and send notifications
+        Task::generate($item, $order, 'New');
 
         $additionalMsg = auth()->user()->isCustomer() ? "You will receive invoice shortly." :  "";
         return redirect(route((auth()->user()->isCustomer() ? 'customer.my-orders' : 'orders')))

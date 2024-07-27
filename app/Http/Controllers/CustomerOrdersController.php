@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use App\Report\ReportBuilder;
+use App\Tasks\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -130,7 +131,7 @@ class CustomerOrdersController extends Controller
         // Get Branch
         $branch = Branch::where('name', $request->branch)->first();
 
-        Order::create([
+        $order = Order::create([
             'name' => $request->name,
             'note' => $request->note,
             'user_id' => $role->name == 'Customer' ? auth()->user()->id :  $customerData->id,
@@ -150,30 +151,16 @@ class CustomerOrdersController extends Controller
         // Build report for the newly received order
         ReportBuilder::build('new');
 
-        // Send Order notification to relevant team
-        $this->sendOrderNotification();
+        // Generate Tasks and send notifications
+        Task::generate($item, $order, 'New');
+        // $this->sendOrderNotification();
 
         return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');
     }
 
     // This method will broadcast a notification about this order to  the Reception at the target branch
-    private function sendOrderNotification()
+    private function sendOrderNotification(Request $request)
     {
-        // Get the details of the ordered item and identify all the task that need to be carried out on the new item at this process. Item ID and process name is required.
-        $tasks = Item::getProcessTasks(1, 'New');
-        if (is_array($tasks)) {
-            // Loop through task and drop notification for all teams that should work on the task.
-            foreach ($tasks as $task) {
-                $taskName = $task->name;
-                $taskDescription = $task->description;
-                $team = $task->team;
-
-                // TODO: Get team members from the specified role. If the settings stipulates that order is processed at branch, get team members from branch order was sent to. If settings specifies a specific branch where orders are handled, narrow the collection to the specified branch.
-            }
-        }
-
-
-
         $message = sprintf("You just received a new Order");
         broadcast(new AnnounceNewOrder($message, auth()->user()->branch_id))->toOthers();
     }

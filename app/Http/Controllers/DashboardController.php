@@ -6,6 +6,7 @@ use App\Config\OrderProcess;
 use App\Models\DailyReport;
 use App\Models\HourlyReport;
 use App\Models\Setting;
+use App\Models\Task;
 use App\Report\ReportPicker;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,14 +30,31 @@ class DashboardController extends Controller
         
         $reportViewers = json_decode($settings->reports_permission);
         if (in_array(auth()->user()->role->name, $reportViewers)) {
-            // TODO: Needs to be able to determine what records to fetch [Hourly, Daily, Monthly or Yearly]
-            // TODO: Need to be able to decide whether to display Dashboard to all roles or only specific roles.
             $hourlyReports = HourlyReport::orderBy('id', 'desc')->take(24)->get();
             return Inertia::render('Dashboard', [
                 $this->getReports($request, $ref)
             ]);
         } else {
             // TODO: If user is not permitted to view report, the user's assigned task appears
+            $query = Task::query();
+            $query->where('role_id', auth()->user()->role_id); // Ensures user is from the target team
+            $query->where('branch_id', auth()->user()->branch_id); // Ensure user is from the production branch
+            $query->whereNull('user_id'); // Task has not been claimed
+            $query->orderBy('id', 'desc');
+            $unclaimedTasks = $query->get([
+                'id', 'name', 'description', 'created_at'                
+            ]);
+            
+            return Inertia::render('Backend/Task/Dashboard', [
+                'unclaimedTasks' => $unclaimedTasks,
+                'summary' => [], // Summary of tasks on user's desk [Todo, Doing and Done].
+                'endpoints' => [
+                    'accepted' => route('tasks.usertasks'),
+                    'updateTask' => route('task.update'),
+                    'newTasks' => route('tasks.team'),
+                    'pickTask' => route('task.pick'),
+                ]
+            ]);
         }
     }
 

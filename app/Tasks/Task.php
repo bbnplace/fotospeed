@@ -1,0 +1,124 @@
+<?php
+
+namespace App\Tasks;
+
+use App\Events\AnnounceNewOrder;
+use App\Models\Branch;
+use App\Models\Item;
+use App\Models\Order;
+use App\Models\OrderStatus;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\Task as TaskModel;
+use App\Models\Notification;
+
+class Task
+{
+    public static function generate(Item $item, Order $order, string $process): bool
+    {
+        // Check that the process is an allowed process;
+        $orderStatuses = OrderStatus::getOrderStatusesArray();
+        if(!in_array($process, $orderStatuses)) {
+            return false;
+        }
+
+        $productionBranches = json_decode($item->order_processing_branches); // Array of production branches
+        $primaryBranch = $item->primary_order_processing_branch; // Principal Production Branch
+        $processData = json_decode($item->process_data); // Get data for each of the processes
+        
+        $tasks = $processData->tasks->$process; // Get tasks for new Process
+
+        if (is_array($tasks)) {
+            // Loop through task and drop notification for all teams that should work on the task.
+            foreach ($tasks as $task) {
+                $taskName = $task->name;
+                $taskDescription = $task->description;
+                $taskTeam = $task->team;
+
+                // Use Primary Branch if order cannot be processed at branch selected by the customer
+                $branchName = in_array($order->branch->name, $productionBranches) ? $order->branch->name : $primaryBranch;
+                $team = Role::where('name', $taskTeam)->first();
+                $branch = Branch::where('name', $branchName)->first();
+
+                // Drop task for all team members in the category
+                self::createTask($taskName, $taskDescription, $order, $branch, $team);
+
+                // Broadcast Push Notification to team members within the selected branch
+                $message = sprintf("You just received a new Order");
+                broadcast(new AnnounceNewOrder($message, $branch->id))->toOthers();
+
+                
+                // Save Notifications for each staff member on the team
+                self::generateNotification($branch, $team, $process, $taskName);
+                
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Create New Task
+     * @param mixed $taskName
+     * @param mixed $taskDescription
+     * @param \App\Models\Order $order
+     * @param \App\Models\Branch $branch
+     * @param \App\Models\Role $team
+     * @return void
+     */
+    private static function createTask($taskName, $taskDescription, Order $order, Branch $branch, Role $team): void
+    {
+        TaskModel::create([
+            'name'=> $taskName,
+            'description'=> $taskDescription,
+            'order_id'=> $order->id,
+            'branch_id'=> $branch->id,
+            'role_id'=> $team->id,
+        ]);
+    }
+
+    /**
+     * Generate Notification
+     * @param \App\Models\Branch $branch
+     * @param \App\Models\Role $role
+     * @param string $process
+     * @return void
+     */
+    public static function generateNotification(Branch $branch, Role $role, string $process, string $taskName): void
+    {
+        $staff = User::where('branch_id', $branch->id)->where('role_id', $role->id)->get();
+        if ($staff->count() > 0) {
+            foreach ($staff as $worker) {
+                Notification::create([
+                    'user_id'=> $worker->id,
+                    'title' => sprintf('%s, Claim New %s Task', $worker->name, $process),
+                    'message' => sprintf('Your new task %s awaits. The rest of the team is counting on you.', $taskName)
+                ]);
+            }
+        }
+    }
+
+    public static function generateTaskCompletionNotice(Branch $branch, Role $role, string $process, string $nextProcess = null, bool $autoStartNextProcess = false): void
+    {
+        $message = sprintf('Please team members have completed all tasks in the %s process. ', $process);
+        if ($autoStartNextProcess && !empty($nextProcess)) {
+            $message .= sprintf('Tasks for %s process has been automatically created.', $nextProcess);
+        }
+
+        // Create Notification for coordinators
+        $staff = User::where('branch_id', $branch->id)->where('role_id', $role->id)->get();
+        if ($staff->count() > 0) {
+            foreach ($staff as $worker) {
+                Notification::create([
+                    'user_id'=> $worker->id,
+                    'title' => sprintf('All %s Tasks Done', $process),
+                    'message' => $message
+                ]);
+            }
+        }
+
+        // Todo: Send Push Notification to Coordinators
+
+    }
+}

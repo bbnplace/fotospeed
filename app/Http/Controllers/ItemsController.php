@@ -130,6 +130,7 @@ class ItemsController extends Controller
             'item' => $item,
             'categories' => Category::getCategoriesArray(),
             'processes' => OrderStatus::getOrderStatusesArray(),
+            'nextProcesses' => OrderStatus::getOrderStatusesArray(),
             'teams' => Role::getRolesArray(),
             'branches' => Branch::getBranchesArray(),
         ];

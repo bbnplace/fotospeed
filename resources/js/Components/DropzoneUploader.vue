@@ -14,7 +14,12 @@
             <span class="ml-3 w-50">{{ fileAction }}</span>
         </div>
         <div v-if="uploadErrors" class="text-red">
-            {{ uploadErrors }}
+            <p>The following errors occurred during file upload:</p>
+            <ul>
+                <li class="list-disc" v-for="(error, index) in uploadErrors" :key="index">
+                    {{ error }}
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -50,10 +55,11 @@ const inputData = reactive({
     dataURL: ''
 });
 
+const uploadParamName = 'files';
 const initDropzone = () => {
     const dropzoneUpload = new Dropzone("#myDropzone", {
         url: route("file.upload"),
-        paramName: "files", // Name that will be used to transfer the file
+        paramName: uploadParamName, // Name that will be used to transfer the file
         // Additional Dropzone options...
         headers: {
             'X-CSRF-TOKEN': csrfToken,
@@ -99,10 +105,10 @@ const handleSuccess =  async (file, response) => {
     emit('fileUploaded', inputData);
 }
 
-const handleError = (file, error) => {
+const handleError = (file, response) => {
     // Handle upload errors
     uploadingFile.value = false;
-    uploadErrors.value = error.message
+    uploadErrors.value = response.errors[uploadParamName];
 }
 
 const formatBytes = bytes => {
