@@ -46,4 +46,9 @@ class Order extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function orderConversations()
+    {
+        return $this->hasMany(OrderConversation::class);
+    }
 }

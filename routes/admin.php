@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommunicationLogController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\CategoriesController;
@@ -79,6 +80,10 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/tasks/accepted', [TasksController::class,'loadTasks'])->name('tasks.usertasks');
     Route::post('/task/pick', [TasksController::class,'pickTask'])->name('task.pick');
     Route::post('/task/update', [TasksController::class,'updateTasks'])->name('task.update');
+
+    // Order Communication Log
+    Route::get('/order-log/{orderId}', [CommunicationLogController::class, 'index'])->name('order.log');
+    Route::post('/order-log/write', [CommunicationLogController::class, 'store'])->name('order.log.write');
 });
 
 
