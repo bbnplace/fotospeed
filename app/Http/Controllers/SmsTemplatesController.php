@@ -9,7 +9,7 @@ use Inertia\Inertia;
 class SmsTemplatesController extends Controller
 {
     protected $rules = [
-        'name' => 'required|string|unique:groups,name|min:2|max:64',
+        'name' => 'required|string|unique:sms_templates,name|min:2|max:64',
         'template' => 'required|string|min:1|max:1530'
     ];
 

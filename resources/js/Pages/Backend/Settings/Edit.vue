@@ -12,8 +12,7 @@
                     <VTab value="order">Order</VTab>
                     <VTab value="file">File Upload</VTab>
                     <VTab value="payment">Payment</VTab>
-                    <VTab value="email">Email</VTab>
-                    <VTab value="sms">SMS</VTab>
+                    <VTab value="messaging">Messaging</VTab>
                     <VTab value="report">Report</VTab>
                 </VTabs>
                 <v-window v-model="tab" direction="vertical">
@@ -123,9 +122,47 @@
                             </VRow>
                         </VCard>
                     </v-window-item>
-                    <v-window-item value="email">
+                    <v-window-item value="messaging">
                         <VCard>
-                            <h4 class="my-3">Email Settings</h4>
+                            <h4 class="my-3">SMS</h4>
+                            <VRow>
+                                <VCol>
+                                    <VTextField
+                                    id="cecula_sync_api_key"
+                                    v-model="form.cecula_sync_api_key"
+                                    label="Cecula Sync API Key"
+                                    variant="outlined"
+                                    :hide-details="form.errors.cecula_sync_api_key == undefined"
+                                    :error-messages="form.errors.cecula_sync_api_key"
+                                ></VTextField>
+                                </VCol>
+                            </VRow>
+                            <h4 class="my-3">WhatsApp</h4>
+                            <VRow>
+                                <VCol>
+                                    <VTextField
+                                    id="wa_phone_id"
+                                    v-model="form.wa_phone_id"
+                                    label="Phone Number ID"
+                                    variant="outlined"
+                                    :hide-details="form.errors.wa_phone_id == undefined"
+                                    :error-messages="form.errors.wa_phone_id"
+                                ></VTextField>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VTextField
+                                    id="wa_access_token"
+                                    v-model="form.wa_access_token"
+                                    label="Access Token"
+                                    variant="outlined"
+                                    :hide-details="form.errors.wa_access_token == undefined"
+                                    :error-messages="form.errors.wa_access_token"
+                                ></VTextField>
+                                </VCol>
+                            </VRow>
+                            <h4 class="my-3">Email</h4>
                             <VRow>
                                 <VCol>
                                     <VTextField
@@ -231,13 +268,13 @@
                     </v-window-item>
                     <v-window-item value="payment">
                         <VCard>
-                            <h4 class="my-3">Payment Settings</h4>
+                            <h4 class="my-3">Paystack</h4>
                             <VRow>
                                 <VCol>
                                     <VTextField
                                     id="paystack_public_key"
                                     v-model="form.paystack_public_key"
-                                    label="Paystack Public Key"
+                                    label="Public Key"
                                     variant="outlined"
                                     :hide-details="form.errors.paystack_public_key == undefined"
                                     :error-messages="form.errors.paystack_public_key"
@@ -249,7 +286,7 @@
                                     <VTextField
                                     id="paystack_secret_key"
                                     v-model="form.paystack_secret_key"
-                                    label="Paystack Secret Key"
+                                    label="Secret Key"
                                     variant="outlined"
                                     :hide-details="form.errors.paystack_secret_key == undefined"
                                     :error-messages="form.errors.paystack_secret_key"
@@ -282,23 +319,6 @@
                                         :error-messages="form.errors.payment_email_temp"
                                         density="compact"
                                     ></VAutocomplete>
-                                </VCol>
-                            </VRow>
-                        </VCard>
-                    </v-window-item>
-                    <v-window-item value="sms">
-                        <VCard>
-                            <h4 class="my-3">SMS Settings</h4>
-                            <VRow>
-                                <VCol>
-                                    <VTextField
-                                    id="cecula_sync_api_key"
-                                    v-model="form.cecula_sync_api_key"
-                                    label="Cecula Sync API Key"
-                                    variant="outlined"
-                                    :hide-details="form.errors.cecula_sync_api_key == undefined"
-                                    :error-messages="form.errors.cecula_sync_api_key"
-                                ></VTextField>
                                 </VCol>
                             </VRow>
                         </VCard>
@@ -392,6 +412,8 @@ const form = useForm({
     cecula_sync_api_key: settings.cecula_sync_api_key,
     paystack_secret_key: settings.paystack_secret_key,
     paystack_public_key: settings.paystack_public_key,
+    wa_phone_id: settings.wa_phone_id,
+    wa_access_token: settings.wa_access_token,
     org_name: settings.org_name,
     org_address: settings.org_address,
     org_email: settings.org_email,

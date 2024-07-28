@@ -1,4 +1,3 @@
-
 <template>
     <form @submit.prevent="submit">
          <div>
@@ -16,7 +15,7 @@
              <VTextarea
                  id="template"
                  v-model="form.template"
-                 label="SMS Template"
+                 label="WhatsApp Template"
                  variant="outlined"
                  :hide-details="form.errors.template == undefined"
                  :error-messages="form.errors.template"
@@ -37,29 +36,29 @@
  import { useForm, usePage, Link } from '@inertiajs/vue3';
  import PrimaryButton from '@/Components/PrimaryButton.vue';
  
- interface SMSTemplateEditor {
+ interface WhatsAppTemplateEditor {
      id?: Number,
      name: String,
      template: String
  }
  
  const props = defineProps<{
-     smsTemplate: SMSTemplateEditor
+     whatsAppTemplate: WhatsAppTemplateEditor
  }>()
  
  const form = useForm({
-     id: props.smsTemplate ? props.smsTemplate.id: "",
-     name: props.smsTemplate ? props.smsTemplate.name: "",
-     template: props.smsTemplate ? props.smsTemplate.template: "",
+     id: props.whatsAppTemplate ? props.whatsAppTemplate.id: "",
+     name: props.whatsAppTemplate ? props.whatsAppTemplate.name: "",
+     template: props.whatsAppTemplate ? props.whatsAppTemplate.template: "",
  });
  
  const submit = () => {
-     if(props.smsTemplate) {
-         form.put(route('sms-template.edit', [props.smsTemplate.id]), {
+     if(props.whatsAppTemplate) {
+         form.put(route('whatsapp-template.edit', [props.whatsAppTemplate.id]), {
              onFinish: () => {},
          });
      } else {
-         form.post(route('sms-template.add'), {
+         form.post(route('whatsapp-template.add'), {
              onFinish: () => {},
          });
      }

@@ -31,5 +31,7 @@ class Setting extends Model
         'org_url',
         'payment_sms_temp',
         'payment_email_temp',
+        'wa_phone_id',
+        'wa_access_token',
     ];
 }

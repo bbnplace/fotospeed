@@ -58,6 +58,8 @@ class SettingsController extends Controller
             'org_url' => 'nullable|url',
             'payment_sms_temp' => 'nullable|string|max:64',
             'payment_email_temp' => 'nullable|string|max:64',
+            'wa_phone_id' => 'nullable|string|max:64',
+            'wa_access_token' => 'nullable|string|max:64',
             'reportables' => 'required|array',
             'reportables.*' => sprintf('in:Received,%s', implode(',', ReportBuilder::getReportStates())),
             'reportViewers' => 'required|array',
@@ -89,6 +91,8 @@ class SettingsController extends Controller
         $settings->org_url = $request->org_url;
         $settings->payment_sms_temp = $request->payment_sms_temp == 'None' ? null : $request->payment_sms_temp;
         $settings->payment_email_temp = $request->payment_email_temp  == 'None' ? null : $request->payment_email_temp;
+        $settings->wa_phone_id = $request->wa_phone_id;
+        $settings->wa_access_token = $request->wa_access_token;
         $settings->reportables = json_encode($request->reportables);
         $settings->reports_permission = json_encode($request->reportViewers);
         $settings->save();

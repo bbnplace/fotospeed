@@ -2,7 +2,7 @@
     <Panel snippet-title="Communication Log">
         <div v-if="orderLog.length">
             <div v-for="(note, index) in orderLog" :key="index" class="task-card px-2">
-                <p class="font-bold">{{ moment(note.created_at).calendar() }}, {{ note.user.mobile == user.mobile ? "I" :  note.user.name }} wrote:</p>
+                <p class="font-bold ">{{ moment(note.created_at).calendar() }}, {{ note.user.mobile == user.mobile ? "I" :  note.user.name }} wrote:</p>
                 <p>{{ note.message }}</p>
             </div>
         </div>

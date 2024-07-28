@@ -53,6 +53,12 @@ const menus = [
                 adminOnly: true
             },
             {
+                icon: "mdi-whatsapp",
+                name: "WhatsApp Templates",
+                route: "whatsapp-templates",
+                adminOnly: true
+            },
+            {
                 icon: "mdi-email-edit",
                 name: "Email Templates",
                 route: "email-templates",
