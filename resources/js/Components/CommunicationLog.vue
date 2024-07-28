@@ -69,7 +69,7 @@ const sendMessage = async () => {
 const loadOrderLog = async () => {
     const response = await axios.get(route("order.log", [order.id]));
     // console.log(response.data.data);
-    orderLog.value = response.data.data;
+    orderLog.value = response.data;
 }
 
 onMounted(() => {

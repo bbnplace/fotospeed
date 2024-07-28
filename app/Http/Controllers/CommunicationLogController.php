@@ -15,7 +15,7 @@ class CommunicationLogController extends Controller
             $query->select("id", "name", "mobile");
         });
         $query->orderBy("created_at","asc");
-        $log = $query->paginate(10);
+        $log = $query->get();
 
         return $log;
     }
