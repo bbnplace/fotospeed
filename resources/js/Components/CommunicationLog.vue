@@ -17,10 +17,12 @@
                     label="Type Comment" 
                     variant="outlined"
                 ></VTextarea>
-                <VBtn
-                    color="black"
-                    type="submit"
-                >Save Note</VBtn>
+                <div class="text-right">
+                    <VBtn
+                        color="black"
+                        type="submit"
+                    >Add Note</VBtn>
+                </div>
             </form>
         </div>
     </Panel>
@@ -58,6 +60,7 @@ const sendMessage = async () => {
     if (data.status !== undefined) {
         if (data.status == 'success') {
             // Add the message to the thread and refresh.
+            logMessage.newMessage = "";
             loadOrderLog();
         }
     }
