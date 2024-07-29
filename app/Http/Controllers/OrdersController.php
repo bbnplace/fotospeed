@@ -10,7 +10,6 @@ use App\Models\OrderLog;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Setting;
-use App\Report\ReportBuilder;
 use App\Tasks\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -173,9 +172,6 @@ class OrdersController extends Controller
             'order_number' => $request->orderNumber,
             'quantity' => $request->quantity,
         ]);
-
-        // Generate Report
-        ReportBuilder::build('new');
 
         // Generate Tasks and send notifications
         Task::generate($item, $order, 'New');

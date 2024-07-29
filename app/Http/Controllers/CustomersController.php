@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomerGroup;
+use App\Models\Group;
 use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
@@ -79,7 +81,8 @@ class CustomersController extends Controller
     public function add()
     {
         return Inertia::render('Backend/Customer/Add', [
-            'states' => State::getStatesArray()
+            'states' => State::getStatesArray(),
+            'groups' => Group::getGroupsArray(),
         ]);
     }
 
@@ -97,6 +100,8 @@ class CustomersController extends Controller
 
         return [
             'states' => State::getStatesArray(),
+            'groups' => Group::getGroupsArray(),
+            'customerGroups' => CustomerGroup::getCustomerGroupsArray($customerId),
             'customer' => $user
         ];
     }
@@ -121,6 +126,8 @@ class CustomersController extends Controller
             'password' => 'nullable|string|min:8|max:64|confirmed',
             'password_confirmation' => 'nullable',
             'role' => 'required|string|min:5|max:64|exists:roles,name',
+            'groups' => 'nullable|array',
+            'groups.*' => sprintf('in:%s', implode(',', Group::getGroupsArray())),
         ];
 
         $request->validate($rules);
@@ -139,6 +146,10 @@ class CustomersController extends Controller
         }
 
         $user->save();
+
+        if (!empty($request->groups)) {
+            CustomerGroup::saveCustomerToGroups($user->id, $request->groups);
+        }
 
         // TODO: Send login link to the customer's mobile number and email.
 

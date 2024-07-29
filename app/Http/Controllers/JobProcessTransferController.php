@@ -3,17 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Events\JobReceived;
+use App\Helper\URLGenerator;
 use App\Messaging\EmailClient;
 use App\Messaging\SMSClient;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Models\User;
-use App\Report\ReportBuilder;
-use AshAllenDesign\ShortURL\Facades\ShortURL;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
 use Inertia\Inertia;
 
@@ -47,8 +44,7 @@ class JobProcessTransferController extends Controller
 
         if ($this->nextProcess->name == "Billing") {
             // Generate Unique temporary token to enable the user automatically sign in to make payment
-            $this->generateAndShortenSignedUrl();
-
+            
             // Generate Invoice Record for the user
             $invoice = Invoice::create([
                 'user_id' => $this->customer->id,
@@ -64,13 +60,8 @@ class JobProcessTransferController extends Controller
             'order' => $this->order,
             'nextProcess' => $this->nextProcess,
             'team' => $this->team,
-            'url' => $this->autoSignInUrl,
+            'url' => URLGenerator::generateAndShortenSignedUrl($this->customer->id, 60 * 60 * 24),
         ];
-
-        // Generate Report for the just completed process
-        if (!empty($this->order->orderStatus->report_as)) {
-            ReportBuilder::build($this->order->orderStatus->report_as);
-        }
 
         // Get Team SMS for the Next Process
         if ($this->nextProcess->sms_team) {
@@ -117,36 +108,6 @@ class JobProcessTransferController extends Controller
             , $this->nextProcess->name
         );
         broadcast(new JobReceived($message, $this->order->branch_id))->toOthers();
-    }
-
-    private function generateSignedUrl()
-    {
-        $user = User::where('id', $this->customer->id)->first();
-        $token = Str::random(60);
-        $user->auto_login_token = $token;
-        $user->auto_login_token_expires_at = now()->addMinutes(10);
-        $user->save();
-
-        // Generate Signed URL
-        return URL::temporarySignedRoute(
-            'auto.login'
-            , now()->addMinutes(10)
-            , [
-                'token' => $token
-            ]
-        );
-    }
-
-    private function shortenUrl($autoSigninUrl)
-    {
-        // Shorten the URL
-        $shortUrlObj = ShortURL::destinationUrl($autoSigninUrl)->make();
-        return $shortUrlObj->default_short_url;
-    }
-
-    private function generateAndShortenSignedUrl()
-    {
-        $this->autoSignInUrl = $this->shortenUrl($this->generateSignedUrl());
     }
 
     private function logOrderProcess()

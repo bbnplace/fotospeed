@@ -10,7 +10,6 @@ use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
-use App\Report\ReportBuilder;
 use App\Tasks\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -147,9 +146,6 @@ class CustomerOrdersController extends Controller
             'delivery_address' => $request->deliveryAddress,
             'quantity' => $request->quantity,
         ]);
-
-        // Build report for the newly received order
-        ReportBuilder::build('new');
 
         // Generate Tasks and send notifications
         Task::generate($item, $order, 'New');

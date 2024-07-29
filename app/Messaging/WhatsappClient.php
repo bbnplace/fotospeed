@@ -24,7 +24,7 @@ class WhatsAppClient
         $this->templateManager = new TemplateManager($config);
     }
 
-    public function sendTeamSms($template=null)
+    public function sendTeamMessage($template=null)
     {
         if ($this->team->count() > 0) {
             $teamSms = empty($template) ? $this->nextProcess->smsTemplate->template : $template;
@@ -37,7 +37,7 @@ class WhatsAppClient
         }
     }
 
-    public function sendCustomerSms($template=null)
+    public function sendCustomerMessage($template=null)
     {
         $customerSmsTemplate = empty($template) ? $this->nextProcess->customerSmsTemplate->template : $template;
         $this->sendMessage($customerSmsTemplate, [$this->customer->mobile]);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CommunicationLogController;
+use App\Http\Controllers\CustomerFeedbacksController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\CategoriesController;
@@ -85,6 +86,10 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     // Order Communication Log
     Route::get('/order-log/{orderId}', [CommunicationLogController::class, 'index'])->name('order.log');
     Route::post('/order-log/write', [CommunicationLogController::class, 'store'])->name('order.log.write');
+
+    // Customer Feedback Log
+    Route::get('/customer-feedback-log/{customerId}', [CustomerFeedbacksController::class, 'index'])->name('customer.feedback');
+    Route::post('/customer-feedback-log/write', [CustomerFeedbacksController::class, 'store'])->name('customer.feedback.write');
 });
 
 

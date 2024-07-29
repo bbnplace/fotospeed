@@ -117,6 +117,113 @@
                                 ></VAutocomplete>
                             </VCol>
                         </VRow>
+                        <VRow class="my-2">
+                            <VCol cols="12">
+                                <h4>Engage Customer</h4>
+                                <VRow>
+                                    <VCol cols="12" md="7">
+                                        <VAutocomplete
+                                            :id="`smsTemplate[${index}]`"
+                                            v-model="productProcesses[index].smsTemplate"
+                                            label="SMS Template"
+                                            :items="smsTemplates"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            aria-autocomplete="off"
+                                            autocomplete="off"
+                                            bg-color="white"
+                                            color="black"
+                                            @blur="updateProcesses"
+                                        ></VAutocomplete>
+                                    </VCol>
+                                    <VCol cols="12" md="5">
+                                        <VAutocomplete
+                                            :id="`sendSmsAt[${index}]`"
+                                            v-model="productProcesses[index].sendSmsAt"
+                                            label="Send At"
+                                            :items="sendAt"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            aria-autocomplete="off"
+                                            autocomplete="off"
+                                            bg-color="white"
+                                            color="black"
+                                            @blur="updateProcesses"
+                                        ></VAutocomplete>
+                                    </VCol>
+                                </VRow>
+                                <VRow>
+                                    <VCol cols="12" md="7">
+                                        <VAutocomplete
+                                            :id="`whatsappTemplate[${index}]`"
+                                            v-model="productProcesses[index].whatsappTemplate"
+                                            label="WhatsApp Template"
+                                            :items="whatsappTemplates"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            aria-autocomplete="off"
+                                            autocomplete="off"
+                                            bg-color="white"
+                                            color="black"
+                                            @blur="updateProcesses"
+                                        ></VAutocomplete>
+                                    </VCol>
+                                    <VCol cols="12" md="5">
+                                        <VAutocomplete
+                                            :id="`sendWhatsappAt[${index}]`"
+                                            v-model="productProcesses[index].sendWhatsappAt"
+                                            label="Send At"
+                                            :items="sendAt"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            aria-autocomplete="off"
+                                            autocomplete="off"
+                                            bg-color="white"
+                                            color="black"
+                                            @blur="updateProcesses"
+                                        ></VAutocomplete>
+                                    </VCol>
+                                </VRow>
+                                <VRow>
+                                    <VCol cols="12" md="7">
+                                        <VAutocomplete
+                                            :id="`emailTemplate[${index}]`"
+                                            v-model="productProcesses[index].emailTemplate"
+                                            label="Email Template"
+                                            :items="emailTemplates"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            aria-autocomplete="off"
+                                            autocomplete="off"
+                                            bg-color="white"
+                                            color="black"
+                                            @blur="updateProcesses"
+                                        ></VAutocomplete>
+                                    </VCol>
+                                    <VCol cols="12" md="5">
+                                        <VAutocomplete
+                                            :id="`sendEmailAt[${index}]`"
+                                            v-model="productProcesses[index].sendEmailAt"
+                                            label="Send At"
+                                            :items="sendAt"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            aria-autocomplete="off"
+                                            autocomplete="off"
+                                            bg-color="white"
+                                            color="black"
+                                            @blur="updateProcesses"
+                                        ></VAutocomplete>
+                                    </VCol>
+                                </VRow>
+                            </VCol>
+                        </VRow>
                     </v-expansion-panel-text>
                 </v-expansion-panel>
             </v-expansion-panels>
@@ -162,7 +269,9 @@ const processes = reactive(usePage().props.processes);
 const teams = usePage().props.teams;
 const retrievedData = usePage().props.item.process_data;
 const processData = retrievedData == undefined ? [] : JSON.parse(retrievedData);
-
+const emailTemplates = usePage().props.emailTemplates;
+const smsTemplates = usePage().props.smsTemplates;
+const whatsappTemplates = usePage().props.whatsappTemplates;
 
 const productProcesses = processData.processes ? reactive(processData.processes) :  reactive([]); // Initial Value to be Populated with fetched data
 if(processData.processes) {
@@ -242,4 +351,6 @@ const updateProcesses = async () => {
         cancelToken: source.token
     });
 }
+
+const sendAt = ['Start', 'Completion'];
 </script>

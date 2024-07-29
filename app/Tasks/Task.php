@@ -3,7 +3,11 @@
 namespace App\Tasks;
 
 use App\Events\AnnounceNewOrder;
+use App\Helper\URLGenerator;
+use App\Messaging\EmailClient;
+use App\Messaging\SMSClient;
 use App\Messaging\TemplateManager;
+use App\Messaging\WhatsAppClient;
 use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Order;
@@ -12,11 +16,15 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Task as TaskModel;
 use App\Models\Notification;
+use App\Report\ReportBuilder;
 
 class Task
 {
     public static function generate(Item $item, Order $order, string $process): bool
     {
+        // Generate report for the new process.
+        ReportBuilder::build($process, $order->quantity);
+
         // Check that the process is an allowed process;
         $orderStatuses = OrderStatus::getOrderStatusesArray();
         if(!in_array($process, $orderStatuses)) {
@@ -62,7 +70,44 @@ class Task
             }
         }
 
+        // Check for communications that are meant to be sent at the start of this process
+        $processes = $processData->processes;
+        foreach ($processes as $object) {
+            if ($object->name == $process) {
+                // Check if there's message to send to customer at the beginning of the process and send them
+                $linkExpirationMinutes = 60 * 60 * 24; // Link valid for 1 Day
+                $config = [
+                    'order' => $order,
+                    'customer' => User::where('id', $order->user_id)->first(),
+                    'nextProcess' => OrderStatus::where('name', $object->nextProcess)->first(),
+                    'url' => URLGenerator::generateAndShortenSignedUrl($order->user_id, $linkExpirationMinutes),
+                ];
+                self::sendCustomerCommunication($object, 'Start', $config);
+            }
+        }
+
+
         return true;
+    }
+
+    public static function sendCustomerCommunication($process, $sendTime, array $config)
+    {
+        // Get Invoice for the Order
+
+        if ($process->emailTemplate != 'None' && !empty($process->emailTemplate) && $process->sendEmailAt == $sendTime) {
+           $emailClient = new EmailClient($config);
+            $emailClient->sendCustomerEmail($process->emailTemplate);
+        }
+
+        if ($process->smsTemplate != 'None' && !empty($process->smsTemplate) && $process->sendSmsAt == $sendTime) {
+            $smsClient = new SMSClient($config);
+            $smsClient->sendCustomerSms($process->smsTemplate);
+        }
+
+        if ($process->whatsappTemplate != 'None' && !empty($process->whatsappTemplate) && $process->sendWhatsappAt == $sendTime) {
+            $whatsappClient = new WhatsAppClient($config);
+            $whatsappClient->sendCustomerMessage($process->whatsappTemplate);
+        }
     }
 
 

@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Report\ReportBuilder;
+use App\Helper\URLGenerator;
+use App\Models\User;
 use App\Tasks\Task as TaskAssigner;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -111,11 +112,25 @@ class TasksController extends Controller
                         TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess, $autoStartNextProcess);
                     }
 
+                    $nextProcessRecord = OrderStatus::where('name', $nextProcess)->first();
+                    // Send Communication to Customer
+                    $linkExpirationMinutes = 60 * 60 * 24;
+                    $config = [
+                        'order' => $order,
+                        'customer' => User::where('id', $order->user_id)->first(),
+                        'nextProcess' => $nextProcessRecord,
+                        'url' => URLGenerator::generateAndShortenSignedUrl($order->user_id, $linkExpirationMinutes),
+                    ];
+
+                    TaskAssigner::sendCustomerCommunication($currentProcessData, 'Completion', $config);
+
                     // If there is a next process, set the status of the order to the next process' and trigger task for the next process
                     if ($autoStartNextProcess && !empty($nextProcess)) {
                         $this->initiateNextProcess($order, $nextProcess);
                     }
                 }
+
+
             }
         }
 
@@ -133,10 +148,6 @@ class TasksController extends Controller
      */
     private function initiateNextProcess(Order $order, string $nextProcess): void
     {
-        
-        // Generate report for the new process.
-        ReportBuilder::build($nextProcess);
-
         $nextProcessRecord = OrderStatus::where('name', $nextProcess)->first();
 
         if (!empty($nextProcessRecord)) {

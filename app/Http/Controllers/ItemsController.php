@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Category;
+use App\Models\EmailTemplate;
 use App\Models\Item;
 use App\Models\OrderStatus;
 use App\Models\Role;
+use App\Models\SmsTemplate;
+use App\Models\WhatsAppTemplate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -118,6 +121,15 @@ class ItemsController extends Controller
 
     private function getItem($id)
     {
+        $emailTemplates = EmailTemplate::getEmailTemplatesArray();
+        array_unshift($emailTemplates, 'None');
+
+        $smsTemplates = SmsTemplate::getSmsTemplatesArray();
+        array_unshift($smsTemplates, 'None');
+
+        $whatsappTemplates = WhatsAppTemplate::getWhatsAppTemplatesArray();
+        array_unshift($whatsappTemplates, 'None');
+
         $query = Item::query();
         $query->where('id', $id);
         $query->with(['category' => function($query){
@@ -133,6 +145,9 @@ class ItemsController extends Controller
             'nextProcesses' => OrderStatus::getOrderStatusesArray(),
             'teams' => Role::getRolesArray(),
             'branches' => Branch::getBranchesArray(),
+            'emailTemplates' => $emailTemplates,
+            'smsTemplates' => $smsTemplates,
+            'whatsappTemplates' => $whatsappTemplates,
         ];
     }
 

@@ -51,6 +51,20 @@
             >
             </VAutocomplete>
         </div>
+        <div class="mt-4">
+            <VCombobox
+                v-model="form.groups"
+                label="Groups"
+                :items="groups"
+                multiple
+                chips
+                small-chips
+                variant="outlined"
+                :hide-details="form.errors.groups == undefined"
+                :error-messages="form.errors.groups"
+                max-errors="5"
+            ></VCombobox>
+        </div>
         <VDivider class="border-opacity-75 my-8"></VDivider>
         <div v-if="props.user" :style="{color: 'orange', backgroundColor: '#3d3d3d', padding: '5px 10px', borderRadius: '5px'}">Leave the Password fields empty if you do not intend to change the Customer's password.</div>
         <div class="mt-4">
@@ -104,6 +118,7 @@ interface UserEditor {
         id: Number,
         name: String
     },
+    groups: String
 }
 
 const props = defineProps<{
@@ -112,6 +127,8 @@ const props = defineProps<{
 }>()
 
 const states = usePage().props.states;
+const groups = usePage().props.groups;
+const customerGroups = usePage().props.customerGroups ?? [];
 
 const form = useForm({
     name: props.user ? props.user.name : "",
@@ -121,19 +138,38 @@ const form = useForm({
     password_confirmation: props.user ? props.user.password_confirmation : "",
     state: props.user ? props.user.state.name : "",
     role: props.userType,
+    groups: customerGroups
 });
 
 const submit = () => {
     if (props.user) {
         form.put(route('customer.edit', [props.user.id]), {
             // onFinish: () => form.reset('password', 'password_confirmation'),
+            onError: (errors) => {
+                handleGroupsError(errors)
+            }
         });
     } else {
         form.post(route('user.register'), {
             // onFinish: () => form.reset('password', 'password_confirmation'),
+            onError: (errors) => {
+                handleGroupsError(errors)
+            }
         });
     }
 };
+
+const handleGroupsError = (errors) =>{
+    const errorKeys = Object.keys(errors);
+    const invalidGroups = [];
+    errorKeys.forEach(element => {
+        if (element.indexOf('groups.') === 0) {
+            const parts = element.split('.');
+            invalidGroups.push(form.groups[parts[1]])
+        }
+    });
+    form.errors.groups = invalidGroups.length > 0 ? [`The following values are not supported: ${invalidGroups.join(', ')}`] : []
+}
 
 
 </script>
