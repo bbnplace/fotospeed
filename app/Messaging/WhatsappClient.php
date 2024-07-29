@@ -3,7 +3,7 @@
 namespace App\Messaging;
 
 use App\Models\Setting;
-use App\Models\WhatsAppMessage;
+use App\Models\WhatsappMessage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -54,7 +54,7 @@ class WhatsAppClient
                 $url = "https://graph.facebook.com/v13.0/{$settings->wa_phone_id}/messages";
 
                 foreach ($recipients as $recipient) {
-                    // Send WhatsAppMessage
+                    // Send WhatsappMessage
                     $response = Http::withToken($$settings->wa_access_token)->post($url, [
                         'messaging_product' => 'whatsapp',
                         'to' => $recipient,
@@ -62,7 +62,7 @@ class WhatsAppClient
                     ]);
 
                     // Log Response on WhatsApp Messages Table
-                    WhatsAppMessage::create([
+                    WhatsappMessage::create([
                         'recipient'=> $recipient,
                         'message' => $message,
                         'status' => $response->successful() ? 'Success' : 'Failed',

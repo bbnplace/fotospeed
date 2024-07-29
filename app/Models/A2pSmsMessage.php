@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class WhatsappMessage extends Model
+class A2pSmsMessage extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        "recipient","message","response","status","order_id","delivery_status","direction"
+        "recipient", "message","response","order_id","status","delivery_status",
     ];
 
     public function order()

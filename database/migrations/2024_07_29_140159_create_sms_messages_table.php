@@ -12,13 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('whats_app_messages', function (Blueprint $table) {
+        Schema::create('sms_messages', function (Blueprint $table) {
             $table->id();
-            $table->string('recipient');
-            $table->text('message');
-            $table->json('response');
-            $table->enum('status', ['Success', 'Failed']);
+            $table->string('recipient')->index();
+            $table->text('message')->fulltext();
+            $table->json('response')->nullable();
             $table->foreignIdFor(Order::class)->nullable();
+            $table->enum('status', ['Success', 'Failed']);
+            $table->json('delivery_status')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('whats_app_messages');
+        Schema::dropIfExists('sms_messages');
     }
 };

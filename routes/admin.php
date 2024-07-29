@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\CommunicationLogController;
 use App\Http\Controllers\CustomerFeedbacksController;
+use App\Http\Controllers\Messaging\A2PSmsController;
+use App\Http\Controllers\Messaging\EmailsController;
+use App\Http\Controllers\Messaging\HostedSimController;
+use App\Http\Controllers\Messaging\WhatsappController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\CategoriesController;
@@ -22,7 +26,7 @@ use App\Http\Controllers\StatesController;
 use App\Http\Controllers\TasksController;
 use App\Http\Controllers\UserRegistrationController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\WhatsAppTemplatesController;
+use App\Http\Controllers\WhatsappTemplatesController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -90,6 +94,22 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     // Customer Feedback Log
     Route::get('/customer-feedback-log/{customerId}', [CustomerFeedbacksController::class, 'index'])->name('customer.feedback');
     Route::post('/customer-feedback-log/write', [CustomerFeedbacksController::class, 'store'])->name('customer.feedback.write');
+
+    // Whatsapp Message
+    Route::get('/message/whatsapp/{customerId}', [WhatsappController::class, 'index'])->name('customer.whatsapp.log');
+    Route::post('/message/whatsapp/write', [WhatsappController::class, 'store'])->name('customer.whatsapp.write');
+
+    // Hosted SIM Message
+    Route::get('/message/hostedsim/{customerId}', [HostedSimController::class, 'index'])->name('customer.hostedsim.log');
+    Route::post('/message/hostedsim/write', [HostedSimController::class, 'store'])->name('customer.hostedsim.write');
+
+    // eMail Message
+    Route::get('/message/email/{customerId}', [EmailsController::class, 'index'])->name('customer.email.log');
+    Route::post('/message/email/write', [EmailsController::class, 'store'])->name('customer.email.write');
+
+    // A2P SMS Message
+    Route::get('/message/a2psms/{customerId}', [A2PSmsController::class, 'index'])->name('customer.a2psms.log');
+    Route::post('/message/a2psms/write', [A2PSmsController::class, 'store'])->name('customer.a2psms.write');
 });
 
 
@@ -183,14 +203,14 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::delete('panel/sms-templates/delete', [SmsTemplatesController::class, 'delete'])->name('sms-templates.delete');
 
     // WhatsApp Template Management Module
-    Route::get('panel/whatsapp-templates', [WhatsAppTemplatesController::class, 'index'])->name('whatsapp-templates');
-    Route::post('panel/whatsapp-templates', [WhatsAppTemplatesController::class, 'records'])->name('whatsapp-templates.records');
-    Route::get('panel/whatsapp-template/add', [WhatsAppTemplatesController::class, 'add'])->name('whatsapp-template.add');
-    Route::post('panel/whatsapp-template/add', [WhatsAppTemplatesController::class, 'store'])->name('whatsapp-template.add');
-    Route::get('panel/whatsapp-template/{id}/edit', [WhatsAppTemplatesController::class, 'edit'])->name('whatsapp-template.edit');
-    Route::put('panel/whatsapp-template/{id}/edit', [WhatsAppTemplatesController::class, 'update'])->name('whatsapp-template.edit');
-    Route::get('panel/whatsapp-template/{id}', [WhatsAppTemplatesController::class, 'view'])->name('whatsapp-template.view');
-    Route::delete('panel/whatsapp-templates/delete', [WhatsAppTemplatesController::class, 'delete'])->name('whatsapp-templates.delete');
+    Route::get('panel/whatsapp-templates', [WhatsappTemplatesController::class, 'index'])->name('whatsapp-templates');
+    Route::post('panel/whatsapp-templates', [WhatsappTemplatesController::class, 'records'])->name('whatsapp-templates.records');
+    Route::get('panel/whatsapp-template/add', [WhatsappTemplatesController::class, 'add'])->name('whatsapp-template.add');
+    Route::post('panel/whatsapp-template/add', [WhatsappTemplatesController::class, 'store'])->name('whatsapp-template.add');
+    Route::get('panel/whatsapp-template/{id}/edit', [WhatsappTemplatesController::class, 'edit'])->name('whatsapp-template.edit');
+    Route::put('panel/whatsapp-template/{id}/edit', [WhatsappTemplatesController::class, 'update'])->name('whatsapp-template.edit');
+    Route::get('panel/whatsapp-template/{id}', [WhatsappTemplatesController::class, 'view'])->name('whatsapp-template.view');
+    Route::delete('panel/whatsapp-templates/delete', [WhatsappTemplatesController::class, 'delete'])->name('whatsapp-templates.delete');
 
     // Email Template Management Module
     Route::get('panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');

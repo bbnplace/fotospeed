@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WhatsAppTemplate;
+use App\Models\WhatsappTemplate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class WhatsAppTemplatesController extends Controller
+class WhatsappTemplatesController extends Controller
 {
     protected $rules = [
         'name' => 'required|string|unique:whats_app_templates,name|min:2|max:64',
@@ -15,7 +15,7 @@ class WhatsAppTemplatesController extends Controller
 
     public function index()
     {
-        return inertia::render('Backend/WhatsAppTemplate/List', [
+        return inertia::render('Backend/WhatsappTemplate/List', [
             'endpoint' => route('whatsapp-templates.records'),
             'note' => session('note')
         ]);
@@ -31,7 +31,7 @@ class WhatsAppTemplatesController extends Controller
             $sortBys = $request->sortBy;
             $search = $request->search;
 
-            $query = WhatsAppTemplate::query();
+            $query = WhatsappTemplate::query();
 
             if (!empty($search)) {
                 $searchTerm = $search['_value'];
@@ -64,7 +64,7 @@ class WhatsAppTemplatesController extends Controller
 
     public function add()
     {
-        return Inertia::render('Backend/WhatsAppTemplate/Add', [
+        return Inertia::render('Backend/WhatsappTemplate/Add', [
         ]);
     }
 
@@ -73,14 +73,14 @@ class WhatsAppTemplatesController extends Controller
         $validated = $request->validate($this->rules);
 
         // Save the record to database
-        WhatsAppTemplate::create($validated);
+        WhatsappTemplate::create($validated);
 
         return redirect()->route('whatsapp-templates')->with('note', 'WhatsApp Template Created');
     }
 
-    private function getWhatsAppTemplate($templateId)
+    private function getWhatsappTemplate($templateId)
     {
-        $whatsAppTemplate = WhatsAppTemplate::where('id', $templateId)->first();
+        $whatsAppTemplate = WhatsappTemplate::where('id', $templateId)->first();
         return [
             'whatsAppTemplate' => $whatsAppTemplate,
         ];
@@ -88,7 +88,7 @@ class WhatsAppTemplatesController extends Controller
 
     public function update(Request $request, $id)
     {
-        $whatsAppTemplate = WhatsAppTemplate::where('id', $id)->first();
+        $whatsAppTemplate = WhatsappTemplate::where('id', $id)->first();
         if(empty($whatsAppTemplate)){
             return redirect()->route('whatsapp-templates')->with('note', 'Select the WhatsApp template you want to edit');
         }
@@ -108,12 +108,12 @@ class WhatsAppTemplatesController extends Controller
 
     public function edit($id)
     {
-        return Inertia::render('Backend/WhatsAppTemplate/Edit', $this->getWhatsAppTemplate($id));
+        return Inertia::render('Backend/WhatsappTemplate/Edit', $this->getWhatsappTemplate($id));
     }
 
     public function view($id)
     {
-        return Inertia::render('Backend/WhatsAppTemplate/Detail', $this->getWhatsAppTemplate($id));
+        return Inertia::render('Backend/WhatsappTemplate/Detail', $this->getWhatsappTemplate($id));
     }
 
     public function delete(Request $request)
@@ -122,7 +122,7 @@ class WhatsAppTemplatesController extends Controller
             // TODO: Check if the selected template is linked with a process or setting. 
             // If template is linked, do not delete. User should be requested to unlink
             // the template before proceeding.
-            WhatsAppTemplate::whereIn('id', $request->ids)->delete();
+            WhatsappTemplate::whereIn('id', $request->ids)->delete();
             return redirect()->route('whatsapp-templates')->with('note', 'Selected WhatsApp templates have been deleted');
         }
     }

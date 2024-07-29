@@ -1,26 +1,32 @@
 <template>
-    <div v-if="feedbackLog.length">
-        <div v-for="(feedback, index) in feedbackLog" :key="index" class="task-card px-2">
-            <p class="font-bold ">{{ moment(feedback.created_at).calendar() }}, {{ feedback.staff.mobile == user.mobile ? "I" :  feedback.staff.name }} wrote:</p>
-            <p>{{ feedback.note }}</p>
+    <div v-if="messageThreads.length">
+        <div v-for="(message, index) in messageThreads" :key="index" class="task-card px-2">
+            <p class="font-bold ">{{ moment(message.created_at).calendar() }}</p>
+            <p>{{ message.subject }}</p>
         </div>
     </div>
-    <div v-else class="p-4 text-center">
-        Feedbacks help servce the customer better. Submit 
-    </div>
+    <VCard v-else class="p-3 mt-2 text-center" color="grey-lighten-3">
+        You have not sent any email to this customer.
+    </VCard>
     <hr />
     <div>
         <form @submit.prevent="sendMessage">
+            <VTextField
+                v-model="logMessage.subject"
+                variant="outlined"
+                label="Subject"
+            ></VTextField>
             <VTextarea
                 v-model="logMessage.newMessage"
-                label="Type Feedback" 
+                label="Type Email Body" 
                 variant="outlined"
             ></VTextarea>
             <div class="text-right">
                 <VBtn
                     color="black"
                     type="submit"
-                >Submit Feedback</VBtn>
+                    prepend-icon="mdi-send"
+                >Send</VBtn>
             </div>
         </form>
     </div>
@@ -37,18 +43,20 @@ const customer = usePage().props.customer;
 const user = usePage().props.auth.user;
 
 const logMessage = reactive({
+    subject: "",
     newMessage: ""
 });
 
-const feedbackLog = ref([]);
+const messageThreads = ref([]);
 
 const sendMessage = async () => {
     const payload = {
+        subject: logMessage.subject,
         message: logMessage.newMessage,
-        customerId: customer.id
+        customerEmail: customer.email
     }
 
-    const response = await axios.post(route("customer.feedback.write"), payload, {
+    const response = await axios.post(route("customer.email.write"), payload, {
         headers: {
             "Content-Type": "application/json"
         }
@@ -59,18 +67,18 @@ const sendMessage = async () => {
         if (data.status == 'success') {
             // Add the message to the thread and refresh.
             logMessage.newMessage = "";
-            loadCustomerFeedback();
+            loadMessages();
         }
     }
 }
 
-const loadCustomerFeedback = async () => {
-    const response = await axios.get(route("customer.feedback", [customer.id]));
-    feedbackLog.value = response.data;
+const loadMessages = async () => {
+    const response = await axios.get(route("customer.email.log", [customer.mobile]));
+    messageThreads.value = response.data;
 }
 
 onMounted(() => {
-    loadCustomerFeedback();
+    loadMessages();
 })
 </script>
 

@@ -36,14 +36,14 @@
  import { useForm, usePage, Link } from '@inertiajs/vue3';
  import PrimaryButton from '@/Components/PrimaryButton.vue';
  
- interface WhatsAppTemplateEditor {
+ interface WhatsappTemplateEditor {
      id?: Number,
      name: String,
      template: String
  }
  
  const props = defineProps<{
-     whatsAppTemplate: WhatsAppTemplateEditor
+     whatsAppTemplate: WhatsappTemplateEditor
  }>()
  
  const form = useForm({

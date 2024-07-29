@@ -5,7 +5,7 @@
             <VRow>
                 <VCol cols="12" md="6">
                     <Panel snippetTitle="Edit WhatsApp Template">
-                        <WhatsAppTemplateEditor :whatsAppTemplate="whatsAppTemplate"></WhatsAppTemplateEditor>
+                        <WhatsappTemplateEditor :whatsAppTemplate="whatsAppTemplate"></WhatsappTemplateEditor>
                     </Panel>
                 </VCol>
                 <VCol cols="12" md="6">
@@ -20,7 +20,7 @@
 import { usePage, Head } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
-import WhatsAppTemplateEditor from "@/Components/Editors/WhatsAppTemplateEditor.vue"
+import WhatsappTemplateEditor from "@/Components/Editors/WhatsappTemplateEditor.vue"
 import TemplateCodes from '@/Components/TemplateCodes.vue'
 
 const whatsAppTemplate = usePage().props.whatsAppTemplate

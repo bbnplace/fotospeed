@@ -9,7 +9,7 @@ use App\Models\Item;
 use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\SmsTemplate;
-use App\Models\WhatsAppTemplate;
+use App\Models\WhatsappTemplate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -127,7 +127,7 @@ class ItemsController extends Controller
         $smsTemplates = SmsTemplate::getSmsTemplatesArray();
         array_unshift($smsTemplates, 'None');
 
-        $whatsappTemplates = WhatsAppTemplate::getWhatsAppTemplatesArray();
+        $whatsappTemplates = WhatsappTemplate::getWhatsappTemplatesArray();
         array_unshift($whatsappTemplates, 'None');
 
         $query = Item::query();

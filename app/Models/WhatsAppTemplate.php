@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class WhatsAppTemplate extends Model
+class WhatsappTemplate extends Model
 {
     use HasFactory;
 
@@ -14,7 +14,7 @@ class WhatsAppTemplate extends Model
         'template'
     ];
 
-    public static function getWhatsAppTemplatesArray()
+    public static function getWhatsappTemplatesArray()
     {
         $whatsAppTemplates = [];
         $whatsAppTemplatesCollection = self::get('name');
