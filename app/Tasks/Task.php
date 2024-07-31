@@ -13,6 +13,7 @@ use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Role;
+use App\Models\TaskStatus;
 use App\Models\User;
 use App\Models\Task as TaskModel;
 use App\Models\Notification;
@@ -127,7 +128,7 @@ class Task
             'description'=> $taskDescription,
             'order_id'=> $order->id,
             'branch_id'=> $branch->id,
-            'role_id'=> $team->id,
+            'role_id'=> $team->id
         ]);
     }
 

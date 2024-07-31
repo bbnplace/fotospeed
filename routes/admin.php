@@ -6,6 +6,7 @@ use App\Http\Controllers\Messaging\A2PSmsController;
 use App\Http\Controllers\Messaging\EmailsController;
 use App\Http\Controllers\Messaging\HostedSimController;
 use App\Http\Controllers\Messaging\WhatsappController;
+use App\Http\Controllers\OrderTasksController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\CategoriesController;
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('panel/invoices', [InvoicesController::class, 'index'])->name('invoices');
     Route::post('panel/invoices', [InvoicesController::class, 'records'])->name('invoice.records');
     Route::get('/panel/invoice/{id}', [InvoicesController::class, 'view'])->name('invoice');
+    Route::post('panel/invoice/create', [InvoicesController::class, 'create'])->name('invoice.create');
 
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
@@ -110,6 +112,10 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     // A2P SMS Message
     Route::get('/message/a2psms/{customerId}', [A2PSmsController::class, 'index'])->name('customer.a2psms.log');
     Route::post('/message/a2psms/write', [A2PSmsController::class, 'store'])->name('customer.a2psms.write');
+
+    // This Task will be open for Admin and Management
+    Route::get('/tasks/order/task/{orderId}', [OrderTasksController::class,'index'])->name('tasks.order.dashboard');
+    Route::get('/tasks/order/{orderId}', [TasksController::class,'loadOrderTasks'])->name('tasks.order');
 });
 
 

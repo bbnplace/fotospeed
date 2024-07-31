@@ -35,7 +35,7 @@ class DashboardController extends Controller
                 $this->getReports($request, $ref)
             ]);
         } else {
-            // TODO: If user is not permitted to view report, the user's assigned task appears
+            // If user is not permitted to view report, the user's assigned task appears
             $query = Task::query();
             $query->where('role_id', auth()->user()->role_id); // Ensures user is from the target team
             $query->where('branch_id', auth()->user()->branch_id); // Ensure user is from the production branch

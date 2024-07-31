@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\InvoiceStatus;
+use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Ramsey\Uuid\Uuid;
 use Inertia\Inertia;
 
 class InvoicesController extends Controller
@@ -15,6 +18,27 @@ class InvoicesController extends Controller
             'endpoint' => route('invoice.records'),
             'note' => session('note')
         ]);
+    }
+
+    public function create(Request $request)
+    {
+        // Create from Cart
+
+        // Create from single Order
+        $order_id = $request->orderId;
+        $order = Order::find($order_id);
+        
+        if (!empty($order)) {
+            $invoice = Invoice::create([
+                'user_id' => $order->user_id,
+                'order_id' => $order_id,
+                'track_id' => (string) Uuid::uuid4(),
+                'invoice_status_id' => InvoiceStatus::STATUS_NEW,
+                'description' => 'Invoice for Order ' . $order->name
+            ]);
+
+            return redirect(route('invoice', [$invoice->id]))->with('note','Invoice Successfully Generated');
+        }
     }
 
     public function records(Request $request)

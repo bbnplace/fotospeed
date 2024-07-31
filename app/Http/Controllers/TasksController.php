@@ -51,6 +51,38 @@ class TasksController extends Controller
         return $tasks;
     }
 
+    public function loadOrderTasks(int $orderId)
+    {
+        $tasks = [
+            'Todo' => [],
+            'Doing' => [],
+            'Done'=> [],
+        ];
+
+        $query =  Task::query();
+        $query->where('order_id', $orderId);
+        $query->with('taskStatus', function ($query){
+            $query->select('id', 'name');
+        });
+        $query->with('user', function ($query){
+            $query->select('id', 'name');
+        });
+
+        // $records = Task::where('order_id', $orderId)->get();
+        $records = $query->get();
+
+        if (!empty($records)) {
+            foreach ($records as $record) {
+                if($record->taskStatus !== null)
+                {
+                    array_push($tasks[$record->taskStatus->name], $record);
+                }
+            }
+        }
+
+        return $tasks;
+    }
+
     public function pickTask(Request $request)
     {
         $task = $request->task;
@@ -86,8 +118,20 @@ class TasksController extends Controller
             $order = Order::find($task->order_id);
 
             // Check if all tasks with the same orderId have been completed.
-            $undoneTask = Task::where('order_id', $task->order_id)->whereNot('task_status_id', TaskStatus::STATUS_DONE)->count();
-            if ($undoneTask == 0) {
+            $hasUndoneTask = true;
+            $orderTasks = Task::where('order_id', $task->order_id)->get();
+            if ($orderTasks->count() == 0) {
+                return [
+                    'status' => 'success'
+                ];
+            }
+
+            foreach ($orderTasks as $orderTask) {
+                $hasUndoneTask = $orderTask->task_status_id != TaskStatus::STATUS_DONE;
+            }
+
+            // $undoneTask = Task::where('order_id', $task->order_id)->whereNot('task_status_id', TaskStatus::STATUS_DONE)->count();
+            if (!$hasUndoneTask) {
                 $currentProcess = $task->order->orderStatus;
                 // Get the Item Process Data and confirm whether to trigger the next process or to notify administrator
                 $item = $task->order->item;

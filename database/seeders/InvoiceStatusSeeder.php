@@ -15,15 +15,19 @@ class InvoiceStatusSeeder extends Seeder
     {
         $statuses = [
             [
-                'id' => 1,
+                'id' => InvoiceStatus::STATUS_NEW,
                 'name' => 'Unpaid'
             ],
             [
-                'id' => 2,
+                'id' => InvoiceStatus::STATUS_PAID,
                 'name' => 'Paid'
             ],
             [
-                'id' => 3,
+                'id' => InvoiceStatus::STATUS_FAILED,
+                'name' => 'Failed'
+            ],
+            [
+                'id' => InvoiceStatus::STATUS_CANCELLED,
                 'name' => 'Cancelled'
             ],
         ];

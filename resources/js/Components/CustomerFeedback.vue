@@ -5,9 +5,9 @@
             <p>{{ feedback.note }}</p>
         </div>
     </div>
-    <div v-else class="p-4 text-center">
-        Feedbacks help servce the customer better. Submit 
-    </div>
+    <VCard v-else class="p-3 mt-2 text-center" color="grey-lighten-3">
+        Customer Feedback help your organisation deliver better customer experiences.
+    </VCard>
     <hr />
     <div>
         <form @submit.prevent="sendMessage">
@@ -20,7 +20,7 @@
                 <VBtn
                     color="black"
                     type="submit"
-                >Submit Feedback</VBtn>
+                >Save Feedback</VBtn>
             </div>
         </form>
     </div>

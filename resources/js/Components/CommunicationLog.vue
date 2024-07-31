@@ -6,9 +6,9 @@
                 <p>{{ note.message }}</p>
             </div>
         </div>
-        <div v-else class="p-4 text-center">
+        <VCard v-else class="p-3 text-center" color="grey-lighten-3">
             Leave a note for other team members working on this Order.
-        </div>
+        </VCard>
         <hr />
         <div>
             <form @submit.prevent="sendMessage">

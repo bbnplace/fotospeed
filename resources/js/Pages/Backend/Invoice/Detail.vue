@@ -3,9 +3,18 @@
     <BackendLayout>
         <VRow>
             <VCol>
-                <Link href="#" @click="goBack">Back</Link>
+                <Link href="#" class="font-bold" @click="goBack">Back</Link>
             </VCol>
         </VRow>
+        <Panel snippet-title="Invoice Successfully Generated">
+            <p>
+                Please Navigate to the task dashboard and move Invoice Generation Task to <b>Done</b>.<br />
+                Once all tasks in this process are <b>done</b>, a link to login and make payment will be sent to the customer.
+            </p>
+            <p>
+                <Link :href="user.isAdmin ? route('tasks.order.dashboard', [invoice.order_id]) : route('dashboard')" class="font-bold btn btn-info">Goto Task Dashboard</Link>
+            </p>
+        </Panel>
         <Panel snippetTitle="Invoice">
             <VRow>
                 <VCol>
@@ -75,6 +84,7 @@
     import Paystack from '@/Components/Paystack.vue';
     import moment from 'moment';
 
+    const user = usePage().props.auth.user;
     const invoice = usePage().props.invoice;
     const paystackData = usePage().props.paystack;
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('whats_app_templates', function (Blueprint $table) {
+        Schema::create('whatsapp_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->text('template')->fulltext();
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('whats_app_templates');
+        Schema::dropIfExists('whatsapp_templates');
     }
 };

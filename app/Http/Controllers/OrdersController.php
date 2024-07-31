@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
+use App\Models\Invoice;
+use App\Models\InvoiceStatus;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -130,8 +132,6 @@ class OrdersController extends Controller
 
     public function add()
     {
-
-        // TODO: Define a setting that will allow Administrator to setup the minimum delivery date.
         return Inertia::render('Backend/Order/Add', [
             'items' => Item::getItemsArray(),
             'stkn' => csrf_token(),
@@ -210,6 +210,14 @@ class OrdersController extends Controller
 
         $nextProcess = OrderStatus::where('id', $order->orderStatus->next_process)->first(['name']);
 
+        // Get Invoice
+        $invoice = Invoice::where('order_id', $order->id)->first();
+        $hasInvoice = !empty($invoice);
+        $invoicePaid = $hasInvoice && $invoice->invoice_status_id == InvoiceStatus::STATUS_PAID;
+        $canEditOrder = auth()->user()->isAdmin() || auth()->user()->isReception();
+        $canGenerateInvoice = !$hasInvoice && ($canEditOrder || auth()->user()->isCashier());
+        $canRegenerateInvoice = $hasInvoice && !$invoicePaid;
+
         return [
             'order' => $order,
             'nextProcess' => $nextProcess->name ?? null,
@@ -220,7 +228,12 @@ class OrdersController extends Controller
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
-            'activities' => $this->getOrderActivityLog($id)
+            'activities' => $this->getOrderActivityLog($id),
+            'hasInvoice' => $hasInvoice,
+            'canGenerateInvoice' => $canGenerateInvoice,
+            'invoicePaid' => $invoicePaid,
+            'canEditOrder' => $canEditOrder,
+            'canRegenerateInvoice' => $canRegenerateInvoice,
         ];
     }
 
@@ -277,7 +290,7 @@ class OrdersController extends Controller
 
         $order->save();
 
-        return redirect(route(($role->name == 'Customer' ? 'customer.my-orders' : 'orders')))->with('note', 'Order Updated');
+        return redirect($role->name == 'Customer' ? route('customer.my-orders') : route('order.view', [$order->id]))->with('note', 'Order Updated');
     }
 
     public function delete(Request $request)

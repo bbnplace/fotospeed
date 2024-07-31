@@ -52,8 +52,10 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Order Number</b><br />
+                                    <b>Reference Number</b><br />
                                     {{ order.order_number }}
+                                    <Link v-if="!order.order_number && canEditOrder" class="font-bold underline" :href="`${route('order.edit', order.id)}`">[ Add ]</Link>
+                                    <Link v-if="order.order_number && canEditOrder" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">[ Edit ]</Link>
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -69,9 +71,11 @@
                                 </VCol>
                             </VRow>
                             <VRow>
-                                <VCol cols="12" sm="6" v-if="$page.props.auth.user.role != 'Customer'">
+                                <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
-                                    ₦{{ orderDetail.price }}
+                                    ₦{{ orderDetail.price ?? " --:--" }} 
+                                    <Link v-if="!orderDetail.price && canEditOrder" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Add</Link>
+                                    <Link v-if="orderDetail.price && canEditOrder" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Edit</Link>
                                 </VCol>
                             </VRow>
                         </VCol>
@@ -89,6 +93,11 @@
                                     {{ $page.props.order.order_status.name }}
                                 </VCol>
                             </VRow>
+                            <VRow v-if="user.isAdmin">
+                                <VCol>
+                                    <Link class="font-bold underline" :href="route('tasks.order.dashboard', [order.id])">View Tasks</Link>
+                                </VCol>
+                            </VRow>
                             <VRow>
                                 <VCol>
                                     <b>Order Created</b><br />
@@ -103,19 +112,25 @@
                             </VRow>
                         </VCol>
                     </VRow>
-                    <VRow v-if="$page.props.order.order_status.name != 'Completed' && $page.props.nextProcess != 'Cancelled'">
+                    <VRow>
                         <VCol>
-                            <VBtn v-if="$page.props.nextProcess == 'Billing'"
-                                color="blue-darken-1"
-                                @click="submitOrder"
-                            >Issue Invoice</VBtn>
-                            <VBtn v-else
-                                color="blue-darken-1"
-                                @click="submitOrder"
+                            <VBtn v-if="canGenerateInvoice && !invoicePaid"
+                                color="blue-darken-1 m-1"
+                                @click="generateInvoice"
+                            >Generate Invoice</VBtn>
+                            <VBtn
+                                color="blue-darken-1 m-1"
+                                @click="editOrder"
+                                 v-if="canEditOrder"
                             >
-                                <template v-if="$page.props.auth.user.isAdmin">Forward To {{ $page.props.nextProcess }}</template>
-                                <template v-else>Mark Completed</template>
-
+                                Edit Order
+                            </VBtn>
+                            <VBtn
+                                color="red-darken-1 m-1"
+                                @click="cancelOrder"
+                                 v-if="!invoicePaid && user.isAdmin"
+                            >
+                                Cancel Order
                             </VBtn>
                         </VCol>
                     </VRow>
@@ -146,16 +161,21 @@
 
 <script setup>
 import { reactive, ref } from 'vue';
-import { usePage, useForm, Head, Link } from "@inertiajs/vue3";
+import { usePage, useForm, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import OrderForm from '@/Components/OrderForm.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
 import CommunicationLog from '@/Components/CommunicationLog.vue';
 
+const user = usePage().props.auth.user;
 const order = usePage().props.order;
 const orderDetail = usePage().props.orderDetail;
 const activities = usePage().props.activities;
+const hasInvoice = usePage().props.hasInvoice;
+const canGenerateInvoice = usePage().props.canGenerateInvoice;
+const invoicePaid = usePage().props.invoicePaid;
+const canEditOrder = usePage().props.canEditOrder;
 const orderForm = reactive({
     orderFiles: orderDetail.files,
 });
@@ -174,8 +194,17 @@ const form = useForm({
     orderId: order.id
 });
 
-const submitOrder = () => {
-    form.post(route('process.forward'));
+
+const editOrder = () => {
+    router.visit(route('order.edit', order.id));
+}
+
+const cancelOrder = () => {
+    alert("Cancelling Order");
+}
+
+const generateInvoice = () => {
+    form.post(route('invoice.create'));
 }
 </script>
 
