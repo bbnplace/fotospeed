@@ -130,7 +130,6 @@ class TasksController extends Controller
                 $hasUndoneTask = $orderTask->task_status_id != TaskStatus::STATUS_DONE;
             }
 
-            // $undoneTask = Task::where('order_id', $task->order_id)->whereNot('task_status_id', TaskStatus::STATUS_DONE)->count();
             if (!$hasUndoneTask) {
                 $currentProcess = $task->order->orderStatus;
                 // Get the Item Process Data and confirm whether to trigger the next process or to notify administrator
@@ -173,8 +172,6 @@ class TasksController extends Controller
                         $this->initiateNextProcess($order, $nextProcess);
                     }
                 }
-
-
             }
         }
 
