@@ -27,7 +27,7 @@
                                         <VTextarea
                                             id="description"
                                             v-model="productProcessActivities[process.name][index].description"
-                                            label="Description (Optional)"
+                                            label="Brief Guidelines (Optional)"
                                             variant="outlined"
                                             hide-details
                                             density="compact"

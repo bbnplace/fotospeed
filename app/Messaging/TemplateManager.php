@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Messaging;
+use App\Models\Item;
 
 class TemplateManager
 {
@@ -9,6 +10,7 @@ class TemplateManager
     private $nextProcess;
     private $team;
     private $autoSignInUrl;
+    private $product;
 
     public function __construct(array $config)
     {
@@ -35,6 +37,15 @@ class TemplateManager
             $matches['order_status'] = $this->order->orderStatus->name;
             $matches['order_branch'] = $this->order->branch->name;
             $matches['price'] = $this->order->total_cost;
+
+            // Get Items
+            $product = Item::where("id", $this->order->item_id)->first();
+            if (!empty($product)) {
+                $matches['product'] = $product->name;
+                $matches['product_name'] = $product->name;
+                $matches['item'] = $product->name;
+                $matches['item_name'] = $product->name;
+            }
         }
 
         if (!empty($this->nextProcess)) {

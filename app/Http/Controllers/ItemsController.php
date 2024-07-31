@@ -20,11 +20,11 @@ class ItemsController extends Controller
     {
         return [
             'name' => 'string|required|unique:items,name|min:2|max:64',
-            'category' => 'string|required|exists:categories,name|min:2|max:64',
-            'description' => 'required|string|min:24|max:1000',
-            'height' => 'required|string|min:3|max:12',
-            'width' => 'required|string|min:3|max:12',
-            'weight' => 'nullable|string|min:3|max:12',
+            'category' => 'string|required|exists:categories,name|max:64',
+            'description' => 'nullable|string|min:24|max:1000',
+            'height' => 'nullable|string|max:12',
+            'width' => 'nullable|string|max:12',
+            'weight' => 'nullable|string|max:12',
             'print_price' => 'nullable|integer|digits_between:2,9',
             'sheet_price' => 'nullable|integer|digits_between:2,9',
             'cover_print_price' => 'nullable|integer|digits_between:2,9',

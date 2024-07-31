@@ -1,12 +1,13 @@
 <template>
     <div>
+        <p>Fields with asterisks(*) are mandatory.</p>
         <form @submit.prevent="submit">
             <VRow>
                 <VCol cols="12" sm="6">
                     <VTextField
                         id="name"
                         v-model="form.name"
-                        label="Name"
+                        label="Name *"
                         variant="outlined"
                         :hide-details="form.errors.name == undefined"
                         :error-messages="form.errors.name"
@@ -16,7 +17,7 @@
                     <VAutocomplete
                         id="category"
                         v-model="form.category"
-                        label="Category"
+                        label="Category *"
                         :items="categories"
                         variant="outlined"
                         :hide-details="form.errors.category == undefined"
@@ -65,7 +66,7 @@
                     <VTextField
                         id="weight"
                         v-model="form.weight"
-                        label="Weight (Optional)"
+                        label="Weight"
                         variant="outlined"
                         :hide-details="form.errors.weight == undefined"
                         :error-messages="form.errors.weight"
@@ -78,7 +79,7 @@
                     <VTextField
                         id="print-price"
                         v-model="form.print_price"
-                        label="Print Price (Optional)"
+                        label="Print Price"
                         variant="outlined"
                         prefix="₦"
                         :hide-details="form.errors.print_price == undefined"
@@ -89,7 +90,7 @@
                     <VTextField
                         id="sheet-price"
                         v-model="form.sheet_price"
-                        label="Sheet Price (Optional)"
+                        label="Sheet Price"
                         variant="outlined"
                         prefix="₦"
                         :hide-details="form.errors.sheet_price == undefined"
@@ -100,7 +101,7 @@
                     <VTextField
                         id="cover-print-price"
                         v-model="form.cover_print_price"
-                        label="Cover Print Price (Optional)"
+                        label="Cover Print Price"
                         variant="outlined"
                         prefix="₦"
                         :hide-details="form.errors.cover_print_price == undefined"
@@ -113,7 +114,7 @@
                 <VCol cols="12" md="6">
                     <VCombobox
                         v-model="form.production_branches"
-                        label="Select Branches that can process this item"
+                        label="Select Branches that can process this item *"
                         :items="branches"
                         multiple
                         chips
@@ -129,7 +130,7 @@
                     <VAutocomplete
                         id="branch"
                         v-model="form.primary_production_branch"
-                        label="Primary Branch"
+                        label="Primary Branch *"
                         :items="branches"
                         variant="outlined"
                         :hide-details="form.errors.primary_production_branch == undefined"
