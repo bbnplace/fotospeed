@@ -1,10 +1,12 @@
 <template>
     <Head title="Item Category"></Head>
     <BackendLayout>
+        <Link :href="route('categories')" class="font-bold">Back</Link>
         <Centralize snippet-title="Item Category">
             <h3>{{ category.name }}</h3>
-            <div class="mt-3">
-                <Link :href="route('category.edit', category.id)" class="btn btn-secondary">Modify</Link>
+            <hr />
+            <div class="mt-3 text-right">
+                <Link :href="route('category.edit', category.id)" class="btn btn-dark">Modify</Link>
             </div>
         </Centralize>
     </BackendLayout>

@@ -62,6 +62,9 @@ class StaffController extends Controller
         $query->with(['state' => function ($query) {
             $query->select('id', 'name');
         }]);
+        $query->with(['branch' => function ($query) {
+            $query->select('id', 'name');
+        }]);
 
         if (!empty($sortBys)) {
             foreach ($sortBys as $sortBy) {

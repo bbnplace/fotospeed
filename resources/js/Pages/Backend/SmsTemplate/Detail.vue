@@ -1,13 +1,15 @@
 <template>
     <Head title="SMS Template"></Head>
     <BackendLayout>
+        <Link :href="route('sms-templates')" class="font-bold">Back</Link>
         <Centralize snippetTitle="SMS Template">
             <h3>{{ smsTemplate.name }}</h3>
             <div>
                 {{ smsTemplate.template }}
             </div>
-            <div class="mt-3">
-                <Link :href="route('sms-template.edit', smsTemplate.id)" class="btn btn-secondary">Modify</Link>
+            <hr />
+            <div class="mt-3 text-right">
+                <Link :href="route('sms-template.edit', smsTemplate.id)" class="btn btn-dark">Modify</Link>
             </div>
         </Centralize>
     </BackendLayout>

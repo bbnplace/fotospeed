@@ -1,9 +1,9 @@
 <template>
     <Head title="Product"></Head>
     <BackendLayout>
+        <Link :href="route('items')" class="font-bold">Back</Link>
         <VRow>
             <VCol cols="12" md="6">
-                <Link :href="route('items')" class="font-bold">Back</Link>
                 <Panel :snippet-title="item.name">
                     <VRow>
                         <VCol cols="6"><b>Item Name</b><br />{{ item.name }}</VCol>
@@ -44,8 +44,8 @@
                         </VCol>
                     </VRow>
                     <hr  class="mt-4" />
-                    <div>
-                        <Link :href="route('item.edit', item.id)" class="btn btn-secondary">Modify</Link>
+                    <div class="text-right">
+                        <Link :href="route('item.edit', item.id)" class="btn btn-dark">Modify</Link>
                     </div>
                 </Panel>
             </VCol>

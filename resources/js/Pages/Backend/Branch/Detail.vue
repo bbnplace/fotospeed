@@ -1,6 +1,7 @@
 <template>
     <Head title="Branch"></Head>
     <BackendLayout>
+        <Link :href="route('branches')" class="font-bold">Back</Link>
         <Centralize snippetTitle="Branch">
             <h3>{{ branch.name }}</h3>
             <div>
@@ -9,8 +10,9 @@
             <div>
                 {{ branch.state.name }}
             </div>
-            <div class="mt-3">
-                <Link :href="route('branch.edit', branch.id)" class="btn btn-secondary">Modify</Link>
+            <hr />
+            <div class="mt-3 text-right">
+                <Link :href="route('branch.edit', branch.id)" class="btn btn-dark">Rename</Link>
             </div>
         </Centralize>
     </BackendLayout>

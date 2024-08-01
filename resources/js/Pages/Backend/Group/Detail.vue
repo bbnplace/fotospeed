@@ -7,8 +7,9 @@
             <div>
                 {{ group.description }}
             </div>
-            <div class="mt-3">
-                <Link :href="route('group.edit', group.id)" class="btn btn-secondary">Modify</Link>
+            <hr />
+            <div class="mt-3 text-right">
+                <Link :href="route('group.edit', group.id)" class="btn btn-dark">Modify</Link>
             </div>
         </Centralize>
     </BackendLayout>

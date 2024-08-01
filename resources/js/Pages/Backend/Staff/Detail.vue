@@ -1,22 +1,26 @@
 <template>
     <Head title="Staff"></Head>
     <BackendLayout>
+        <Link :href="route('staff')" class="font-bold">Back</Link>
         <VRow>
             <VCol cols="12" md="7">
                 <Panel :snippet-title="staff.name">
                     <VRow>
                         <VCol cols="6"><b>Staff Name</b><br />{{ staff.name }}</VCol>
-                        <VCol cols="6"><b>Branch</b><br />{{ staff.branch.name }}, {{ staff.state.name }}</VCol>
+                        <VCol cols="6"><b>Department</b><br />{{ staff.role.name }}</VCol>
+                        
                     </VRow>
                     <VRow>
                         <VCol cols="6"><b>Email</b><br />{{ staff.email }}</VCol>
                         <VCol cols="6"><b>Mobile</b><br />{{ staff.mobile }}</VCol>
                     </VRow>
                     <VRow>
-                        <VCol cols="6"><b>Department</b><br />{{ staff.role.name }}</VCol>
+                        <VCol cols="6"><b>Branch</b><br />{{ staff.branch.name }}</VCol>
+                        <VCol cols="6"><b>State</b><br />{{ staff.state.name }}</VCol>
                     </VRow>
-                    <div class="mt-3">
-                        <Link :href="route('staff.edit', staff.id)" class="btn btn-secondary">Modify</Link>
+                    <hr />
+                    <div class="mt-3 text-right">
+                        <Link :href="route('staff.edit', staff.id)" class="btn btn-dark">Modify</Link>
                     </div>
                 </Panel>
             </VCol>

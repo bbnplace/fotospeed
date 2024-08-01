@@ -34,13 +34,14 @@ const dataResources = {
             key: "mobile",
             sortable: true
         },
+        // {
+        //     title: "Email",
+        //     key: "email",
+        //     sortable: true
+        // },
         {
-            title: "Email",
-            key: "email",
-            sortable: true
-        }, {
-            title: "State",
-            key: "state.name",
+            title: "Branch",
+            key: "branch.name",
             sortable: true
         },
         // {

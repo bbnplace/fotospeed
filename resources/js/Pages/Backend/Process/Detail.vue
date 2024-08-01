@@ -1,6 +1,7 @@
 <template>
     <Head title="Process"></Head>
     <BackendLayout>
+        <Link :href="route('processes')" class="font-bold">Back</Link>
         <Panel :snippet-title="process.name">
             <VRow>
                 <VCol cols="6"><b>Process Name</b><br />{{ process.name }}</VCol>
@@ -21,8 +22,9 @@
             <VRow>
                 <VCol cols="4"><b>Next Process</b><br />{{ process.next_process ? process.next_process.name : "-" }}</VCol>
             </VRow>
-            <div class="mt-3">
-                <Link :href="route('process.edit', process.id)" class="btn btn-secondary">Modify</Link>
+            <hr />
+            <div class="mt-3 text-right">
+                <Link :href="route('process.edit', process.id)" class="btn btn-dark">Modify</Link>
             </div>
         </Panel>
     </BackendLayout>

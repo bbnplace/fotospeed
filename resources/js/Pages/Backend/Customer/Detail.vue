@@ -28,8 +28,9 @@
                             </v-chip-group>
                         </VCol>
                     </VRow>
-                    <div class="mt-3">
-                        <Link :href="route('customer.edit', customer.id)" class="btn btn-secondary">Modify</Link>
+                    <hr />
+                    <div class="mt-3 text-right">
+                        <Link :href="route('customer.edit', customer.id)" class="btn btn-dark">Modify</Link>
                     </div>
                 </Panel>
             </VCol>

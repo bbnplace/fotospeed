@@ -1,10 +1,12 @@
 <template>
     <Head title="Item Role"></Head>
     <BackendLayout>
+        <Link :href="route('roles')" class="font-bold">Back</Link>
         <Centralize snippet-title="Item Role">
             <h3>{{ role.name }}</h3>
-            <div class="mt-3">
-                <Link :href="route('role.edit', role.id)" class="btn btn-secondary">Modify</Link>
+            <hr />
+            <div class="mt-3 text-right">
+                <Link :href="route('role.edit', role.id)" class="btn btn-dark">Rename</Link>
             </div>
         </Centralize>
     </BackendLayout>
