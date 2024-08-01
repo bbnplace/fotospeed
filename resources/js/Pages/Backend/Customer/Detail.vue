@@ -1,6 +1,7 @@
 <template>
     <Head title="Customer"></Head>
     <BackendLayout>
+        <Link :href="route('customers')" class="font-bold">Back </Link>
         <VRow>
             <VCol cols="12" md="5">
                 <Panel :snippet-title="customer.name">

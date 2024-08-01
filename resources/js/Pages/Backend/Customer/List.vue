@@ -24,31 +24,32 @@ const dataResources = {
             key: "name",
             sortable: true
         },
-        {
-            title: "Role",
-            key: "role.name",
-            sortable: true
-        },
+        // {
+        //     title: "Role",
+        //     key: "role.name",
+        //     sortable: true
+        // },
         {
             title: "Mobile",
             key: "mobile",
             sortable: true
         },
+        // {
+        //     title: "Email",
+        //     key: "email",
+        //     sortable: true
+        // },
         {
-            title: "Email",
-            key: "email",
-            sortable: true
-        }, {
             title: "State",
             key: "state.name",
             sortable: true
         },
-        {
-            title: "Actions",
-            key: "actions",
-            sortable: false,
-            width: '100px'
-        },
+        // {
+        //     title: "Actions",
+        //     key: "actions",
+        //     sortable: false,
+        //     width: '100px'
+        // },
     ],
     name: {
         singular: "customer",

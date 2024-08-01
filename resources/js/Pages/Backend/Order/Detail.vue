@@ -1,6 +1,7 @@
 <template>
     <Head title="Order"></Head>
     <BackendLayout>
+        <Link :href="route('orders')" class="font-bold">Back</Link>
         <Panel :snippet-title="`Order Files`">
             <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">

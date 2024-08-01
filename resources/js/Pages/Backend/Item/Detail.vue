@@ -3,6 +3,7 @@
     <BackendLayout>
         <VRow>
             <VCol cols="12" md="6">
+                <Link :href="route('items')" class="font-bold">Back</Link>
                 <Panel :snippet-title="item.name">
                     <VRow>
                         <VCol cols="6"><b>Item Name</b><br />{{ item.name }}</VCol>

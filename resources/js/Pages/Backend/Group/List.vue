@@ -24,17 +24,17 @@ const dataResources = {
             key: "name",
             sortable: true
         },
-        {
-            title: "Description",
-            key: "description",
-            sortable: false
-        },
-        {
-            title: "Actions",
-            key: "actions",
-            sortable: false,
-            width: '100px'
-        },
+        // {
+        //     title: "Description",
+        //     key: "description",
+        //     sortable: false
+        // },
+        // {
+        //     title: "Actions",
+        //     key: "actions",
+        //     sortable: false,
+        //     width: '100px'
+        // },
     ],
     name: {
         singular: "Group",

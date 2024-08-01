@@ -30,7 +30,7 @@ const dataResources = {
             sortable: true
         },
         {
-            title: "Items",
+            title: "Item",
             key: "item.name",
             sortable: true
         },
@@ -45,11 +45,17 @@ const dataResources = {
             sortable: false
         },
         {
-            title: "Actions",
-            key: "actions",
+            title: "Date",
+            key: "created_at",
             sortable: false,
-            width: '100px'
+            align: "right"
         },
+        // {
+        //     title: "Actions",
+        //     key: "actions",
+        //     sortable: false,
+        //     width: '100px'
+        // },
     ],
     name: {
         singular: "Order",

@@ -1,6 +1,7 @@
 <template>
     <Head title="Group"></Head>
     <BackendLayout>
+        <Link :href="route('groups')" class="font-bold">Back</Link>
         <Centralize snippetTitle="Group">
             <h3>{{ group.name }}</h3>
             <div>

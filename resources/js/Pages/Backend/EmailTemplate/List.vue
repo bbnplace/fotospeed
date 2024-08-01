@@ -30,12 +30,12 @@ const dataResources = {
             key: "template",
             sortable: false
         },
-        {
-            title: "Actions",
-            key: "actions",
-            sortable: false,
-            width: '100px'
-        },
+        // {
+        //     title: "Actions",
+        //     key: "actions",
+        //     sortable: false,
+        //     width: '100px'
+        // },
     ],
     name: {
         singular: "Email Template",

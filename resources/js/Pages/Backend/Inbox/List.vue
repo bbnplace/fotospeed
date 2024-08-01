@@ -103,12 +103,12 @@ const headers = [
         key: "read",
         sortable: true
     },
-    {
-        title: "Actions",
-        key: "actions",
-        sortable: false,
-        width: '100px'
-    },
+    // {
+    //     title: "Actions",
+    //     key: "actions",
+    //     sortable: false,
+    //     width: '100px'
+    // },
 ];
 
 let source = null;

@@ -34,12 +34,12 @@ const dataResources = {
         //     key: "description",
         //     sortable: true
         // },
-        {
-            title: "Actions",
-            key: "actions",
-            sortable: false,
-            width: '100px'
-        },
+        // {
+        //     title: "Actions",
+        //     key: "actions",
+        //     sortable: false,
+        //     width: '100px'
+        // },
     ],
     name: {
         singular: "Process",

@@ -35,23 +35,27 @@
                 :search="search"
                 :headers="props.headers"
                 item-value="id"
+                @click:row="rowClicked"
                 @update:options="loadRecords"
                 :show-select="props.endpoint.delete">
                 <template v-slot:item.actions="{ item }">
-                        <v-icon v-if="props.endpoint.detail"
+                        <!-- <v-icon v-if="props.endpoint.detail"
                             size="small"
                             class="me-2"
                             @click="viewDetail(item)"
                         >
                             mdi-eye
-                        </v-icon>
-                        <v-icon v-if="props.endpoint.edit"
+                        </v-icon> -->
+                        <!-- <v-icon v-if="props.endpoint.edit"
                             size="small"
                             class="me-2"
                             @click="editItem(item)"
                         >
                             mdi-pencil
-                        </v-icon>
+                        </v-icon> -->
+                    </template>
+                    <template v-slot:item.created_at="{ item }">
+                        {{ moment(item.created_at).calendar() }}
                     </template>
             </VDataTableServer>
         </VCol>
@@ -71,6 +75,7 @@ import { Link, router } from "@inertiajs/vue3";
 import Dialog from '@/Components/Dialog.vue';
 import Snackbar from '@/Components/Snackbar.vue';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
+import moment from 'moment';
 
 // Load record data from props
 const recordProps = defineProps({
@@ -175,4 +180,8 @@ const closeDialog = () => {
 const showDialog = () => {
     dialog.value = true;
 }
+
+const rowClicked = (table, row) => {
+    viewDetail(row.item);
+};
 </script>

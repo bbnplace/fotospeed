@@ -12,6 +12,7 @@ import { Head, usePage, useForm } from '@inertiajs/vue3'
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue'
 import Records from  '@/Components/Records.vue';
+import moment from 'moment';
 
 const invoiceRefSrc = usePage().props.invoice_no_src;
 
@@ -38,11 +39,16 @@ const dataResources = {
             sortable: false
         },
         {
-            title: "Actions",
-            key: "actions",
-            sortable: false,
-            width: '100px'
+            title: "Generated",
+            key: "created_at",
+            sortable: false
         },
+        // {
+        //     title: "Actions",
+        //     key: "actions",
+        //     sortable: false,
+        //     width: '100px'
+        // },
     ],
     name: {
         singular: "Invoice",
