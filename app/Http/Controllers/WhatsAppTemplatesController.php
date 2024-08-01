@@ -9,7 +9,7 @@ use Inertia\Inertia;
 class WhatsappTemplatesController extends Controller
 {
     protected $rules = [
-        'name' => 'required|string|unique:whats_app_templates,name|min:2|max:64',
+        'name' => 'required|string|unique:whatsapp_templates,name|min:2|max:64',
         'template' => 'required|string|min:1|max:1530',
     ];
 
@@ -95,7 +95,7 @@ class WhatsappTemplatesController extends Controller
 
         // In the event where the template name changed, user should be notified
         $request->validate([
-            'name' => $whatsAppTemplate->name != $request->name ? 'required|string|unique:whats_app_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
+            'name' => $whatsAppTemplate->name != $request->name ? 'required|string|unique:whatsapp_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
             'template' => 'required|string|min:1|max:1530'
         ]);
 

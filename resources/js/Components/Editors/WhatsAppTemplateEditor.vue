@@ -15,7 +15,7 @@
              <VTextarea
                  id="template"
                  v-model="form.template"
-                 label="WhatsApp Template"
+                 label="Template Body"
                  variant="outlined"
                  :hide-details="form.errors.template == undefined"
                  :error-messages="form.errors.template"
