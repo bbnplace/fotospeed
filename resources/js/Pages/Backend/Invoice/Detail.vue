@@ -87,6 +87,7 @@
     const user = usePage().props.auth.user;
     const invoice = usePage().props.invoice;
     const paystackData = usePage().props.paystack;
+    const invoiceRefSrc = usePage().props.invoice_no_src;
 
     const handlePaymentCompletion = data => {
         // console.log(data)
@@ -105,7 +106,7 @@
         email: invoice.user.email
     };
 
-    const invoiceNumber = invoice.id;
+    const invoiceNumber = invoiceRefSrc == "System Generated" ? invoice.id : invoice.order.order_number;
     const invoiceDate = moment(invoice.created_at).format('LL');
 
     const formatter = new Intl.NumberFormat('en-US', {

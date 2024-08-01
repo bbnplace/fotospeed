@@ -14,8 +14,10 @@ class InvoicesController extends Controller
 {
     public function index()
     {
+        $settings = Setting::first();
         return Inertia::render('Backend/Invoice/List', [
             'endpoint' => route('invoice.records'),
+            'invoice_no_src' => $settings->invoice_no_src,
             'note' => session('note')
         ]);
     }
@@ -59,7 +61,7 @@ class InvoicesController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['order' => function ($query){
-            $query->select('id', 'name', 'total_cost');
+            $query->select('id', 'name', 'total_cost', 'order_number');
         }]);
 
         if (!empty($search)) {
@@ -99,7 +101,7 @@ class InvoicesController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['order' => function ($query){
-            $query->select('id', 'name', 'total_cost', 'delivery_address');
+            $query->select('id', 'name', 'total_cost', 'delivery_address', 'order_number');
         }]);
 
         $invoice = $query->first();
@@ -116,6 +118,7 @@ class InvoicesController extends Controller
 
         return [
             'invoice' => $invoice,
+            'invoice_no_src' => $settings->invoice_no_src,
             'endpoint' => route('customer.find'),
             'paystack' => $paystack,
             'company' => [

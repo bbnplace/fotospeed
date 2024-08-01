@@ -13,6 +13,8 @@ import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue'
 import Records from  '@/Components/Records.vue';
 
+const invoiceRefSrc = usePage().props.invoice_no_src;
+
 const dataResources = {
     endpoint: {
         records: usePage().props.endpoint,
@@ -22,7 +24,7 @@ const dataResources = {
     headers: [
         {
             title: "Invoice #",
-            key: "id",
+            key: invoiceRefSrc == "System Generated" ? "id" : "order.order_number",
             sortable: true
         },
         {

@@ -33,5 +33,6 @@ class Setting extends Model
         'payment_email_temp',
         'wa_phone_id',
         'wa_access_token',
+        'invoice_no_src',
     ];
 }

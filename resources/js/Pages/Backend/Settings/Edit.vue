@@ -264,6 +264,19 @@
                                 ></VTextField>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VSelect
+                                    id="invoice_number_src"
+                                    v-model="form.invoice_no_src"
+                                    label="Invoice Number Source"
+                                    variant="outlined"
+                                    :items="['Order Reference Number', 'System Generated']"
+                                    :hide-details="form.errors.invoice_no_src == undefined"
+                                    :error-messages="form.errors.invoice_no_src"
+                                ></VSelect>
+                                </VCol>
+                            </VRow>
                         </VCard>
                     </v-window-item>
                     <v-window-item value="payment">
@@ -419,6 +432,7 @@ const form = useForm({
     org_email: settings.org_email,
     org_phone: settings.org_phone,
     org_url: settings.org_url,
+    invoice_no_src: settings.invoice_no_src,
     payment_sms_temp: settings.payment_sms_temp ?? 'None',
     payment_email_temp: settings.payment_email_temp ?? 'None',
     reportables: JSON.parse(settings.reportables),

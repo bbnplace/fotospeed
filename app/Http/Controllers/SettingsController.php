@@ -64,6 +64,7 @@ class SettingsController extends Controller
             'reportables.*' => sprintf('in:Received,%s', implode(',', ReportBuilder::getReportStates())),
             'reportViewers' => 'required|array',
             'reportViewers.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
+            'invoice_no_src' => 'required|string|max:64',
         ];
 
         $request->validate($rules);
@@ -95,6 +96,7 @@ class SettingsController extends Controller
         $settings->wa_access_token = $request->wa_access_token;
         $settings->reportables = json_encode($request->reportables);
         $settings->reports_permission = json_encode($request->reportViewers);
+        $settings->invoice_no_src = $request->invoice_no_src;
         $settings->save();
 
         return redirect(route('settings'));
