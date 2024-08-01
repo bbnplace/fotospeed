@@ -15,6 +15,7 @@
                                             v-model="productProcessActivities[process.name][index].name"
                                             label="Task Name"
                                             variant="outlined"
+                                            :rules="[taskNameRule]"
                                             hide-details
                                             autocomplete="off"
                                             bg-color="white"
@@ -33,6 +34,7 @@
                                             density="compact"
                                             autocomplete="off"
                                             bg-color="white"
+                                            :rules="[taskDetailRule]"
                                             @blur="updateProcesses"
                                         ></VTextarea>
                                     </VCol>
@@ -287,6 +289,9 @@ if(processData.processes) {
         processes.splice(targetIndex, 1);
     });
 }
+
+const taskNameRule = value => value.length <= 20;
+const taskDetailRule = value => value.length <= 75;
 
 const form = reactive({
     name: "",

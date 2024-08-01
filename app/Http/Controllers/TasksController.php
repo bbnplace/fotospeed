@@ -118,7 +118,7 @@ class TasksController extends Controller
             $order = Order::find($task->order_id);
 
             // Check if all tasks with the same orderId have been completed.
-            $hasUndoneTask = true;
+            $undoneTasks = [];
             $orderTasks = Task::where('order_id', $task->order_id)->get();
             if ($orderTasks->count() == 0) {
                 return [
@@ -127,10 +127,13 @@ class TasksController extends Controller
             }
 
             foreach ($orderTasks as $orderTask) {
-                $hasUndoneTask = $orderTask->task_status_id != TaskStatus::STATUS_DONE;
+                if($orderTask->task_status_id != TaskStatus::STATUS_DONE)
+                {
+                    array_push($undoneTasks, $orderTask);
+                }
             }
 
-            if (!$hasUndoneTask) {
+            if (empty($undoneTasks)) {
                 $currentProcess = $task->order->orderStatus;
                 // Get the Item Process Data and confirm whether to trigger the next process or to notify administrator
                 $item = $task->order->item;
@@ -150,7 +153,7 @@ class TasksController extends Controller
                     $nextProcess = $currentProcessData->nextProcess ?? null;
                     
                     // Notify Project Coordinator that all tasks have been completed
-                    if (!empty($currentProcessData->whoCoordinates)) {
+                    if (!empty($currentProcessData->whoCoordinates) && $currentProcessData->whoCoordinates != 'None') {
                         $projectCoordinatorRole = Role::where('name', $currentProcessData->whoCoordinates)->first();
                         TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess, $autoStartNextProcess);
                     }

@@ -17,6 +17,7 @@ yarn-error.log
 /.idea
 /.vscode
 /test.php
+/test.json
 /Credentials.md
 /.env.clone
 /dev.sql
