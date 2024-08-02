@@ -80,7 +80,7 @@ const handleSendingStarted = (file, xhr, formData) => {
 
 const handleUploadProgress = (file, progress, bytesSent) => {
     fileUploadProgress.value = progress;
-    fileAction.value = `${Math.round(progress)}% Uploaded`;
+    fileAction.value = `${file.name} is ${Math.round(progress)}% Uploaded`;
 }
 
 const handleSuccess =  async (file, response) => {

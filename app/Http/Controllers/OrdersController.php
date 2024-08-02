@@ -204,7 +204,7 @@ class OrdersController extends Controller
             for($i=0; $i<count($orderDetail->files); $i++)
             {
                 $data = Storage::get($orderDetail->files[$i]->file->uploadedFile);
-                $orderDetail->files[$i]->file->dataURL = sprintf('data:%s;base64,%s', $orderDetail->files[$i]->file->fileInfo->type, base64_encode($data));
+                // $orderDetail->files[$i]->file->dataURL = sprintf('data:%s;base64,%s', $orderDetail->files[$i]->file->fileInfo->type, base64_encode($data));
             }
         }
 

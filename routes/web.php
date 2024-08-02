@@ -30,11 +30,13 @@ use Inertia\Inertia;
 */
 
 Route::get('/test', function(){
-    if (extension_loaded('gd')) {
-        echo "GD extension is installed.";
-    } else {
-        echo "GD extension is not installed.";
-    }
+    // if (extension_loaded('gd')) {
+    //     echo "GD extension is installed.";
+    // } else {
+    //     echo "GD extension is not installed.";
+    // 
+    // }
+    return redirect(route('login'));
 });
 
 Route::get('/', function () {

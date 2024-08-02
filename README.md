@@ -19,7 +19,11 @@ When Administrator, defines Activities, the following data is important:
 5. Customer Account
 6. Production Team Account
 
-## GD Library
+## Enabling Image Resizing 
+
+To enable creation of thumbnail with new order, we are using 
+
+#### Install GD Extension (If Not Already Installed)
 On Ubuntu
 ```
 sudo apt-get install php-gd
