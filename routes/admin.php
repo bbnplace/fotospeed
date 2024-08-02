@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CommunicationLogController;
 use App\Http\Controllers\CustomerFeedbacksController;
+use App\Http\Controllers\FileDownloadsController;
 use App\Http\Controllers\Messaging\A2PSmsController;
 use App\Http\Controllers\Messaging\EmailsController;
 use App\Http\Controllers\Messaging\HostedSimController;
@@ -118,6 +119,9 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     // This Task will be open for Admin and Management
     Route::get('/tasks/order/task/{orderId}', [OrderTasksController::class,'index'])->name('tasks.order.dashboard');
     Route::get('/tasks/order/{orderId}', [TasksController::class,'loadOrderTasks'])->name('tasks.order');
+
+    // Media Download
+    Route::get('/file/download', [FileDownloadsController::class, 'fetch'])->name('file.fetch');
 });
 
 

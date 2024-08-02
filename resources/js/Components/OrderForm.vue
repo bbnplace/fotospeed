@@ -32,7 +32,7 @@
                                 size="small"
                                 prepend-icon="mdi-download"
                                 color="blue-darken-1"
-                                @click="downloadImage(props.orderImage.uploadedFile)"
+                                @click="downloadAsset"
                                 >
                             Download</VBtn>
                         </VCol>
@@ -77,6 +77,9 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
 import { router } from  '@inertiajs/vue3';
+import axios from 'axios';
+import { saveAs } from 'file-saver';
+const downloadURL = route('file.fetch');
 
 interface OrderImage {
     fileReadCompleted?: Boolean,
@@ -105,12 +108,6 @@ const pageData = reactive({
     note: props.orderImage.note
 });
 
-const downloadImage = file => {
-    const data = {
-        filepath: file
-    }
-    window.open(route('file.download', data), '_blank');
-}
 
 const removeImage = id => {
     emit('pageRemoved', {
@@ -122,5 +119,23 @@ watch(pageData, (newData, oldData) => {
     emit('pageDataUpdated', newData);
 })
 
+const downloadAsset = () => {
+    const ext = getFileExtension(props.orderImage.uploadedFile);
+    const imageName = `page-${pageData.pageNumber}.${ext}`;
+    const imageUrl = props.orderImage.uploadedFile;
+    const mimeType = props.orderImage.fileInfo.type;
+    const downloadLink = `${downloadURL}?filepath=${encodeURIComponent(imageUrl)}&type=${mimeType}`;
+    axios.get(downloadLink, { responseType: 'blob' })
+    .then((response) => {
+        const blob = new Blob([response.data], { type: response.headers['content-type'] });
+        saveAs(blob, imageName);
+    });
+}
 
+
+const getFileExtension = (url) => {
+    // Use a regular expression to capture the extension
+    const extension = url.split('.').pop().split(/\#|\?/)[0];
+    return extension;
+}
 </script>

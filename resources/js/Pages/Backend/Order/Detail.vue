@@ -3,6 +3,9 @@
     <BackendLayout>
         <Link :href="route('orders')" class="font-bold">Back</Link>
         <Panel :snippet-title="`Order Files`">
+            <div class="text-right mb-2">
+                <DownloadAllMediaBtn :files="orderForm.orderFiles" />
+            </div>
             <VRow v-if="orderForm.orderFiles">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
@@ -168,6 +171,7 @@ import OrderForm from '@/Components/OrderForm.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
 import CommunicationLog from '@/Components/CommunicationLog.vue';
+import DownloadAllMediaBtn from '@/Components/DownloadAllMediaBtn.vue';
 
 const user = usePage().props.auth.user;
 const order = usePage().props.order;

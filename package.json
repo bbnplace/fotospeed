@@ -55,6 +55,7 @@
         "daterangepicker": "^3.1.0",
         "dragula": "^3.7.3",
         "dropzone": "^5.9.3",
+        "file-saver": "^2.0.5",
         "flatpickr": "^4.6.9",
         "fullcalendar": "^5.10.2",
         "gmaps": "^0.4.25",

@@ -13,4 +13,14 @@ class FileDownloadsController extends Controller
         $file = Storage::path($filepath);
         return response()->download($file);
     }
+
+    public function fetch(Request $request)
+    {
+        $filepath = $request->filepath;
+        $fileContent = Storage::get($filepath);
+
+        return response($fileContent)->withHeaders([
+            "Content-Type"=> $request->mimeType
+        ]);
+    }
 }
