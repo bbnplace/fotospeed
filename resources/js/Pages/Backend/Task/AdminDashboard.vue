@@ -3,13 +3,27 @@
     <BackendLayout>
       <Link class="font-bold" :href="route('order.view', order.id)">Back to Order</Link>
         <Panel :snippet-title="`Unclaimed ${order.name} Tasks`">
-            <div>This panel holds {{ order.name }} tasks that has not been picked up by any team member. Click the <b>Accept Task</b> button to pick up a task.</div>
-            <VRow v-if="unclaimedTasks.length" class="mt-3">
+            <div><VIcon icon="mdi-information-outline"></VIcon> This panel holds {{ order.name }} tasks that has not been picked up by any team member.</div>
+            <VRow v-if="unclaimedTasks.length" class="mt-0">
               <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
-                <VCard :title="task.name" class="p-3" prepend-icon="mdi-checkbox-blank-outline" color="blue-lighten-5">
-                  <p>{{ task.description }}</p>
-                  <p><b>Task Created:</b> {{ moment(task.created_at).calendar() }}</p>
-                  <VBtn color="blue" @click="pickTask(task, index)">Accept Task</VBtn>
+                <VCard class="p-2 cursor-pointer" color="blue-darken-2">
+                  <h5>{{ task.name }}</h5>
+                  <p class="mb-0"><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                  
+                  <VOverlay
+                            activator="parent"
+                            location-strategy="connected"
+                            scroll-strategy="close">
+                            <VCard class="px-3 py-8 w-96" :title="task.name">
+                              <VCardText>
+                                <p class="mb-4">{{ task.description }}</p>
+                                <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                              </VCardText>
+                              <VCardActions>
+                                <VBtn color="blue" @click="pickTask(task, index)">Accept Task</VBtn>
+                              </VCardActions>
+                            </VCard>
+                          </VOverlay>
                 </VCard>
               </VCol>
             </VRow>
@@ -22,12 +36,29 @@
                         v-for="task in tasks"
                         :key="task.id"
                         class="task-card"
-                        @click="showClickedTask(task)"
+                        
                         >
-                        <h4>{{ task.name }}</h4>
-                        <p>{{ task.description }}</p>
-                        <p><b>Task Created:</b> {{ moment(task.created_at).calendar() }}</p>
-                        <p><b>Team Member:</b> {{ task.user.name }}</p>
+                          <h5>{{ task.name }}</h5>
+                          <p class="mb-0"><b>Created</b> {{ moment(task.created_at).calendar() }}</p>
+                          <VOverlay
+                            activator="parent"
+                            location-strategy="connected"
+                            scroll-strategy="close">
+                            <VCard class="px-3 py-8 w-96" :title="task.name">
+                              <VCardText>
+                                <p class="mb-4">{{ task.description }}</p>
+                                <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                                <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
+                                <p class="mt-3"><b>Team Member:</b> {{ task.user.name }}</p>
+                              </VCardText>
+                              <VCardActions>
+                                <VBtn
+                                color="blue"
+                                @click="showClickedTask(task)"
+                              >Open Order</VBtn>
+                              </VCardActions>
+                            </VCard>
+                          </VOverlay>
                         </div>
                     </div>
                 </VCard>
@@ -48,7 +79,7 @@ import moment from 'moment';
 const user = usePage().props.auth.user;
 const order = usePage().props.order;
 const endpoints = usePage().props.endpoints;
-const unclaimedTasks = ref(usePage().props.unclaimedTasks);
+const unclaimedTasks = ref([]);
 
 
 const columns = ref({
@@ -128,7 +159,9 @@ const updateTaskStatus = async (task, fromStatus, toStatus) => {
     const data = response.data;
     if (data.status != undefined) {
       if (data.status == 'success') {
-        console.log("status updated");
+        // console.log("status updated");
+        loadNewTasks();
+        loadPickedTasks();
       }
     }
 }
@@ -141,6 +174,7 @@ const loadPickedTasks = async () => {
 
 const loadNewTasks = async () => {
   const response = await axios.get(endpoints.newTasks);
+  console.log(response.data)
   unclaimedTasks.value = response.data.unclaimedTasks ?? [];
 }
 
@@ -163,7 +197,7 @@ const pickTask = async (task, index) => {
   }
 }
 
-let checkNewTaskInterval = 0;
+// let checkNewTaskInterval = 0;
 onMounted(async () => {
   await nextTick(); // Ensure DOM is fully rendered
 
@@ -180,16 +214,17 @@ onMounted(async () => {
     }
   });
 
+  loadNewTasks();
   loadPickedTasks();
 
-  checkNewTaskInterval = setInterval(function () {
-    loadNewTasks();
-    loadPickedTasks();
-  }, 30000)
+  // checkNewTaskInterval = setInterval(function () {
+  //   loadNewTasks();
+  //   loadPickedTasks();
+  // }, 30000)
 });
 
 onUnmounted(() => {
-  clearInterval(checkNewTaskInterval);
+  // clearInterval(checkNewTaskInterval);
 })
 
 </script>

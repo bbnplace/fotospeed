@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <title inertia>{{ config('app.name', 'Indigo OMS') }}</title>
-        <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-AE-0Y9Je.css">
+        <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-IWq602mh.css">
 
         <!-- Scripts -->
         @routes
@@ -13,4 +13,4 @@
          @inertia
          <div id="mod"></div>
     </body>
-    <script src="{{ env('APP_URL') }}/build/assets/app-Qzgcmb5g.js" type="module"></script>
+    <script src="{{ env('APP_URL') }}/build/assets/app-QlZi-rZ-.js" type="module"></script>

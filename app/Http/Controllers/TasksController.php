@@ -15,11 +15,26 @@ use Illuminate\Support\Facades\Log;
 
 class TasksController extends Controller
 {
-    public function loadTeamTasks()
+    public function loadUnassignedTeamTasks()
     {
         $query = Task::query();
         $query->where('role_id', auth()->user()->role_id); // Ensures user is from the target team
         $query->where('branch_id', auth()->user()->branch_id); // Ensure user is from the production branch
+        $query->whereNull('user_id'); // Task has not been claimed
+        $query->orderBy('id', 'desc');
+        $unclaimedTasks = $query->get([
+            'id', 'name', 'description', 'created_at'                
+        ]);
+
+        return [
+            'unclaimedTasks' => $unclaimedTasks,
+        ];
+    }
+
+    public function loadUnassignedOrderTasks(int $orderId)
+    {
+        $query = Task::query();
+        $query->where('order_id', $orderId); // Ensures user is from the target team
         $query->whereNull('user_id'); // Task has not been claimed
         $query->orderBy('id', 'desc');
         $unclaimedTasks = $query->get([

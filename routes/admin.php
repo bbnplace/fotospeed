@@ -84,7 +84,9 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::post('/report/export/file', [DashboardController::class, 'export'])->name('report.export');
 
     // Task Routes
-    Route::get('/tasks/unassigned', [TasksController::class,'loadTeamTasks'])->name('tasks.team');
+    Route::get('/tasks/unassigned', [TasksController::class,'loadUnassignedTeamTasks'])->name('tasks.team');
+    Route::get('/tasks/unassigned/{orderId}', [TasksController::class,'loadUnassignedOrderTasks'])->name('tasks.order.unassigned');
+    
     Route::get('/tasks/accepted', [TasksController::class,'loadTasks'])->name('tasks.usertasks');
     Route::post('/task/pick', [TasksController::class,'pickTask'])->name('task.pick');
     Route::post('/task/update', [TasksController::class,'updateTasks'])->name('task.update');

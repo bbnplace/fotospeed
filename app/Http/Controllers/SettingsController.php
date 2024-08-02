@@ -37,8 +37,8 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $rules = [
-            'max_file_size' => 'required|integer|min:1024|max:102400',
-            'thumbnail_size' => 'required|integer|min:10|max:400',
+            'max_file_size' => 'required|integer|min:1024|max:1024000',
+            'thumbnail_size' => 'required|integer|min:10|max:1080',
             'file_mime_types' => 'required|string|min:2|max:200',
             'cecula_sync_api_key' => 'nullable|string|min:32|max:64',
             'email_sender_name' => 'nullable|string|min:2|max:64',

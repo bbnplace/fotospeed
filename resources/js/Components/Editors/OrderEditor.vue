@@ -13,7 +13,7 @@
                 ></VAutocomplete>
             </VCol>
         </VRow>
-        <h4 class="mt-3">Upload Album Pages</h4>
+        <h4 class="mt-3">Upload Job Pages</h4>
         <template v-if="orderForm.orderFiles">
             <VRow>
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
