@@ -1,13 +1,5 @@
 <template>
     <Head title="Create Order"></Head>
-        <!-- <div class="flex flex-row-reverse">
-            <VBtn
-                color="blue-darken-1"
-                @click="submitOrder"
-            >{{ masterForm.btnTag }}</VBtn>
-        </div> -->
-
-
         <VRow>
             <VCol>
                 <VAutocomplete

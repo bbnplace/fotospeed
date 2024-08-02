@@ -200,7 +200,7 @@ onUnmounted(() => {
 }
 
 .column {
-  width: 30%;
+  width: 32%;
   background-color: #f0f0f0;
   padding: 10px;
   border-radius: 8px;

@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Media;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class FileUploadsController extends Controller
 {
     public function uploadImage(Request $request)
     {
-        sleep(5);
-
         $settings = Setting::first();
 
         $request->validate([
@@ -24,16 +25,28 @@ class FileUploadsController extends Controller
             ),
         ]);
 
-        $path = $request->file('files')->store("/images");
+        $file = $request->file('files');
+        $path = $file->store("/images");
 
-        // Generate a thumbnail of the photograph
+        // If the file is an image, generate a thumbnail
+        $thumbnailPath = null;
+        if ($file && strstr($file->getMimeType(), 'image/')) {
+            $srcFile = Storage::get($path);
+            $thumbFile = str_replace("images/","images/thumbnails/", $path);
+            
+            $this->createThmbnail($srcFile, $thumbFile, $settings->thumbnail_size);
+            $thumbnailPath = sprintf('%s/%s', env('APP_URL'), $thumbFile);
+        }
+        
         // Store the thumbnail and get the path to the thumbnail
         // Save uploaded file to database
-        // Return the path to the thumbnail
+        $uploader = auth()->user()->isCustomer() ?'customer_id':'staff_id';
 
-        return [
+        return Media::create([
             'path' => $path,
-        ];
+            'thumbnail' => $thumbnailPath,
+            $uploader => auth()->user()->id,
+        ]);
     }
 
 
@@ -41,7 +54,7 @@ class FileUploadsController extends Controller
     {
         $path = $request->file("spreadsheet")->store("/spreadsheets");
         return [
-            'path' => $path
+            'path' => $path,
         ];
     }
 
@@ -51,5 +64,20 @@ class FileUploadsController extends Controller
         return response($data, 200, [
             'Content-Type' => $type
         ]);
+    }
+
+    public function createThmbnail(string $sourceFilePath, string $thumbnailFilePath, int $thumbnailSize = 150)
+    {
+        $driver = new Driver() ;
+        $manager = new ImageManager($driver);
+        
+        $image = $manager->read($sourceFilePath);
+        $image->scale(width: $thumbnailSize);
+
+        // $image->resize($thumbnailSize, null, function ($constraint){
+        //     $constraint->aspectRatio();
+        // });
+
+        $image->save($thumbnailFilePath);
     }
 }

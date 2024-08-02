@@ -3,7 +3,7 @@
         <VCol cols="12" sm="4" md="5" class="flex flex-column items-center gap-2 justify-center">
             <div>
                 <VImg
-                    :src="props.orderImage.dataURL"
+                    :src="props.orderImage.imageThumbnail"
                     :width="175"
                     :height="175"
                     cover

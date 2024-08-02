@@ -19,5 +19,17 @@ When Administrator, defines Activities, the following data is important:
 5. Customer Account
 6. Production Team Account
 
-php artisan make:migration modify_height_and_width_nullable_in_items_table
+## GD Library
+On Ubuntu
+```
+sudo apt-get install php-gd
+```
+On CentOS/RHEL
+```
+sudo yum install php-gd
+```
+On macOS (Using Homebrew)
+```
+brew install gd
+```
 

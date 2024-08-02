@@ -30,8 +30,11 @@ use Inertia\Inertia;
 */
 
 Route::get('/test', function(){
-    $data = Item::getProcessTasks(1, 'New');
-    print_r($data);
+    if (extension_loaded('gd')) {
+        echo "GD extension is installed.";
+    } else {
+        echo "GD extension is not installed.";
+    }
 });
 
 Route::get('/', function () {

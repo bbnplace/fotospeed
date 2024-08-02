@@ -93,8 +93,10 @@ const handleSuccess =  async (file, response) => {
         type: file.type
     }
     inputData.uploadedFile = response.path;
-    inputData.dataURL = file.dataURL;
+    // inputData.dataURL = file.dataURL;
     inputData.id = uuidv4();
+    inputData.imageThumbnail = response.thumbnail;
+    inputData.mediaId = response.id;
 
     // Run a method to goto system and read first line of the file to extract heading.
     const payload = {
