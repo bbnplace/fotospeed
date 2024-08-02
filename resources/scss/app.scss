@@ -94,3 +94,51 @@ File: Main Css File
 @import "custom/plugins/timepicker";
 @import "custom/plugins/rateit";
 @import "custom/plugins/ion-rangeslider";
+
+.kanban-board {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .column {
+    width: 32%;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  .task-list {
+    min-height: 200px;
+    font-size: 92%;
+    user-select: none;
+  }
+  
+  .task-card {
+    background-color: rgba(255,255,255,0.7);
+    padding: 15px 20px; /* Increased padding for more spacing */
+    margin: 7px 0; /* Increased margin for more separation */
+    border-radius: 8px; /* Increased border-radius for a smoother look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Increased shadow for better depth */
+    border: 1px solid #e0e0e0; /* Added border for more definition */
+    transition: transform 0.2s, box-shadow 0.2s; /* Added transition for smooth effects */
+    cursor: grab;
+  }
+  
+  /* Adding a hover effect */
+  .task-card:hover {
+    transform: translateY(-1px); /* Slight lift on hover */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+  }
+  
+  /* Adding font styling */
+  .task-card h5 {
+    margin-bottom: 0px;
+    // font-size: 1em; /* Slightly larger font for headers */
+    // color: #333; /* Darker color for contrast */
+  }
+  
+  .task-card p {
+    margin: 5px 0 0;
+    font-size: 0.95em; /* Slightly smaller font for body text */
+    color: #666; /* Lighter color for secondary text */
+  }

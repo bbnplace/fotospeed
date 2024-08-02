@@ -2,10 +2,9 @@
     <Head title="Task Dashboard" />
     <BackendLayout>
         <Panel :snippet-title="`${user.role} Tasks`">
-            <div>This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept Task</b> button to pick up a task.</div>
             <VRow v-if="unclaimedTasks.length" class="mt-3">
               <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
-                <VCard class="p-2 cursor-pointer" color="blue-darken-2">
+                <VCard class="p-2 cursor-pointer" hover color="blue-darken-2">
                   <h5>{{ task.name }}</h5>
                   <p class="mb-0"><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
                   <VOverlay
@@ -25,6 +24,7 @@
                 </VCard>
               </VCol>
             </VRow>
+            <div v-else>This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept Task</b> button to pick up a task.</div>
         </Panel>
         <Panel snippet-title="My Tasks">
             <div class="kanban-board">
@@ -223,29 +223,5 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.kanban-board {
-  display: flex;
-  justify-content: space-between;
-}
 
-.column {
-  width: 32%;
-  background-color: #f0f0f0;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.task-list {
-  min-height: 200px;
-  user-select: none;
-}
-
-.task-card {
-  background-color: #fff;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  cursor: grab;
-}
 </style>

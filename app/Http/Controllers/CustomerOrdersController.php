@@ -181,13 +181,6 @@ class CustomerOrdersController extends Controller
 
         $order = $query->first();
         $orderDetail = json_decode($order->detail);
-        if(!empty($orderDetail->files)) {
-            for($i=0; $i<count($orderDetail->files); $i++)
-            {
-                $data = Storage::get($orderDetail->files[$i]->file->uploadedFile);
-                $orderDetail->files[$i]->file->dataURL = sprintf('data:%s;base64,%s', $orderDetail->files[$i]->file->fileInfo->type, base64_encode($data));
-            }
-        }
 
         return [
             'order' => $order,
