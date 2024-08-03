@@ -132,6 +132,13 @@ class TasksController extends Controller
 
             $order = Order::find($task->order_id);
 
+            // Check if order has been cancelled If order has been cancelled, stop further action.
+            if ($order->order_status_id == OrderStatus::STATUS_CANCELLED) {
+                return [
+                    'status' => 'success'
+                ];
+            }
+
             // Check if all tasks with the same orderId have been completed.
             $undoneTasks = [];
             $orderTasks = Task::where('order_id', $task->order_id)->get();

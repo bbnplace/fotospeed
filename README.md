@@ -46,3 +46,15 @@ Once the order has been uploaded, it should not be possible to remove any of the
 
 Administrator determines the stage at which cancellation can be done for an item.
 If the item has passed that process, it should not be possible for either the Customer, Receptionist or Admin to CANCEL the order.
+
+1. Set the Order Status to Cancelled
+2. Update reports that the order is cancelled
+3. Add a condition to task generation function to check if an order has been cancelled before generating new tasks. If order has been cancelled, new tasks should not be generated.
+4. Notification should be sent to all team members with uncompleted tasks that the order has been cancelled
+5. Send Notification to customer that the order has been cancelled.
+
+
+## Additional Message for Customer
+You may want to have it as someone's task or part of the guidelines for a task or a dedicated task to have someone to download the order assets. Failure to do so may result in everybody consuming data to download assets.
+
+

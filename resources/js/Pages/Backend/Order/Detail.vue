@@ -94,7 +94,7 @@
                             <VRow>
                                 <VCol>
                                     <b>Order Status</b><br />
-                                    {{ $page.props.order.order_status.name }}
+                                    {{ orderStatus }}
                                 </VCol>
                             </VRow>
                             <VRow v-if="user.isAdmin">
@@ -131,10 +131,35 @@
                             </VBtn>
                             <VBtn
                                 color="red-darken-1 m-1"
-                                @click="cancelOrder"
-                                 v-if="!invoicePaid && user.isAdmin"
+                                 v-if="user.isAdmin && orderStatus != 'Cancelled'"
                             >
                                 Cancel Order
+                                <VOverlay
+                                    activator="parent"
+                                    location-strategy="connected"
+                                    scroll-strategy="close"
+                                >
+                                    <VCard max-width="400" class="p-3">
+                                        <VCardTitle>Heads Up!</VCardTitle>
+                                        <VCardText>
+                                            <p>Are you sure you want to cancel this order?</p>
+                                            <p class="text-center" v-if="cancellingOrderProgress">
+                                                <v-progress-circular
+                                                    color="red"
+                                                    indeterminate
+                                                ></v-progress-circular>
+                                            </p>
+                                            <p v-if="orderCancelResponse.length" class="text-center font-bold">{{ orderCancelResponse }}</p>
+                                        </VCardText>
+                                        <VCardActions>
+                                            <VBtn
+                                                color="red-darken-1 m-1"
+                                                @click="cancelOrder"
+                                                :disabled="cancellingOrderProgress"
+                                            >Yes Proceed</VBtn>
+                                        </VCardActions>
+                                    </VCard>
+                                </VOverlay>
                             </VBtn>
                         </VCol>
                     </VRow>
@@ -159,7 +184,6 @@
                 </Panel>
             </VCol>
         </VRow>
-        
     </BackendLayout>
 </template>
 
@@ -172,6 +196,7 @@ import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
 import CommunicationLog from '@/Components/CommunicationLog.vue';
 import DownloadAllMediaBtn from '@/Components/DownloadAllMediaBtn.vue';
+import axios from 'axios';
 
 const user = usePage().props.auth.user;
 const order = usePage().props.order;
@@ -184,6 +209,10 @@ const canEditOrder = usePage().props.canEditOrder;
 const orderForm = reactive({
     orderFiles: orderDetail.files,
 });
+const orderCancelResponse = ref("");
+const cancellingOrderProgress = ref(false);
+const orderStatus = ref(order.order_status.name)
+const showOverlay = ref(false);
 
 const removeImage = data => {
     for (let index = 0; index < orderForm.orderFiles.length; index++) {
@@ -204,8 +233,30 @@ const editOrder = () => {
     router.visit(route('order.edit', order.id));
 }
 
-const cancelOrder = () => {
-    alert("Cancelling Order");
+let source = null;
+const cancelOrder = async () => {
+    cancellingOrderProgress.value = true;
+    const payload = {
+        orderId: order.id
+    };
+    if(source) source.cancel('Request cancelled by user');
+    source = axios.CancelToken.source();
+    const response = await axios.put(route('order.cancel', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        cancelToken: source.token
+    });
+
+    cancellingOrderProgress.value = false;
+    orderCancelResponse.value = response.data.response;
+    orderStatus.value = response.data.orderStatus;
+
+    setTimeout(()=>{
+        orderCancelResponse.value = "";
+        showOverlay.value = false;
+    }, 10000);
+
 }
 
 const generateInvoice = () => {

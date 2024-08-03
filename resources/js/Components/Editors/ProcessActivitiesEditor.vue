@@ -78,6 +78,16 @@
                                 >Add Task
                             </VBtn>
                         </div>
+                        
+                        <VRow class="my-2">
+                            <VCol>
+                                <v-checkbox
+                                    v-model="productProcesses[index].canCancelOrder"
+                                    label="Allow Order Cancellation during this process"
+                                    @blur="updateProcesses"
+                                ></v-checkbox>
+                            </VCol>
+                        </VRow>
                         <VRow class="my-2">
                             <VCol cols="12" class="font-bold">
                                 After all tasks in this process are completed.

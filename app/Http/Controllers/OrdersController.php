@@ -12,6 +12,7 @@ use App\Models\OrderLog;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Setting;
+use App\Report\ReportBuilder;
 use App\Tasks\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -291,6 +292,48 @@ class OrdersController extends Controller
             Order::whereIn('id', $request->ids)->delete();
 
             return redirect()->route('orders')->with('note', 'Selected orders have been deleted');
+        }
+    }
+
+    private function canCancelOrder(Order $order): bool
+    {
+        $canCancel = false;
+        $processData = json_decode($order->item->process_data);
+        $itemProcesses = $processData->processes;
+        foreach ($itemProcesses as $itemProcess) {
+            if (!empty($order->orderStatus->name) && strtolower($itemProcess->name) == strtolower($order->orderStatus->name)) {
+                $canCancel = $itemProcess->canCancelOrder ?? false;
+                break;
+            }
+        }
+        return $canCancel;
+    }
+
+    public function cancel(Request $request, $orderId)
+    {
+        $order = Order::find($orderId);
+       
+        if ($this->canCancelOrder($order)) {
+            // Set Order status to Cancelled
+            $order->order_status_id = OrderStatus::STATUS_CANCELLED;
+            $order->save();
+
+            // Update report that order is cancelled
+            ReportBuilder::build('cancelled');
+
+            // Todo: Log the ID of the user that cancelled the order
+            // Todo: Send notification to all team members with uncompleted tasks that order has been cancelled
+            // Todo: Send notification to customer that order has been cancelled.
+
+            return [
+                'response' => 'Success',
+                'orderStatus' => 'Cancelled',
+            ];
+        } else {
+            return [
+                'response' => 'Cannot cancel',
+                'orderStatus' => $order->orderStatus->name,
+            ];
         }
     }
 

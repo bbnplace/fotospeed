@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{id}', [OrdersController::class, 'view'])->name('order.view');
     Route::get('/order/{id}/edit', [OrdersController::class, 'edit'])->name('order.edit');
     Route::put('/order/{id}/edit', [OrdersController::class, 'update'])->name('order.edit');
+    Route::put('/order/{id}/cancel', [OrdersController::class, 'cancel'])->name('order.cancel');
     Route::delete('/orders/delete', [OrdersController::class, 'delete'])->name('orders.delete');
 
     Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');

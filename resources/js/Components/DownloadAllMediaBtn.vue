@@ -11,7 +11,7 @@
             location-strategy="connected"
             scroll-strategy="close">
             <VCard class="p-3" max-width="400">
-                <VCardTitle>One Moment Please!</VCardTitle>
+                <VCardTitle>Heads Up!</VCardTitle>
                 <VCardText>
                     <p>You're about to start downloading {{ recordProps.files.length }} files.</p>
                 <div>To keep things organized, we recommend creating a dedicated folder to store all assets for this order.</div>
