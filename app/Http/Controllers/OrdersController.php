@@ -319,7 +319,7 @@ class OrdersController extends Controller
             $order->save();
 
             // Update report that order is cancelled
-            ReportBuilder::build('cancelled');
+            ReportBuilder::build('cancelled', $order->quantity);
 
             // Todo: Log the ID of the user that cancelled the order
             // Todo: Send notification to all team members with uncompleted tasks that order has been cancelled

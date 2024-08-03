@@ -69,12 +69,6 @@
                                 </VCol>
                             </VRow>
                             <VRow>
-                                <VCol>
-                                    <b>Note</b><br />
-                                    {{ order.note }}
-                                </VCol>
-                            </VRow>
-                            <VRow>
                                 <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
                                     ₦{{ orderDetail.price ?? " --:--" }} 
@@ -110,10 +104,23 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Delivery Date</b><br />
+                                    <b>Last Updated</b><br />
+                                    {{ moment(order.updated_at).calendar() }}
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>Target Delivery Date</b><br />
                                     {{ moment(orderDetail.date).format('LL') }}
                                 </VCol>
                             </VRow>
+                        </VCol>
+                    </VRow>
+                    
+                    <VRow>
+                        <VCol>
+                            <b>Note</b><br />
+                            {{ order.note }}
                         </VCol>
                     </VRow>
                     <VRow>
@@ -135,6 +142,7 @@
                             >
                                 Cancel Order
                                 <VOverlay
+                                    v-model="showOverlay"
                                     activator="parent"
                                     location-strategy="connected"
                                     scroll-strategy="close"
@@ -157,6 +165,10 @@
                                                 @click="cancelOrder"
                                                 :disabled="cancellingOrderProgress"
                                             >Yes Proceed</VBtn>
+                                            <VBtn
+                                                color="blue-darken-1 m-1"
+                                                @click="showOverlay = false"
+                                            >No Please</VBtn>
                                         </VCardActions>
                                     </VCard>
                                 </VOverlay>
