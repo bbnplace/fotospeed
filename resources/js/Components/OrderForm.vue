@@ -33,6 +33,7 @@
                                 prepend-icon="mdi-download"
                                 color="blue-darken-1"
                                 @click="downloadAsset"
+                                :disabled="downloading"
                                 >
                             Download</VBtn>
                         </VCol>
@@ -75,11 +76,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { reactive, watch, ref } from 'vue';
 import { router } from  '@inertiajs/vue3';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 const downloadURL = route('file.fetch');
+
+const downloading = ref(false);
 
 interface OrderImage {
     fileReadCompleted?: Boolean,
@@ -120,8 +123,9 @@ watch(pageData, (newData, oldData) => {
 })
 
 const downloadAsset = () => {
+    downloading.value = true;
     const ext = getFileExtension(props.orderImage.uploadedFile);
-    const imageName = `page-${pageData.pageNumber}.${ext}`;
+    const imageName = pageData.pageNumber ? `page-${pageData.pageNumber}.${ext}` : props.orderImage.fileInfo.name;
     const imageUrl = props.orderImage.uploadedFile;
     const mimeType = props.orderImage.fileInfo.type;
     const downloadLink = `${downloadURL}?filepath=${encodeURIComponent(imageUrl)}&type=${mimeType}`;
@@ -129,6 +133,7 @@ const downloadAsset = () => {
     .then((response) => {
         const blob = new Blob([response.data], { type: response.headers['content-type'] });
         saveAs(blob, imageName);
+        downloading.value = false;
     });
 }
 
