@@ -77,7 +77,6 @@
 
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
-import { router } from  '@inertiajs/vue3';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 const downloadURL = route('file.fetch');

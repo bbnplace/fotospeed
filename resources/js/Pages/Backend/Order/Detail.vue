@@ -3,10 +3,10 @@
     <BackendLayout>
         <Link :href="route('orders')" class="font-bold">Back</Link>
         <Panel :snippet-title="`Order Files`">
-            <div class="text-right mb-2">
+            <div class="text-right mb-2" v-if="orderForm.orderFiles.length">
                 <DownloadAllMediaBtn :files="orderForm.orderFiles" />
             </div>
-            <VRow v-if="orderForm.orderFiles">
+            <VRow v-if="orderForm.orderFiles.length">
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
                         :orderImage="orderFile.file"
@@ -20,7 +20,7 @@
             </VRow>
             <VRow v-else>
                 <VCol class="text-center">
-                    <h1 class="text-red">Image Files were not uploaded for this Order!</h1>
+                    <h3 class="text-red">No asset was uploaded for this order!</h3>
                     <p>If you do not have the image files, kindly contact the client using the phone number below.</p>
                     <p class="mt-4 font-bold">If you have the files and would like to upload them, use the button below.</p>
                     <p>

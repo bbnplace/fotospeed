@@ -29,7 +29,7 @@
             </VRow>
         </template>
         <!-- {{ orderForm.orderFiles}} -->
-        <DropzoneUploader @fileUploaded="handleData"></DropzoneUploader>
+        <DropzoneUploader v-if="!props.order" @fileUploaded="handleData"></DropzoneUploader>
         <div class="text-red" v-if="masterForm.errors.files">{{ masterForm.errors.files }}</div>
         <VRow class="mt-4">
             <VCol cols="12" md="6">
@@ -221,19 +221,20 @@ const handleData = data => {
 
 const updatePageData = (pageObject, object) => {
     object.note = pageObject.note;
-    object.copies = pageObject.copies;
     object.pageNo = pageObject.pageNumber;
+    object['freshEmission'] = true;
 }
 
 const submitOrder = () => {
-    // To reduce size of submitted data, cut out the dataURL from each file before submitting
     const fileData = [];
 
     orderForm.orderFiles.forEach(element => {
+        console.log(element.freshEmission)
         let file = element.file;
-        if(element.pageNo && element.note){
-            file = { ...element.file, note: element.note, pageNumber: element.pageNo }
-            file.dataURL = undefined;
+
+        if (element.freshEmission) {
+            file.pageNumber = element.pageNo;
+            file.note = element.note;
         }
 
         fileData.push({
