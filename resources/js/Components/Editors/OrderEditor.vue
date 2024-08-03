@@ -229,7 +229,6 @@ const submitOrder = () => {
     const fileData = [];
 
     orderForm.orderFiles.forEach(element => {
-        console.log(element.freshEmission)
         let file = element.file;
 
         if (element.freshEmission) {
