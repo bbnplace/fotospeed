@@ -60,12 +60,14 @@
                 variant="outlined"
                 density="compact"
                 hide-details
+                :disabled="props.view == 'Detail'"
             ></VTextField>
             <VTextarea
                 v-model="pageData.note"
                 label="Note (Optional)"
                 variant="outlined"
                 hide-details
+                :disabled="props.view == 'Detail'"
             ></VTextarea>
         </VCol>
         
