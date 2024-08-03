@@ -19,7 +19,7 @@
                 <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
                     <OrderForm
                         :orderImage="orderFile.file"
-                        view="New"
+                        :view="props.order ? 'Edit' : 'New'"
                         @pageRemoved="removeImage"
                         @pageDataUpdated="(data) => {
                             updatePageData(data, orderFile)
@@ -28,7 +28,7 @@
                 </VCol>
             </VRow>
         </template>
-        <!-- {{ orderForm.orderFiles}} -->
+        
         <DropzoneUploader v-if="!props.order" @fileUploaded="handleData"></DropzoneUploader>
         <div class="text-red" v-if="masterForm.errors.files">{{ masterForm.errors.files }}</div>
         <VRow class="mt-4">

@@ -37,3 +37,8 @@ On macOS (Using Homebrew)
 brew install gd
 ```
 
+## Removal of File from Order
+
+After careful consideration, we believe it should only be possible to remove file during upload.
+Once the order has been uploaded, it should not be possible to remove any of the uploaded file anymore.
+

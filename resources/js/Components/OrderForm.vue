@@ -24,6 +24,7 @@
                                 prepend-icon="mdi-delete"
                                 color="red"
                                 @click="removeImage(props.orderImage.id)"
+                                v-if="props.view == 'New'"
                                 >
                             Remove Page</VBtn>
                             <VBtn
@@ -79,8 +80,11 @@
 
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
+const user = usePage().props.auth.user;
+
 const downloadURL = route('file.fetch');
 
 const downloading = ref(false);
