@@ -7,6 +7,7 @@ use App\Http\Controllers\Messaging\A2PSmsController;
 use App\Http\Controllers\Messaging\EmailsController;
 use App\Http\Controllers\Messaging\HostedSimController;
 use App\Http\Controllers\Messaging\WhatsappController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OrderTasksController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\BranchesController;
@@ -122,6 +123,9 @@ Route::middleware(['auth', 'team.console'])->group(function (){
 
     // Media Download
     Route::get('/file/download', [FileDownloadsController::class, 'fetch'])->name('file.fetch');
+
+    // Notifications
+    Route::get('/recent-notifications', [NotificationsController::class,'recent'])->name('notifications.recent');
 });
 
 

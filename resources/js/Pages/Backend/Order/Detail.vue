@@ -58,8 +58,8 @@
                                 <VCol>
                                     <b>Reference Number</b><br />
                                     {{ order.order_number }}
-                                    <Link v-if="!order.order_number && canEditOrder" class="font-bold underline" :href="`${route('order.edit', order.id)}`">[ Add ]</Link>
-                                    <Link v-if="order.order_number && canEditOrder" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">[ Edit ]</Link>
+                                    <Link v-if="!order.order_number && canEditOrder && orderStatus != 'Cancelled'" class="font-bold underline" :href="`${route('order.edit', order.id)}`">[ Add ]</Link>
+                                    <Link v-if="order.order_number && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">[ Edit ]</Link>
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -72,8 +72,8 @@
                                 <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
                                     ₦{{ orderDetail.price ?? " --:--" }} 
-                                    <Link v-if="!orderDetail.price && canEditOrder" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Add</Link>
-                                    <Link v-if="orderDetail.price && canEditOrder" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Edit</Link>
+                                    <Link v-if="!orderDetail.price && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Add</Link>
+                                    <Link v-if="orderDetail.price && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Edit</Link>
                                 </VCol>
                             </VRow>
                         </VCol>
@@ -125,14 +125,14 @@
                     </VRow>
                     <VRow>
                         <VCol>
-                            <VBtn v-if="canGenerateInvoice && !invoicePaid"
+                            <VBtn v-if="canGenerateInvoice && !invoicePaid && orderStatus != 'Cancelled'"
                                 color="blue-darken-1 m-1"
                                 @click="generateInvoice"
                             >Generate Invoice</VBtn>
                             <VBtn
                                 color="blue-darken-1 m-1"
                                 @click="editOrder"
-                                 v-if="canEditOrder"
+                                 v-if="canEditOrder && !invoicePaid && orderStatus != 'Cancelled'"
                             >
                                 Edit Order
                             </VBtn>
@@ -168,7 +168,7 @@
                                             <VBtn
                                                 color="blue-darken-1 m-1"
                                                 @click="showOverlay = false"
-                                            >No Please</VBtn>
+                                            >Close</VBtn>
                                         </VCardActions>
                                     </VCard>
                                 </VOverlay>

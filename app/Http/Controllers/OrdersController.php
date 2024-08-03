@@ -331,7 +331,7 @@ class OrdersController extends Controller
             ];
         } else {
             return [
-                'response' => 'Cannot cancel',
+                'response' => sprintf('Cannot cancel %s order during %s.', $order->item->name, $order->orderStatus->name),
                 'orderStatus' => $order->orderStatus->name,
             ];
         }

@@ -7,9 +7,10 @@
               <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
                 <VCard class="p-2 cursor-pointer" hover color="blue-darken-2">
                   <h5 class="mb-0">{{ task.name }}</h5>
-                  <p class="mb-0"><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                  <p class="mb-0"><b>Created</b> {{ moment(task.created_at).calendar() }}</p>
                   
                   <VOverlay
+                    v-model="showOverlay[task.id]"
                     activator="parent"
                     location-strategy="connected"
                     scroll-strategy="close">
@@ -80,6 +81,7 @@ const user = usePage().props.auth.user;
 const order = usePage().props.order;
 const endpoints = usePage().props.endpoints;
 const unclaimedTasks = ref([]);
+const showOverlay = ref([]);
 
 
 const columns = ref({
@@ -174,11 +176,15 @@ const loadPickedTasks = async () => {
 
 const loadNewTasks = async () => {
   const response = await axios.get(endpoints.newTasks);
-  console.log(response.data)
   unclaimedTasks.value = response.data.unclaimedTasks ?? [];
+  unclaimedTasks.value.forEach(element => {
+    showOverlay[element.id] = false;
+  })
 }
 
 const pickTask = async (task, index) => {
+  showOverlay[task.id] = false;
+
   const payload = {task};
 
   const response = await axios.post(endpoints.pickTask, payload, {

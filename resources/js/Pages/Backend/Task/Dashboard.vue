@@ -72,6 +72,7 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import axios from 'axios';
 import moment from 'moment';
 
+
 const user = usePage().props.auth.user;
 const endpoints = usePage().props.endpoints;
 const unclaimedTasks = ref([]);
@@ -192,6 +193,7 @@ const pickTask = async (task, index) => {
 
 // let checkNewTaskInterval = 0;
 onMounted(async () => {
+
   await nextTick(); // Ensure DOM is fully rendered
 
   statusKeys.forEach((status) => {

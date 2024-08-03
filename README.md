@@ -57,4 +57,6 @@ If the item has passed that process, it should not be possible for either the Cu
 ## Additional Message for Customer
 You may want to have it as someone's task or part of the guidelines for a task or a dedicated task to have someone to download the order assets. Failure to do so may result in everybody consuming data to download assets.
 
-
+## Notification Triggers
+1. Task Assignments
+2. Order Cancellation - This will send notification to all users that are still handling tasks;

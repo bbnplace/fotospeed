@@ -65,7 +65,7 @@
 
 
 
-            <li class="dropdown notification-list">
+            <li class="dropdown notification-list" v-if="totalNotification > 0">
                 <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                     <i class="ri-notification-3-line fs-22"></i>
                     <span class="noti-icon-badge"></span>
@@ -77,111 +77,43 @@
                                 <h6 class="m-0 fs-16 fw-semibold"> Notification</h6>
                             </div>
                             <div class="col-auto">
-                                <a href="javascript: void(0);" class="text-dark text-decoration-underline">
-                                    <small>Clear All</small>
-                                </a>
+                                
                             </div>
                         </div>
                     </div>
 
-                    <div style="max-height: 300px;" data-simplebar>
+                    <template v-if="totalNotification > 0">
+                        <div style="max-height: 300px;" data-simplebar>
+                            <template v-for="(notifications, key) in recentNotifications" :key="key">
+                                <h5 class="text-muted fs-12 fw-bold p-2 text-uppercase mb-0">{{ key }}</h5>
 
-                        <h5 class="text-muted fs-12 fw-bold p-2 text-uppercase mb-0">Today</h5>
-                        <!-- item-->
-
-                        <a href="javascript:void(0);" class="dropdown-item p-0 notify-item unread-noti card m-0 shadow-none">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="notify-icon bg-primary">
-                                            <i class="ri-message-3-line fs-18"></i>
+                                <a href="javascript:void(0);" class="dropdown-item p-0 notify-item unread-noti card m-0 shadow-none bg-white" v-for="(notification, i) in notifications" :key="i">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="notify-icon bg-primary">
+                                                    <i class="ri-message-3-line fs-18"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 text-truncate ms-2">
+                                                <h5 class="noti-item-title fw-semibold fs-13">{{ notification.title.substring(0, 23) }} <small class="fw-normal text-muted float-end ms-1">{{ moment(notification.created_at).fromNow() }}</small></h5>
+                                                <small class="noti-item-subtitle text-muted">{{ notification.message.substring(0, 50) }}</small>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="flex-grow-1 text-truncate ms-2">
-                                        <h5 class="noti-item-title fw-semibold fs-14">Inemesit Archibong <small class="fw-normal text-muted float-end ms-1">1 min ago</small></h5>
-                                        <small class="noti-item-subtitle text-muted">I just submitted an order.</small>
-                                    </div>
-                                </div>
-                            </div>
+                                </a>
+                            </template>
+                            
+                        </div>
+
+                        <!-- All-->
+                        <a href="javascript:void(0);" class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
+                            View All
                         </a>
-
-                        <!-- item-->
-                        <a href="javascript:void(0);" class="dropdown-item p-0 notify-item read-noti card m-0 shadow-none">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="notify-icon bg-info">
-                                            <i class="ri-user-add-line fs-18"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 text-truncate ms-2">
-                                        <h5 class="noti-item-title fw-semibold fs-14">Admin <small class="fw-normal text-muted float-end ms-1">1 hr ago</small></h5>
-                                        <small class="noti-item-subtitle text-muted">New user registered</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-
-                        <h5 class="text-muted fs-12 fw-bold p-2 mb-0 text-uppercase">Yesterday</h5>
-
-                        <!-- item-->
-                        <a href="javascript:void(0);" class="dropdown-item p-0 notify-item read-noti card m-0 shadow-none">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="notify-icon">
-                                            <img src="/images/users/avatar-2.jpg" class="img-fluid rounded-circle" alt="" />
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 text-truncate ms-2">
-                                        <h5 class="noti-item-title fw-semibold fs-14">Kemi Shot It <small class="fw-normal text-muted float-end ms-1">1 day ago</small></h5>
-                                        <small class="noti-item-subtitle text-muted">Hi, How are you? When do I expect delivery?</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-
-                        <h5 class="text-muted fs-12 fw-bold p-2 mb-0 text-uppercase">31 Jan 2024</h5>
-
-                        <!-- item-->
-                        <a href="javascript:void(0);" class="dropdown-item p-0 notify-item read-noti card m-0 shadow-none">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="notify-icon bg-primary">
-                                            <i class="ri-discuss-line fs-18"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 text-truncate ms-2">
-                                        <h5 class="noti-item-title fw-semibold fs-14">Customer One</h5>
-                                        <small class="noti-item-subtitle text-muted">Photobook Received by Customer One</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-
-                        <!-- item-->
-                        <a href="javascript:void(0);" class="dropdown-item p-0 notify-item read-noti card m-0 shadow-none">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="notify-icon">
-                                            <img src="/images/users/avatar-4.jpg" class="img-fluid rounded-circle" alt="" />
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 text-truncate ms-2">
-                                        <h5 class="noti-item-title fw-semibold fs-14">Karen Robinson</h5>
-                                        <small class="noti-item-subtitle text-muted">Wow ! this admin looks good and awesome design</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- All-->
-                    <a href="javascript:void(0);" class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
-                        View All
-                    </a>
+                    </template>
+                    <!-- <div v-else>
+                        <p class="p-2 text-center">No Notification</p>
+                    </div> -->
 
                 </div>
             </li>
@@ -234,6 +166,8 @@
         </ul>
     </div>
 </div>
+<br />
+
 <Snackbar :data="snackbarOption"></Snackbar>
 </template>
 
@@ -244,6 +178,8 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import axios from 'axios';
+import moment from 'moment';
 
 const userProps = usePage().props.auth.user;
 const name = userProps.name;
@@ -264,7 +200,13 @@ const echo = new Echo({
   encrypted: true,
 });
 
-const message = ref(null);
+const recentNotifications = ref({});
+const totalNotification = ref(0);
+const loadRecentNotifications = async () => {
+    const response = await axios.get(route('notifications.recent'));
+    recentNotifications.value = response.data.notifications;
+    totalNotification.value = response.data.count;
+}
 
 onMounted(() => {
     // Listening for branch event as message is passed through different processing stages.
@@ -278,6 +220,8 @@ onMounted(() => {
     .listen('AnnounceNewOrder', (e) => {
         showSnackbar(e.message);
     });
+
+    loadRecentNotifications();
 });
 
 onBeforeUnmount(() => {
