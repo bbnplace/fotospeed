@@ -2,7 +2,7 @@
     <Head title="Order"></Head>
     <BackendLayout>
         <Link :href="route('orders')" class="font-bold">Back</Link>
-        <Panel :snippet-title="`Order Files`">
+        <Panel :snippet-title="`Order Assets`">
             <div class="text-right mb-2" v-if="orderForm.orderFiles.length">
                 <DownloadAllMediaBtn :files="orderForm.orderFiles" />
             </div>

@@ -42,3 +42,7 @@ brew install gd
 After careful consideration, we believe it should only be possible to remove file during upload.
 Once the order has been uploaded, it should not be possible to remove any of the uploaded file anymore.
 
+## Order Cancellation
+
+Administrator determines the stage at which cancellation can be done for an item.
+If the item has passed that process, it should not be possible for either the Customer, Receptionist or Admin to CANCEL the order.
