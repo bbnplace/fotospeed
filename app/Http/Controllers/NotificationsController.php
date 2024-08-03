@@ -46,9 +46,11 @@ class NotificationsController extends Controller
             }
         });
 
+        $unreadNotification = Notification::where('user_id', auth()->user()->id)->where('read', 0)->count();
         return [
             'notifications' => $groupedNotifications,
             'count' => $totalNotifications,
+            'unread' => $unreadNotification,
         ];
     }
 }
