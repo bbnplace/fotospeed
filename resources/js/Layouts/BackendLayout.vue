@@ -63,6 +63,12 @@ const menus = [
                 name: "Email Templates",
                 route: "email-templates",
                 adminOnly: true
+            },
+            {
+                icon: "mdi-square-rounded-badge-outline",
+                name: "Notification Templates",
+                route: "notification-templates",
+                adminOnly: true
             }
         ]
     },

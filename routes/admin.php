@@ -30,6 +30,7 @@ use App\Http\Controllers\TasksController;
 use App\Http\Controllers\UserRegistrationController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WhatsappTemplatesController;
+use App\Http\Controllers\NotificationTemplatesController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -239,6 +240,16 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
     Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
     Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
+
+    // Notifications Template Management Module
+    Route::get('panel/notification-templates', [NotificationTemplatesController::class, 'index'])->name('notification-templates');
+    Route::post('panel/notification-templates', [NotificationTemplatesController::class, 'records'])->name('notification-templates.records');
+    Route::get('panel/notification-template/add', [NotificationTemplatesController::class, 'add'])->name('notification-template.add');
+    Route::post('panel/notification-template/add', [NotificationTemplatesController::class, 'store'])->name('notification-template.add');
+    Route::get('panel/notification-template/{id}/edit', [NotificationTemplatesController::class, 'edit'])->name('notification-template.edit');
+    Route::put('panel/notification-template/{id}/edit', [NotificationTemplatesController::class, 'update'])->name('notification-template.edit');
+    Route::get('panel/notification-template/{id}', [NotificationTemplatesController::class, 'view'])->name('notification-template.view');
+    Route::delete('panel/notification-templates/delete', [NotificationTemplatesController::class, 'delete'])->name('notification-templates.delete');
 
     // Settings
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings');

@@ -39,6 +39,8 @@ class NotificationsController extends Controller
     public function notification($id)
     {
         $notification = Notification::where('user_id', auth()->user()->id)->where('id', $id)->first();
+        $notification->read = 1;
+        $notification->save();
         
         return Inertia::render('Backend/Notifications/Notification', [
             'notification' => $notification,
