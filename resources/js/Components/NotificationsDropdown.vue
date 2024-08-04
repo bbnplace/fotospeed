@@ -21,7 +21,7 @@
                     <template v-for="(notifications, key) in recentNotifications" :key="key">
                         <h5 class="text-muted fs-12 fw-bold p-2 text-uppercase mb-0">{{ key }}</h5>
 
-                        <a href="javascript:void(0);" class="dropdown-item p-0 notify-item unread-noti card m-0 shadow-none bg-white" v-for="(notification, i) in notifications" :key="i">
+                        <Link class="dropdown-item p-0 notify-item unread-noti card m-0 shadow-none bg-white" v-for="(notification, i) in notifications" :key="i" :href="route('notification.view', [notification.id])">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
@@ -35,15 +35,15 @@
                                     </div>
                                 </div>
                             </div>
-                        </a>
+                        </Link>
                     </template>
                     
                 </div>
 
                 <!-- All-->
-                <a href="javascript:void(0);" class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
+                <Link :href="route('notifications')" class="dropdown-item text-center text-primary text-decoration-underline fw-bold notify-item border-top border-light py-2">
                     View All
-                </a>
+                </Link>
             </template>
         </div>
     </li>
@@ -51,6 +51,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { Link } from "@inertiajs/vue3";
 import axios from 'axios';
 import moment from 'moment';
 

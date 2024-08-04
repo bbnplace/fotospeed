@@ -125,6 +125,8 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/file/download', [FileDownloadsController::class, 'fetch'])->name('file.fetch');
 
     // Notifications
+    Route::get('/notifications', [NotificationsController::class,'index'])->name('notifications');
+    Route::get('/notification/{id}', [NotificationsController::class,'notification'])->name('notification.view');
     Route::get('/recent-notifications', [NotificationsController::class,'recent'])->name('notifications.recent');
 });
 

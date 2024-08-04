@@ -9,18 +9,42 @@ use Inertia\Inertia;
 
 class NotificationsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('Backend/Notifications', [
+        $pageSize = 10;
+        $page = $request->query("pg", 1);
+        $keyphrase = $request->query("search", null);
+        $additionalParams = [];
 
+        $query = Notification::query();
+        $query->where('user_id', auth()->user()->id);
+        if ($keyphrase) {
+            $query->where("title","like","%". $keyphrase ."%");
+            $query->orwhere("message","like","%". $keyphrase ."%");
+            $additionalParams["search"] = $keyphrase;
+        }
+        $notifications = $query->orderBy('created_at','desc')->paginate($pageSize, ['*'],'pg', $page);
+        if(!empty($additionalParams)) {
+            $notifications->appends($additionalParams);
+        }
+
+        return Inertia::render('Backend/Notifications/List', [
+            'notifications' => $notifications,
+            'keyword' => $keyphrase,
+            'note' => session('note')
         ]);
     }
 
-    public function records(Request $request)
+   
+    public function notification($id)
     {
-        $query = Notification::query();
-
+        $notification = Notification::where('user_id', auth()->user()->id)->where('id', $id)->first();
+        
+        return Inertia::render('Backend/Notifications/Notification', [
+            'notification' => $notification,
+        ]);
     }
+
 
     public function recent()
     {

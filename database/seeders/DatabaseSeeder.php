@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             TaskStatusesSeeder::class,
             InvoiceStatusSeeder::class,
+            NotificationsTemplateSeeder::class,
         ]);
     }
 }

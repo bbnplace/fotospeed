@@ -6,14 +6,17 @@ use App\Models\Branch;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Item;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\OrderLog;
 use App\Models\Role;
+use App\Models\TaskStatus;
 use App\Models\User;
 use App\Models\Setting;
 use App\Report\ReportBuilder;
 use App\Tasks\Task;
+use App\Models\Task as TaskModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -323,6 +326,17 @@ class OrdersController extends Controller
 
             // Todo: Log the ID of the user that cancelled the order
             // Todo: Send notification to all team members with uncompleted tasks that order has been cancelled
+            $tasks = TaskModel::where('order_id', $order->id)->whereNot('task_status_id', TaskStatus::STATUS_DONE)->get();
+            // if (!$tasks->isEmpty()) {
+            //     $tasks->each(function ($task) use ($order) {
+            //         $user = $task->user;
+            //         Notification::create([
+            //             'user_id'=> $user->id,
+            //             'title' => sprintf('%s[%s] is Cancelled', $order->name, $order->order_number),
+            //             'message' => sprintf('Hello %s,<br /> this is to inform you that order[%s] has been cancelled.', $order->name, $order->order_number),
+            //         ]);
+            //     });
+            // }
             // Todo: Send notification to customer that order has been cancelled.
 
             return [

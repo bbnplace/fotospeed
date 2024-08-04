@@ -60,3 +60,5 @@ You may want to have it as someone's task or part of the guidelines for a task o
 ## Notification Triggers
 1. Task Assignments
 2. Order Cancellation - This will send notification to all users that are still handling tasks;
+3. Task Completions
+
