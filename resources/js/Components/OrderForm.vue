@@ -7,7 +7,7 @@
                     location-strategy="connected"
                     scroll-strategy="close"
                 >
-                    <VCard class="p-4">
+                    <VCard class="p-4" width="350">
                         <p class="text-right">Page# {{ pageData.pageNumber }}</p>
                         <VImg
                             :src="props.orderImage.imageThumbnail"
