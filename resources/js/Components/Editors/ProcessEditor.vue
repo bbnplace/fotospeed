@@ -26,7 +26,7 @@
                     ></VTextarea>
                 </VCol>
             </VRow>
-            <VRow>
+            <!-- <VRow>
                 <VCol cols="12" sm="6">
                     <VAutocomplete
                         id="role"
@@ -39,143 +39,8 @@
                         density="compact"
                     ></VAutocomplete>
                 </VCol>
-            </VRow>
-
-            <VRow>
-                <VCol cols="12">
-                    <VExpansionPanels
-                        v-model="switches.panels"
-                    >
-                        <VExpansionPanel title="Team">
-                            <VRow class="p-3 pt-0">
-                                <VCol cols="12" sm="6">
-                                    <v-switch
-                                        v-model="form.smsTeam"
-                                        label="Send SMS/WhatsApp"
-                                        color="#0594be"
-                                        hide-details
-                                    ></v-switch>
-
-                                    <VAutocomplete
-                                        id="smsTemplate"
-                                        v-model="form.smsTemplate"
-                                        label="SMS/WhatsApp Template"
-                                        :items="smsTemplates"
-                                        variant="outlined"
-                                        :hide-details="form.errors.smsTemplate == undefined"
-                                        :error-messages="form.errors.smsTemplate"
-                                        density="compact"
-                                        v-if="form.smsTeam"
-                                    ></VAutocomplete>
-                                </VCol>
-                                <VCol cols="12" sm="6">
-                                    <v-switch
-                                        v-model="form.emailTeam"
-                                        label="Send Email"
-                                        color="#0594be"
-                                        hide-details
-                                    ></v-switch>
-
-                                    <VAutocomplete
-                                        id="emailTemplate"
-                                        v-model="form.emailTemplate"
-                                        label="Email Template"
-                                        :items="emailTemplates"
-                                        variant="outlined"
-                                        :hide-details="form.errors.emailTemplate == undefined"
-                                        :error-messages="form.errors.emailTemplate"
-                                        density="compact"
-                                        v-if="form.emailTeam"
-                                    ></VAutocomplete>
-                                </VCol>
-                            </VRow>
-                        </VExpansionPanel>
-                        <VExpansionPanel title="Customer">
-                            <VRow class="p-3 pt-0">
-                                <VCol cols="12" sm="6">
-                                    <v-switch
-                                        v-model="form.smsCustomer"
-                                        label="Send SMS/WhatsApp"
-                                        color="#0594be"
-                                        hide-details
-                                    ></v-switch>
-
-                                    <VAutocomplete
-                                        id="smsTemplate"
-                                        v-model="form.customerSmsTemplate"
-                                        label="SMS/WhatsApp Template"
-                                        :items="smsTemplates"
-                                        variant="outlined"
-                                        :hide-details="form.errors.smsTemplate == undefined"
-                                        :error-messages="form.errors.smsTemplate"
-                                        density="compact"
-                                        v-if="form.smsCustomer"
-                                    ></VAutocomplete>
-                                </VCol>
-                                <VCol cols="12" sm="6">
-                                    <v-switch
-                                        v-model="form.emailCustomer"
-                                        label="Send Email"
-                                        color="#0594be"
-                                        hide-details
-                                    ></v-switch>
-
-                                    <VAutocomplete
-                                        id="emailTemplate"
-                                        v-model="form.customerEmailTemplate"
-                                        label="Email Template"
-                                        :items="emailTemplates"
-                                        variant="outlined"
-                                        :hide-details="form.errors.emailTemplate == undefined"
-                                        :error-messages="form.errors.emailTemplate"
-                                        density="compact"
-                                        v-if="form.emailCustomer"
-                                    ></VAutocomplete>
-                                </VCol>
-                            </VRow>
-                        </VExpansionPanel>
-                    </VExpansionPanels>
-                </VCol>
-            </VRow>
-
-            <VRow>
-                <VCol cols="12" sm="6">
-                    <v-switch
-                        v-model="form.reportProcess"
-                        label="Report Process Completion"
-                        color="#0594be"
-                        hide-details
-                    ></v-switch>
-
-                    <VAutocomplete
-                        id="reportAs"
-                        v-model="form.reportAs"
-                        label="Report As"
-                        :items="reportStates"
-                        variant="outlined"
-                        :hide-details="form.errors.reportAs == undefined"
-                        :error-messages="form.errors.reportAs"
-                        density="compact"
-                        v-if="form.reportProcess"
-                    ></VAutocomplete>
-                </VCol>
-            </VRow>
-
-            <VRow>
-                <VCol cols="12" sm="6">
-                    <VAutocomplete
-                        id="nextprocess"
-                        v-model="form.nextProcess"
-                        label="Next Process"
-                        :items="processes"
-                        variant="outlined"
-                        :hide-details="form.errors.nextProcess == undefined"
-                        :error-messages="form.errors.nextProcess"
-                        density="compact"
-                    ></VAutocomplete>
-                </VCol>
-            </VRow>
-
+            </VRow> -->
+            <hr />
             <div class="flex flex-row-reverse mt-3">
                 <VBtn
                     color="blue-darken-1"
@@ -235,28 +100,18 @@ const props = defineProps<{
     process?: ProcessEditor
 }>();
 
-const roles = usePage().props.roles;
-const processes = usePage().props.processes;
-const smsTemplates = usePage().props.smsTemplates;
-const emailTemplates = usePage().props.emailTemplates;
-const reportStates = usePage().props.reportStates;
+// const roles = usePage().props.roles;
+// const processes = usePage().props.processes;
+// const smsTemplates = usePage().props.smsTemplates;
+// const emailTemplates = usePage().props.emailTemplates;
+// const reportStates = usePage().props.reportStates;
 
 const form = useForm({
     id: props.process ? props.process.id : "",
     name: props.process ? props.process.name : "",
-    role: props.process ? (props.process.role ? props.process.role.name : "") : "",
+    // role: props.process ? (props.process.role ? props.process.role.name : "") : "",
     description: props.process ? props.process.description : "",
-    nextProcess: props.process ? (props.process.next_process ? props.process.next_process.name : "") : "",
     smsTeam: props.process ? (props.process.sms_team ? !!props.process.sms_team : false) : false,
-    smsTemplate: props.process ? (props.process.sms_template ? props.process.sms_template.name : "") : "",
-    emailTeam:  props.process ? (props.process.email_team ? !!props.process.email_team : false) : false,
-    emailTemplate: props.process ? (props.process.email_template ? props.process.email_template.name : "") : "",
-    smsCustomer:  props.process ? (props.process.sms_customer ? !!props.process.sms_customer : false) : false,
-    customerSmsTemplate: props.process ? (props.process.customer_sms_template ? props.process.customer_sms_template.name : "") : "",
-    emailCustomer: props.process ? (props.process.email_customer ? !!props.process.email_customer : false) : false,
-    customerEmailTemplate: props.process ? (props.process.customer_email_template ? props.process.customer_email_template.name : "") : "",
-    reportProcess: props.process ? (props.process.report_process ? !!props.process.report_process : false) : false,
-    reportAs: props.process ? (props.process.report_as ?? '') : '',
 });
 
 const submit = () => {

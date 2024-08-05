@@ -84,7 +84,7 @@ class TasksController extends Controller
         });
 
         // $records = Task::where('order_id', $orderId)->get();
-        $records = $query->get();
+        $records = $query->orderBy('id', 'desc')->get();
 
         if (!empty($records)) {
             foreach ($records as $record) {

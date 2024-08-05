@@ -16,7 +16,7 @@ class ProcessesController extends Controller
 {
     protected $rules = [
         'name' => 'string|required|unique:items,name|min:2|max:64',
-        'role' => 'string|required|exists:roles,name|min:2|max:64',
+        'role' => 'string|nullable|exists:roles,name|min:2|max:64',
         'description' => 'nullable|string|min:24|max:1000',
         'nextProcess' => 'nullable|string|exists:order_statuses,name|min:2|max:64',
         'smsTeam' => 'nullable|boolean',
@@ -118,19 +118,19 @@ class ProcessesController extends Controller
         // If process is to be reported, check that no other process is using that report name
 
         OrderStatus::create([
-            'role_id' => $role->id,
+            'role_id' => $role->id ?? null,
             'name' => $request->name,
             'description' => $request->description,
             'sms_template_id' => $teamSmsTemplate->id ?? null,
             'email_template_id' => $teamEmailTemplate->id ?? null,
             'next_process' => $nextProcess->id ?? null,
-            'sms_team' => $request->smsTeam,
-            'email_team' => $request->emailTeam,
-            'sms_customer' => $request->smsCustomer,
-            'email_customer' => $request->emailCustomer,
+            'sms_team' => $request->smsTeam ?? false,
+            'email_team' => $request->emailTeam ?? false,
+            'sms_customer' => $request->smsCustomer ?? false,
+            'email_customer' => $request->emailCustomer ?? false,
             'customer_sms_template_id' => $customerSmsTemplate->id ?? null,
             'customer_email_template_id' => $customerEmailTemplate->id ?? null,
-            'report_process' => $request->reportProcess,
+            'report_process' => $request->reportProcess?? false,
             'report_as' => $request->reportProcess ? $request->reportAs : null,
         ]);
 
@@ -212,17 +212,17 @@ class ProcessesController extends Controller
         // Save changes
         $process->name = $request->name;
         $process->description = $request->description;
-        $process->role_id = $role->id;
+        $process->role_id = $role->id ?? null;
         $process->sms_template_id = $smsTemplate->id ?? null;
         $process->email_template_id = $emailTemplate->id ?? null;
         $process->next_process = $nextProcess->id ?? null;
-        $process->sms_team = $request->smsTeam;
-        $process->email_team = $request->emailTeam;
-        $process->sms_customer = $request->smsCustomer;
-        $process->email_customer = $request->emailCustomer;
+        $process->sms_team = $request->smsTeam ?? false;
+        $process->email_team = $request->emailTeam ?? false;
+        $process->sms_customer = $request->smsCustomer ?? false;
+        $process->email_customer = $request->emailCustomer ?? false;
         $process->customer_sms_template_id = $customerSmsTemplate->id ?? null;
         $process->customer_email_template_id = $customerEmailTemplate->id ?? null;
-        $process->report_process = $request->reportProcess;
+        $process->report_process = $request->reportProcess ?? false;
         $process->report_as = $request->reportProcess ? $request->reportAs : null;
         $process->save();
 

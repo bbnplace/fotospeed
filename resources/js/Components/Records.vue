@@ -57,6 +57,9 @@
                     <template v-slot:item.created_at="{ item }">
                         {{ moment(item.created_at).calendar() }}
                     </template>
+                    <template v-slot:item.updated_at="{ item }">
+                        {{ moment(item.updated_at).calendar() }}
+                    </template>
             </VDataTableServer>
         </VCol>
     </VRow>

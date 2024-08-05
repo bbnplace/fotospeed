@@ -44,9 +44,15 @@ const dataResources = {
             key: "order_status.name",
             sortable: false
         },
+        // {
+        //     title: "Created",
+        //     key: "created_at",
+        //     sortable: false,
+        //     align: "right"
+        // },
         {
-            title: "Date",
-            key: "created_at",
+            title: "Last Updated",
+            key: "updated_at",
             sortable: false,
             align: "right"
         },

@@ -80,10 +80,12 @@ class Task
                 $config = [
                     'order' => $order,
                     'customer' => User::where('id', $order->user_id)->first(),
-                    'nextProcess' => OrderStatus::where('name', $object->nextProcess)->first(),
+                    'nextProcess' => property_exists($object, 'nextProcess') ? OrderStatus::where('name', $object->nextProcess)->first() : null,
                     'url' => URLGenerator::generateAndShortenSignedUrl($order->user_id, $linkExpirationMinutes),
                 ];
+
                 self::sendCustomerCommunication($object, 'Start', $config);
+
             }
         }
 
