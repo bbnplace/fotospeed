@@ -83,7 +83,14 @@ class TemplateManager
         return $message;
     }
 
-    public function prepareText(string $template)
+
+    /**
+     * Prepare Text
+     * An aliase function to Prepare Message
+     * @param string|null $template
+     * @return string
+     */
+    public function prepareText(string | null $template)
     {
         return $this->prepareMessage($template);
     }
