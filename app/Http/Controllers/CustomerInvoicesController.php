@@ -44,7 +44,7 @@ class CustomerInvoicesController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['order' => function ($query){
-            $query->select('id', 'name', 'total_cost');
+            $query->select('id', 'name', 'total_cost', 'order_number');
         }]);
 
         if (!empty($search)) {
