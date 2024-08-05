@@ -10,7 +10,7 @@ class WhatsappTemplatesController extends Controller
 {
     protected $rules = [
         'name' => 'required|string|unique:whatsapp_templates,name|min:2|max:64',
-        'template' => 'required|string|min:1|max:1530',
+        'template' => 'required|string|min:1|max:1530'
     ];
 
     public function index()
