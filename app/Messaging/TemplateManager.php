@@ -59,15 +59,24 @@ class TemplateManager
         return $matches;
     }
 
-    public function prepareMessage(String $template)
-    {
-        $message = $template;
-        $templateMatches = $this->matchTemplateKeyWithValues();
 
-        foreach ($templateMatches as $key => $value) {
-            $searchTerm = sprintf('[%s]', $key);
-            if (strstr($message, $searchTerm)) {
-                $message = str_replace($searchTerm, $value, $message);
+    /**
+     * Prepare Message
+     * This method accepts a string template and replaces the template codes with values.
+     * @param string|null $template
+     * @return string
+     */
+    public function prepareMessage(string | null $template)
+    {
+        $message = $template ?? "";
+        if (!empty($message)) {
+            $templateMatches = $this->matchTemplateKeyWithValues();
+
+            foreach ($templateMatches as $key => $value) {
+                $searchTerm = sprintf('[%s]', $key);
+                if (strstr($message, $searchTerm)) {
+                    $message = str_replace($searchTerm, $value, $message);
+                }
             }
         }
 
