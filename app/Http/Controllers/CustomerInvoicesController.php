@@ -83,7 +83,7 @@ class CustomerInvoicesController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['order' => function ($query){
-            $query->select('id', 'name', 'total_cost', 'delivery_address');
+            $query->select('id', 'name', 'total_cost', 'delivery_address', 'order_number');
         }]);
 
         $invoice = $query->first();
@@ -100,6 +100,7 @@ class CustomerInvoicesController extends Controller
 
         return [
             'invoice' => $invoice,
+            'invoice_no_src' => $settings->invoice_no_src,
             'endpoint' => route('customer.find'),
             'paystack' => $paystack,
             'company' => [
@@ -158,12 +159,11 @@ class CustomerInvoicesController extends Controller
                             'url' => '',
                         ];
 
-                        $email_template_name = $settings->payment_email_temp;
                         // Send email receipt to customer
-                        if(!empty($email_template_name))
+                        if(!empty($settings->payment_email_temp))
                         {
                             // Fetch the email template
-                            $emailTemplate = EmailTemplate::where('name', $email_template_name)->first();
+                            $emailTemplate = EmailTemplate::where('name', $settings->payment_email_temp)->first();
                             if(!empty($emailTemplate))
                             {
                                 $emailClient = new EmailClient($messagingData);
@@ -171,12 +171,11 @@ class CustomerInvoicesController extends Controller
                             }
                         }
 
-                        $sms_template_name = $settings->payment_sms_temp;
                         // Send sms receipt to customer
-                        if(!empty($sms_template_name))
+                        if(!empty($settings->payment_sms_temp))
                         {
                             // Fetch the sms template
-                            $smsTemplate = SmsTemplate::where('name', $sms_template_name)->first();
+                            $smsTemplate = SmsTemplate::where('name', $settings->payment_sms_temp)->first();
                             if(!empty($smsTemplate))
                             {
                                 $smsClient = new SMSClient($messagingData);

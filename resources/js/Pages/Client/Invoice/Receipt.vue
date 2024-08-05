@@ -6,7 +6,7 @@
             <VRow>
                 <VCol>
                     <h4>Invoice #</h4>
-                    <p>{{ invoice.id }}</p>
+                    <p>{{ invoiceNumber }}</p>
                 </VCol>
                 <VCol>
                     <h4>Date</h4>
@@ -67,6 +67,8 @@ import moment from 'moment';
 const props = usePage().props;
 const invoice = props.invoice;
 const company = props.company;
+const invoiceRefSrc = props.invoice_no_src;
+const invoiceNumber = invoiceRefSrc == "System Generated" ? invoice.id : invoice.order.order_number;
 
 const client = {
         name: invoice.user.name,

@@ -90,8 +90,6 @@
     const invoiceRefSrc = usePage().props.invoice_no_src;
 
     const handlePaymentCompletion = data => {
-        // console.log(data)
-        // alert(`${data.reference}, ${data.status}`)
         setTimeout(()=>{
             router.visit(route('customer.receipt', [invoice.id]))
         }, 1000);

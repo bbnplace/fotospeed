@@ -129,7 +129,6 @@ class TasksController extends Controller
             $task->save();
 
             // Todo: Notify Controller of the change in the status of the task.
-
             $order = Order::find($task->order_id);
 
             // Check if order has been cancelled If order has been cancelled, stop further action.
