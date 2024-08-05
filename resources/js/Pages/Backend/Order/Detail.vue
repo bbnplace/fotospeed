@@ -22,13 +22,13 @@
                 <VCol class="text-center">
                     <h3 class="text-red">No asset was uploaded for this order!</h3>
                     <p>If you do not have the image files, kindly contact the client using the phone number below.</p>
-                    <p class="mt-4 font-bold">If you have the files and would like to upload them, use the button below.</p>
+                    <!-- <p class="mt-4 font-bold">If you have the files and would like to upload them, use the button below.</p>
                     <p>
                         <Link 
                             :href="route('order.edit', [order.id])"
                             class="btn bg-blue font-bold"
                         >Upload Images</Link>
-                    </p>
+                    </p> -->
                 </VCol>
             </VRow>
         </Panel>

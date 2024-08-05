@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Report;
+use App\Config\OrderProcess;
 use App\Models\OrderStatus;
 
 class ReportBuilder
@@ -18,6 +19,27 @@ class ReportBuilder
         Month::initialize();
         Year::initialize();
     }
+
+
+    /**
+     * Order Process os Reportable
+     * This method checks if report can be generated for the Order process submitted 
+     * @param string $processName
+     * @return bool
+     */
+    public static function isReportableOrderProcess(string $processName): bool
+    {
+        $isReportableOrderProcess = false;
+        $reportableProcesses = OrderProcess::list();
+        foreach ($reportableProcesses as $process) {
+            if (strtolower($process["name"]) == strtolower($processName)) {
+                $isReportableOrderProcess = true;
+                break;
+            }
+        }
+
+        return $isReportableOrderProcess;
+    }
     
     /**
      * Build
@@ -32,10 +54,13 @@ class ReportBuilder
     {
         $field = strtolower($field);
 
-        Hour::build($field, $ordersCount);
-        Day::build($field, $ordersCount);
-        Month::build($field, $ordersCount);
-        Year::build($field, $ordersCount);
+        // If the field name is not part of the standard processes, don't build report for it
+        if (self::isReportableOrderProcess($field)) {
+            Hour::build($field, $ordersCount);
+            Day::build($field, $ordersCount);
+            Month::build($field, $ordersCount);
+            Year::build($field, $ordersCount);
+        }
     }
 
 
@@ -46,17 +71,13 @@ class ReportBuilder
      * 
      * @return array
      */
-    public static function getReportStates()
+    public static function getReportStates(): array
     {
-        return OrderStatus::getOrderStatusesArray();
-        // return [
-        //     'Processing',
-        //     'Produced',
-        //     'Delivered',
-        //     'Cancelled',
-        //     'Dispatched',
-        //     'Completed',
-        //     'Packaged',
-        // ];
+        $reportStates = OrderProcess::list();
+        $states = [];
+        foreach ($reportStates as $state) {
+            array_push($states, $state["name"]);
+        }
+        return $states;
     }
 }
