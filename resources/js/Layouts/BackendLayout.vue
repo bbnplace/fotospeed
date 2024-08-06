@@ -95,7 +95,7 @@ const menus = [
             },
             {
                 icon: "mdi-list-box-outline",
-                name: "Items",
+                name: "Products",
                 route: "items",
                 adminOnly: true
             },

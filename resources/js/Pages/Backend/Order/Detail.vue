@@ -22,13 +22,6 @@
                 <VCol class="text-center">
                     <h3 class="text-red">No asset was uploaded for this order!</h3>
                     <p>If you do not have the image files, kindly contact the client using the phone number below.</p>
-                    <!-- <p class="mt-4 font-bold">If you have the files and would like to upload them, use the button below.</p>
-                    <p>
-                        <Link 
-                            :href="route('order.edit', [order.id])"
-                            class="btn bg-blue font-bold"
-                        >Upload Images</Link>
-                    </p> -->
                 </VCol>
             </VRow>
         </Panel>
@@ -38,9 +31,22 @@
                 <CommunicationLog />
             </VCol>
             <VCol cols="12" sm="6">
-                <Panel snippetTitle="Order Details">
+                <Panel snippetTitle="Order Card">
                     <VRow>
-                        <VCol cols="12" sm="6">
+                        <VCol class="text-right">
+                            <VBtn
+                                color="blue-darken-3"
+                                prepend-icon="mdi-printer"
+                                @click="editOrder"
+                                 v-if="canEditOrder && orderStatus != 'Cancelled'"
+                            >
+                                Print Card
+                            </VBtn>
+                        </VCol>
+                    </VRow>
+                    <hr/>
+                    <VRow>
+                        <VCol cols="12" md="6">
                             <VRow >
                                 <VCol>
                                     <b>Client</b><br />
@@ -76,18 +82,44 @@
                                     <Link v-if="orderDetail.price && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Edit</Link>
                                 </VCol>
                             </VRow>
+                            <VRow v-if="orderDetail.price && order.order_number && !hasInvoice && canGenerateInvoice && orderStatus != 'Cancelled'">
+                                <VCol cols="12">
+                                    <VBtn
+                                        color="blue-darken-1"
+                                        @click="generateInvoice"
+                                    >Issue Invoice</VBtn>
+                                </VCol>
+                            </VRow>
+                            <VRow v-if="hasInvoice">
+                                <VCol cols="12" sm="6">
+                                    <b>Invoice Status</b><br />
+                                    {{ invoicePaid ? "Paid" : "Unpaid" }}
+                                </VCol>
+                            </VRow>
                         </VCol>
 
-                        <VCol cols="12" sm="6">
+                        <VCol cols="12" md="6">
                             <VRow>
                                 <VCol>
-                                    <b>Order Quantity</b><br />
+                                    <b>Product</b><br />
+                                    {{ $page.props.order.item.name }}
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>Quantity</b><br />
                                     {{ $page.props.order.quantity }}
                                 </VCol>
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Order Status</b><br />
+                                    <b>Current Process</b><br />
+                                    {{ orderStatus }}
+                                </VCol>
+                            </VRow>
+                            <VRow v-if="orderStatus == 'Dispatch'">
+                                <VCol>
+                                    <b>WayBill Number</b><br />
                                     {{ orderStatus }}
                                 </VCol>
                             </VRow>
@@ -105,7 +137,7 @@
                             <VRow>
                                 <VCol>
                                     <b>Last Updated</b><br />
-                                    {{ moment(order.updated_at).calendar() }}
+                                    {{ moment(order.updated_at).fromNow() }}
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -123,22 +155,59 @@
                             {{ order.note }}
                         </VCol>
                     </VRow>
+                    <hr/>
                     <VRow>
                         <VCol>
-                            <VBtn v-if="canGenerateInvoice && !invoicePaid && orderStatus != 'Cancelled'"
-                                color="blue-darken-1 m-1"
-                                @click="generateInvoice"
-                            >Generate Invoice</VBtn>
                             <VBtn
-                                color="blue-darken-1 m-1"
-                                @click="editOrder"
-                                 v-if="canEditOrder && !invoicePaid && orderStatus != 'Cancelled'"
+                                color="grey-darken-3"
+                                prepend-icon="mdi-pause"
+                                class="mr-2 mb-2"
+                                 v-if="canEditOrder && orderStatus != 'Cancelled'"
                             >
-                                Edit Order
+                                Hold Order
+                                <VOverlay
+                                    v-model="showHoldOrderOverlay"
+                                    activator="parent"
+                                    location-strategy="connected"
+                                    scroll-strategy="close"
+                                >
+                                    <VCard max-width="400" class="p-3">
+                                        <VCardTitle>What's Wrong?</VCardTitle>
+                                        <VCardText>
+                                            <p>
+                                                Why do you want to place this order on hold?<br />
+                                            </p>
+                                            <p>
+                                                <VTextarea
+                                                    v-model="orderHoldReason"
+                                                    hide-details
+                                                    id="hold-order"
+                                                    variant="outlined"
+                                                    label="Write note for team members here"
+                                                    :loading="holdingOrderProgress"
+                                                ></VTextarea>
+                                            </p>
+                                            <p v-if="orderHoldResponse.length" class="text-center font-bold">{{ orderHoldResponse }}</p>
+                                        </VCardText>
+                                        <VCardActions>
+                                            <VBtn
+                                                color="red-darken-1 m-1"
+                                                @click="holdOrder"
+                                                :disabled="holdingOrderProgress"
+                                            >Continue</VBtn>
+                                            <VBtn
+                                                color="blue-darken-1 m-1"
+                                                @click="showHoldOrderOverlay = false"
+                                            >Close</VBtn>
+                                        </VCardActions>
+                                    </VCard>
+                                </VOverlay>
                             </VBtn>
                             <VBtn
-                                color="red-darken-1 m-1"
-                                 v-if="user.isAdmin && orderStatus != 'Cancelled'"
+                                color="red-darken-1"
+                                class="mr-2 mb-2"
+                                prepend-icon="mdi-cancel"
+                                v-if="user.isAdmin && orderStatus != 'Cancelled'"
                             >
                                 Cancel Order
                                 <VOverlay
@@ -168,7 +237,7 @@
                                             <VBtn
                                                 color="blue-darken-1 m-1"
                                                 @click="showOverlay = false"
-                                            >Close</VBtn>
+                                            >Don't</VBtn>
                                         </VCardActions>
                                     </VCard>
                                 </VOverlay>
@@ -222,9 +291,12 @@ const orderForm = reactive({
     orderFiles: orderDetail.files,
 });
 const orderCancelResponse = ref("");
+const orderHoldResponse = ref("");
 const cancellingOrderProgress = ref(false);
+const holdingOrderProgress = ref(false);
 const orderStatus = ref(order.order_status.name)
 const showOverlay = ref(false);
+const showHoldOrderOverlay = ref(false);
 
 const removeImage = data => {
     for (let index = 0; index < orderForm.orderFiles.length; index++) {
@@ -273,6 +345,40 @@ const cancelOrder = async () => {
 
 const generateInvoice = () => {
     form.post(route('invoice.create'));
+}
+
+const saveWaybill = async () => {
+    const payload = {
+        waybillNo: ""
+    }
+
+    const response = await axios.put(route('order.save-waybill', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (response.data && response.data.status == "success") {
+        alert(response.data.status)
+    }
+}
+
+const orderHoldReason = ref("");
+const holdOrder = async () => {
+    const payload = {
+        reason: orderHoldReason.value
+    }
+
+    const response = await axios.put(route('order.hold', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (response.data && response.data.status == "success") {
+        orderHoldResponse.value = response.data.response;
+        alert(response.data.status)
+    }
 }
 </script>
 

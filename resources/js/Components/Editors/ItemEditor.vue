@@ -31,8 +31,7 @@
                     <VTextarea
                         id="description"
                         v-model="form.description"
-                        label="Item Description"
-                        :items="categories"
+                        label="Product Description"
                         variant="outlined"
                         :hide-details="form.errors.description == undefined"
                         :error-messages="form.errors.description"
@@ -140,13 +139,13 @@
                     <b>Important:</b> In the event that customer selects a center that cannot process this item, this is the center that will receive the order.
                 </VCol>
             </VRow>
-
+            <hr/>
             <div class="flex flex-row-reverse mt-3">
                 <VBtn
                     color="blue-darken-1"
                     type="submit"
                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                >Save Item</VBtn>
+                >Save</VBtn>
             </div>
         </form>
     </div>

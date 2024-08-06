@@ -30,20 +30,15 @@ const dataResources = {
             sortable: true
         },
         {
-            title: "Total Cost",
-            key: "total_cost",
-            sortable: true
-        },
-        {
             title: "Status",
             key: "order_status.name",
             sortable: false
         },
         {
-            title: "Actions",
-            key: "actions",
+            title: "Date",
+            key: "created_at",
             sortable: false,
-            width: '100px'
+            align: 'end'
         },
     ],
     name: {
@@ -51,35 +46,6 @@ const dataResources = {
         plural: "Orders"
     }
 }
-
-// const replyMessage = item => {
-//     // router.get(route('customer.edit', item.id))
-// }
-
-// const viewDetail = item => {
-//     router.get(route('order.detail', item.id));
-// }
-
-// // Deleting selected contacts
-// const deleteRecords = items => {
-//     router.delete(route('orders.delete'), {
-//         data: {
-//             ids: items
-//         },
-//         onFinish: (d)=>{
-//             closeDialog();
-//             const obj = {
-//                 page: pageNo.value,
-//                 itemsPerPage: itemsPerPage.value,
-//                 sortBy: []
-//             }
-//             loadRecords(obj);
-//             showSnackbar("Selected orders have been deleted");
-//             selected.value = [];
-//         }
-//     })
-// }
-
 
 </script>
 

@@ -1,7 +1,7 @@
 <template>
-    <Head title="Add Item Category"></Head>
+    <Head title="Add Product Category"></Head>
     <BackendLayout>
-        <Panel snippetTitle="Add Item">
+        <Panel snippetTitle="Add Product">
             <ItemEditor></ItemEditor>
         </Panel>
     </BackendLayout>

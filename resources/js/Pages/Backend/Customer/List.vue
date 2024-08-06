@@ -44,12 +44,12 @@ const dataResources = {
             key: "state.name",
             sortable: true
         },
-        // {
-        //     title: "Actions",
-        //     key: "actions",
-        //     sortable: false,
-        //     width: '100px'
-        // },
+        {
+            title: "Registered",
+            key: "created_at",
+            sortable: false,
+            align: "end"
+        },
     ],
     name: {
         singular: "customer",

@@ -1,7 +1,7 @@
 <template>
-    <Head title="Edit Item"></Head>
+    <Head title="Edit Product"></Head>
     <BackendLayout>
-        <Panel snippetTitle="Edit Item">
+        <Panel snippetTitle="Edit Product">
             <ItemEditor :item="item"></ItemEditor>
         </Panel>
     </BackendLayout>

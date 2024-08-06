@@ -4,9 +4,9 @@
         <Link :href="route('items')" class="font-bold">Back</Link>
         <VRow>
             <VCol cols="12" md="6">
-                <Panel :snippet-title="item.name">
+                <Panel snippet-title="Product">
                     <VRow>
-                        <VCol cols="6"><b>Item Name</b><br />{{ item.name }}</VCol>
+                        <VCol cols="6"><b>Product Name</b><br />{{ item.name }}</VCol>
                         <VCol cols="6"><b>Category</b><br />{{ item.category.name }}</VCol>
                     </VRow>
                     <VRow>

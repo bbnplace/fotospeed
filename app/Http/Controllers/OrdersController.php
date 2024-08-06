@@ -351,6 +351,65 @@ class OrdersController extends Controller
         }
     }
 
+    public function hold(Request $request, $orderId)
+    {
+        $order = Order::find($orderId);
+        $order->pause = true;
+        $order->save();
+
+        // Todo: Send stop work notice to all team members that have task for this order
+
+        return [
+            'response' => 'Success',
+        ];
+    }
+
+    public function reactivateOrder(Request $request, $orderId)
+    {
+        $order = Order::find($orderId);
+        $order->pause = false;
+        $order->save();
+
+        // Todo: Send order reactivation notice to all team members that have task for this order
+
+        return [
+            'response' => 'Success',
+        ];
+    }
+
+    public function setWaybillNumber(Request $request, $orderId)
+    {
+        $order = Order::find($orderId);
+        $order->waybill_number = $request->waybillNumber;
+        $order->save();
+
+        return [
+            'response' => 'Success',
+        ];
+    }
+
+    public function editPrice(Request $request, $orderId)
+    {
+        $order = Order::find($orderId);
+        $order->total_cost = $request->price;
+        $order->save();
+
+        return [
+            'response' => 'Success',
+        ];
+    }
+
+    public function editReferenceNumber(Request $request, $orderId)
+    {
+        $order = Order::find($orderId);
+        $order->order_number = $request->orderNumber;
+        $order->save();
+
+        return [
+            'response' => 'Success',
+        ];
+    }
+
     private function getOrderActivityLog($orderId)
     {
         // Fetch the Activity Log for the order. This shows who worked on what.

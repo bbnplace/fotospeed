@@ -35,33 +35,16 @@ const dataResources = {
             sortable: true
         },
         {
-            title: "Total Cost",
-            key: "total_cost",
-            sortable: true
-        },
-        {
             title: "Status",
             key: "order_status.name",
             sortable: false
         },
-        // {
-        //     title: "Created",
-        //     key: "created_at",
-        //     sortable: false,
-        //     align: "right"
-        // },
         {
             title: "Last Updated",
             key: "updated_at",
             sortable: false,
-            align: "right"
-        },
-        // {
-        //     title: "Actions",
-        //     key: "actions",
-        //     sortable: false,
-        //     width: '100px'
-        // },
+            align: "end"
+        }
     ],
     name: {
         singular: "Order",

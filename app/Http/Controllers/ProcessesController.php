@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmailTemplate;
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Models\Process;
 use App\Models\Role;
 use App\Models\SmsTemplate;
 use App\Models\User;
@@ -15,19 +16,8 @@ use Inertia\Inertia;
 class ProcessesController extends Controller
 {
     protected $rules = [
-        'name' => 'string|required|unique:items,name|min:2|max:64',
-        'role' => 'string|nullable|exists:roles,name|min:2|max:64',
+        'name' => 'string|required|unique:processes,name|min:2|max:64',
         'description' => 'nullable|string|min:24|max:1000',
-        'nextProcess' => 'nullable|string|exists:order_statuses,name|min:2|max:64',
-        'smsTeam' => 'nullable|boolean',
-        'smsTemplate' => 'nullable|string|exists:sms_templates,name|min:2|max:64',
-        'emailTeam' => 'nullable|boolean',
-        'emailTemplate' => 'nullable|string|exists:email_templates,name|min:2|max:64',
-        'smsCustomer' => 'nullable|boolean',
-        'customerSmsTemplate' => 'nullable|string|exists:sms_templates,name|min:2|max:64',
-        'emailCustomer' => 'nullable|boolean',
-        'customerEmailTemplate' => 'nullable|string|exists:email_templates,name|min:2|max:64',
-        'reportProcess' => 'nullable|boolean',
     ];
 
     public function index(){
@@ -39,38 +29,21 @@ class ProcessesController extends Controller
 
     public function records(Request $request)
     {
-        $items = [];
-        $itemsCount = 0;
+        $processes = [];
+        $processesCount = 0;
 
         $page = $request->page;
-        $itemsPerPage = $request->itemsPerPage;
+        $processesPerPage = $request->processesPerPage ?? 25;
         $sortBys = $request->sortBy;
         $search = $request->search;
 
-        $query = OrderStatus::query();
-        $query->with(['role' => function ($query) {
-            $query->select('id', 'name');
-        }]);
-        // $query->with(['smsTemplate' => function ($query) {
-        //     $query->select('id', 'name');
-        // }]);
-        // $query->with(['emailTemplate' => function ($query) {
-        //     $query->select('id', 'name');
-        // }]);
-        $query->with(['nextProcess' => function ($query) {
-            $query->select('id', 'name');
-        }]);
+        $query = Process::query();
 
         if (!empty($search)) {
             $searchTerm = $search['_value'];
             if (!empty($searchTerm)) {
-            //    $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('height', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('width', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('weight', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('print_price', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('cover_print_price', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('sheet_price', 'LIKE', sprintf('%%%s%%', $searchTerm));
+               $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm));
+               $query->where('description', 'LIKE', sprintf('%%%s%%', $searchTerm));
             }
         }
 
@@ -82,14 +55,14 @@ class ProcessesController extends Controller
             $query->orderBy('id', 'desc');
         }
 
-        $itemsCount = $query->count();
-        $items = $query->take($itemsPerPage)
-            ->skip($itemsPerPage * ($page - 1))
+        $processesCount = $query->count();
+        $processes = $query->take($processesPerPage)
+            ->skip($processesPerPage * ($page - 1))
             ->get();
 
         return [
-            'records' => $items,
-            'totalRecords' => $itemsCount,
+            'records' => $processes,
+            'totalRecords' => $processesCount,
         ];
     }
 
@@ -105,33 +78,11 @@ class ProcessesController extends Controller
 
     public function store(Request $request)
     {
-        $this->rules['reportAs'] = 'nullable|string|unique:order_statuses,report_as|max:32';
-        $validated = $request->validate($this->rules);
+        $request->validate($this->rules);
 
-        $nextProcess = OrderStatus::where('name', $request->nextProcess)->first();
-        $role = Role::where('name', $request->role)->first();
-        $teamSmsTemplate = SmsTemplate::where('name', $request->smsTemplate)->first();
-        $teamEmailTemplate = EmailTemplate::where('name', $request->emailTemplate)->first();
-        $customerSmsTemplate = SmsTemplate::where('name', $request->customerSmsTemplate)->first();
-        $customerEmailTemplate = EmailTemplate::where('name', $request->customerEmailTemplate)->first();
-
-        // If process is to be reported, check that no other process is using that report name
-
-        OrderStatus::create([
-            'role_id' => $role->id ?? null,
+        Process::create([
             'name' => $request->name,
             'description' => $request->description,
-            'sms_template_id' => $teamSmsTemplate->id ?? null,
-            'email_template_id' => $teamEmailTemplate->id ?? null,
-            'next_process' => $nextProcess->id ?? null,
-            'sms_team' => $request->smsTeam ?? false,
-            'email_team' => $request->emailTeam ?? false,
-            'sms_customer' => $request->smsCustomer ?? false,
-            'email_customer' => $request->emailCustomer ?? false,
-            'customer_sms_template_id' => $customerSmsTemplate->id ?? null,
-            'customer_email_template_id' => $customerEmailTemplate->id ?? null,
-            'report_process' => $request->reportProcess?? false,
-            'report_as' => $request->reportProcess ? $request->reportAs : null,
         ]);
 
         return redirect()->route('processes')->with('note', $request->name . ' Process Registered');
@@ -139,36 +90,10 @@ class ProcessesController extends Controller
 
     private function getProcess($id)
     {
-        $query = OrderStatus::query();
-        $query->where('id', $id);
-        $query->with(['role' => function($query){
-            $query->select('id', 'name');
-        }]);
-        $query->with(['smsTemplate' => function($query){
-            $query->select('id', 'name');
-        }]);
-        $query->with(['emailTemplate' => function($query){
-            $query->select('id', 'name');
-        }]);
-        $query->with(['customerSmsTemplate' => function($query){
-            $query->select('id', 'name');
-        }]);
-        $query->with(['customerEmailTemplate' => function($query){
-            $query->select('id', 'name');
-        }]);
-        $query->with(['nextProcess' => function($query){
-            $query->select('id', 'name');
-        }]);
-
-        $process = $query->first();
+        $process = Process::find($id);
 
         return [
             'process' => $process,
-            'processes' => OrderStatus::getOrderStatusesArray(),
-            'roles' => Role::getRolesArray(),
-            'smsTemplates' => SmsTemplate::getSmsTemplatesArray(),
-            'emailTemplates' => EmailTemplate::getEmailTemplatesArray(),
-            'reportStates' => ReportBuilder::getReportStates(),
         ];
     }
 
@@ -184,7 +109,7 @@ class ProcessesController extends Controller
 
     public function update(Request $request, $id)
     {
-        $process = OrderStatus::where('id', $id)->first();
+        $process = Process::find($id);
         if (empty($process)) {
             return redirect()->route('processes')->with('note', 'Select a process to edit.');
         }
@@ -194,36 +119,11 @@ class ProcessesController extends Controller
             $this->rules['name'] = 'string|required|min:2|max:64';
         }
         
-        // If saved report_as value is not same as what's received, re-validate
-        if($process->report_as != $request->reportAs)
-        {
-            $this->rules['reportAs'] = 'nullable|string|unique:order_statuses,report_as|max:32';
-        }
         $request->validate($this->rules);
-
-        $nextProcess = OrderStatus::where('name', $request->nextProcess)->first();
-        $role = Role::where('name', $request->role)->first();
-        $smsTemplate = SmsTemplate::where('name', $request->smsTemplate)->first();
-        $emailTemplate = EmailTemplate::where('name', $request->emailTemplate)->first();
-        $customerSmsTemplate = SmsTemplate::where('name', $request->customerSmsTemplate)->first();
-        $customerEmailTemplate = EmailTemplate::where('name', $request->customerEmailTemplate)->first();
-
 
         // Save changes
         $process->name = $request->name;
         $process->description = $request->description;
-        $process->role_id = $role->id ?? null;
-        $process->sms_template_id = $smsTemplate->id ?? null;
-        $process->email_template_id = $emailTemplate->id ?? null;
-        $process->next_process = $nextProcess->id ?? null;
-        $process->sms_team = $request->smsTeam ?? false;
-        $process->email_team = $request->emailTeam ?? false;
-        $process->sms_customer = $request->smsCustomer ?? false;
-        $process->email_customer = $request->emailCustomer ?? false;
-        $process->customer_sms_template_id = $customerSmsTemplate->id ?? null;
-        $process->customer_email_template_id = $customerEmailTemplate->id ?? null;
-        $process->report_process = $request->reportProcess ?? false;
-        $process->report_as = $request->reportProcess ? $request->reportAs : null;
         $process->save();
 
         return redirect()->route('process.view', $process->id)->with('note', 'Updated.');
@@ -232,24 +132,10 @@ class ProcessesController extends Controller
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
-            OrderStatus::whereIn('id', $request->ids)->delete();
+            Process::whereIn('id', $request->ids)->delete();
 
             return redirect()->route('processes')->with('note', 'Selected processes have been deleted');
         }
     }
 
-    
-
-    public function cancel(Request $request)
-    {
-        $order = Order::where('id', $request->orderId)->first();
-        $orderStatus = OrderStatus::where('name', 'Cancelled')->first();
-
-        $order->order_status_id = $orderStatus->id;
-        $order->save();
-
-        return [
-            'status' => 'Cancelled and Closed',
-        ];
-    }
 }

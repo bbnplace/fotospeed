@@ -20,7 +20,7 @@ const dataResources = {
     },
     headers: [
         {
-            title: "Item",
+            title: "Product",
             key: "name",
             sortable: true
         },
@@ -42,8 +42,8 @@ const dataResources = {
         // },
     ],
     name: {
-        singular: "Item",
-        plural: "Items"
+        singular: "Product",
+        plural: "Products"
     }
 }
 

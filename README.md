@@ -66,3 +66,9 @@ git mv app/Models/WhatsAppTemplate.php app/Models/WhatsappTemplate.php
 git mv app/Models/WhatsAppMessage.php app/Models/WhatsappMessage.php
 
 git mv resources/js/Pages/Backend/WhatsAppTemplate resources/js/Pages/Backend/WhatsappTemplate
+
+
+The software will help enterprises to:
+1. Setup a Standard Operating Procedure for their business,
+2. Automate Project Management
+3. Manage Inventory

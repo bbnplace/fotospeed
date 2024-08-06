@@ -129,6 +129,10 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/notifications', [NotificationsController::class,'index'])->name('notifications');
     Route::get('/notification/{id}', [NotificationsController::class,'notification'])->name('notification.view');
     Route::get('/recent-notifications', [NotificationsController::class,'recent'])->name('notifications.recent');
+
+    // Manage Order
+    Route::put('/order/{id}/hold', [OrdersController::class, 'hold'])->name('order.hold');
+    Route::put('/order/{id}/save-waybill', [OrdersController::class, 'setWaybillNumber'])->name('order.save-waybill');
 });
 
 
