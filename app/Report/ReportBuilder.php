@@ -22,23 +22,23 @@ class ReportBuilder
 
 
     /**
-     * Order Process os Reportable
+     * Order Status is Reportable
      * This method checks if report can be generated for the Order process submitted 
-     * @param string $processName
+     * @param string $statusName
      * @return bool
      */
-    public static function isReportableOrderProcess(string $processName): bool
+    public static function isReportableOrderProcess(string $statusName): bool
     {
-        $isReportableOrderProcess = false;
-        $reportableProcesses = OrderProcess::list();
-        foreach ($reportableProcesses as $process) {
-            if (strtolower($process["name"]) == strtolower($processName)) {
-                $isReportableOrderProcess = true;
+        $isReportableOrderStatus = false;
+        $reportableStatuses = OrderStatus::list();
+        foreach ($reportableStatuses as $status) {
+            if (strtolower($status["name"]) == strtolower($statusName)) {
+                $isReportableOrderStatus = true;
                 break;
             }
         }
 
-        return $isReportableOrderProcess;
+        return $isReportableOrderStatus;
     }
     
     /**
@@ -52,7 +52,7 @@ class ReportBuilder
      */
     public static function build(string $field, int $ordersCount = 1): void
     {
-        $field = strtolower($field);
+        $field = strtolower(str_replace(" ", "_", $field));
 
         // If the field name is not part of the standard processes, don't build report for it
         if (self::isReportableOrderProcess($field)) {
@@ -73,7 +73,7 @@ class ReportBuilder
      */
     public static function getReportStates(): array
     {
-        $reportStates = OrderProcess::list();
+        $reportStates = OrderStatus::list();
         $states = [];
         foreach ($reportStates as $state) {
             array_push($states, $state["name"]);

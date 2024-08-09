@@ -19,10 +19,10 @@ class Process extends Model
     public static function getProcessesArray()
     {
         $processes = [];
-        $processes = self::get('name');
-        if(!empty($processes))
+        $processesCollection = self::get(['name']);
+        if(!empty($processesCollection))
         {
-            foreach($processes as $process){
+            foreach($processesCollection as $process){
                 array_push($processes, $process->name);
             }
         }

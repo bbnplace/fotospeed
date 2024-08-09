@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\EmailTemplate;
 use App\Models\Item;
 use App\Models\OrderStatus;
+use App\Models\Process;
 use App\Models\Role;
 use App\Models\SmsTemplate;
 use App\Models\WhatsappTemplate;
@@ -141,13 +142,14 @@ class ItemsController extends Controller
         return [
             'item' => $item,
             'categories' => Category::getCategoriesArray(),
-            'processes' => OrderStatus::getOrderStatusesArray(),
-            'nextProcesses' => OrderStatus::getOrderStatusesArray(),
+            'processes' => Process::getProcessesArray(),
+            'nextProcesses' => Process::getProcessesArray(),
             'teams' => Role::getRolesArray(),
             'branches' => Branch::getBranchesArray(),
             'emailTemplates' => $emailTemplates,
             'smsTemplates' => $smsTemplates,
             'whatsappTemplates' => $whatsappTemplates,
+            'orderStatuses' => OrderStatus::getOrderStatusesArray(),
         ];
     }
 

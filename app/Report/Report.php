@@ -369,6 +369,7 @@ class Report
                                 break;
                         }
                     } else {
+                        // $key = ucfirst(str_replace('_',' ', $key));
                         array_push($data[$key], $value);
                         isset($fieldTotals[$key]) ? $fieldTotals[$key] += $value : $fieldTotals[$key] = $value;
                     }
@@ -381,7 +382,7 @@ class Report
         foreach ($reportables as $value)
         {
             array_push($datasets, [
-                'label' => $value,
+                'label' => ucfirst(str_replace('_', ' ', $value)),
                 'backgroundColor' => $lineColors[$colorIndex],
                 'borderColor' => $lineColors[$colorIndex],
                 'data' => $data[$value],

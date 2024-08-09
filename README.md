@@ -62,13 +62,21 @@ You may want to have it as someone's task or part of the guidelines for a task o
 2. Order Cancellation - This will send notification to all users that are still handling tasks;
 3. Task Completions
 
+```
 git mv app/Models/WhatsAppTemplate.php app/Models/WhatsappTemplate.php
 git mv app/Models/WhatsAppMessage.php app/Models/WhatsappMessage.php
-
 git mv resources/js/Pages/Backend/WhatsAppTemplate resources/js/Pages/Backend/WhatsappTemplate
-
+```
 
 The software will help enterprises to:
 1. Setup a Standard Operating Procedure for their business,
 2. Automate Project Management
 3. Manage Inventory
+
+
+## Feeling Threatened;
+
+
+
+## Did she tell you about the document;
+

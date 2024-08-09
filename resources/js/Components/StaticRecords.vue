@@ -31,8 +31,8 @@ const props = defineProps({
 const data = props.data;
 
 const records = data.records;
-const title = data.title.replace('-', ' ');
-const header = data.header;
+const title = data.title;
+const headers = data.header;
 
 const form = reactive({
     search: ""

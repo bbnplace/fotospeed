@@ -94,12 +94,21 @@ class SettingsController extends Controller
         $settings->payment_email_temp = $request->payment_email_temp  == 'None' ? null : $request->payment_email_temp;
         $settings->wa_phone_id = $request->wa_phone_id;
         $settings->wa_access_token = $request->wa_access_token;
-        $settings->reportables = json_encode($request->reportables);
+        $settings->reportables = json_encode($this->snakeCaseReportables($request->reportables));
         $settings->reports_permission = json_encode($request->reportViewers);
         $settings->invoice_no_src = $request->invoice_no_src;
         $settings->save();
 
         return redirect(route('settings'));
+    }
+
+    public function snakeCaseReportables(array $reportables): array
+    {
+        $snakeCasedReportables = [];
+        foreach ($reportables as $value) {
+            array_push($snakeCasedReportables, strtolower(str_replace(' ', '_', $value)));
+        }
+        return $snakeCasedReportables;
     }
 
     public function authBroadcast(Request $request)

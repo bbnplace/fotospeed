@@ -82,15 +82,15 @@ const menus = [
                 adminOnly: true
             },
             {
-                icon: "mdi-shape",
-                name: "Item Categories",
-                route: "categories",
-                adminOnly: true
-            },
-            {
                 icon: "mdi-briefcase-account",
                 name: "Roles",
                 route: "roles",
+                adminOnly: true
+            },
+            {
+                icon: "mdi-shape",
+                name: "Product Categories",
+                route: "categories",
                 adminOnly: true
             },
             {

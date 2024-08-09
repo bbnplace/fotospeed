@@ -69,7 +69,7 @@ import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import LineChart from '@/Components/LineChart.vue';
 import StaticRecords from '@/Components/StaticRecords.vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
-import Records from  '@/Components/Records.vue';
+// import Records from  '@/Components/Records.vue';
 import '@vuepic/vue-datepicker/dist/main.css';
 import axios from 'axios';
 import moment from 'moment';
@@ -85,8 +85,12 @@ const reportables = props.reportables;
 const header = [];
 for (let index = 0; index < reportables.length; index++) {
     const element = reportables[index];
+    const title = element.replace('_', ' ').replace(/\b\w/g, function (char) {
+        return char.toUpperCase();
+    }); 
+    // console.log(title)
     header.push({
-        title: element,
+        title: title,
         key: element,
         sortable: true
     })
@@ -98,6 +102,8 @@ const records = {
     title: `${key} Report`,
     header: header
 }
+
+// console.log(records)
 
 
 

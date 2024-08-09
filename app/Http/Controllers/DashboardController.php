@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Config\OrderProcess;
 use App\Models\DailyReport;
 use App\Models\HourlyReport;
+use App\Models\OrderStatus;
 use App\Models\Setting;
 use App\Models\Task;
 use App\Report\ReportPicker;
@@ -18,12 +19,12 @@ class DashboardController extends Controller
     {
         $settings = Setting::first();
         if (empty($settings->reports_permission)) {
-            $orderProcess = OrderProcess::list();
-            $starting_processes = [];
+            $orderStatus = OrderStatus::list();
+            $starting_statuses = [];
             for($i=0; $i < 5; $i++) {
-                array_push($starting_processes, $orderProcess[$i]['name']);
+                array_push($starting_statuses, strtolower(str_replace(' ', '_', $orderStatus[$i]['name'])));
             }
-            $settings->reportables = json_encode($starting_processes);
+            $settings->reportables = json_encode($starting_statuses);
             $settings->reports_permission = json_encode(["Administrator", "System Admin"]);
             $settings->save();
         }

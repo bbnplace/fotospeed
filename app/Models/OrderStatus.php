@@ -9,32 +9,26 @@ class OrderStatus extends Model
 {
     use HasFactory;
 
-    const STATUS_NEW = 1;
-    const STATUS_BILLING = 2;
-    const STATUS_PREPRESS = 3;
-    const STATUS_PRODUCTION = 4;
-    const STATUS_FINISHING = 5;
-    const STATUS_PACKAGING = 6;
-    const STATUS_DISPATCH = 7;
-    const STATUS_DELIVERED = 8;
-    const STATUS_CANCELLED = 9;
-    const STATUS_RETURNED = 10;
+    const PENDING = 1;
+    const ORDER_CONFIRMED = 2;
+    const AWAITING_PAYMENT = 3;
+    const PAYMENT_CONFIRMED = 4;
+    const PRODUCTION_STARTED = 5;
+    const IN_PRODUCTION = 6;
+    const PRODUCTION_COMPLETED = 7;
+    const FULFILLED = 8;
+    const ON_HOLD = 9;
+    const DISPATCHED = 10;
+    const SHIPPING = 11;
+    const IN_TRANSIT = 12;
+    const DELIVERED = 13;
+    const DELIVERY_FAILED = 14;
+    const CANCELLED = 15;
+    const RETURNED = 16;
 
     protected $fillable = [
         'name',
         'description',
-        'role_id',
-        'sms_template_id',
-        'email_template_id',
-        'next_process',
-        'sms_team',
-        'email_team',
-        'sms_customer',
-        'email_customer',
-        'customer_sms_template_id',
-        'customer_email_template_id',
-        'report_as',
-        'report_process'
     ];
 
     public $timestamps = false;
@@ -86,5 +80,75 @@ class OrderStatus extends Model
         }
 
         return $orderStatuses;
+    }
+
+    public static function list()
+    {
+        return [
+            [
+                'id' => self::PENDING,
+                'name' => 'Pending',
+            ],
+            [
+                'id' => self::ORDER_CONFIRMED,
+                'name' => 'Order Confirmed',
+            ],
+            [
+                'id' => self::AWAITING_PAYMENT,
+                'name' => 'Awaiting Payment',
+            ],
+            [
+                'id' => self::PAYMENT_CONFIRMED,
+                'name' => 'Payment Confirmed',
+            ],
+            [
+                'id' => self::PRODUCTION_STARTED,
+                'name' => 'Production Started',
+            ],
+            [
+                'id' => self::PRODUCTION_COMPLETED,
+                'name' => 'Production Completed',
+            ],
+            [
+                'id' => self::IN_PRODUCTION,
+                'name' => 'In Production',
+            ],
+            [
+                'id' => self::FULFILLED,
+                'name' => 'Fulfilled'
+            ],
+            [
+                'id' => self::ON_HOLD,
+                'name' => 'On Hold'
+            ],
+            [
+                'id' => self::DISPATCHED,
+                'name' => 'Dispatched'
+            ],
+            [
+                'id' => self::SHIPPING,
+                'name' => 'Shipping'
+            ],
+            [
+                'id' => self::IN_TRANSIT,
+                'name' => 'In Transit'
+            ],
+            [
+                'id' => self::DELIVERED,
+                'name' => 'Delivered'
+            ],
+            [
+                'id' => self::DELIVERY_FAILED,
+                'name' => 'Delivery Failed'
+            ],
+            [
+                'id' => self::CANCELLED,
+                'name' => 'Cancelled'
+            ],
+            [
+                'id' => self::RETURNED,
+                'name' => 'Returned'
+            ],
+        ];
     }
 }

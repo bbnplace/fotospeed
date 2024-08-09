@@ -14,7 +14,7 @@ class OrderStatusesSeeder extends Seeder
      */
     public function run(): void
     {
-        $statuses = OrderProcess::list();
+        $statuses = OrderStatus::list();
 
         foreach ($statuses as $status) {
             OrderStatus::create($status);

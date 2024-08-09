@@ -392,11 +392,11 @@
 </template>
 
 <script setup>
-import { Head, usePage, useForm } from '@inertiajs/vue3'
+import { Head, usePage, useForm } from '@inertiajs/vue3';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
-import Panel from '@/Layouts/Shared/Panel.vue'
+import Panel from '@/Layouts/Shared/Panel.vue';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
-import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue';
 
 const tab = ref(null);
 
@@ -409,6 +409,17 @@ const roles = props.roles;
 let saveStatus = ref(null);
 const reportStatusSearch = ref(null);
 const reportViewersSearch = ref(null);
+
+const normalizeReportables = (reportables) => {
+    const normalizedReportables = [];
+    const initialReportables = JSON.parse(reportables);
+    initialReportables.forEach(element => {
+        normalizedReportables.push(element.replace('_', ' ').replace(/\b\w/g, function (char) {
+            return char.toUpperCase();
+        }));
+    });
+    return normalizedReportables;
+}
 
 const form = useForm({
     max_file_size: settings.max_file_size,
@@ -435,15 +446,17 @@ const form = useForm({
     invoice_no_src: settings.invoice_no_src,
     payment_sms_temp: settings.payment_sms_temp ?? 'None',
     payment_email_temp: settings.payment_email_temp ?? 'None',
-    reportables: JSON.parse(settings.reportables),
+    reportables: normalizeReportables(settings.reportables),
     reportViewers: JSON.parse(settings.reports_permission),
     processing: false,
 });
 
+
+
 const submit = () =>{
     form.post(route('settings'), {
         onFinish: () => {
-            saveStatus.value = 'Saved Changes';
+            saveStatus.value = "Saved Changes";
             setTimeout(()=>{
                 saveStatus.value = null;
             }, 5000)
@@ -473,14 +486,10 @@ const handleReportViewersError = (errors) =>{
     errorKeys.forEach(element => {
         if (element.indexOf('reportViewers.') === 0) {
             const parts = element.split('.');
-            invalidReportViewers.push(form.reportViewers[parts[1]])
+            invalidReportViewers.push(form.reportViewers[parts[1]]);
         }
     })
     form.errors.reportViewers = invalidReportViewers.length > 0 ? [`The following values are not supported: ${invalidReportViewers.join(', ')}`] : []
 }
 
 </script>
-
-<style lang="scss" scoped>
-
-</style>
