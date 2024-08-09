@@ -24,7 +24,8 @@ class Order extends Model
         'branch_id',
         'delivery_address',
         'order_number',
-        'quantity'
+        'quantity',
+        'process_id',
     ];
 
     public function user()
@@ -55,5 +56,10 @@ class Order extends Model
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function process()
+    {
+        return $this->belongsTo(Process::class);
     }
 }

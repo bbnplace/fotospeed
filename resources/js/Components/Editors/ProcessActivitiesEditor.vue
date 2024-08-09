@@ -3,7 +3,7 @@
         <v-expansion-panels v-if="productProcesses.length" ref="sortableContainer">
             <v-expansion-panel v-for="(process, index) in productProcesses" :key="process.name" :data-id="index">
                 <v-expansion-panel-title color="blue">{{ process.name }}</v-expansion-panel-title>
-                <v-expansion-panel-text>
+                <v-expansion-panel-text class="non-draggable">
                     <h4 class="my-2">Tasks</h4>
                     <template v-if="productProcessActivities[process.name].length == 0">
                         <VCard color="grey-darken-4" class="p-3 my-2">
@@ -141,7 +141,7 @@
                                     ></v-checkbox>
                                 </VCol>
                             </VRow>
-                            <VRow v-if="productProcesses[index].autoStartNextProcess">
+                            <!-- <VRow v-if="productProcesses[index].autoStartNextProcess">
                                 <VCol>
                                     <VAutocomplete
                                         id="nextProcess"
@@ -158,7 +158,7 @@
                                         @blur="updateProcesses"
                                     ></VAutocomplete>
                                 </VCol>
-                            </VRow>
+                            </VRow> -->
                         </VCol>
                     </VRow>
                     <hr/>
@@ -406,7 +406,7 @@ const updateProcesses = async () => {
 
 const sendAt = ['Start', 'Completion'];
 
-const moveItemInArray = (oldIndex, newIndex) => {
+const reorderProcesses = (oldIndex, newIndex) => {
   // Validate indices
   if (oldIndex < 0 || oldIndex >= productProcesses.value.length || newIndex < 0 || newIndex >= productProcesses.value.length) {
     throw new Error('Invalid indices');
@@ -428,8 +428,9 @@ onMounted(() => {
             Sortable.create(sortableContainer.value.$el, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
+                filter: '.non-draggable',
                 onEnd: (event) => {
-                    moveItemInArray(event.oldIndex, event.newIndex);
+                    reorderProcesses(event.oldIndex, event.newIndex);
                 },
             });
         }

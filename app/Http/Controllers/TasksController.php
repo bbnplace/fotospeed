@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helper\URLGenerator;
+use App\Models\Process;
 use App\Models\User;
+use App\Report\ReportBuilder;
 use App\Tasks\Task as TaskAssigner;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -131,8 +133,8 @@ class TasksController extends Controller
             // Todo: Notify Controller of the change in the status of the task.
             $order = Order::find($task->order_id);
 
-            // Check if order has been cancelled If order has been cancelled, stop further action.
-            if ($order->order_status_id == OrderStatus::STATUS_CANCELLED) {
+            // Check if order has been cancelled or placed on Hold, stop further action.
+            if ($order->order_status_id == OrderStatus::CANCELLED || $order->order_status_id == OrderStatus::ON_HOLD) {
                 return [
                     'status' => 'success'
                 ];
@@ -155,31 +157,29 @@ class TasksController extends Controller
             }
 
             if (empty($undoneTasks)) {
-                $currentProcess = $task->order->orderStatus;
+                $currentProcess = $task->order->process;
                 // Get the Item Process Data and confirm whether to trigger the next process or to notify administrator
                 $item = $task->order->item;
                 $processData = json_decode($item->process_data);
                 $currentProcessName = $currentProcess->name;
 
-                $processes = $processData->processes;
-                $currentProcessData = null;
-                foreach ($processes as $process) {
-                    if ($process->name == $currentProcessName) {
-                        $currentProcessData = $process;
-                    }
-                }
+                $currentProcessData = $this->getCurrentProcessData($processData->processes, $currentProcessName);
 
                 if (!empty($currentProcessData)) {
+                    // Update Order Status
+                    if ($currentProcessData->orderStatus) $this->updateOrderStatus($order, $currentProcessData);
+
                     $autoStartNextProcess = $currentProcessData->autoStartNextProcess;
-                    $nextProcess = $currentProcessData->nextProcess ?? null;
+                    $nextProcess = $this->getNextProcess($processData->processes, $currentProcessName);
                     
                     // Notify Project Coordinator that all tasks have been completed
                     if (!empty($currentProcessData->whoCoordinates) && $currentProcessData->whoCoordinates != 'None') {
                         $projectCoordinatorRole = Role::where('name', $currentProcessData->whoCoordinates)->first();
-                        TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess, $autoStartNextProcess);
+                        TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess->name ?? null, $autoStartNextProcess);
                     }
 
-                    $nextProcessRecord = OrderStatus::where('name', $nextProcess)->first();
+                    $nextProcessRecord = $nextProcess ? Process::where('name', $nextProcess->name)->first() : null;
+
                     // Send Communication to Customer
                     $linkExpirationMinutes = 60 * 60 * 24;
                     $config = [
@@ -192,9 +192,7 @@ class TasksController extends Controller
                     TaskAssigner::sendCustomerCommunication($currentProcessData, 'Completion', $config);
 
                     // If there is a next process, set the status of the order to the next process' and trigger task for the next process
-                    if ($autoStartNextProcess && !empty($nextProcess)) {
-                        $this->initiateNextProcess($order, $nextProcess);
-                    }
+                    if ($autoStartNextProcess && !empty($nextProcess)) $this->initiateNextProcess($order, $nextProcess);
                 }
             }
         }
@@ -204,23 +202,60 @@ class TasksController extends Controller
         ];
     }
 
+    private function updateOrderStatus($order, $currentProcessData): void
+    {
+        $orderStatus = OrderStatus::where('name', $currentProcessData->orderStatus)->first();
+        if (!empty($orderStatus)) {
+            $order->order_status_id = $orderStatus->id;
+            $order->save();
+
+            ReportBuilder::build($orderStatus->name, $order->quantity);
+        }
+        
+    }
+
+    private function getNextProcess(array $processes, $currentProcessName)
+    {
+        $currentProcessIndex = -1;
+        foreach ($processes as $process) {
+            $currentProcessIndex++;
+            if ($process->name == $currentProcessName) {
+                break;
+            }
+        }
+
+        return $processes[$currentProcessIndex + 1] ?? null;
+    }
+
+    private function getCurrentProcessData(array $processes, String $currentProcessName)
+    {
+        $currentProcessData = null;
+        foreach ($processes as $process) {
+            if ($process->name == $currentProcessName) {
+                $currentProcessData = $process;
+                break;
+            }
+        }
+
+        return $currentProcessData;
+    }
+
     
     /**
      * Initiate Next Process
      * @param \App\Models\Order $order
-     * @param string $nextProcess
      * @return void
      */
-    private function initiateNextProcess(Order $order, string $nextProcess): void
+    private function initiateNextProcess(Order $order, $nextProcess): void
     {
-        $nextProcessRecord = OrderStatus::where('name', $nextProcess)->first();
+        $nextProcessRecord = Process::where('name', $nextProcess->name)->first();
 
         if (!empty($nextProcessRecord)) {
-            $order->order_status_id = $nextProcessRecord->id;
+            $order->process_id = $nextProcessRecord->id;
             $order->save();
 
             // Trigger the distribution of tasks for the next process
-            TaskAssigner::generate($order->item, $order, $nextProcess);
+            TaskAssigner::assignProcessTasks($order->item, $order, $nextProcess->name);
         }
     }
 }

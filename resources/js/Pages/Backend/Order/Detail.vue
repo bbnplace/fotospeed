@@ -113,8 +113,14 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Current Process</b><br />
+                                    <b>Order Status</b><br />
                                     {{ orderStatus }}
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>Current Process</b><br />
+                                    {{ currentProcess }}
                                 </VCol>
                             </VRow>
                             <VRow v-if="orderStatus == 'Dispatch'">
@@ -295,6 +301,7 @@ const orderHoldResponse = ref("");
 const cancellingOrderProgress = ref(false);
 const holdingOrderProgress = ref(false);
 const orderStatus = ref(order.order_status.name)
+const currentProcess = order.process.name;
 const showOverlay = ref(false);
 const showHoldOrderOverlay = ref(false);
 

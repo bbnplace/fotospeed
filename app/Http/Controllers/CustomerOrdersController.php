@@ -147,9 +147,13 @@ class CustomerOrdersController extends Controller
             'quantity' => $request->quantity,
         ]);
 
-        // Generate Tasks and send notifications
-        Task::generate($item, $order, 'New');
-        // $this->sendOrderNotification();
+            // Generate Tasks and send notifications
+             $processData = json_decode($item->process_data);
+
+            if (count($processData->processes)) {
+                $firstProcess = $processData->processes[0];
+                Task::assignProcessTasks($item, $order, $firstProcess->name);
+            }
 
         return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');
     }

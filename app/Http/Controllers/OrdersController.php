@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\OrderLog;
+use App\Models\Process;
 use App\Models\Role;
 use App\Models\TaskStatus;
 use App\Models\User;
@@ -152,6 +153,19 @@ class OrdersController extends Controller
 
         // Get Item ID
         $item = Item::where('name', $request->item)->first();
+        $processData = json_decode($item->process_data);
+
+        if (empty($processData->process)) {
+            // Todo: Redirect to notify customer that something is wrong with the order while notify admin that an initial process is not set
+        }
+
+        $firstProcess = $processData->processes[0];
+        $process = Process::where('name', $firstProcess->name)->first();
+
+        if (empty($process)) {
+            // Todo: Redirect to notify customer that something is wrong with the order while notify admin that an initial set does not exist
+        }
+
 
         if (!auth()->user()->isCustomer()) {
             $customerData = User::where('mobile', $request->customerMobile)->first();
@@ -165,6 +179,7 @@ class OrdersController extends Controller
             'user_id' => auth()->user()->isCustomer() ? auth()->user()->id :  $customerData->id,
             'item_id' => $item->id,
             'branch_id' => $branch->id,
+            'process_id' => $process->id,
             'order_status_id' => 1,
             'detail' => json_encode($request->all()),
             'total_cost' => auth()->user()->isCustomer() ? 0 :  $request->price,
@@ -177,8 +192,10 @@ class OrdersController extends Controller
             'quantity' => $request->quantity,
         ]);
 
-        // Generate Tasks and send notifications
-        Task::generate($item, $order, 'New');
+        // TODO: Trigger the first task for this order.
+        
+        Task::assignProcessTasks($item, $order, $firstProcess->name);
+        
 
         $additionalMsg = auth()->user()->isCustomer() ? "You will receive invoice shortly." :  "";
         return redirect(route((auth()->user()->isCustomer() ? 'customer.my-orders' : 'orders')))
@@ -199,7 +216,10 @@ class OrdersController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['orderStatus' => function ($query){
-            $query->select('id', 'name', 'next_process');
+            $query->select('id', 'name');
+        }]);
+        $query->with(['process' => function ($query){
+            $query->select('id', 'name');
         }]);
 
         $order = $query->first();
