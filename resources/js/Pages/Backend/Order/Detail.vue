@@ -96,6 +96,12 @@
                                     {{ invoicePaid ? "Paid" : "Unpaid" }}
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>WayBill Number</b><br />
+                                    {{ waybillNo }} <span v-if="!waybillNo">[Register Waybill]</span>
+                                </VCol>
+                            </VRow>
                         </VCol>
 
                         <VCol cols="12" md="6">
@@ -121,12 +127,6 @@
                                 <VCol>
                                     <b>Current Process</b><br />
                                     {{ currentProcess }}
-                                </VCol>
-                            </VRow>
-                            <VRow v-if="orderStatus == 'Dispatch'">
-                                <VCol>
-                                    <b>WayBill Number</b><br />
-                                    {{ orderStatus }}
                                 </VCol>
                             </VRow>
                             <VRow v-if="user.isAdmin">
@@ -302,6 +302,7 @@ const cancellingOrderProgress = ref(false);
 const holdingOrderProgress = ref(false);
 const orderStatus = ref(order.order_status.name)
 const currentProcess = order.process.name;
+const waybillNo = order.waybill_number;
 const showOverlay = ref(false);
 const showHoldOrderOverlay = ref(false);
 

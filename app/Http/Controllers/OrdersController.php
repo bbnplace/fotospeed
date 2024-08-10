@@ -324,7 +324,7 @@ class OrdersController extends Controller
         $processData = json_decode($order->item->process_data);
         $itemProcesses = $processData->processes;
         foreach ($itemProcesses as $itemProcess) {
-            if (!empty($order->orderStatus->name) && strtolower($itemProcess->name) == strtolower($order->orderStatus->name)) {
+            if (!empty($order->process->name) && strtolower($itemProcess->name) == strtolower($order->process->name)) {
                 $canCancel = $itemProcess->canCancelOrder ?? false;
                 break;
             }
@@ -338,7 +338,7 @@ class OrdersController extends Controller
        
         if ($this->canCancelOrder($order)) {
             // Set Order status to Cancelled
-            $order->order_status_id = OrderStatus::STATUS_CANCELLED;
+            $order->order_status_id = OrderStatus::CANCELLED;
             $order->save();
 
             // Update report that order is cancelled
@@ -365,8 +365,8 @@ class OrdersController extends Controller
             ];
         } else {
             return [
-                'response' => sprintf('Cannot cancel %s order during %s.', $order->item->name, $order->orderStatus->name),
-                'orderStatus' => $order->orderStatus->name,
+                'response' => sprintf('Cannot cancel %s order during %s.', $order->item->name, $order->process->name),
+                'orderStatus' => $order->process->name,
             ];
         }
     }

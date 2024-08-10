@@ -11,12 +11,12 @@
                         </VCard>
                     </template>
                     <template v-else>
-                        <VCard class="p-2 my-3" color="grey-lighten-5" v-for="(productProcessActivity, ind) in productProcessActivities[process.name]" :key="ind" :title="`Task ${ind + 1}`">
+                        <VCard class="p-2 my-3" color="grey-lighten-5" v-for="(productProcessActivity, index) in productProcessActivities[process.name]" :key="index" :title="`Task ${index + 1}`">
                             <VRow>
                                 <VCol>
                                     <VTextField
-                                        id="activityName"
-                                        v-model="productProcessActivities[process.name][ind].name"
+                                        :id="`task${index}`"
+                                        v-model="productProcessActivities[process.name][index].name"
                                         label="Task Name"
                                         variant="outlined"
                                         :rules="[taskNameRule]"
@@ -30,8 +30,8 @@
                             <VRow>
                                 <VCol>
                                     <VTextarea
-                                        id="description"
-                                        v-model="productProcessActivities[process.name][ind].description"
+                                        :id="`description${index}`"
+                                        v-model="productProcessActivities[process.name][index].description"
                                         label="Brief Guidelines (Optional)"
                                         variant="outlined"
                                         hide-details
@@ -46,8 +46,8 @@
                             <VRow>
                                 <VCol>
                                     <VAutocomplete
-                                        id="team"
-                                        v-model="productProcessActivities[process.name][ind].team"
+                                        :id="`team${index}`"
+                                        v-model="productProcessActivities[process.name][index].team"
                                         label="Team"
                                         :items="teams"
                                         variant="outlined"
@@ -63,7 +63,7 @@
                                 <VBtn
                                     prepend-icon="mdi-minus"
                                     color="grey-darken-3"
-                                    @click="removeActivity(process.name, ind)"
+                                    @click="removeActivity(process.name, index)"
                                     >Remove
                                 </VBtn>
                             </div>
@@ -101,7 +101,7 @@
                             <VRow>
                                 <VCol>
                                     <VAutocomplete
-                                        id="team"
+                                        :id="`order-status${index}`"
                                         v-model="productProcesses[index].orderStatus"
                                         label="Update Order Status To"
                                         :items="orderStatuses"
@@ -118,7 +118,7 @@
                             <VRow>
                                 <VCol>
                                     <VAutocomplete
-                                        id="team"
+                                        :id="`coordinator${index}`"
                                         v-model="productProcesses[index].whoCoordinates"
                                         label="Send Notification To"
                                         :items="teams"
@@ -315,7 +315,7 @@ import Sortable from 'sortablejs';
 const nextProcesses = usePage().props.nextProcesses;
 const processes = reactive(usePage().props.processes);
 const orderStatuses = usePage().props.orderStatuses;
-const teams = usePage().props.teams;
+const teams = reactive(usePage().props.teams);
 const retrievedData = usePage().props.item.process_data;
 const processData = retrievedData == undefined ? [] : JSON.parse(retrievedData);
 const emailTemplates = usePage().props.emailTemplates;
@@ -429,6 +429,7 @@ onMounted(() => {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 filter: '.non-draggable',
+                preventOnFilter: false,
                 onEnd: (event) => {
                     reorderProcesses(event.oldIndex, event.newIndex);
                 },

@@ -167,13 +167,13 @@ class TasksController extends Controller
 
                 if (!empty($currentProcessData)) {
                     // Update Order Status
-                    if ($currentProcessData->orderStatus) $this->updateOrderStatus($order, $currentProcessData);
+                    if (property_exists($currentProcessData, 'orderStatus') && $currentProcessData->orderStatus) $this->updateOrderStatus($order, $currentProcessData);
 
                     $autoStartNextProcess = $currentProcessData->autoStartNextProcess;
                     $nextProcess = $this->getNextProcess($processData->processes, $currentProcessName);
                     
                     // Notify Project Coordinator that all tasks have been completed
-                    if (!empty($currentProcessData->whoCoordinates) && $currentProcessData->whoCoordinates != 'None') {
+                    if (property_exists($currentProcessData, 'whoCoordinates') && !empty($currentProcessData->whoCoordinates) && $currentProcessData->whoCoordinates != 'None') {
                         $projectCoordinatorRole = Role::where('name', $currentProcessData->whoCoordinates)->first();
                         TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess->name ?? null, $autoStartNextProcess);
                     }
