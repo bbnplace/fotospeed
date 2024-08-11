@@ -31,14 +31,14 @@
                 <CommunicationLog />
             </VCol>
             <VCol cols="12" sm="6">
-                <Panel snippetTitle="Order Card">
+                <Panel snippetTitle="Order Card" :cardColor="orderOnHold ? 'bg-gray-700 text-white' : 'bg-white'">
                     <VRow>
                         <VCol class="text-right">
                             <VBtn
                                 color="blue-darken-3"
                                 prepend-icon="mdi-printer"
                                 @click="editOrder"
-                                 v-if="canEditOrder && orderStatus != 'Cancelled'"
+                                 v-if="canEditOrder && reference && reference.length && price > 0"
                             >
                                 Print Card
                             </VBtn>
@@ -63,13 +63,13 @@
                             <VRow>
                                 <VCol>
                                     <b>Reference Number</b><br />
-                                    {{ reference }} <br />
+                                    {{ reference }}
                                     <VBtn
-                                        color="blue-darken-3"
                                         prepend-icon="mdi-pencil"
-                                        class="mr-2 mt-2"
-                                        v-if="canEditOrder && orderStatus != 'Cancelled' && !invoicePaid"
-                                    ><span v-if="!reference">Add</span><span v-else>Edit</span>
+                                        class="mr-2 no-padding no-border"
+                                        elevation="0"
+                                        v-if="canEditReferenceNumber && !orderOnHold"
+                                    >
                                         <VOverlay
                                             v-model="showOrderRefOverlay"
                                             activator="parent"
@@ -91,12 +91,12 @@
                                                 </VCardText>
                                                 <VCardActions>
                                                     <VBtn
-                                                        color="red-darken-1 m-1"
+                                                        color="blue-darken-1 m-1"
                                                         @click="setReferenceNo"
                                                         :disabled="orderReferenceSaving"
                                                     >Save</VBtn>
                                                     <VBtn
-                                                        color="blue-darken-1 m-1"
+                                                        color="grey-darken-1 m-1"
                                                         @click="showOrderRefOverlay = false"
                                                     >Close</VBtn>
                                                 </VCardActions>
@@ -114,13 +114,12 @@
                             <VRow>
                                 <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
-                                    ₦{{ price ?? " --:--" }} <br />
-                                    <VBtn
-                                        color="blue-darken-3"
+                                    ₦{{ price ?? " --:--" }} <VBtn
+                                        elevation="0"
                                         prepend-icon="mdi-pencil"
-                                        class="mr-2 mt-2"
-                                        v-if="canEditOrder && orderStatus != 'Cancelled' && !invoicePaid"
-                                    ><span v-if="!price">Add</span><span v-else>Edit</span>
+                                        class="mr-2 no-padding no-border"
+                                        v-if="canEditPrice && !orderOnHold"
+                                    >
                                         <VOverlay
                                             v-model="showPriceOverlay"
                                             activator="parent"
@@ -143,12 +142,12 @@
                                                 </VCardText>
                                                 <VCardActions>
                                                     <VBtn
-                                                        color="red-darken-1 m-1"
+                                                        color="blue-darken-1 m-1"
                                                         @click="setPrice"
                                                         :disabled="priceSaving"
                                                     >Save</VBtn>
                                                     <VBtn
-                                                        color="blue-darken-1 m-1"
+                                                        color="grey-darken-1 m-1"
                                                         @click="showPriceOverlay = false"
                                                     >Close</VBtn>
                                                 </VCardActions>
@@ -174,13 +173,12 @@
                             <VRow>
                                 <VCol>
                                     <b>WayBill Number</b><br />
-                                    {{ waybillNumber ?? 'NOT SET' }} <br />
-                                    <VBtn
-                                        color="blue-darken-3"
+                                    {{ waybillNumber ?? 'NOT SET' }}  <VBtn
+                                        elevation="0"
                                         prepend-icon="mdi-pencil"
-                                        class="mr-2 mt-2"
-                                        v-if="canEditOrder && orderStatus != 'Cancelled'"
-                                    ><span v-if="!waybillNumber">Add</span><span v-else>Edit</span>
+                                        class="mr-2 no-padding no-border"
+                                        v-if="canEditWaybill && !orderOnHold"
+                                    >
                                         <VOverlay
                                             v-model="showWaybillOverlay"
                                             activator="parent"
@@ -198,16 +196,16 @@
                                                         style="width: 200px"
                                                         :loading="waybillSaving"
                                                     ></VTextField>
-                                                    <div v-if="orderReferenceResponse.length" class="text-center font-bold">{{ orderReferenceResponse }}</div>
+                                                    <div v-show="waybillResponse.length" class="text-center font-bold">{{ waybillResponse }}</div>
                                                 </VCardText>
                                                 <VCardActions>
                                                     <VBtn
-                                                        color="red-darken-1 m-1"
+                                                        color="blue-darken-1 m-1"
                                                         @click="saveWaybill"
                                                         :disabled="waybillSaving"
                                                     >Save</VBtn>
                                                     <VBtn
-                                                        color="blue-darken-1 m-1"
+                                                        color="grey-darken-1 m-1"
                                                         @click="showWaybillOverlay = false"
                                                     >Close</VBtn>
                                                 </VCardActions>
@@ -234,7 +232,7 @@
                             <VRow>
                                 <VCol>
                                     <b>Order Status</b><br />
-                                    {{ orderStatus }}
+                                    {{ orderOnHold ? "On Hold" : orderStatus }}
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -282,7 +280,7 @@
                                 color="grey-darken-3"
                                 prepend-icon="mdi-pause"
                                 class="mr-2 mb-2"
-                                 v-if="canEditOrder && orderStatus != 'Cancelled'"
+                                 v-if="!orderOnHold && canHoldOrder"
                             >
                                 Hold Order
                                 <VOverlay
@@ -297,28 +295,65 @@
                                             <p>
                                                 Why do you want to place this order on hold?<br />
                                             </p>
-                                            <p>
-                                                <VTextarea
-                                                    v-model="orderHoldReason"
-                                                    hide-details
-                                                    id="hold-order"
-                                                    variant="outlined"
-                                                    label="Write note for team members here"
-                                                    :loading="holdingOrderProgress"
-                                                ></VTextarea>
-                                            </p>
-                                            <p v-if="orderHoldResponse.length" class="text-center font-bold">{{ orderHoldResponse }}</p>
+                                            <VTextarea
+                                                v-model="orderHoldReason"
+                                                hide-details
+                                                id="hold-order"
+                                                variant="outlined"
+                                                label="Write note for team members here"
+                                                :loading="holdingOrderProgress"
+                                            ></VTextarea>
+                                            <p v-if="orderHoldResponse.length" class="text-center font-bold pt-2">{{ orderHoldResponse }}</p>
                                         </VCardText>
                                         <VCardActions>
                                             <VBtn
-                                                color="red-darken-1 m-1"
+                                                color="red-darken-1"
                                                 @click="holdOrder"
                                                 :disabled="holdingOrderProgress"
                                             >Continue</VBtn>
                                             <VBtn
-                                                color="blue-darken-1 m-1"
+                                                color="blue-darken-1"
                                                 @click="showHoldOrderOverlay = false"
                                             >Close</VBtn>
+                                        </VCardActions>
+                                    </VCard>
+                                </VOverlay>
+                            </VBtn>
+                            <VBtn
+                                color="white"
+                                class="mr-2 mb-2"
+                                prepend-icon="mdi-play"
+                                v-if="orderOnHold && user.isAdmin && orderStatus != 'Cancelled'"
+                            >
+                                Reactivate
+                                <VOverlay
+                                    v-model="showReactivateOrderOverlay"
+                                    activator="parent"
+                                    location-strategy="connected"
+                                    scroll-strategy="close"
+                                >
+                                    <VCard max-width="400" class="p-3">
+                                        <VCardTitle>Confirm Action!</VCardTitle>
+                                        <VCardText>
+                                            <p>Are you sure you want to reactivate this order?</p>
+                                            <p class="text-center" v-if="reactivateOrderProgress">
+                                                <v-progress-circular
+                                                    color="red"
+                                                    indeterminate
+                                                ></v-progress-circular>
+                                            </p>
+                                            <p v-if="reactiveOrderResponse.length" class="text-center font-bold">{{ reactiveOrderResponse }}</p>
+                                        </VCardText>
+                                        <VCardActions>
+                                            <VBtn
+                                                color="red-darken-1 m-1"
+                                                @click="reactivateOrder"
+                                                :disabled="reactivateOrderProgress"
+                                            >Yes Proceed</VBtn>
+                                            <VBtn
+                                                color="blue-darken-1 m-1"
+                                                @click="showReactivateOrderOverlay = false"
+                                            >Don't</VBtn>
                                         </VCardActions>
                                     </VCard>
                                 </VOverlay>
@@ -327,7 +362,7 @@
                                 color="red-darken-1"
                                 class="mr-2 mb-2"
                                 prepend-icon="mdi-cancel"
-                                v-if="user.isAdmin && orderStatus != 'Cancelled'"
+                                v-if="canCancelOrder"
                             >
                                 Cancel Order
                                 <VOverlay
@@ -389,7 +424,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { usePage, useForm, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import OrderForm from '@/Components/OrderForm.vue';
@@ -408,18 +443,20 @@ const hasInvoice = usePage().props.hasInvoice;
 const canGenerateInvoice = usePage().props.canGenerateInvoice;
 const invoicePaid = usePage().props.invoicePaid;
 const canEditOrder = usePage().props.canEditOrder;
+const canHoldOrder = usePage().props.canHoldOrder;
+const canCancelOrder = usePage().props.canCancelOrder;
+const canEditReferenceNumber = usePage().props.canEditReferenceNumber;
+const canEditPrice = usePage().props.canEditPrice;
+const canEditWaybill = usePage().props.canEditWaybill;
 const orderForm = reactive({
     orderFiles: orderDetail.files,
 });
 const orderCancelResponse = ref("");
-const orderHoldResponse = ref("");
 const cancellingOrderProgress = ref(false);
-const holdingOrderProgress = ref(false);
 const orderStatus = ref(order.order_status.name)
-const currentProcess = order.process.name;
+const currentProcess = order.process ? order.process.name : "-";
 const waybillNo = order.waybill_number;
 const showOverlay = ref(false);
-const showHoldOrderOverlay = ref(false);
 
 const removeImage = data => {
     for (let index = 0; index < orderForm.orderFiles.length; index++) {
@@ -470,8 +507,15 @@ const generateInvoice = () => {
     form.post(route('invoice.create'));
 }
 
+
+// Place Order on Hold
 const orderHoldReason = ref("");
+const orderHoldResponse = ref("");
+const holdingOrderProgress = ref(false);
+const showHoldOrderOverlay = ref(false);
+const orderOnHold = ref(order.paused);
 const holdOrder = async () => {
+    holdingOrderProgress.value = true;
     const payload = {
         reason: orderHoldReason.value
     }
@@ -482,12 +526,42 @@ const holdOrder = async () => {
         }
     });
 
+    holdingOrderProgress.value = false;
     if (response.data && response.data.status == "success") {
-        orderHoldResponse.value = response.data.response;
-        alert(response.data.status)
+        // orderHoldResponse.value = response.data.response;
+        orderHoldReason.value = "";
+        orderOnHold.value = true;
+        showHoldOrderOverlay.value = false;
     }
 }
 
+
+// Reactive Held Order
+const reactiveOrderResponse = ref("");
+const reactivateOrderProgress = ref(false);
+const showReactivateOrderOverlay = ref(false);
+const reactivateOrder = async () => {
+    reactivateOrderProgress.value = true;
+    const payload = {
+        
+    }
+
+    const response = await axios.put(route('order.reactivate', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    reactivateOrderProgress.value = false;
+    if (response.data && response.data.status == "success") {
+        // reactiveOrderResponse.value = response.data.response;
+        orderOnHold.value = false;
+        showReactivateOrderOverlay.value = false;
+    }
+}
+
+
+// Register the Order Reference Number
 const reference = ref(order.order_number);
 const orderReferenceSaving = ref(false);
 const orderReferenceResponse = ref("");
@@ -511,7 +585,8 @@ const setReferenceNo = async () => {
 }
 
 
-const price = ref(orderDetail.price);
+// Register the price for the Order
+const price = ref(order.total_cost);
 const priceSaving = ref(false);
 const priceResponse = ref("");
 const showPriceOverlay = ref(false)
@@ -530,11 +605,10 @@ const setPrice = async () => {
     priceSaving.value = false;
     if (response.data && response.data.status == "success") {
         priceResponse.value = response.data.response;
-        alert(response.data.status)
     }
 }
 
-
+// Register Waybill
 const waybillNumber = ref(waybillNo);
 const waybillSaving = ref(false);
 const waybillResponse = ref("");
@@ -553,9 +627,17 @@ const saveWaybill = async () => {
 
     waybillSaving.value = false;
     if (response.data && response.data.status == "success") {
-        waybillResponse.value = waybillResponse.data.response;
-        alert(response.data.status)
+        waybillResponse.value = response.data.response;
     }
 }
 </script>
 
+<style scoped>
+.no-border {
+  border: none;
+}
+
+.no-padding {
+  padding: 0;
+}
+</style>

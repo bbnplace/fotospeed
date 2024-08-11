@@ -8,6 +8,7 @@
                   <h5>{{ task.name }}</h5>
                   <p class="mb-0"><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
                   <VOverlay
+                      v-model="showOverlay[task.id]"
                       activator="parent"
                       location-strategy="connected"
                       scroll-strategy="close">
@@ -33,10 +34,10 @@
                         <div
                         v-for="task in tasks"
                         :key="task.id"
-                        class="task-card"
+                        :class="`task-card ${task.order.paused ? 'non-draggable bg-gray-500' : ''}`"
                         >
                           <h5>{{ task.name }}</h5>
-                          <p class="mb-0"><b>Created</b> {{ moment(task.created_at).calendar() }}</p>
+                          <p class="mb-0 flex "><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>{{ task.order.paused ? 'ON HOLD' : '' }}</b></p>
                           <VOverlay
                             activator="parent"
                             location-strategy="connected"
@@ -76,6 +77,7 @@ import moment from 'moment';
 const user = usePage().props.auth.user;
 const endpoints = usePage().props.endpoints;
 const unclaimedTasks = ref([]);
+const showOverlay = ref([]);
 
 
 const columns = ref({
@@ -153,7 +155,6 @@ const updateTaskStatus = async (task, fromStatus, toStatus) => {
     })
 
     const data = response.data;
-    console.log(data);
     if (data.status != undefined) {
       if (data.status == 'success') {
         console.log("status updated");
@@ -170,9 +171,14 @@ const loadPickedTasks = async () => {
 const loadNewTasks = async () => {
   const response = await axios.get(endpoints.newTasks);
   unclaimedTasks.value = response.data.unclaimedTasks ?? [];
+  unclaimedTasks.value.forEach(element => {
+    showOverlay[element.id] = false;
+  })
 }
 
 const pickTask = async (task, index) => {
+  showOverlay[task.id] = false;
+  
   const payload = {task};
 
   const response = await axios.post(endpoints.pickTask, payload, {
@@ -225,5 +231,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-
+  .non-draggable {
+    pointer-events: none;
+    background: #374151;
+    color: white;
+  }
 </style>

@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->foreignIdFor(Process::class)->after('quantity');
             $table->string('waybill_number')->nullable()->after('delivery_address');
+            $table->boolean('paused')->default(false);
         });
     }
 
@@ -26,6 +27,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->dropColumn('process_id');
             $table->dropColumn('waybill_number');
+            $table->dropColumn('paused');
         });
     }
 };

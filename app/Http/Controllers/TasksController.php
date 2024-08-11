@@ -56,7 +56,14 @@ class TasksController extends Controller
             'Done'=> [],
         ];
 
-        $records = Task::where('user_id', auth()->user()->id)->get();
+        $query = Task::query();
+        $query->where('user_id', auth()->user()->role_id);
+        $query->with('order', function ($query){
+            $query->select('id','name','order_number','paused');
+        });
+        $query->orderBy('id','desc');
+        // $records = Task::where('user_id', auth()->user()->id)->get();
+        $records = $query->get();
 
         if (!empty($records)) {
             foreach ($records as $record) {
@@ -83,6 +90,9 @@ class TasksController extends Controller
         });
         $query->with('user', function ($query){
             $query->select('id', 'name');
+        });
+        $query->with('order', function ($query){
+            $query->select('id','order_number','name','paused');
         });
 
         // $records = Task::where('order_id', $orderId)->get();

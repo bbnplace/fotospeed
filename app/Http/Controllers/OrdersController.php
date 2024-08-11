@@ -251,6 +251,25 @@ class OrdersController extends Controller
             'invoicePaid' => $invoicePaid,
             'canEditOrder' => $canEditOrder,
             'canRegenerateInvoice' => $canRegenerateInvoice,
+            'isCancelled' => $order->order_status_id === OrderStatus::CANCELLED,
+            'isDelivered' => $order->order_status_id === OrderStatus::DELIVERED,
+            'canHoldOrder' => $canEditOrder && !in_array($order->order_status_id, [
+                OrderStatus::DELIVERED, OrderStatus::CANCELLED, OrderStatus::DELIVERY_FAILED
+            ]),
+            'canCancelOrder' => $canEditOrder && in_array($order->order_status_id, [
+                OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED, OrderStatus::AWAITING_PAYMENT
+            ]),
+            'canEditReferenceNumber' => $canEditOrder && in_array($order->order_status_id, [
+                OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED
+            ]),
+            'canEditPrice' => $canGenerateInvoice && in_array($order->order_status_id, [
+                OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED
+            ]),
+            'canEditWaybill' => $canEditOrder && !in_array($order->order_status_id, [
+                OrderStatus::ON_HOLD, OrderStatus::DISPATCHED, OrderStatus::CANCELLED
+                , OrderStatus::DELIVERY_FAILED, OrderStatus::DELIVERED, OrderStatus::SHIPPING, OrderStatus::IN_TRANSIT,
+            ]),
+            'canPrintOrderCard' => $canGenerateInvoice && !empty($order->order_number) && !empty($order->total_cost),
         ];
     }
 
@@ -375,48 +394,54 @@ class OrdersController extends Controller
     public function hold(Request $request, $orderId)
     {
         $order = Order::find($orderId);
-        $order->pause = true;
+        $order->paused = true;
         $order->save();
 
         // Todo: Send stop work notice to all team members that have task for this order
 
         return [
-            'response' => 'Success',
+            'status' => 'success',
+            'response' => 'Saved!',
         ];
     }
 
-    public function reactivateOrder(Request $request, $orderId)
+    public function reactivate(Request $request, $orderId)
     {
         $order = Order::find($orderId);
-        $order->pause = false;
+        $order->paused = false;
         $order->save();
 
         // Todo: Send order reactivation notice to all team members that have task for this order
 
         return [
-            'response' => 'Success',
+            'status' => 'success',
+            'response' => 'Saved!',
         ];
     }
 
     public function setWaybillNumber(Request $request, $orderId)
     {
+        // Log::info('Order ID: '. $orderId .', Waybill No: '. $request->waybillNo );
         $order = Order::find($orderId);
         $order->waybill_number = $request->waybillNo;
         $order->save();
 
         return [
-            'response' => 'Success',
+            'status' => 'success',
+            'response' => 'Saved!',
         ];
     }
 
     public function editPrice(Request $request, $orderId)
     {
+        // Log::info('Order ID: '. $orderId .', Price: '. $request->price );
         $order = Order::find($orderId);
         $order->total_cost = $request->price;
         $order->save();
 
         return [
-            'response' => 'Success',
+            'status' => 'success',
+            'response' => 'Saved!',
         ];
     }
 
@@ -427,7 +452,8 @@ class OrdersController extends Controller
         $order->save();
 
         return [
-            'response' => 'Success',
+            'status' => 'success',
+            'response' => 'Saved!',
         ];
     }
 

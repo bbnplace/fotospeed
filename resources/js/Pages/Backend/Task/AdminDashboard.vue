@@ -34,13 +34,12 @@
                 <VCard class="column" v-for="(tasks, status) in columns" :key="status" :title="status">
                     <div class="task-list" :ref="setRef(status)" :id="status">
                         <div
-                        v-for="task in tasks"
-                        :key="task.id"
-                        class="task-card"
-                        
+                          v-for="task in tasks"
+                          :key="task.id"
+                          :class="`task-card ${task.order.paused ? 'non-draggable' : ''}`"
                         >
                           <h5>{{ task.name }}</h5>
-                          <p class="mb-0"><b>Created</b> {{ moment(task.created_at).calendar() }}</p>
+                          <p class="mb-0 flex "><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>{{ task.order.paused ? 'ON HOLD' : '' }}</b></p>
                           <VOverlay
                             activator="parent"
                             location-strategy="connected"
@@ -212,6 +211,8 @@ onMounted(async () => {
       Sortable.create(refs.value[status], {
         group: 'tasks',
         animation: 150,
+        filter: ".non-draggable",
+        preventOnFilter: false,
         onEnd,
         onMove
       });
@@ -236,6 +237,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-
-
+  .non-draggable {
+    pointer-events: none;
+    background: #374151;
+    color: white;
+  }
 </style>
