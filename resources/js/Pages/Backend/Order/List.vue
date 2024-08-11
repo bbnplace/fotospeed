@@ -13,7 +13,7 @@ import Records from  '@/Components/Records.vue';
 const dataResources = {
     endpoint: {
         records: usePage().props.endpoint,
-        add: "order.add",
+        // add: "order.add",
         edit: "order.edit",
         // delete: "orders.delete",
         detail: "order.view"

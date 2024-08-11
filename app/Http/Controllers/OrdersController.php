@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class OrdersController extends Controller
 {
@@ -400,7 +401,7 @@ class OrdersController extends Controller
     public function setWaybillNumber(Request $request, $orderId)
     {
         $order = Order::find($orderId);
-        $order->waybill_number = $request->waybillNumber;
+        $order->waybill_number = $request->waybillNo;
         $order->save();
 
         return [

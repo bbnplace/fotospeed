@@ -132,6 +132,8 @@ Route::middleware(['auth', 'team.console'])->group(function (){
 
     // Manage Order
     Route::put('/order/{id}/hold', [OrdersController::class, 'hold'])->name('order.hold');
+    Route::put('/order/{id}/add-reference', [OrdersController::class, 'editReferenceNumber'])->name('order.set-reference');
+    Route::put('/order/{id}/set-price', [OrdersController::class, 'editPrice'])->name('order.set-price');
     Route::put('/order/{id}/save-waybill', [OrdersController::class, 'setWaybillNumber'])->name('order.save-waybill');
 });
 

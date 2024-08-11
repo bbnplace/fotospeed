@@ -39,9 +39,10 @@ const dataResources = {
             sortable: false
         },
         {
-            title: "Generated",
+            title: "Issue Date",
             key: "created_at",
-            sortable: false
+            sortable: false,
+            align: "end"
         },
         // {
         //     title: "Actions",

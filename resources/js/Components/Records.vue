@@ -1,8 +1,8 @@
 <template>
-    <div class="d-flex flex-row-reverse my-3" v-if="props.endpoint.add">
+    <div class="d-flex flex-row-reverse mb-2" v-if="props.endpoint.add">
         <Link :href="route(props.endpoint.add)" class="btn btn-primary">Add {{ props.name.singular }}</Link>
     </div>
-    <div class="d-flex mb-6t">
+    <div class="d-flex mb-2 bg-white rounded shadow">
         <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter {{ props.name.singular }}</v-sheet>
             <v-text-field
                 v-model="search"
@@ -15,13 +15,14 @@
                 variant="outlined"
             ></v-text-field>
     </div>
-    <div class="flex gap-5 ml-5" v-if="selected.value && selected.value.length > 0">
+    <div class="flex flex-row ml-5" v-if="selected.value && selected.value.length > 0">
         <v-icon  v-if="props.endpoint.delete"
-            size="small"
+            size="large"
             title="Delete"
+            class="my-1 mx-0"
             @click="showDialog"
         >
-            mdi-delete
+        mdi-delete-circle
         </v-icon>
     </div>
     <VRow>

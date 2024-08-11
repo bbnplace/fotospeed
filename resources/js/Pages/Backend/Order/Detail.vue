@@ -63,9 +63,46 @@
                             <VRow>
                                 <VCol>
                                     <b>Reference Number</b><br />
-                                    {{ order.order_number }}
-                                    <Link v-if="!order.order_number && canEditOrder && orderStatus != 'Cancelled'" class="font-bold underline" :href="`${route('order.edit', order.id)}`">[ Add ]</Link>
-                                    <Link v-if="order.order_number && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">[ Edit ]</Link>
+                                    {{ reference }} <br />
+                                    <VBtn
+                                        color="blue-darken-3"
+                                        prepend-icon="mdi-pencil"
+                                        class="mr-2 mt-2"
+                                        v-if="canEditOrder && orderStatus != 'Cancelled' && !invoicePaid"
+                                    ><span v-if="!reference">Add</span><span v-else>Edit</span>
+                                        <VOverlay
+                                            v-model="showOrderRefOverlay"
+                                            activator="parent"
+                                            location-strategy="connected"
+                                            scroll-strategy="close"
+                                        >
+                                            <VCard max-width="400" class="p-1">
+                                                <VCardText class="pb-0">
+                                                    <VTextField
+                                                        v-model="reference"
+                                                        hide-details
+                                                        id="order-number"
+                                                        variant="outlined"
+                                                        label="Reference Number"
+                                                        style="width: 200px"
+                                                        :loading="orderReferenceSaving"
+                                                    ></VTextField>
+                                                    <p v-if="orderReferenceResponse.length" class="text-center font-bold">{{ orderReferenceResponse }}</p>
+                                                </VCardText>
+                                                <VCardActions>
+                                                    <VBtn
+                                                        color="red-darken-1 m-1"
+                                                        @click="setReferenceNo"
+                                                        :disabled="orderReferenceSaving"
+                                                    >Save</VBtn>
+                                                    <VBtn
+                                                        color="blue-darken-1 m-1"
+                                                        @click="showOrderRefOverlay = false"
+                                                    >Close</VBtn>
+                                                </VCardActions>
+                                            </VCard>
+                                        </VOverlay>
+                                    </VBtn>
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -77,9 +114,47 @@
                             <VRow>
                                 <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
-                                    ₦{{ orderDetail.price ?? " --:--" }} 
-                                    <Link v-if="!orderDetail.price && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Add</Link>
-                                    <Link v-if="orderDetail.price && canEditOrder && orderStatus != 'Cancelled'" class="ml-3 font-bold underline" :href="`${route('order.edit', order.id)}`">Edit</Link>
+                                    ₦{{ price ?? " --:--" }} <br />
+                                    <VBtn
+                                        color="blue-darken-3"
+                                        prepend-icon="mdi-pencil"
+                                        class="mr-2 mt-2"
+                                        v-if="canEditOrder && orderStatus != 'Cancelled' && !invoicePaid"
+                                    ><span v-if="!price">Add</span><span v-else>Edit</span>
+                                        <VOverlay
+                                            v-model="showPriceOverlay"
+                                            activator="parent"
+                                            location-strategy="connected"
+                                            scroll-strategy="close"
+                                        >
+                                            <VCard max-width="400" class="p-1">
+                                                <VCardText class="pb-0">
+                                                    <VTextField
+                                                        v-model="price"
+                                                        hide-details
+                                                        id="price"
+                                                        variant="outlined"
+                                                        label="Price"
+                                                        prefix="₦"
+                                                        style="width: 200px"
+                                                        :loading="priceSaving"
+                                                    ></VTextField>
+                                                    <div v-if="priceResponse.length" class="text-center font-bold">{{ priceResponse }}</div>
+                                                </VCardText>
+                                                <VCardActions>
+                                                    <VBtn
+                                                        color="red-darken-1 m-1"
+                                                        @click="setPrice"
+                                                        :disabled="priceSaving"
+                                                    >Save</VBtn>
+                                                    <VBtn
+                                                        color="blue-darken-1 m-1"
+                                                        @click="showPriceOverlay = false"
+                                                    >Close</VBtn>
+                                                </VCardActions>
+                                            </VCard>
+                                        </VOverlay>
+                                    </VBtn>
                                 </VCol>
                             </VRow>
                             <VRow v-if="orderDetail.price && order.order_number && !hasInvoice && canGenerateInvoice && orderStatus != 'Cancelled'">
@@ -99,7 +174,46 @@
                             <VRow>
                                 <VCol>
                                     <b>WayBill Number</b><br />
-                                    {{ waybillNo }} <span v-if="!waybillNo">[Register Waybill]</span>
+                                    {{ waybillNumber ?? 'NOT SET' }} <br />
+                                    <VBtn
+                                        color="blue-darken-3"
+                                        prepend-icon="mdi-pencil"
+                                        class="mr-2 mt-2"
+                                        v-if="canEditOrder && orderStatus != 'Cancelled'"
+                                    ><span v-if="!waybillNumber">Add</span><span v-else>Edit</span>
+                                        <VOverlay
+                                            v-model="showWaybillOverlay"
+                                            activator="parent"
+                                            location-strategy="connected"
+                                            scroll-strategy="close"
+                                        >
+                                            <VCard max-width="400" class="p-1">
+                                                <VCardText class="pb-0">
+                                                    <VTextField
+                                                        v-model="waybillNumber"
+                                                        hide-details
+                                                        id="order-number"
+                                                        variant="outlined"
+                                                        label="Waybill Number"
+                                                        style="width: 200px"
+                                                        :loading="waybillSaving"
+                                                    ></VTextField>
+                                                    <div v-if="orderReferenceResponse.length" class="text-center font-bold">{{ orderReferenceResponse }}</div>
+                                                </VCardText>
+                                                <VCardActions>
+                                                    <VBtn
+                                                        color="red-darken-1 m-1"
+                                                        @click="saveWaybill"
+                                                        :disabled="waybillSaving"
+                                                    >Save</VBtn>
+                                                    <VBtn
+                                                        color="blue-darken-1 m-1"
+                                                        @click="showWaybillOverlay = false"
+                                                    >Close</VBtn>
+                                                </VCardActions>
+                                            </VCard>
+                                        </VOverlay>
+                                    </VBtn>
                                 </VCol>
                             </VRow>
                         </VCol>
@@ -284,6 +398,7 @@ import moment from 'moment';
 import CommunicationLog from '@/Components/CommunicationLog.vue';
 import DownloadAllMediaBtn from '@/Components/DownloadAllMediaBtn.vue';
 import axios from 'axios';
+import { VTextField } from 'vuetify/lib/components/index.mjs';
 
 const user = usePage().props.auth.user;
 const order = usePage().props.order;
@@ -355,22 +470,6 @@ const generateInvoice = () => {
     form.post(route('invoice.create'));
 }
 
-const saveWaybill = async () => {
-    const payload = {
-        waybillNo: ""
-    }
-
-    const response = await axios.put(route('order.save-waybill', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-
-    if (response.data && response.data.status == "success") {
-        alert(response.data.status)
-    }
-}
-
 const orderHoldReason = ref("");
 const holdOrder = async () => {
     const payload = {
@@ -385,6 +484,76 @@ const holdOrder = async () => {
 
     if (response.data && response.data.status == "success") {
         orderHoldResponse.value = response.data.response;
+        alert(response.data.status)
+    }
+}
+
+const reference = ref(order.order_number);
+const orderReferenceSaving = ref(false);
+const orderReferenceResponse = ref("");
+const showOrderRefOverlay = ref(false)
+const setReferenceNo = async () => {
+    orderReferenceSaving.value = true;
+    const payload = {
+        orderNumber: reference.value
+    }
+
+    const response = await axios.put(route('order.set-reference', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    orderReferenceSaving.value = false;
+    if (response.data && response.data.status == "success") {
+        orderReferenceResponse.value = response.data.response;
+    }
+}
+
+
+const price = ref(orderDetail.price);
+const priceSaving = ref(false);
+const priceResponse = ref("");
+const showPriceOverlay = ref(false)
+const setPrice = async () => {
+    priceSaving.value = true;
+    const payload = {
+        price: price.value
+    }
+
+    const response = await axios.put(route('order.set-price', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    priceSaving.value = false;
+    if (response.data && response.data.status == "success") {
+        priceResponse.value = response.data.response;
+        alert(response.data.status)
+    }
+}
+
+
+const waybillNumber = ref(waybillNo);
+const waybillSaving = ref(false);
+const waybillResponse = ref("");
+const showWaybillOverlay = ref(false)
+const saveWaybill = async () => {
+    waybillSaving.value = true;
+    const payload = {
+        waybillNo: waybillNumber.value
+    }
+
+    const response = await axios.put(route('order.save-waybill', [order.id]), payload, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    waybillSaving.value = false;
+    if (response.data && response.data.status == "success") {
+        waybillResponse.value = waybillResponse.data.response;
         alert(response.data.status)
     }
 }

@@ -332,7 +332,7 @@ class Report
         $data = [];
         $labels = [];
         $datasets = [];
-        $lineColors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00','#0000FF', '#4B0082', '#8B00FF'];
+        $lineColors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00','#0000FF', '#4B0082', '#8B00FF', '#FF69B4', '#FF4500', '#FFD700','#00FA9A', '#00CED1', '#8A2BE2', '#FF1493', '#1E90FF'];
 
         foreach ($reportables as $value)
         {
