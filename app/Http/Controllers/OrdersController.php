@@ -262,7 +262,7 @@ class OrdersController extends Controller
             'canEditReferenceNumber' => $canEditOrder && in_array($order->order_status_id, [
                 OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED
             ]),
-            'canEditPrice' => $canGenerateInvoice && in_array($order->order_status_id, [
+            'canEditPrice' => $canGenerateInvoice && !$hasInvoice && in_array($order->order_status_id, [
                 OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED
             ]),
             'canEditWaybill' => $canEditOrder && !in_array($order->order_status_id, [
@@ -393,8 +393,13 @@ class OrdersController extends Controller
 
     public function hold(Request $request, $orderId)
     {
+        $request->validate([
+            'reason' => 'nullable|string|max:1000',
+        ]);
+        
         $order = Order::find($orderId);
         $order->paused = true;
+        $order->hold_reason = $request->reason;
         $order->save();
 
         // Todo: Send stop work notice to all team members that have task for this order
@@ -409,6 +414,7 @@ class OrdersController extends Controller
     {
         $order = Order::find($orderId);
         $order->paused = false;
+        $order->hold_reason = null;
         $order->save();
 
         // Todo: Send order reactivation notice to all team members that have task for this order
@@ -422,8 +428,12 @@ class OrdersController extends Controller
     public function setWaybillNumber(Request $request, $orderId)
     {
         // Log::info('Order ID: '. $orderId .', Waybill No: '. $request->waybillNo );
+        $request->validate([
+            'waybillNumber' => 'required|unique:orders,waybill_number|string|max:16'
+        ]);
+
         $order = Order::find($orderId);
-        $order->waybill_number = $request->waybillNo;
+        $order->waybill_number = $request->waybillNumber;
         $order->save();
 
         return [
@@ -434,6 +444,9 @@ class OrdersController extends Controller
 
     public function editPrice(Request $request, $orderId)
     {
+        $request->validate([
+            'price' => 'required|integer|digits_between:1,9'
+        ]);
         // Log::info('Order ID: '. $orderId .', Price: '. $request->price );
         $order = Order::find($orderId);
         $order->total_cost = $request->price;
@@ -447,6 +460,10 @@ class OrdersController extends Controller
 
     public function editReferenceNumber(Request $request, $orderId)
     {
+        $request->validate([
+            'orderNumber' => 'required|unique:orders,order_number|string|max:16'
+        ]);
+
         $order = Order::find($orderId);
         $order->order_number = $request->orderNumber;
         $order->save();

@@ -144,7 +144,7 @@ class TasksController extends Controller
             $order = Order::find($task->order_id);
 
             // Check if order has been cancelled or placed on Hold, stop further action.
-            if ($order->order_status_id == OrderStatus::CANCELLED || $order->order_status_id == OrderStatus::ON_HOLD) {
+            if ($order->order_status_id == OrderStatus::CANCELLED || $order->order_status_id == OrderStatus::ON_HOLD || $order->paused) {
                 return [
                     'status' => 'success'
                 ];

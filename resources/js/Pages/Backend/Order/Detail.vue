@@ -32,6 +32,13 @@
             </VCol>
             <VCol cols="12" sm="6">
                 <Panel snippetTitle="Order Card" :cardColor="orderOnHold ? 'bg-gray-700 text-white' : 'bg-white'">
+                    <VRow v-if="orderHoldReason && orderHoldReason.length && orderOnHold">
+                        <VCol cols="12">
+                            <VCard color="red">
+                                <VCardText>{{ orderHoldReason }}</VCardText>
+                            </VCard>
+                        </VCol>
+                    </VRow>
                     <VRow>
                         <VCol class="text-right">
                             <VBtn
@@ -62,7 +69,7 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Reference Number</b><br />
+                                    <b>Order Number</b><br />
                                     {{ reference }}
                                     <VBtn
                                         prepend-icon="mdi-pencil"
@@ -83,11 +90,12 @@
                                                         hide-details
                                                         id="order-number"
                                                         variant="outlined"
-                                                        label="Reference Number"
-                                                        style="width: 200px"
+                                                        label="Order Number"
+                                                        style="min-width: 200px"
                                                         :loading="orderReferenceSaving"
                                                     ></VTextField>
-                                                    <p v-if="orderReferenceResponse.length" class="text-center font-bold">{{ orderReferenceResponse }}</p>
+                                                    <p v-if="orderReferenceResponse.length" class="text-center font-bold mt-1 mb-0">{{ orderReferenceResponse }}</p>
+                                                    <p v-if="orderReferenceError.length" class="text-center text-red mt-1 mb-0">{{ orderReferenceError }}</p>
                                                 </VCardText>
                                                 <VCardActions>
                                                     <VBtn
@@ -132,6 +140,7 @@
                                                         v-model="price"
                                                         hide-details
                                                         id="price"
+                                                        type="number"
                                                         variant="outlined"
                                                         label="Price"
                                                         prefix="₦"
@@ -139,6 +148,7 @@
                                                         :loading="priceSaving"
                                                     ></VTextField>
                                                     <div v-if="priceResponse.length" class="text-center font-bold">{{ priceResponse }}</div>
+                                                    <p v-if="priceError.length" class="text-center text-red mt-1 mb-0">{{ priceError }}</p>
                                                 </VCardText>
                                                 <VCardActions>
                                                     <VBtn
@@ -156,7 +166,7 @@
                                     </VBtn>
                                 </VCol>
                             </VRow>
-                            <VRow v-if="orderDetail.price && order.order_number && !hasInvoice && canGenerateInvoice && orderStatus != 'Cancelled'">
+                            <VRow v-if="price && reference && !orderOnHold && !hasInvoice && canGenerateInvoice && orderStatus != 'Cancelled'">
                                 <VCol cols="12">
                                     <VBtn
                                         color="blue-darken-1"
@@ -193,10 +203,11 @@
                                                         id="order-number"
                                                         variant="outlined"
                                                         label="Waybill Number"
-                                                        style="width: 200px"
+                                                        style="min-width: 200px"
                                                         :loading="waybillSaving"
                                                     ></VTextField>
                                                     <div v-show="waybillResponse.length" class="text-center font-bold">{{ waybillResponse }}</div>
+                                                    <p v-if="waybillError.length" class="text-center text-red mt-1 mb-0">{{ waybillError }}</p>
                                                 </VCardText>
                                                 <VCardActions>
                                                     <VBtn
@@ -300,10 +311,11 @@
                                                 hide-details
                                                 id="hold-order"
                                                 variant="outlined"
-                                                label="Write note for team members here"
+                                                label="Leave a note for team members"
                                                 :loading="holdingOrderProgress"
                                             ></VTextarea>
                                             <p v-if="orderHoldResponse.length" class="text-center font-bold pt-2">{{ orderHoldResponse }}</p>
+                                            <p v-if="orderHoldError && orderHoldError.length"  class="text-center text-red mt-1 mb-0">{{ orderHoldError }}</p>
                                         </VCardText>
                                         <VCardActions>
                                             <VBtn
@@ -343,6 +355,7 @@
                                                 ></v-progress-circular>
                                             </p>
                                             <p v-if="reactiveOrderResponse.length" class="text-center font-bold">{{ reactiveOrderResponse }}</p>
+                                            <p v-if="orderReactivationError && orderReactivationError.length"  class="text-center text-red mt-1 mb-0">{{ orderReactivationError }}</p>
                                         </VCardText>
                                         <VCardActions>
                                             <VBtn
@@ -382,6 +395,7 @@
                                                 ></v-progress-circular>
                                             </p>
                                             <p v-if="orderCancelResponse.length" class="text-center font-bold">{{ orderCancelResponse }}</p>
+                                            <p v-if="orderCancelError && orderCancelError.length"  class="text-center text-red mt-1 mb-0">{{ orderCancelError }}</p>
                                         </VCardText>
                                         <VCardActions>
                                             <VBtn
@@ -477,27 +491,41 @@ const editOrder = () => {
     router.visit(route('order.edit', order.id));
 }
 
+const orderCancelError = ref("");
 let source = null;
 const cancelOrder = async () => {
+    orderCancelResponse.value = "";
+    orderCancelError.value = "";
     cancellingOrderProgress.value = true;
     const payload = {
         orderId: order.id
     };
     if(source) source.cancel('Request cancelled by user');
     source = axios.CancelToken.source();
-    const response = await axios.put(route('order.cancel', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        cancelToken: source.token
-    });
+    
+    try {
+        const response = await axios.put(route('order.cancel', [order.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            cancelToken: source.token
+        });
 
-    cancellingOrderProgress.value = false;
-    orderCancelResponse.value = response.data.response;
-    orderStatus.value = response.data.orderStatus;
+        cancellingOrderProgress.value = false;
+        orderCancelResponse.value = response.data.response;
+        orderStatus.value = response.data.orderStatus;
+    } catch (error) {
+        cancellingOrderProgress.value = false;
+        if (error.response && error.response.status === 422) {
+            orderCancelError.value = error.response.data.message;
+        } else {
+            orderCancelError.value = "Something went wrong! Pls try again later.";
+        }
+    }
 
     setTimeout(()=>{
         orderCancelResponse.value = "";
+        orderCancelError.value = "";
         showOverlay.value = false;
     }, 10000);
 
@@ -509,55 +537,81 @@ const generateInvoice = () => {
 
 
 // Place Order on Hold
-const orderHoldReason = ref("");
+const orderHoldReason = ref(order.hold_reason);
 const orderHoldResponse = ref("");
 const holdingOrderProgress = ref(false);
 const showHoldOrderOverlay = ref(false);
 const orderOnHold = ref(order.paused);
+const orderHoldError = ref("");
 const holdOrder = async () => {
+    orderHoldError.value = "";
     holdingOrderProgress.value = true;
     const payload = {
         reason: orderHoldReason.value
     }
 
-    const response = await axios.put(route('order.hold', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+    try {
+        const response = await axios.put(route('order.hold', [order.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-    holdingOrderProgress.value = false;
-    if (response.data && response.data.status == "success") {
-        // orderHoldResponse.value = response.data.response;
-        orderHoldReason.value = "";
-        orderOnHold.value = true;
-        showHoldOrderOverlay.value = false;
+        holdingOrderProgress.value = false;
+        if (response.data && response.data.status == "success") {
+            orderOnHold.value = true;
+            showHoldOrderOverlay.value = false;
+        }
+    } catch (error) {
+        holdingOrderProgress.value = false;
+        if (error.response && error.response.status === 422) {
+            orderHoldError.value = error.response.data.message;
+        } else {
+            orderHoldError.value = "Something went wrong! Pls try again later.";
+        }
     }
 }
 
 
-// Reactive Held Order
+// Reactivate Held Order
 const reactiveOrderResponse = ref("");
 const reactivateOrderProgress = ref(false);
 const showReactivateOrderOverlay = ref(false);
+const orderReactivationError = ref("");
 const reactivateOrder = async () => {
     reactivateOrderProgress.value = true;
     const payload = {
         
     }
 
-    const response = await axios.put(route('order.reactivate', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+    try {
+        const response = await axios.put(route('order.reactivate', [order.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-    reactivateOrderProgress.value = false;
-    if (response.data && response.data.status == "success") {
-        // reactiveOrderResponse.value = response.data.response;
-        orderOnHold.value = false;
-        showReactivateOrderOverlay.value = false;
+        reactivateOrderProgress.value = false;
+        if (response.data && response.data.status == "success") {
+            // reactiveOrderResponse.value = response.data.response;
+            orderOnHold.value = false;
+            orderHoldReason.value = "";
+            showReactivateOrderOverlay.value = false;
+        }
+    } catch (error) {
+        reactivateOrderProgress.value = false;
+        if (error.response && error.response.status === 422) {
+            orderReactivationError.value = error.response.data.message;
+        } else {
+            orderReactivationError.value = "Something went wrong! Pls try again later.";
+        }
     }
+
+    setTimeout(()=>{
+        // reactiveOrderResponse.value = "";
+        orderReactivationError.value = "";
+        showReactivateOrderOverlay.value = false;
+    }, 5000);
 }
 
 
@@ -565,22 +619,33 @@ const reactivateOrder = async () => {
 const reference = ref(order.order_number);
 const orderReferenceSaving = ref(false);
 const orderReferenceResponse = ref("");
+const orderReferenceError = ref("");
 const showOrderRefOverlay = ref(false)
 const setReferenceNo = async () => {
+    orderReferenceError.value = "";
     orderReferenceSaving.value = true;
     const payload = {
         orderNumber: reference.value
     }
 
-    const response = await axios.put(route('order.set-reference', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+    try {
+        const response = await axios.put(route('order.set-reference', [order.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-    orderReferenceSaving.value = false;
-    if (response.data && response.data.status == "success") {
-        orderReferenceResponse.value = response.data.response;
+        orderReferenceSaving.value = false;
+        if (response.data && response.data.status == "success") {
+            orderReferenceResponse.value = response.data.response;
+        }
+    } catch (error) {
+        orderReferenceSaving.value = false;
+        if (error.response && error.response.status === 422) {
+            orderReferenceError.value = error.response.data.message;
+        } else {
+            orderReferenceError.value = "Something went wrong! Pls try again later.";
+        }
     }
 }
 
@@ -589,45 +654,67 @@ const setReferenceNo = async () => {
 const price = ref(order.total_cost);
 const priceSaving = ref(false);
 const priceResponse = ref("");
+const priceError = ref("");
 const showPriceOverlay = ref(false)
 const setPrice = async () => {
+    priceError.value = "";
     priceSaving.value = true;
     const payload = {
         price: price.value
     }
 
-    const response = await axios.put(route('order.set-price', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+   try {
+        const response = await axios.put(route('order.set-price', [order.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-    priceSaving.value = false;
-    if (response.data && response.data.status == "success") {
-        priceResponse.value = response.data.response;
-    }
+        priceSaving.value = false;
+        if (response.data && response.data.status == "success") {
+            priceResponse.value = response.data.response;
+        }
+   } catch (error) {
+        priceSaving.value = false;
+        if (error.response && error.response.status === 422) {
+            priceError.value = error.response.data.message;
+        } else {
+            priceError.value = "Something went wrong! Pls try again later.";
+        }
+   }
 }
 
 // Register Waybill
 const waybillNumber = ref(waybillNo);
 const waybillSaving = ref(false);
 const waybillResponse = ref("");
+const waybillError = ref("");
 const showWaybillOverlay = ref(false)
 const saveWaybill = async () => {
     waybillSaving.value = true;
+    waybillError.value = "";
     const payload = {
-        waybillNo: waybillNumber.value
+        waybillNumber: waybillNumber.value
     }
 
-    const response = await axios.put(route('order.save-waybill', [order.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+    try {
+        const response = await axios.put(route('order.save-waybill', [order.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-    waybillSaving.value = false;
-    if (response.data && response.data.status == "success") {
-        waybillResponse.value = response.data.response;
+        waybillSaving.value = false;
+        if (response.data && response.data.status == "success") {
+            waybillResponse.value = response.data.response;
+        }
+    } catch (error) {
+        waybillSaving.value = false;
+        if (error.response && error.response.status === 422) {
+            waybillError.value = error.response.data.message;
+        } else {
+            waybillError.value = "Something went wrong! Pls try again later.";
+        }
     }
 }
 </script>
