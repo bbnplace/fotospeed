@@ -56,8 +56,8 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import { usePage, Head, Link } from "@inertiajs/vue3";
+import { reactive, ref, computed } from 'vue';
+import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import OrderForm from '@/Components/OrderForm.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
@@ -66,6 +66,7 @@ import CommunicationLog from '@/Components/CommunicationLog.vue';
 import DownloadAllMediaBtn from '@/Components/DownloadAllMediaBtn.vue';
 import OrderCard from '@/Components/OrderCard.vue';
 
+const order = usePage().props.order;
 const orderDetail = usePage().props.orderDetail;
 const activities = usePage().props.activities;
 
@@ -82,6 +83,13 @@ const removeImage = data => {
         }
     }
 }
+
+
+const editOrder = () => {
+    router.visit(route('order.edit', order.id));
+}
+
+
 </script>
 
 <style scoped>

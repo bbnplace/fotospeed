@@ -112,7 +112,6 @@
         </ul>
     </div>
 </div>
-<br />
 
 <Snackbar :data="snackbarOption"></Snackbar>
 </template>

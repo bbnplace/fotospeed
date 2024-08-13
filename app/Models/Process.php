@@ -11,9 +11,14 @@ class Process extends Model
 
     protected $fillable = ['name', 'description'] ;
 
-    protected function orders()
+    public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
     }
 
     public static function getProcessesArray()

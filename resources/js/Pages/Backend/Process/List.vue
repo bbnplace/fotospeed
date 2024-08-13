@@ -14,7 +14,7 @@ const dataResources = {
     endpoint: {
         records: usePage().props.endpoint,
         add: "process.add",
-        edit: "process.edit",
+        // edit: "process.edit",
         delete: "processes.delete",
         detail: "process.view"
     },
@@ -24,22 +24,32 @@ const dataResources = {
             key: "name",
             sortable: true
         },
-        // {
-        //     title: "Category",
-        //     key: "category.name",
-        //     sortable: true
-        // },
-        // {
-        //     title: "Description",
-        //     key: "description",
-        //     sortable: true
-        // },
-        // {
-        //     title: "Actions",
-        //     key: "actions",
-        //     sortable: false,
-        //     width: '100px'
-        // },
+        {
+            title: "Unclaimed [Orders]",
+            key: "unclaimed_count",
+            sortable: false,
+            sortable: false,
+            align: "end"
+        },
+        {
+            title: "ToDo [Orders]",
+            key: "todo_count",
+            sortable: false,
+            align: "end"
+        },
+        {
+            title: "Doing [Orders]",
+            key: "doing_count",
+            sortable: false,
+            align: "end"
+        },
+        {
+            title: "Done [Orders]",
+            key: "done_count",
+            sortable: false,
+            align: "end"
+        },
+        
     ],
     name: {
         singular: "Process",

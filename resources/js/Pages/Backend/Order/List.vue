@@ -30,7 +30,7 @@ const dataResources = {
             sortable: true
         },
         {
-            title: "Item",
+            title: "Product",
             key: "item.name",
             sortable: true
         },

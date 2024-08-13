@@ -12,6 +12,7 @@ use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Models\Process;
 use App\Models\Role;
 use App\Models\TaskStatus;
 use App\Models\User;
@@ -65,7 +66,7 @@ class Task
             $taskDescription = $templateManager->prepareText($task->description);
 
             // Drop task for all team members in the category
-            self::createTask($taskName, $taskDescription, $order, $branch, $team);
+            self::createTask($taskName, $taskDescription, $order, $processName, $branch, $team);
 
             // Broadcast Push Notification to team members within the selected branch
             $message = sprintf("You just received a new Order");
@@ -167,11 +168,13 @@ class Task
      * @param \App\Models\Role $team
      * @return void
      */
-    private static function createTask($taskName, $taskDescription, Order $order, Branch $branch, Role $team): void
+    private static function createTask($taskName, $taskDescription, Order $order, string $processName, Branch $branch, Role $team): void
     {
+        $process = Process::where('name', $processName)->first(['id']);
         TaskModel::create([
             'name'=> $taskName,
             'description'=> $taskDescription,
+            'process_id' => $process->id,
             'order_id'=> $order->id,
             'branch_id'=> $branch->id,
             'role_id'=> $team->id

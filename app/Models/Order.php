@@ -62,4 +62,9 @@ class Order extends Model
     {
         return $this->belongsTo(Process::class);
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

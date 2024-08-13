@@ -386,7 +386,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { usePage, Link } from "@inertiajs/vue3";
+import { usePage, useForm, Link } from "@inertiajs/vue3";
 import axios from 'axios';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
@@ -451,6 +451,10 @@ const cancelOrder = async () => {
     }, 10000);
 
 }
+
+const form = useForm({
+    orderId: order.id
+});
 
 const generateInvoice = () => {
     form.post(route('invoice.create'));

@@ -206,6 +206,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::get('panel/process/{id}/edit', [ProcessesController::class, 'edit'])->name('process.edit');
     Route::put('panel/process/{id}/edit', [ProcessesController::class, 'update'])->name('process.edit');
     Route::get('panel/process/{id}', [ProcessesController::class, 'view'])->name('process.view');
+    Route::post('panel/process/{id}/orders', [ProcessesController::class, 'orders'])->name('process.orders');
     Route::delete('panel/processes/delete', [ProcessesController::class, 'delete'])->name('processes.delete');
 
     // Roles Management
