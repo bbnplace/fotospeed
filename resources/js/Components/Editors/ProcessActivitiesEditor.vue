@@ -267,6 +267,18 @@
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
+                            <hr />
+                            <VRow>
+                                <VCol cols="12">
+                                    <div class="text-right">
+                                        <VBtn
+                                            prepend-icon="mdi-minus"
+                                            color="red"
+                                            @click="RemoveProcess(index)"
+                                        >Remove Process</VBtn>
+                                    </div>
+                                </VCol>
+                            </VRow>
                         </VCol>
                     </VRow>
                 </v-expansion-panel-text>
@@ -351,6 +363,16 @@ const form = reactive({
 });
 
 const productProcessActivities = reactive(processData.tasks || []);
+
+const RemoveProcess = (index)=> {
+    const processName = productProcesses.value[index].name;
+    processes.push(processName); // Add the process back to the list of processes
+
+    delete productProcessActivities[processName]; // Delete tasks
+    productProcesses.value.splice(index, 1); // Remove the process from the product processes
+
+    updateProcesses();
+}
 
 // Add Process: This function is used to add a new process.
 const saveProcess = () => {
