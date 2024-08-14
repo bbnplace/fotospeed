@@ -448,8 +448,7 @@ const cancelOrder = async () => {
         orderCancelResponse.value = "";
         orderCancelError.value = "";
         showOverlay.value = false;
-    }, 10000);
-
+    }, 5000);
 }
 
 const form = useForm({
@@ -495,6 +494,11 @@ const holdOrder = async () => {
             orderHoldError.value = "Something went wrong! Pls try again later.";
         }
     }
+
+    setTimeout(()=>{
+        orderHoldError.value = "";
+        showHoldOrderOverlay.value = false;
+    }, 5000);
 }
 
 
@@ -533,7 +537,6 @@ const reactivateOrder = async () => {
     }
 
     setTimeout(()=>{
-        // reactiveOrderResponse.value = "";
         orderReactivationError.value = "";
         showReactivateOrderOverlay.value = false;
     }, 5000);
@@ -572,6 +575,12 @@ const setReferenceNo = async () => {
             orderReferenceError.value = "Something went wrong! Pls try again later.";
         }
     }
+
+    setTimeout(()=>{
+        orderReferenceResponse.value = "";
+        orderReferenceError.value = "";
+        showOrderRefOverlay.value = false;
+    }, 5000);
 }
 
 
@@ -607,6 +616,12 @@ const setPrice = async () => {
             priceError.value = "Something went wrong! Pls try again later.";
         }
    }
+
+   setTimeout(()=>{
+        priceResponse.value = "";
+        priceError.value = "";
+        showPriceOverlay.value = false;
+    }, 5000);
 }
 
 // Register Waybill
@@ -641,6 +656,12 @@ const saveWaybill = async () => {
             waybillError.value = "Something went wrong! Pls try again later.";
         }
     }
+
+    setTimeout(()=>{
+        waybillResponse.value = "";
+        waybillError.value = "";
+        showWaybillOverlay.value = false;
+    }, 5000);
 }
 
 

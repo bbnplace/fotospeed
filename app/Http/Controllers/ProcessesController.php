@@ -247,7 +247,7 @@ class ProcessesController extends Controller
             }
         ])
         ->where('process_id', $processId)  // Filter orders by the current process_id
-        ->select('id', 'name', 'order_number', 'item_id', 'process_id');
+        ->select('id', 'name', 'order_number', 'item_id', 'process_id', 'updated_at');
         
         // Search functionality
         if (!empty($search)) {
