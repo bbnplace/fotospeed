@@ -394,6 +394,10 @@ const saveProcess = () => {
 
 // Add Activity: This function is used to add new activity to a Process.
 const addActivity = process => {
+    if (productProcessActivities[process] === undefined) {
+        productProcessActivities[process] = [];
+    }
+    
     productProcessActivities[process].push({
         name: "",
         description: "",

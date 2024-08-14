@@ -13,4 +13,4 @@
          @inertia
          <div id="mod"></div>
     </body>
-    <script src="{{ env('APP_URL') }}/build/assets/app-wC1VmJYQ.js" type="module"></script>
+    <script src="{{ env('APP_URL') }}/build/assets/app-fBd0yQep.js" type="module"></script>
