@@ -5,7 +5,7 @@
                 <v-expansion-panel-title color="blue">{{ process.name }}</v-expansion-panel-title>
                 <v-expansion-panel-text class="non-draggable">
                     <h4 class="my-2">Tasks</h4>
-                    <template v-if="productProcessActivities[process.name].length == 0">
+                    <template v-if="productProcessActivities[process.name] == undefined || productProcessActivities[process.name].length == 0">
                         <VCard color="grey-darken-4" class="p-3 my-2">
                             You have not defined any task for this process.
                         </VCard>
