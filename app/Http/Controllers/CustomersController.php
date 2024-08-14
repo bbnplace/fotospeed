@@ -38,8 +38,9 @@ class CustomersController extends Controller
         $sortBys = $request->sortBy;
         $search = $request->search;
 
+        $customerRole = Role::where('name','Customer')->first();
         $query = User::query();
-        $query->where('role_id', 1);
+        $query->where('role_id', $customerRole->id);
 
         if (!empty($search)) {
             $searchTerm = $search['_value'];

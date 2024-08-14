@@ -40,10 +40,9 @@ class StaffController extends Controller
         $staffPerPage = $request->itemsPerPage;
         $sortBys = $request->sortBy;
         $search = $request->search;
-
+        $customerRole = Role::where('name','Customer')->first();
         $query = User::query();
-        $query->whereNot('role_id', 6);
-        $query->whereNot('role_id', 1);
+        $query->whereNot('role_id', $customerRole->id);
 
         if (!empty($search)) {
             $searchTerm = $search['_value'];
