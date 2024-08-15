@@ -1,6 +1,6 @@
 <template>
     <Panel snippet-title="Production Processes">
-        <v-expansion-panels v-if="productProcesses.length" ref="sortableContainer">
+        <v-expansion-panels v-if="productProcesses != undefined && productProcesses.length" ref="sortableContainer">
             <v-expansion-panel v-for="(process, index) in productProcesses" :key="process.name" :data-id="index">
                 <v-expansion-panel-title color="blue">{{ process.name }}</v-expansion-panel-title>
                 <v-expansion-panel-text class="non-draggable">
@@ -318,7 +318,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, ref, nextTick } from 'vue';
+import { reactive, onMounted, ref, nextTick } from 'vue';
 import { usePage} from "@inertiajs/vue3";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import axios from 'axios';
@@ -335,6 +335,8 @@ const smsTemplates = usePage().props.smsTemplates;
 const whatsappTemplates = usePage().props.whatsappTemplates;
 
 const productProcesses = ref(processData.processes || []); // Initial Value to be Populated with fetched data
+let productProcessActivities = reactive(processData.tasks || {});
+
 if(processData.processes) {
     processData.processes.forEach(targetProcess => {
         let targetIndex = -1;
@@ -362,9 +364,8 @@ const form = reactive({
     }
 });
 
-const productProcessActivities = reactive(processData.tasks || []);
 
-const RemoveProcess = (index)=> {
+const RemoveProcess = (index) => {
     const processName = productProcesses.value[index].name;
     processes.push(processName); // Add the process back to the list of processes
 
@@ -393,12 +394,12 @@ const saveProcess = () => {
 }
 
 // Add Activity: This function is used to add new activity to a Process.
-const addActivity = process => {
-    if (productProcessActivities[process] === undefined) {
-        productProcessActivities[process] = [];
+const addActivity = processName => {
+    if (productProcessActivities[processName] === undefined) {
+        productProcessActivities[processName] = [];
     }
-    
-    productProcessActivities[process].push({
+
+    productProcessActivities[processName].push({
         name: "",
         description: "",
         team: "",
@@ -428,6 +429,8 @@ const updateProcesses = async () => {
         },
         cancelToken: source.token
     });
+
+    // Todo: If the save was not successful notify
 }
 
 const sendAt = ['Start', 'Completion'];
