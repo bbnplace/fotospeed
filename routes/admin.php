@@ -148,6 +148,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::post('panel/item/add', [ItemsController::class, 'store'])->name('item.store');
     Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
     Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
+    Route::post('panel/item/{id}/duplicate', [ItemsController::class, 'duplicate'])->name('item.duplicate');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
     Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
     Route::put('panel/item-process/{id}/save', [ItemsController::class,'saveProcessData'])->name('item.saveprocess');

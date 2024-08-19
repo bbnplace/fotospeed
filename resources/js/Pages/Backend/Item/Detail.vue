@@ -45,7 +45,63 @@
                     </VRow>
                     <hr  class="mt-4" />
                     <div class="text-right">
-                        <Link :href="route('item.edit', item.id)" class="btn btn-dark">Modify</Link>
+                        <VBtn
+                            color="blue-darken-3"
+                            class="mr-2"
+                        >
+                            Duplicate
+                            <VOverlay
+                                v-model="showDuplicateOverlay"
+                                activator="parent"
+                                location-strategy="connected"
+                                scroll-strategy="close"
+                            >
+                                <VCard min-width="300">
+                                    <VCardTitle>Create Similar Product</VCardTitle>
+                                    <VCardText>
+                                        <div>
+                                            <VTextField
+                                                v-model="cloneData.productName"
+                                                variant="outlined"
+                                                label="Product Name"
+                                                hide-details
+                                            ></VTextField>
+                                        </div>
+                                        <div>
+                                            <VCheckbox
+                                                v-model="cloneData.includeProcess"
+                                                label="Include Production Processes"
+                                                hide-details
+                                            ></VCheckbox>
+                                        </div>
+                                        <div v-if="processingClone" class="text-center my-3">
+                                            <v-progress-circular
+                                                color="red"
+                                                indeterminate
+                                            ></v-progress-circular>
+                                        </div>
+                                        <p v-if="cloneResponse.length">
+                                            {{ cloneResponse }}<br />
+                                            <Link :href="clonePageLink">View Product</Link>
+                                        </p>
+                                        <p v-if="cloneError.length" class="text-red">{{ cloneError }}</p>
+                                    </VCardText>
+                                    <VCardActions>
+                                        <VBtn
+                                        @click="duplicateProduct"
+                                        >Proceed</VBtn>
+                                        <VBtn 
+                                            color="red"
+                                            @click="!showDuplicateOverlay"
+                                        >Close</VBtn>
+                                    </VCardActions>
+                                </VCard>
+                            </VOverlay>
+                        </VBtn>
+                        <VBtn
+                            color="grey-darken-3"
+                            @click="modifyProduct"
+                        >Edit</VBtn>
                     </div>
                 </Panel>
             </VCol>
@@ -59,14 +115,57 @@
 </template>
 
 <script setup>
-
-import { usePage, Head, Link } from "@inertiajs/vue3";
+import { ref } from 'vue';
+import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import ProcessActivitiesEditor from '@/Components/Editors/ProcessActivitiesEditor.vue';
 import TemplateCodes from '@/Components/TemplateCodes.vue'
+import axios from 'axios';
 
 const item = usePage().props.item;
 const processingCenters = item.order_processing_branches ? JSON.parse(item.order_processing_branches) : []
 
+const modifyProduct = () => {
+    router.visit(route('item.edit', item.id));
+}
+
+const cloneData = ref({
+    productName: `${item.name} Copy`,
+    includeProcess: false
+});
+
+const showDuplicateOverlay = ref(false);
+const processingClone = ref(false);
+const cloneResponse = ref("");
+const cloneError = ref("");
+const clonePageLink = ref("")
+
+const duplicateProduct = async () => {
+    const payload = cloneData.value;
+    processingClone.value = true;
+    cloneResponse.value = "";
+    cloneError.value = "";
+
+    try {
+        const response = await axios.post(route('item.duplicate', item.id), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.data && response.data.status == "success") {
+            cloneResponse.value = response.data.response;
+            clonePageLink.value = response.data.link;
+        }
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            cloneError.value = error.response.data.message;
+        } else {
+            cloneError.value = "Something went wrong! Pls try again later.";
+        }
+    }
+
+    processingClone.value = false;
+}
 </script>

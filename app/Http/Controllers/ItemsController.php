@@ -215,4 +215,40 @@ class ItemsController extends Controller
             'status' => 'Saved'
         ];
     }
+
+    public function duplicate(Request $request, $id)
+    {
+        $request->validate([
+            'productName' => 'required|string|unique:items,name|min:2|max:64',
+            'includeProcess' => 'required|boolean',
+        ]);
+
+        $item = Item::find($id);
+        if (empty($item)) {
+            return response()->json([
+                'message' => 'Could not reference any product'
+            ], 422);
+        }
+
+        $duplicateItem = Item::create([
+            'category_id' => $item->category_id,
+            'name' => $request->productName,
+            'description'=> $item->description,
+            'process_data' => $request->includeProcess ? $item->process_data : null,
+            'height' => $request->height,
+            'width' => $request->width,
+            'weight' => $request->weight,
+            'print_price' => $item->print_price,
+            'sheet_price' => $item->sheet_price,
+            'cover_print_price' => $item->cover_print_price,
+            'order_processing_branches' => $item->order_processing_branches,
+            'primary_order_processing_branch' => $item->primary_order_processing_branch,
+        ]);
+
+        return [
+            'status' => 'success',
+            'response' => sprintf('Successfully duplicated %s to %s', $item->name, $request->productName),
+            'link' => route('item.view', [$duplicateItem->id]),
+        ];
+    }
 }
