@@ -51,6 +51,7 @@
             <p v-if="photosSaveSuccess.length">{{ photosSaveSuccess }}</p>
             <p v-if="photosSaveError.length">{{ photosSaveError }}</p>
             <v-btn
+                prepend-icon="mdi-content-save"
                 color="blue-darken-3"
                 @click="saveProductImages"
             >Save</v-btn>

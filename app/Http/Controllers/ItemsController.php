@@ -228,6 +228,7 @@ class ItemsController extends Controller
         $request->validate([
             'productName' => 'required|string|unique:items,name|min:2|max:64',
             'includeProcess' => 'required|boolean',
+            'includePhotos' => 'required|boolean',
         ]);
 
         $item = Item::find($id);
@@ -241,7 +242,7 @@ class ItemsController extends Controller
             'category_id' => $item->category_id,
             'name' => $request->productName,
             'description'=> $item->description,
-            'product_photos' => $item->product_photos,
+            'product_photos' => $request->includePhotos ? $item->product_photos : null,
             'process_data' => $request->includeProcess ? $item->process_data : null,
             'height' => $request->height,
             'width' => $request->width,

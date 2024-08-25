@@ -46,6 +46,7 @@
                     <hr  class="mt-4" />
                     <div class="text-right">
                         <VBtn
+                            prepend-icon="mdi-content-duplicate"
                             color="blue-darken-3"
                             class="mr-2"
                         >
@@ -58,7 +59,7 @@
                             >
                                 <VCard min-width="300">
                                     <VCardTitle>Create Similar Product</VCardTitle>
-                                    <VCardText>
+                                    <VCardText class="mt-3">
                                         <div>
                                             <VTextField
                                                 v-model="cloneData.productName"
@@ -67,10 +68,15 @@
                                                 hide-details
                                             ></VTextField>
                                         </div>
-                                        <div>
+                                        <div class="mt-2">
                                             <VCheckbox
                                                 v-model="cloneData.includeProcess"
                                                 label="Include Production Processes"
+                                                hide-details
+                                            ></VCheckbox>
+                                            <VCheckbox
+                                                v-model="cloneData.includePhotos"
+                                                label="Include Product Photos"
                                                 hide-details
                                             ></VCheckbox>
                                         </div>
@@ -99,6 +105,7 @@
                             </VOverlay>
                         </VBtn>
                         <VBtn
+                            prepend-icon="mdi-pencil"
                             color="grey-darken-3"
                             @click="modifyProduct"
                         >Edit</VBtn>
@@ -134,7 +141,8 @@ const modifyProduct = () => {
 
 const cloneData = ref({
     productName: `${item.name} Copy`,
-    includeProcess: false
+    includeProcess: false,
+    includePhotos: false
 });
 
 const showDuplicateOverlay = ref(false);

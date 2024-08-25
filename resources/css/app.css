@@ -7,7 +7,7 @@
 }
 
 .v-checkbox .v-selection-control {
-    min-height: 40px;
+    min-height: 30px !important;
 }
 
 .dz-preview {
