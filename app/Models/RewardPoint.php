@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class RewardPoint extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['user_id', 'invoice_id', 'points'];
 }

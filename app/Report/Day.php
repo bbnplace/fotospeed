@@ -3,7 +3,6 @@
 namespace App\Report;
 
 use App\Models\DailyReport;
-use Illuminate\Support\Facades\Log;
 
 class Day
 {

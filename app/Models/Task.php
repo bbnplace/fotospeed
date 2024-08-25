@@ -48,4 +48,9 @@ class Task extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function process()
+    {
+        return $this->belongsTo(Process::class);
+    }
 }

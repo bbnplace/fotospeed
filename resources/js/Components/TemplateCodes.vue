@@ -23,6 +23,8 @@
             <dd>The link that will be used by customer to view invoice and make payment.</dd>
             <dt>item_name</dt>
             <dd>The name of the item being ordered. Aliases: <b>product_name</b>, <b>product</b>, or <b>item</b>.</dd>
+            <dt>waybill_number</dt>
+            <dd>This captures the WayBill Number for the order.</dd>
         </dl>
     </Panel>
 </template>

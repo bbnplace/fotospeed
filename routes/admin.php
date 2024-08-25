@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommunicationLogController;
 use App\Http\Controllers\CustomerFeedbacksController;
 use App\Http\Controllers\FileDownloadsController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Messaging\A2PSmsController;
 use App\Http\Controllers\Messaging\EmailsController;
 use App\Http\Controllers\Messaging\HostedSimController;
@@ -77,8 +78,8 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('panel/restricted', [PermissionsController::class, 'restrictionNotice'])->name('dashboard.restricted');
 
     // Route for forwarding an order to the next process
-    Route::post('panel/forward', [JobProcessTransferController::class, 'forward'])->name('process.forward');
-    Route::get('panel/order/{id}/task-completed', [JobProcessTransferController::class, 'completed'])->name('process.completed');
+    Route::post('panel/order/start-next-process', [TasksController::class, 'humanInitiateNextProcess'])->name('order.process.forward');
+    // Route::get('panel/order/{id}/task-completed', [JobProcessTransferController::class, 'completed'])->name('process.completed');
 
     Route::get('/report/{type}', [DashboardController::class, 'report'])->name('report');
     Route::get('/report/{type}/json', [DashboardController::class, 'getReports'])->name('report.json');
@@ -136,6 +137,16 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::put('/order/{id}/add-reference', [OrdersController::class, 'editReferenceNumber'])->name('order.set-reference');
     Route::put('/order/{id}/set-price', [OrdersController::class, 'editPrice'])->name('order.set-price');
     Route::put('/order/{id}/save-waybill', [OrdersController::class, 'setWaybillNumber'])->name('order.save-waybill');
+
+    // Media Library Management
+    Route::get('panel/media', [MediaController::class, 'index'])->name('media');
+    Route::post('panel/media', [MediaController::class, 'records'])->name('media.records');
+    Route::get('panel/media/add', [MediaController::class, 'add'])->name('media.add');
+    Route::post('panel/media/add', [MediaController::class, 'store'])->name('media.store');
+    Route::get('panel/media/{id}/edit', [MediaController::class, 'edit'])->name('media.edit');
+    Route::put('panel/media/{id}/edit', [MediaController::class, 'update'])->name('media.edit');
+    Route::get('panel/media/{id}', [MediaController::class, 'view'])->name('media.view');
+    Route::delete('panel/media/delete', [MediaController::class, 'delete'])->name('media.delete');
 });
 
 
@@ -179,6 +190,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::get('panel/state/{id}', [StatesController::class, 'view'])->name('state.view');
     Route::delete('panel/states/delete', [StatesController::class, 'delete'])->name('states.delete');
 
+     
     // Branch Management Module
     Route::get('panel/branches', [BranchesController::class, 'index'])->name('branches');
     Route::post('panel/branches', [BranchesController::class, 'records'])->name('branches.records');

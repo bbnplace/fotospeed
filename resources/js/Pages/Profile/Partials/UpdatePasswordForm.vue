@@ -45,47 +45,42 @@ const updatePassword = () => {
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
             <div>
-                <InputLabel for="current_password" value="Current Password" />
-
-                <TextInput
-                    id="current_password"
-                    ref="currentPasswordInput"
+                <VTextField
                     v-model="form.current_password"
+                    id="current_password"
+                    label="Current Password"
                     type="password"
-                    class="mt-1 block w-full"
+                    variant="outlined"
+                    :hide-details="form.errors.current_password == undefined"
+                    :error-messages="form.errors.current_password"
                     autocomplete="current-password"
-                />
-
-                <InputError :message="form.errors.current_password" class="mt-2" />
+                ></VTextField>
             </div>
 
             <div>
-                <InputLabel for="password" value="New Password" />
-
-                <TextInput
-                    id="password"
-                    ref="passwordInput"
+                <VTextField
                     v-model="form.password"
+                    id="password"
+                    label="New Password"
                     type="password"
-                    class="mt-1 block w-full"
+                    variant="outlined"
+                    :hide-details="form.errors.password == undefined"
+                    :error-messages="form.errors.password"
                     autocomplete="new-password"
-                />
-
-                <InputError :message="form.errors.password" class="mt-2" />
+                ></VTextField>
             </div>
 
             <div>
-                <InputLabel for="password_confirmation" value="Confirm Password" />
-
-                <TextInput
-                    id="password_confirmation"
+                <VTextField
                     v-model="form.password_confirmation"
+                    id="password"
+                    label="Confirm Password"
                     type="password"
-                    class="mt-1 block w-full"
+                    variant="outlined"
+                    :hide-details="form.errors.password_confirmation == undefined"
+                    :error-messages="form.errors.password_confirmation"
                     autocomplete="new-password"
-                />
-
-                <InputError :message="form.errors.password_confirmation" class="mt-2" />
+                ></VTextField>
             </div>
 
             <div class="flex items-center gap-4">

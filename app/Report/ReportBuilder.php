@@ -3,6 +3,7 @@
 namespace App\Report;
 use App\Config\OrderProcess;
 use App\Models\OrderStatus;
+use Illuminate\Support\Facades\Log;
 
 class ReportBuilder
 {
@@ -52,10 +53,10 @@ class ReportBuilder
      */
     public static function build(string $field, int $ordersCount = 1): void
     {
-        $field = strtolower(str_replace(" ", "_", $field));
-
         // If the field name is not part of the standard processes, don't build report for it
         if (self::isReportableOrderProcess($field)) {
+            $field = strtolower(str_replace(" ", "_", $field));
+            // Log::info($field);
             Hour::build($field, $ordersCount);
             Day::build($field, $ordersCount);
             Month::build($field, $ordersCount);

@@ -2,6 +2,34 @@
     <Head title="Order"></Head>
     <BackendLayout>
         <Link :href="route('orders')" class="font-bold">Back</Link>
+        
+
+        <VRow>
+            <VCol cols="12" sm="6">
+                <OrderCard />
+                <Panel snippet-title="Activities" v-if="activities.length">
+                    <VTable>
+                        <THead>
+                            <tr>
+                                <td>Process</td>
+                                <td>Completed by</td>
+                                <td>Date</td>
+                            </tr>
+                        </THead>
+                        <TBody>
+                            <tr v-for="activity in activities" :key="activity.id">
+                                <td>{{ activity.process.name }}</td>
+                                <td>{{ activity.staff.name }}</td>
+                                <td>{{ moment(activity.created_at).format('MM/DD/YYYY, h:mm A') }}</td>
+                            </tr>
+                        </TBody>
+                    </VTable>
+                </Panel>
+            </VCol>
+            <VCol cols="12" sm="6">
+                <CommunicationLog />
+            </VCol>
+        </VRow>
         <Panel :snippet-title="`Order Assets`">
             <div class="text-right mb-2" v-if="orderForm.orderFiles.length">
                 <DownloadAllMediaBtn :files="orderForm.orderFiles" />
@@ -25,33 +53,6 @@
                 </VCol>
             </VRow>
         </Panel>
-
-        <VRow>
-            <VCol cols="12" sm="6">
-                <CommunicationLog />
-            </VCol>
-            <VCol cols="12" sm="6">
-                <OrderCard />
-                <Panel snippet-title="Activities" v-if="activities.length">
-                    <VTable>
-                        <THead>
-                            <tr>
-                                <td>Process</td>
-                                <td>Completed by</td>
-                                <td>Date</td>
-                            </tr>
-                        </THead>
-                        <TBody>
-                            <tr v-for="activity in activities" :key="activity.id">
-                                <td>{{ activity.process.name }}</td>
-                                <td>{{ activity.staff.name }}</td>
-                                <td>{{ moment(activity.created_at).format('MM/DD/YYYY, h:mm A') }}</td>
-                            </tr>
-                        </TBody>
-                    </VTable>
-                </Panel>
-            </VCol>
-        </VRow>
     </BackendLayout>
 </template>
 

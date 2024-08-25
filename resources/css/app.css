@@ -6,6 +6,10 @@
     margin: 1rem auto;
 }
 
+.v-checkbox .v-selection-control {
+    min-height: 40px;
+}
+
 .dz-preview {
     display: flex !important;
     flex-direction: row !important;
@@ -50,3 +54,15 @@
 input[type='text'], input[type='text']:focus {
     background-color: transparent;
 }
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+  
+  .shake {
+    animation: shake 0.5s ease;
+  }

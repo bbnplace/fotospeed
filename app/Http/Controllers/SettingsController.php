@@ -65,6 +65,7 @@ class SettingsController extends Controller
             'reportViewers' => 'required|array',
             'reportViewers.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
             'invoice_no_src' => 'required|string|max:64',
+            'loyalty_reward_formula' => 'nullable|string|max:64'
         ];
 
         $request->validate($rules);
@@ -97,6 +98,7 @@ class SettingsController extends Controller
         $settings->reportables = json_encode($this->snakeCaseReportables($request->reportables));
         $settings->reports_permission = json_encode($request->reportViewers);
         $settings->invoice_no_src = $request->invoice_no_src;
+        $settings->loyalty_reward_formula = $request->loyalty_reward_formula;
         $settings->save();
 
         return redirect(route('settings'));

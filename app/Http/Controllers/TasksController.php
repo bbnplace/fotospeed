@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helper\URLGenerator;
+use App\Messaging\TemplateManager;
 use App\Models\Process;
 use App\Models\User;
 use App\Report\ReportBuilder;
@@ -12,6 +13,7 @@ use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Tasks\TaskAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -128,14 +130,72 @@ class TasksController extends Controller
         }
     }
 
+    private function getTaskAudits($task, $taskName): array | bool
+    {
+        $processData = json_decode($task->order->item->process_data, true);
+        $currentProcess = $task->process->name;
+        if (!empty($processData)) {
+            $currentProcessTasks = $processData['tasks'][$currentProcess];
+            $tm = new TemplateManager([
+                'order' => $task->order
+            ]);
+
+            $targetTask = [];
+            foreach ($currentProcessTasks as $currentProcessTask) {
+                if ($taskName == $tm->prepareText($currentProcessTask['name'])) {
+                    $targetTask = $currentProcessTask;
+                    break;
+                }
+            }
+
+            if (empty($targetTask)) {
+                return false; // No Audit
+            }
+            
+            if (isset($targetTask['audit']) && $targetTask['audit']) {
+                return $targetTask['checks'] ?? [];
+            } else {
+                return false; // No Audit
+            }
+        } else {
+            return false;
+        }
+    }
+
     public function updateTasks(Request $request)
     {
         $task = $request->task;
+        if (!isset($task['id'])) {
+            return [
+                'status' => 'Failed'
+            ];
+        }
         $taskId = $task['id'];
         $taskName = $task['name'];
         $newStatus = TaskStatus::getTaskStatusId($request->toStatus);
         
         $task = Task::find($taskId);
+        if ($newStatus === TaskStatus::STATUS_DONE) {
+            $auditables = $this->getTaskAudits($task, $taskName);
+            if (is_array($auditables)) {
+                $auditReport = TaskAudit::checkAll($auditables, $task->order);
+                $failedAudits = [];
+                foreach ($auditReport as $key => $value) {
+                    if (!$value) {
+                        array_push($failedAudits, $key);
+                    }
+                }
+                
+                if (!empty($failedAudits)) {
+                    return [
+                        'status' => 'Failed',
+                        'message' => 'The following online activities for this task have not been completed:',
+                        'incompleteTasks' => $failedAudits
+                    ];
+                }
+            }
+        }
+
         if (!empty($task) && $newStatus !== 0) {
             $task->task_status_id = $newStatus;
             $task->save();
@@ -169,8 +229,7 @@ class TasksController extends Controller
             if (empty($undoneTasks)) {
                 $currentProcess = $task->order->process;
                 // Get the Item Process Data and confirm whether to trigger the next process or to notify administrator
-                $item = $task->order->item;
-                $processData = json_decode($item->process_data);
+                $processData = $this->getOrderProcesses($task->order);
                 $currentProcessName = $currentProcess->name;
 
                 $currentProcessData = $this->getCurrentProcessData($processData->processes, $currentProcessName);
@@ -202,7 +261,17 @@ class TasksController extends Controller
                     TaskAssigner::sendCustomerCommunication($currentProcessData, 'Completion', $config);
 
                     // If there is a next process, set the status of the order to the next process' and trigger task for the next process
-                    if ($autoStartNextProcess && !empty($nextProcess)) $this->initiateNextProcess($order, $nextProcess);
+                    if (!empty($nextProcess)) {
+                        if ($autoStartNextProcess) {
+                            $this->initiateNextProcess($order, $nextProcess);
+                        } else {
+                            // Flag Order so that An Admin can manually start the next process
+                            $order->human_forwarding = true;
+                            $order->save();
+
+                            // Todo: Send Signal to Team responsible for task forwarding on client so that they can review and forward the task
+                        }
+                    }
                 }
             }
         }
@@ -262,10 +331,39 @@ class TasksController extends Controller
 
         if (!empty($nextProcessRecord)) {
             $order->process_id = $nextProcessRecord->id;
+            $order->human_forwarding = false; // Remove the link for human to forward the process
             $order->save();
 
             // Trigger the distribution of tasks for the next process
             TaskAssigner::assignProcessTasks($order->item, $order, $nextProcess->name);
         }
+    }
+
+    public function humanInitiateNextProcess(Request $request)
+    {
+        $order = Order::find($request->orderId);
+        if (!empty($order)) {
+            $currentProcess = $order->process->name;
+            $orderProcesses = $this->getOrderProcesses($order);
+            $nextProcess = $this->getNextProcess($orderProcesses->processes, $currentProcess);
+            $this->initiateNextProcess($order, $nextProcess);
+
+            return [
+                'status' => 'success',
+                'message' => sprintf('%s process successfully initialized', $nextProcess->name),
+                'currentProcess' => $nextProcess->name,
+            ];
+        } else {
+            return [
+                'status' => 'failed',
+                'message' => 'Unable to identify the order'
+            ];
+        }
+    }
+
+    private function getOrderProcesses(Order $order)
+    {
+        $item = $order->item;
+        return json_decode($item->process_data);
     }
 }

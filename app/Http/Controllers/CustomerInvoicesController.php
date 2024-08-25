@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Messaging\EmailClient;
 use App\Messaging\SMSClient;
 use App\Models\EmailTemplate;
+use App\Models\RewardPoint;
 use App\Models\SmsTemplate;
 use App\Models\Setting;
 use App\Models\Invoice;
@@ -182,9 +183,28 @@ class CustomerInvoicesController extends Controller
                                 $smsClient->sendCustomerSms($smsTemplate->template);
                             }
                         }
+
+                        // Save Loyalty Reward
+                        $this->saveLoyaltyRewardPoints($order, $invoice, $settings->loyalty_reward_formula);
                     }
                 }
             }
+        }
+    }
+
+    private function saveLoyaltyRewardPoints($order, $invoice, $rewardPointsFormula)
+    {
+        $invoiceAmountPlaceholder = '[invoice_amount]';
+        if(!empty($rewardPointsFormula) && strstr($rewardPointsFormula, $invoiceAmountPlaceholder))
+        {
+            $calculation = str_replace($invoiceAmountPlaceholder, $order->total_cost, $rewardPointsFormula);
+            $rewardPoint = eval('return '. $calculation .';');
+            
+            RewardPoint::create([
+                'user_id' => $order->user_id,
+                'invoice_id' => $invoice->id,
+                'points' => $rewardPoint,
+            ]);
         }
     }
 

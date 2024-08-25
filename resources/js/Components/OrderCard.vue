@@ -193,6 +193,12 @@
                                     </VBtn>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>Delivery Address</b><br />
+                                    {{ order.delivery_address }}
+                                </VCol>
+                            </VRow>
                         </VCol>
 
                         <VCol cols="12" md="6">
@@ -218,6 +224,27 @@
                                 <VCol>
                                     <b>Current Process</b><br />
                                     {{ currentProcess }}
+                                </VCol>
+                            </VRow>
+                            <VRow v-if="user.isAdmin && enableHumanForwarding">
+                                <VCol>
+                                    <VBtn
+                                        prepend-icon="mdi-play"
+                                        color="blue-darken-3"
+                                        @click="startNextProcess"
+                                        :disabled="nextProcessStartSending"
+                                    >Start Next Process</VBtn>
+                                    <p class="my-2" v-if="nextProcessStartSending">
+                                        <v-progress-linear color="red" indeterminate></v-progress-linear>
+                                    </p>
+                                    <p v-if="nextProcessStartError.length" class="text-red">
+                                        {{ nextProcessStartError }}
+                                    </p>
+                                </VCol>
+                            </VRow>
+                            <VRow v-if="nextProcessStartResponse.length">
+                                <VCol>
+                                    {{ nextProcessStartResponse }}
                                 </VCol>
                             </VRow>
                             <VRow v-if="user.isAdmin">
@@ -409,8 +436,9 @@ const showOverlay = ref(false);
 const orderCancelResponse = ref("");
 const cancellingOrderProgress = ref(false);
 const orderStatus = ref(order.order_status.name)
-const currentProcess = order.process ? order.process.name : "-";
+const currentProcess = ref(order.process ? order.process.name : "-");
 const waybillNo = order.waybill_number;
+const enableHumanForwarding = ref(order.human_forwarding);
 
 const orderCancelError = ref("");
 let source = null;
@@ -662,6 +690,46 @@ const saveWaybill = async () => {
         waybillError.value = "";
         showWaybillOverlay.value = false;
     }, 5000);
+}
+
+
+const nextProcessStartSending = ref(false);
+const nextProcessStartResponse = ref("");
+const nextProcessStartError = ref("");
+const startNextProcess = async () => {
+    nextProcessStartSending.value = true;
+    nextProcessStartResponse.value = "";
+    nextProcessStartError.value = "";
+
+    const payload = {
+        orderId: order.id
+    }
+
+    try {
+        const response = await axios.post(route('order.process.forward'), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.data && response.data.status == "success") {
+            nextProcessStartResponse.value = response.data.message;
+            currentProcess.value = response.data.currentProcess;
+            enableHumanForwarding.value = false;
+        }
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            nextProcessStartError.value = error.response.data.message;
+        } else {
+            nextProcessStartError.value = "Something went wrong! Pls try again later.";
+        }
+    }
+    nextProcessStartSending.value = false;
+
+    setTimeout(()=>{
+        nextProcessStartResponse.value = "";
+        nextProcessStartError.value = "";
+    }, 7000)
 }
 
 

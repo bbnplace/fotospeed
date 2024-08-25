@@ -22,6 +22,19 @@ use App\Report\ReportBuilder;
 
 class Task
 {
+    public static function getVerifiableTasks()
+    {
+        $verifiableTasks = [
+            'Order Number Input',
+            'Waybill Number Input',
+            'Invoice Generation',
+            'Invoice Payment',
+            'Price Input',
+        ];
+        sort($verifiableTasks);
+        return $verifiableTasks;
+    }
+    
     public static function assignProcessTasks(Item $item, Order $order, string $processName)
     {
         $processesData = json_decode($item->process_data);

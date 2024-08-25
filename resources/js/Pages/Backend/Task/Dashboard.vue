@@ -35,24 +35,36 @@
                         v-for="task in tasks"
                         :key="task.id"
                         :class="`task-card ${task.order.paused ? 'non-draggable bg-gray-500' : ''}`"
+                        :ref="setCardRef(task.id)"
                         >
                           <h5>{{ task.name }}</h5>
                           <p class="mb-0 flex "><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>{{ task.order.paused ? 'ON HOLD' : '' }}</b></p>
                           <VOverlay
+                            v-model="showAcceptedTaskOverlay[task.id]"
                             activator="parent"
                             location-strategy="connected"
                             scroll-strategy="close">
                             <VCard class="px-3 py-8 w-96" :title="task.name">
                               <VCardText>
-                                <p class="mb-4">{{ task.description }}</p>
+                                <p class="mb-2">{{ task.description }}</p>
+                                <p v-if="taskAuditError[`card-${task.id}`]" class="bg-red-100 text-red p-2">
+                                  {{ taskAuditError[`card-${task.id}`].message }}
+                                  <ul class="mb-0">
+                                    <li class="list-disc my-2" v-for="(incompleteTask, idx) in taskAuditError[`card-${task.id}`].incompleteTasks" :key="idx">{{ incompleteTask }}</li>
+                                  </ul>
+                                </p>
                                 <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
                                 <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
                               </VCardText>
                               <VCardActions>
                                 <VBtn
-                                color="blue"
-                                @click="showClickedTask(task)"
-                              >Open Order</VBtn>
+                                  color="blue"
+                                  @click="showClickedTask(task)"
+                                >Open Order</VBtn>
+                                <VBtn
+                                  color="red"
+                                  @click="showAcceptedTaskOverlay[task.id] = false"
+                                >Close</VBtn>
                               </VCardActions>
                             </VCard>
                           </VOverlay>
@@ -78,6 +90,8 @@ const user = usePage().props.auth.user;
 const endpoints = usePage().props.endpoints;
 const unclaimedTasks = ref([]);
 const showOverlay = ref([]);
+const showAcceptedTaskOverlay = ref([]);
+const taskAuditError = ref({});
 
 
 const columns = ref({
@@ -90,12 +104,34 @@ let statusKeys = Object.keys(columns.value);
 
 // Ref container to hold references
 const refs = ref({});
+const cardRefs = ref({});
 
 // Function to set refs
 const setRef = (key) => (el) => {
   if (el) {
     refs.value[key] = el;
   }
+};
+
+const setCardRef = (key) => (el) => {
+  if (el) {
+    cardRefs.value[key] = el;
+  }
+};
+
+let originalState = null;
+
+const onStart = (event) => {
+  const { from, oldIndex } = event;
+  const fromStatus = from.id;
+  const draggedItem = columns.value[fromStatus][oldIndex];
+
+  // Store the original state
+  originalState = {
+    fromStatus,
+    oldIndex,
+    item: draggedItem
+  };
 };
 
 const onEnd = (event) => {
@@ -118,7 +154,42 @@ const onEnd = (event) => {
   if (from.id === to.id) {
     return false;
   }
-    updateTaskStatus(draggedItem, fromStatus, toStatus);;
+    updateTaskStatus(draggedItem, fromStatus, toStatus, event);
+};
+
+const reverseMove = (event, responseData) => {
+  if (originalState) {
+    const { fromStatus, oldIndex, item } = originalState;
+    const toStatus = event.to.id;  // Current column after the move
+    const newIndex = columns.value[toStatus].indexOf(item);
+
+    if (columns.value[toStatus] && columns.value[fromStatus]) {
+      // Remove from current position
+      columns.value[toStatus].splice(newIndex, 1);
+      // Move back to original position
+      columns.value[fromStatus].splice(oldIndex, 0, item);
+
+      // console.log(item.id)
+      const cardRefName = `card-${item.id}`;
+      const cardElement = cardRefs.value[item.id];
+      if (cardElement) {
+        console.log('Reversed Card: ', cardElement);
+        cardElement.classList.add('bg-red-200');
+        showAcceptedTaskOverlay.value[item.id] = true;
+        taskAuditError.value[`card-${item.id}`] = responseData;
+        
+      } else {
+        console.error('Card Not Found: ', cardRefName);
+      }
+    } else {
+      console.error('Invalid column status:', fromStatus, toStatus);
+    }
+
+    // Clear original state
+    originalState = null;
+  } else {
+    console.error('No move to reverse');
+  }
 };
 
 const onMove = (event) => {
@@ -144,7 +215,7 @@ const showClickedTask = task => {
 }
 
 // Update the status of the task on the server
-const updateTaskStatus = async (task, fromStatus, toStatus) => {
+const updateTaskStatus = async (task, fromStatus, toStatus, event) => {
     // console.log('Dragged Item:', task);
     // console.log(`Moved from ${fromStatus} to ${toStatus}`);
     const payload = { task, fromStatus, toStatus }
@@ -157,7 +228,13 @@ const updateTaskStatus = async (task, fromStatus, toStatus) => {
     const data = response.data;
     if (data.status != undefined) {
       if (data.status == 'success') {
-        console.log("status updated");
+        // console.log("status updated");
+        loadNewTasks();
+        loadPickedTasks();
+      }
+
+      if (data.status.toLowerCase() == 'failed') {
+        reverseMove(event, data);
       }
     }
 }
@@ -207,6 +284,9 @@ onMounted(async () => {
       Sortable.create(refs.value[status], {
         group: 'tasks',
         animation: 150,
+        filter: ".non-draggable",
+        preventOnFilter: false,
+        onStart,
         onEnd,
         onMove
       });

@@ -28,7 +28,13 @@ const menus = [
                 name: "Inbox",
                 route: "messages",
                 adminOnly: false
-            }
+            },
+            {
+                icon: "mdi-image-multiple",
+                name: "Media Library",
+                route: "media",
+                adminOnly: false
+            },
         ]
     },
     {
@@ -73,7 +79,7 @@ const menus = [
         ]
     },
     {
-        heading: "Settings",
+        heading: "Admin",
         links: [
             {
                 icon: "mdi-account-tie-woman",

@@ -37,6 +37,7 @@ class TemplateManager
             $matches['order_status'] = $this->order->orderStatus->name;
             $matches['order_branch'] = $this->order->branch->name;
             $matches['price'] = $this->order->total_cost;
+            $matches['waybill_number'] = $this->order->waybill_number;
 
             // Get Items
             $product = Item::where("id", $this->order->item_id)->first();

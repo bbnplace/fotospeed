@@ -40,6 +40,20 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit');
     }
 
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'mobile'=> 'required|numeric|digits_between:10,15|unique:users,mobile,'.$request->user()->id,
+            'name' => 'required|string|min:5|max:64'
+        ]);
+
+        $request->user()->mobile = $request->mobile;
+        $request->user()->name = $request->name;
+        $request->user()->save();
+
+        return Redirect::route('profile.edit');
+    }
+
     /**
      * Delete the user's account.
      */

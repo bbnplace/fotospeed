@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CustomerGroup;
 use App\Models\Group;
+use App\Models\RewardPoint;
 use App\Models\Role;
 use App\Models\State;
 use App\Models\User;
@@ -99,11 +100,15 @@ class CustomersController extends Controller
         }]);
         $user = $query->first();
 
+        // Loyalty Reward Points
+        $points = RewardPoint::where('user_id', $user->id)->sum('points');
+
         return [
             'states' => State::getStatesArray(),
             'groups' => Group::getGroupsArray(),
             'customerGroups' => CustomerGroup::getCustomerGroupsArray($customerId),
-            'customer' => $user
+            'customer' => $user,
+            'loyaltyPoints' => $points,
         ];
     }
 

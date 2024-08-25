@@ -3,7 +3,7 @@
     <BackendLayout>
         <Link :href="route('customers')" class="font-bold">Back </Link>
         <VRow>
-            <VCol cols="12" md="5">
+            <VCol cols="12" md="6">
                 <Panel :snippet-title="customer.name">
                     <VRow>
                         <VCol cols="6"><b>Customer Name</b><br />{{ customer.name }}</VCol>
@@ -14,7 +14,8 @@
                         <VCol cols="6"><b>Mobile</b><br />{{ customer.mobile }}</VCol>
                     </VRow>
                     <VRow>
-                        <VCol ><b>Groups</b><br />
+                        <VCol cols="6"><b>Reward Points</b><br />{{ loyaltyPoints }}</VCol>
+                        <VCol cols="6" ><b>Groups</b><br />
                             <v-chip-group
                                 selected-class="text-primary"
                                 column
@@ -34,7 +35,7 @@
                     </div>
                 </Panel>
             </VCol>
-            <VCol cols="12" md="7">
+            <VCol cols="12" md="6">
                 <Panel snippet-title="Engagements">
                     <v-expansion-panels>
                         <v-expansion-panel>
@@ -66,4 +67,5 @@ import MessagingOptions from '@/Components/MessagingClient/MessagingOptions.vue'
 
 const customer = usePage().props.customer;
 const groups = usePage().props.customerGroups;
+const loyaltyPoints = usePage().props.loyaltyPoints;
 </script>

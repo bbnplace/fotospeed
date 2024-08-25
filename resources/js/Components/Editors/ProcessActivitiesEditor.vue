@@ -55,8 +55,35 @@
                                         density="compact"
                                         autocomplete="off"
                                         bg-color="white"
-                                        @blur="updateProcesses"
+                                        @update:model-value="updateProcesses"
                                     ></VAutocomplete>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol cols="12">
+                                    <VCheckbox
+                                        v-model="productProcessActivities[process.name][index].audit"
+                                        label="Verify Task Completion"
+                                        hide-details
+                                        @change="updateProcesses"
+                                    ></VCheckbox>
+                                </VCol>
+                            </VRow>
+                            <VRow v-if="productProcessActivities[process.name][index].audit">
+                                <VCol cols="12">
+                                    <VCombobox
+                                        v-model="productProcessActivities[process.name][index].checks"
+                                        label="Select checks"
+                                        :items="verifiables"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        variant="outlined"
+                                        hide-details
+                                        max-errors="5"
+                                        density="compact"
+                                        @update:model-value="updateProcesses"
+                                    ></VCombobox>
                                 </VCol>
                             </VRow>
                             <div class="mt-2 text-right">
@@ -138,6 +165,7 @@
                                         v-model="productProcesses[index].autoStartNextProcess"
                                         label="Trigger Next Process"
                                         hide-details
+                                        @change="updateProcesses"
                                     ></v-checkbox>
                                 </VCol>
                             </VRow>
@@ -333,6 +361,7 @@ const processData = retrievedData == undefined ? [] : JSON.parse(retrievedData);
 const emailTemplates = usePage().props.emailTemplates;
 const smsTemplates = usePage().props.smsTemplates;
 const whatsappTemplates = usePage().props.whatsappTemplates;
+const verifiables = usePage().props.verifiables;
 
 const productProcesses = ref(processData.processes || []); // Initial Value to be Populated with fetched data
 let productProcessActivities = reactive(processData.tasks || {});

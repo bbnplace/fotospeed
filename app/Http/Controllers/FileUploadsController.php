@@ -26,17 +26,30 @@ class FileUploadsController extends Controller
         ]);
 
         $file = $request->file('files');
-        $path = $file->store("/images");
-
         // If the file is an image, generate a thumbnail
         $thumbnailPath = null;
-        if ($file && strstr($file->getMimeType(), 'image/')) {
-            $srcFile = Storage::get($path);
-            $thumbFile = str_replace("images/","images/thumbnails/", $path);
-            
-            $this->createThmbnail($srcFile, $thumbFile, $settings->thumbnail_size);
-            $thumbnailPath = sprintf('%s/%s', env('APP_URL'), $thumbFile);
+
+        $fileDirectory = "";
+        switch (true) {
+            case strstr($file->getMimeType(), 'image/'):
+                $path = $file->store("/images");
+
+                $srcFile = Storage::get($path);
+                $thumbFile = str_replace("images/","images/thumbnails/", $path);
+                
+                $this->createThmbnail($srcFile, $thumbFile, $settings->thumbnail_size);
+                $thumbnailPath = sprintf('%s/%s', env('APP_URL'), $thumbFile);
+                break;
+            case strstr($file->getMimeType(), 'pdf'):
+                $path = $file->store("/pdfs");
+                $thumbnailPath = sprintf('%s/%s', env('APP_URL'), 'images/pdf-icon.png');
+                break;
+            case strstr($file->getMimeType(), 'zip'):
+                $path = $file->store("/zips");
+                $thumbnailPath = sprintf('%s/%s', env('APP_URL'), 'images/zip-icon.png');
+                break;
         }
+        
         
         // Store the thumbnail and get the path to the thumbnail
         // Save uploaded file to database

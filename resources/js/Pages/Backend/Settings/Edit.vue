@@ -334,6 +334,20 @@
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
+                            <h4 class="my-3">Loyalty Reward</h4>
+                            <VRow>
+                                <VCol>
+                                    <VTextField
+                                    id="loyalty_reward_formula"
+                                    v-model="form.loyalty_reward_formula"
+                                    label="Forumla"
+                                    variant="outlined"
+                                    :hide-details="form.errors.loyalty_reward_formula == undefined"
+                                    :error-messages="form.errors.loyalty_reward_formula"
+                                    hint="Do something"
+                                ></VTextField>
+                                </VCol>
+                            </VRow>
                         </VCard>
                     </v-window-item>
                     <v-window-item value="report">
@@ -436,6 +450,7 @@ const form = useForm({
     cecula_sync_api_key: settings.cecula_sync_api_key,
     paystack_secret_key: settings.paystack_secret_key,
     paystack_public_key: settings.paystack_public_key,
+    loyalty_reward_formula: settings.loyalty_reward_formula,
     wa_phone_id: settings.wa_phone_id,
     wa_access_token: settings.wa_access_token,
     org_name: settings.org_name,

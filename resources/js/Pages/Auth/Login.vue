@@ -3,6 +3,7 @@ import Checkbox from '@/Components/Checkbox.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({
     canResetPassword: {
@@ -12,6 +13,8 @@ defineProps({
         type: String,
     },
 });
+
+const showPassword = ref(false);
 
 const form = useForm({
     mobile: '',
@@ -45,33 +48,37 @@ const submit = () => {
                     autocomplete="phone"
                     :hide-details="form.errors.mobile == undefined"
                     :error-messages="form.errors.mobile"
-                    append-inner-icon="mdi-cellphone"
+                    prepend-inner-icon="mdi-cellphone"
                 ></VTextField>
             </div>
             </div>
 
-            <div class="mt-4">
+            <div class="mt-3">
                 <VTextField
                     id="password"
-                    type="password"
+                    :type="showPassword ? 'text' : 'password'"
                     v-model="form.password"
                     label="Password"
                     variant="outlined"
                     autocomplete="current-password"
                     :hide-details="form.errors.password == undefined"
                     :error-messages="form.errors.password"
-                    append-inner-icon="mdi-lock"
+                    prepend-inner-icon="mdi-lock"
+                    :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    @click:append-inner="showPassword = !showPassword"
                 ></VTextField>
             </div>
 
-            <div class="block mt-4">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600">Remember me</span>
-                </label>
+            <div class="block">
+                <VCheckbox
+                    v-model:checked="form.remember"
+                    label="Remember Me"
+                    id="remember"
+                    name="remember"
+                ></VCheckbox>
             </div>
 
-            <div class="flex items-center justify-end mt-4">
+            <div class="flex items-center justify-end">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
