@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Category;
 use App\Models\EmailTemplate;
 use App\Models\Item;
+use App\Models\Media;
 use App\Models\OrderStatus;
 use App\Models\Process;
 use App\Models\Role;
@@ -140,6 +141,8 @@ class ItemsController extends Controller
 
         $item = $query->first();
 
+        $productMedia = Media::where('usage', 'product')->get(['id', 'name', 'thumbnail', 'thumbnail_100']);
+
         return [
             'item' => $item,
             'categories' => Category::getCategoriesArray(),
@@ -152,6 +155,8 @@ class ItemsController extends Controller
             'whatsappTemplates' => $whatsappTemplates,
             'orderStatuses' => OrderStatus::getOrderStatusesArray(),
             'verifiables' => Task::getVerifiableTasks(),
+            'productMedia' => $productMedia,
+            'stkn' => csrf_token(),
         ];
     }
 
@@ -236,6 +241,7 @@ class ItemsController extends Controller
             'category_id' => $item->category_id,
             'name' => $request->productName,
             'description'=> $item->description,
+            'product_photos' => $item->product_photos,
             'process_data' => $request->includeProcess ? $item->process_data : null,
             'height' => $request->height,
             'width' => $request->width,
@@ -252,5 +258,32 @@ class ItemsController extends Controller
             'response' => sprintf('Successfully duplicated %s to %s', $item->name, $request->productName),
             'link' => route('item.view', [$duplicateItem->id]),
         ];
+    }
+
+    public function saveProductPhotos(Request $request, $id)
+    {
+        $item = Item::find($id);
+        if (empty($item)) {
+            return [
+                'status' => 'failed',
+                'message' => 'Could not find the referenced product'
+            ];
+        }
+
+        try {
+            $item->product_photos = $request->productPhotos;
+            $item->save();
+
+            return [
+                'status' => 'success',
+                'message' => 'Successfully Saved'
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'status' => 'failed',
+                'message' => 'Could not save product photos. Admin has been notified.',
+                'exceptn' => $th->getMessage()
+            ];
+        }
     }
 }

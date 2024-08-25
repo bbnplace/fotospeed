@@ -4,7 +4,7 @@
         <VRow>
             <VCol cols="8">
                 
-                <DropzoneUploader @file-uploaded="showUploadedFile" v-if="showMediaUploader" />
+                <DropzoneUploader usage="Order" @file-uploaded="showUploadedFile" v-if="showMediaUploader" />
                 <Panel snippet-title="Media Library">
                     <div>
                         <VTextField
@@ -87,6 +87,15 @@
                                 ></VTextarea>
                             </VCol>
                             <VCol cols="12">
+                                <VSelect
+                                    v-model="selectedMedia.usage"
+                                    label="Usage"
+                                    variant="outlined"
+                                    :items="mediaUsages"
+                                    hide-details
+                                ></VSelect>
+                            </VCol>
+                            <VCol cols="12">
                                 <div class="grid grid-cols-2">
                                     <div>Uploaded By</div>
                                     <div class="font-bold">{{ selectedMedia.uploadedBy }}</div>
@@ -141,6 +150,7 @@ const search = ref("");
 const page = ref(1);
 const sortBy = null;
 const endpoint = usePage().props.endpoint;
+const mediaUsages = usePage().props.usage;
 
 const toggleSelection = () => {
     enableSelection.value = !enableSelection.value
@@ -198,6 +208,7 @@ const selectImage = image => {
     selectedMedia.value.lastUpdated = moment(image.updated_at).format('LL');
     selectedMedia.value.error = "";
     selectedMedia.value.response = "";
+    selectedMedia.value.usage = image.usage.charAt(0).toUpperCase() + image.usage.slice(1)
 }
 
 const mediaUploadResponse = ref("");

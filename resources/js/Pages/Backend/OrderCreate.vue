@@ -38,7 +38,7 @@
             </VRow>
 
         </template>
-        <DropzoneUploader @fileUploaded="handleData"></DropzoneUploader>
+        <DropzoneUploader usage="Order" @fileUploaded="handleData"></DropzoneUploader>
 
         <div class="flex flex-row-reverse">
             <VBtn

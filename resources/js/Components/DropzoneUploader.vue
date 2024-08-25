@@ -33,6 +33,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const emit = defineEmits(['fileUploaded']);
 const props = defineProps({
+    usage: String
 });
 
 
@@ -58,7 +59,7 @@ const inputData = reactive({
 const uploadParamName = 'files';
 const initDropzone = () => {
     const dropzoneUpload = new Dropzone("#myDropzone", {
-        url: route("file.upload"),
+        url: route("file.upload", [props.usage]),
         paramName: uploadParamName, // Name that will be used to transfer the file
         // Additional Dropzone options...
         headers: {
@@ -97,6 +98,7 @@ const handleSuccess =  async (file, response) => {
     inputData.id = uuidv4();
     inputData.imageThumbnail = response.thumbnail;
     inputData.mediaId = response.id;
+    inputData.thumbnail100 = response.thumbnail_100;
 
     // Run a method to goto system and read first line of the file to extract heading.
     const payload = {

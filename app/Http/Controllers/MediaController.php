@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Media;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class MediaController extends Controller
@@ -14,6 +16,9 @@ class MediaController extends Controller
             'endpoint' => route('media.records'),
             'note' => session('note'),
             'stkn' => csrf_token(),
+            'usage' => [
+                'Order', 'Product', 'Profile'
+            ],
         ]);
     }
 
@@ -87,11 +92,23 @@ class MediaController extends Controller
         $request->validate([
             'name'=> 'nullable|string|max:64|unique:media,name,' . $id,
             'description' => 'nullable|string|max:1000',
+            'usage' => ['required', Rule::in(['Order', 'Product', 'Profile'])]
         ]);
 
         $media = Media::findOrFail($id);
         $media->name = $request->name;
         $media->description = $request->description;
+        $media->usage = strtolower($request->usage);
+
+        if (empty($media->thumbnail_100)) {
+            $srcFile = Storage::get($media->path);
+            $previewImgSize = 100;
+            $previewImageFile = str_replace("images/","images/thumbnails/100/", $media->path);
+            Media::createThumbnail($srcFile, $previewImageFile, $previewImgSize);
+            $previewImgPath = sprintf('%s/%s', env('APP_URL'), $previewImageFile);
+            $media->thumbnail_100 = $previewImgPath;
+        }
+
         $media->save();
 
         return [

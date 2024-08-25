@@ -13,7 +13,7 @@ use Intervention\Image\ImageManager;
 
 class FileUploadsController extends Controller
 {
-    public function uploadImage(Request $request)
+    public function uploadImage(Request $request, $usage)
     {
         $settings = Setting::first();
 
@@ -37,8 +37,15 @@ class FileUploadsController extends Controller
                 $srcFile = Storage::get($path);
                 $thumbFile = str_replace("images/","images/thumbnails/", $path);
                 
-                $this->createThmbnail($srcFile, $thumbFile, $settings->thumbnail_size);
+                // Create thumbnail for the size specified by the user
+                Media::createThumbnail($srcFile, $thumbFile, $settings->thumbnail_size);
                 $thumbnailPath = sprintf('%s/%s', env('APP_URL'), $thumbFile);
+
+                // Create another thumbnail for dropdown
+                $previewImgSize = 100;
+                $previewImageFile = str_replace("images/","images/thumbnails/100/", $path);
+                Media::createThumbnail($srcFile, $previewImageFile, $previewImgSize);
+                $previewImgPath = sprintf('%s/%s', env('APP_URL'), $previewImageFile);
                 break;
             case strstr($file->getMimeType(), 'pdf'):
                 $path = $file->store("/pdfs");
@@ -55,9 +62,15 @@ class FileUploadsController extends Controller
         // Save uploaded file to database
         $uploader = auth()->user()->isCustomer() ?'customer_id':'staff_id';
 
+        if (!empty($usage) && !in_array(strtolower($usage), ['order','product','profile'])) {
+            $usage = 'order';
+        }
+
         return Media::create([
             'path' => $path,
             'thumbnail' => $thumbnailPath,
+            'thumbnail_100' => $previewImgPath,
+            'usage' => strtolower($usage) ?? 'Order',
             $uploader => auth()->user()->id,
         ]);
     }
@@ -77,20 +90,5 @@ class FileUploadsController extends Controller
         return response($data, 200, [
             'Content-Type' => $type
         ]);
-    }
-
-    public function createThmbnail(string $sourceFilePath, string $thumbnailFilePath, int $thumbnailSize = 150)
-    {
-        $driver = new Driver() ;
-        $manager = new ImageManager($driver);
-        
-        $image = $manager->read($sourceFilePath);
-        $image->scale(width: $thumbnailSize);
-
-        // $image->resize($thumbnailSize, null, function ($constraint){
-        //     $constraint->aspectRatio();
-        // });
-
-        $image->save($thumbnailFilePath);
     }
 }

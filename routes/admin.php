@@ -160,6 +160,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::get('panel/item/{id}/edit', [ItemsController::class, 'edit'])->name('item.edit');
     Route::put('panel/item/{id}/edit', [ItemsController::class, 'update'])->name('item.edit');
     Route::post('panel/item/{id}/duplicate', [ItemsController::class, 'duplicate'])->name('item.duplicate');
+    Route::put('panel/item/{id}/save-photos', [ItemsController::class, 'saveProductPhotos'])->name('item.save-photos');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
     Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
     Route::put('panel/item-process/{id}/save', [ItemsController::class,'saveProcessData'])->name('item.saveprocess');

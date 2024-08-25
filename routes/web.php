@@ -73,7 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/order/{id}/cancel', [OrdersController::class, 'cancel'])->name('order.cancel');
     Route::delete('/orders/delete', [OrdersController::class, 'delete'])->name('orders.delete');
 
-    Route::post('/file/upload', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
+    Route::post('/file/upload/{usage}', [FileUploadsController::class, 'uploadImage'])->name('file.upload');
     Route::get('/file/{path}/{type}', [FileUploadsController::class, 'get'])->name('file.load');
     Route::get('/file/download', [FileDownloadsController::class, 'download'])->name('file.download');
 

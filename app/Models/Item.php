@@ -19,6 +19,7 @@ class Item extends Model
         'print_price',
         'sheet_price',
         'cover_print_price',
+        'product_photos',
         'process_data',
         'primary_order_processing_branch',
         'order_processing_branches'

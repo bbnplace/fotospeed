@@ -29,7 +29,7 @@
             </VRow>
         </template>
         
-        <DropzoneUploader v-if="!props.order" @fileUploaded="handleData"></DropzoneUploader>
+        <DropzoneUploader usage="Order" v-if="!props.order" @fileUploaded="handleData"></DropzoneUploader>
         <div class="text-red" v-if="masterForm.errors.files">{{ masterForm.errors.files }}</div>
         <VRow class="mt-4">
             <VCol cols="12" md="6">

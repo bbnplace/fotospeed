@@ -104,6 +104,7 @@
                         >Edit</VBtn>
                     </div>
                 </Panel>
+                <ProductImagesSelector />
             </VCol>
             <VCol cols="12" md="6">
                 <ProcessActivitiesEditor />
@@ -120,6 +121,7 @@ import { usePage, Head, Link, router } from "@inertiajs/vue3";
 import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Panel from "@/Layouts/Shared/Panel.vue";
 import ProcessActivitiesEditor from '@/Components/Editors/ProcessActivitiesEditor.vue';
+import ProductImagesSelector from '@/Components/ProductImagesSelector.vue';
 import TemplateCodes from '@/Components/TemplateCodes.vue'
 import axios from 'axios';
 
