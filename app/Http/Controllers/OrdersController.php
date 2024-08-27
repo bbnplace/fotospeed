@@ -33,8 +33,8 @@ class OrdersController extends Controller
         'price' => 'nullable|integer',
         'name' => 'string|required|min:3|max:32',
         'note' => 'string|nullable|max:2000',
-        'date' => 'string|nullable|max:64',
-        'delivery_date' => 'string',
+        'date' => 'string|required|max:64',
+        // 'delivery_date' => 'required|string',
         'deliveryAddress' => 'string|required|max:200',
         'orderNumber' => 'integer|nullable|digits_between:1,16',
         'quantity' => 'integer|digits_between:1,7',
@@ -257,7 +257,7 @@ class OrdersController extends Controller
                 OrderStatus::DELIVERED, OrderStatus::CANCELLED, OrderStatus::DELIVERY_FAILED
             ]),
             'canCancelOrder' => $canEditOrder && in_array($order->order_status_id, [
-                OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED, OrderStatus::AWAITING_PAYMENT
+                OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED, OrderStatus::AWAITING_PAYMENT, OrderStatus::PAYMENT_CONFIRMED
             ]),
             'canEditReferenceNumber' => $canEditOrder && in_array($order->order_status_id, [
                 OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED

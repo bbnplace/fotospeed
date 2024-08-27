@@ -124,6 +124,15 @@ class MediaController extends Controller
 
     public function delete(Request $request)
     {
+        $request->validate([
+            'selections' => 'required|array'
+        ]);
 
+        Media::deleteMedia($request->selections);
+
+        return [
+            'status' => 'success',
+            'message' => 'Selected media files have been deleted'
+        ];
     }
 }

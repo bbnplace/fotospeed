@@ -1,62 +1,61 @@
 <template>
     <Head title="Create Order"></Head>
-        <VRow>
-            <VCol>
-                <VAutocomplete
-                    v-model="masterForm.item"
-                    label="Select Item"
-                    :items="items"
-                    variant="outlined"
-                    density="compact"
-                    :hide-details="masterForm.errors.item == undefined"
-                    :error-messages="masterForm.errors.item"
-                ></VAutocomplete>
-            </VCol>
-        </VRow>
-        <h4 class="mt-3">Upload Job Pages</h4>
-        <template v-if="orderForm.orderFiles">
-            <VRow>
-                <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
-                    <OrderForm
-                        :orderImage="orderFile.file"
-                        :view="props.order ? 'Edit' : 'New'"
-                        @pageRemoved="removeImage"
-                        @pageDataUpdated="(data) => {
-                            updatePageData(data, orderFile)
-                        }"
-                    ></OrderForm>
-                </VCol>
-            </VRow>
-        </template>
         
-        <DropzoneUploader usage="Order" v-if="!props.order" @fileUploaded="handleData"></DropzoneUploader>
-        <div class="text-red" v-if="masterForm.errors.files">{{ masterForm.errors.files }}</div>
-        <VRow class="mt-4">
+        <VRow>
             <VCol cols="12" md="6">
-                <VRow v-if="$page.props.auth.user.role != 'Customer'">
+                <VRow>
                     <VCol>
+                        <VAutocomplete
+                            v-model="masterForm.item"
+                            label="Select Product"
+                            :items="items"
+                            variant="outlined"
+                            density="compact"
+                            :hide-details="masterForm.errors.item == undefined"
+                            :error-messages="masterForm.errors.item"
+                            @blur="getProductDetails"
+                        ></VAutocomplete>
+                    </VCol>
+                </VRow>
+                <VRow>
+                    <VCol cols="12" sm="5">
                         <VTextField
-                            id="orderNumber"
-                            v-model="masterForm.orderNumber"
-                            label="Reference Number (Optional)"
+                            id="quantity"
+                            v-model="masterForm.quantity"
+                            label="Quantity"
                             variant="outlined"
                             autocomplete="off"
-                            :hide-details="masterForm.errors.orderNumber == undefined"
-                            :error-messages="masterForm.errors.orderNumber"
+                            type="number"
+                            :hide-details="masterForm.errors.quantity == undefined"
+                            :error-messages="masterForm.errors.quantity"
+                        ></VTextField>
+                    </VCol>
+                    <VCol cols="12" sm="7" v-if="$page.props.auth.user.role != 'Customer'">
+                        <VTextField
+                            id="price"
+                            v-model="masterForm.price"
+                            label="Price"
+                            variant="outlined"
+                            autocomplete="off"
+                            type="number"
+                            prefix="₦ "
+                            :hide-details="masterForm.errors.price == undefined"
+                            :error-messages="masterForm.errors.price"
+                            disabled
                         ></VTextField>
                     </VCol>
                 </VRow>
                 <VRow>
                     <VCol>
-                        <VTextField
-                            id="name"
-                            v-model="masterForm.name"
-                            label="Order Name"
+                        <VAutocomplete
+                            v-model="masterForm.branch"
+                            label="Select Processing Branch"
+                            :items="branches"
                             variant="outlined"
-                            autocomplete="off"
-                            :hide-details="masterForm.errors.name == undefined"
-                            :error-messages="masterForm.errors.name"
-                        ></VTextField>
+                            density="compact"
+                            :hide-details="masterForm.errors.branch == undefined"
+                            :error-messages="masterForm.errors.branch"
+                        ></VAutocomplete>
                     </VCol>
                 </VRow>
                 <VRow>
@@ -72,48 +71,37 @@
                         ></VTextarea>
                     </VCol>
                 </VRow>
-                <VRow>
-                    <VCol cols="12" sm="6">
-                        <VTextField
-                            id="quantity"
-                            v-model="masterForm.quantity"
-                            label="Quantity"
-                            variant="outlined"
-                            autocomplete="off"
-                            type="number"
-                            :hide-details="masterForm.errors.quantity == undefined"
-                            :error-messages="masterForm.errors.quantity"
-                        ></VTextField>
-                    </VCol>
-                </VRow>
-                <VRow>
-                    <VCol cols="12" sm="6" v-if="$page.props.auth.user.role != 'Customer'">
-                        <VTextField
-                            id="price"
-                            v-model="masterForm.price"
-                            label="Price"
-                            variant="outlined"
-                            autocomplete="off"
-                            type="number"
-                            prefix="₦ "
-                            :hide-details="masterForm.errors.price == undefined"
-                            :error-messages="masterForm.errors.price"
-                        ></VTextField>
-                    </VCol>
-                </VRow>
+                <h4 class="mt-4">Tracking Information</h4>
                 <VRow>
                     <VCol>
-                        <VAutocomplete
-                            v-model="masterForm.branch"
-                            label="Select Branch"
-                            :items="branches"
+                        <VTextField
+                            id="name"
+                            v-model="masterForm.name"
+                            label="Order Name"
                             variant="outlined"
-                            density="compact"
-                            :hide-details="masterForm.errors.branch == undefined"
-                            :error-messages="masterForm.errors.branch"
-                        ></VAutocomplete>
+                            autocomplete="off"
+                            :hide-details="masterForm.errors.name == undefined"
+                            :error-messages="masterForm.errors.name"
+                        ></VTextField>
                     </VCol>
                 </VRow>
+                <VRow v-if="$page.props.auth.user.role != 'Customer'">
+                    <VCol>
+                        <VTextField
+                            id="orderNumber"
+                            v-model="masterForm.orderNumber"
+                            label="Reference/ Job Card Number (Optional)"
+                            variant="outlined"
+                            autocomplete="off"
+                            :hide-details="masterForm.errors.orderNumber == undefined"
+                            :error-messages="masterForm.errors.orderNumber"
+                        ></VTextField>
+                    </VCol>
+                </VRow>
+            </VCol>
+
+            <VCol cols="12" md="6">
+                <h4>Delivery Information</h4>
                 <VRow v-if="$page.props.auth.user.role != 'Customer'">
                     <VCol>
                         <VTextField
@@ -131,7 +119,7 @@
                     </VCol>
                 </VRow>
                 <VRow>
-                    <VCol>
+                    <VCol cols="12">
                         <VTextarea
                             id="deliveryAddress"
                             v-model="masterForm.deliveryAddress"
@@ -143,25 +131,48 @@
                         ></VTextarea>
                     </VCol>
                 </VRow>
-            </VCol>
-
-            <VCol cols="12" md="6">
-                <v-container>
-                    <v-row justify="space-around">
-                    <v-date-picker
-                        v-model="masterForm.date"
-                        :min="minDeliveryDate"
-                        :max="maxDeliveryDate"
-                        title="Select Delivery Date"
-                        :hide-details="masterForm.errors.date == undefined"
-                        :error-messages="masterForm.errors.date"
-                    ></v-date-picker>
-                    </v-row>
-                </v-container>
-                <!-- {{ masterForm.date }} -->
+                <VRow>
+                    <VCol cols="12">
+                        <v-container>
+                            <v-row justify="space-around">
+                            <v-date-picker
+                                v-model="masterForm.date"
+                                :min="minDeliveryDate"
+                                :max="maxDeliveryDate"
+                                title="Select Delivery Date"
+                                :hide-details="masterForm.errors.date == undefined"
+                                :error-messages="masterForm.errors.date"
+                            ></v-date-picker>
+                            </v-row>
+                        </v-container>
+                    </VCol>
+                </VRow>
             </VCol>
         </VRow>
-
+        <VRow>
+            <VCol>
+                <h4>Upload Job Pages</h4>
+                <template v-if="orderForm.orderFiles">
+                    <VRow>
+                        <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">
+                            <OrderForm
+                                :orderImage="orderFile.file"
+                                :view="props.order ? 'Edit' : 'New'"
+                                @pageRemoved="removeImage"
+                                @pageDataUpdated="(data) => {
+                                    updatePageData(data, orderFile)
+                                }"
+                            ></OrderForm>
+                        </VCol>
+                    </VRow>
+                </template>
+                
+                <DropzoneUploader usage="Order" v-if="!props.order" @fileUploaded="handleData"></DropzoneUploader>
+                <div class="text-red" v-if="masterForm.errors.files">{{ masterForm.errors.files }}</div>
+                
+            </VCol>
+        </VRow>
+        <hr />
         <div class="flex flex-row-reverse">
             <VBtn
                 color="blue-darken-1"
@@ -202,7 +213,7 @@ const masterForm = useForm({
     name: props.order ? props.order.name : "",
     note: props.order ? props.order.note : "",
     btnTag: props.order ? "Save" : "Submit",
-    date: new Date((props.order ? props.order.date : "")),
+    date: props.order ? new Date(props.order.date) : new Date(minDeliveryDate),
     deliveryAddress: props.order ? props.order.deliveryAddress : "",
     orderNumber: props.order ? props.order.orderNumber : "",
     quantity: props.order ? props.order.quantity : 1,
@@ -282,6 +293,29 @@ const getCustomerInfo = async () => {
         });
         masterForm.customerData = response.data;
     }
+}
+
+
+
+const getProductDetails = async () => {
+        const payload = {
+            name: masterForm.item
+        };
+        
+        try {
+            const response = await axios.post(route('item.get-by-name'), payload, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            
+            if (response.data && response.data.status === 'success') {
+                const product = response.data.product;
+                masterForm.price = (product.print_price ?? 0) + (product.sheet_price ?? 0) + (product.cover_print_price ?? 0);
+            }
+        } catch (error) {
+            
+        }
 }
 
 </script>

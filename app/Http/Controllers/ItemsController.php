@@ -122,6 +122,22 @@ class ItemsController extends Controller
         return redirect()->route('items')->with('note', 'Item Registered');
     }
 
+    public function getItemByName(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|exists:items,name'
+        ]);
+
+        $item = Item::where('name', $request->name)->first();
+        
+        return empty($item) ? [
+            'status' => 'failed',
+        ] : [
+            'status' => 'success',
+            'product' => $item
+        ];
+    }
+
     private function getItem($id)
     {
         $emailTemplates = EmailTemplate::getEmailTemplatesArray();

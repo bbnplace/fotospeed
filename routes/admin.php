@@ -146,7 +146,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('panel/media/{id}/edit', [MediaController::class, 'edit'])->name('media.edit');
     Route::put('panel/media/{id}/edit', [MediaController::class, 'update'])->name('media.edit');
     Route::get('panel/media/{id}', [MediaController::class, 'view'])->name('media.view');
-    Route::delete('panel/media/delete', [MediaController::class, 'delete'])->name('media.delete');
+    Route::post('panel/media/delete', [MediaController::class, 'delete'])->name('media.delete');
 });
 
 
@@ -162,6 +162,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::post('panel/item/{id}/duplicate', [ItemsController::class, 'duplicate'])->name('item.duplicate');
     Route::put('panel/item/{id}/save-photos', [ItemsController::class, 'saveProductPhotos'])->name('item.save-photos');
     Route::get('panel/item/{id}', [ItemsController::class, 'view'])->name('item.view');
+    Route::post('panel/item/find', [ItemsController::class, 'getItemByName'])->name('item.get-by-name');
     Route::delete('panel/items/delete', [ItemsController::class, 'delete'])->name('items.delete');
     Route::put('panel/item-process/{id}/save', [ItemsController::class,'saveProcessData'])->name('item.saveprocess');
 

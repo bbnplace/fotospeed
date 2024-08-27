@@ -33,15 +33,36 @@ class Media extends Model
         $image = $manager->read($sourceFilePath);
         $image->scale(width: $thumbnailSize);
 
-        // $image->resize($thumbnailSize, null, function ($constraint){
-        //     $constraint->aspectRatio();
-        // });
-
         $path = dirname($thumbnailFilePath);
         if (!File::exists($path)) {
             File::makeDirectory($path, 0755, true);
         }
 
         $image->save($thumbnailFilePath);
+    }
+
+    public static function deleteMedia(array $media)
+    {
+        foreach ($media as $value) {
+            $image = self::find($value);
+            if (!empty($image)) {
+                // Delete the main file
+                if (!empty($image->path) && Storage::exists($image->path)) {
+                    Storage::delete($image->path);
+                }
+                
+                // Delete the thumbnail
+                if (!empty($image->thumbnail) && File::exists($image->thumbnail)) {
+                    File::delete($image->thumbnail);
+                }
+
+                // Delete the avatar
+                if (!empty($image->thumbnail_100) && File::exists($image->thumbnail_100)) {
+                    File::delete($image->thumbnail_100);
+                }
+
+                $image->delete();
+            }
+        }
     }
 }
