@@ -38,6 +38,9 @@ class OrdersController extends Controller
         'deliveryAddress' => 'string|required|max:200',
         'orderNumber' => 'integer|nullable|digits_between:1,16',
         'quantity' => 'integer|digits_between:1,7',
+        'newCustomer' => 'required|boolean',
+        'customerName' => 'required_if:newCustomer,true|string|min:5|max:64',
+        'customerEmail' => 'required_if:newCustomer,true|max:124|email:rfc,dns|unique:users,email',
     ];
 
     public function index()
@@ -149,7 +152,9 @@ class OrdersController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
+        if ($request->newCustomer) {
+            $this->rules['customerMobile'] = 'required|string|min:7|max:14|unique:users,mobile';
+        }
         $request->validate($this->rules);
 
         // Get Item ID
@@ -165,6 +170,19 @@ class OrdersController extends Controller
 
         if (empty($process)) {
             // Todo: Redirect to notify customer that something is wrong with the order while notify admin that an initial set does not exist
+        }
+
+        // Register customer if this is a new customer
+        if ($request->newCustomer) {
+            User::create([
+                'role_id' => Role::CUSTOMER,
+                'name' => $request->customerName,
+                'email' => $request->customerEmail,
+                'mobile' => $request->customerMobile,
+                'state_id' => auth()->user()->state_id,
+                'password' => '',
+                'branch_id' => auth()->user()->branch_id,
+            ]);
         }
 
 

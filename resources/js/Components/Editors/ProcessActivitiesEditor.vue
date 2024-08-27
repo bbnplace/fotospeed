@@ -45,18 +45,18 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <VAutocomplete
+                                    <VSelect
                                         :id="`team${index}`"
                                         v-model="productProcessActivities[process.name][index].team"
                                         label="Team"
                                         :items="teams"
                                         variant="outlined"
-                                        hide-details
                                         density="compact"
                                         autocomplete="off"
                                         bg-color="white"
                                         @update:model-value="updateProcesses"
-                                    ></VAutocomplete>
+                                        :rules="[value => !!value || 'This field is required']"
+                                    ></VSelect>
                                 </VCol>
                             </VRow>
                             <VRow>

@@ -174,11 +174,16 @@ class CustomersController extends Controller
 
     public function findByMobile(Request $request)
     {
-        return User::where('mobile', $request->mobile)->first([
+        $customer = User::where('mobile', $request->mobile)->first([
             'name',
             'email',
             'mobile'
         ]);
+
+        return [
+            'status' => 'success',
+            'customer' => $customer,
+        ];
     }
 
     public function findCustomerByMobileOrName(Request $request)

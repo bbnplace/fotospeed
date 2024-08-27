@@ -9,6 +9,13 @@ class Role extends Model
 {
     use HasFactory;
 
+    const CUSTOMER = 1;
+    const RECEPTION = 2;
+    const PRODUCTION = 3;
+    const MANAGEMENT = 4;
+    const ADMINISTRATION = 5;
+    const SYSTEM_ADMIN = 6;
+
     protected $fillable = ['name'];
 
     public $timestamps = false;

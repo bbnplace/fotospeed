@@ -34,7 +34,7 @@
                         <VTextField
                             id="price"
                             v-model="masterForm.price"
-                            label="Price"
+                            label="Unit Price"
                             variant="outlined"
                             autocomplete="off"
                             type="number"
@@ -103,7 +103,7 @@
             <VCol cols="12" md="6">
                 <h4>Delivery Information</h4>
                 <VRow v-if="$page.props.auth.user.role != 'Customer'">
-                    <VCol>
+                    <VCol cols="12">
                         <VTextField
                             id="customerMobile"
                             v-model="masterForm.customerMobile"
@@ -116,6 +116,30 @@
                             :error-messages="masterForm.errors.customerMobile"
                         ></VTextField>
                         {{ masterForm.customerData.name }}
+                    </VCol>
+                    <VCol cols="12" v-if="masterForm.newCustomer">
+                        <VTextField
+                            id="name"
+                            v-model="masterForm.customerName"
+                            label="Full Name"
+                            variant="outlined"
+                            autocomplete="name"
+                            :hide-details="masterForm.errors.customerName == undefined"
+                            :error-messages="masterForm.errors.customerName"
+                            append-inner-icon="mdi-account"
+                        ></VTextField>
+                    </VCol>
+                    <VCol cols="12" v-if="masterForm.newCustomer">
+                        <VTextField
+                            id="email"
+                            v-model="masterForm.customerEmail"
+                            label="Email (Optional)"
+                            variant="outlined"
+                            autocomplete="off"
+                            :hide-details="masterForm.errors.customerEmail == undefined"
+                            :error-messages="masterForm.errors.customerEmail"
+                            append-inner-icon="mdi-email"
+                        ></VTextField>
                     </VCol>
                 </VRow>
                 <VRow>
@@ -184,7 +208,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { Head, usePage, router, useForm } from '@inertiajs/vue3';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
 import OrderForm from '@/Components/OrderForm.vue';
@@ -201,23 +225,31 @@ const items = usePage().props.items;
 const branches = usePage().props.branches;
 
 const minDeliveryDate = usePage().props.deliveryDate.min;
-const maxDeliveryDate = usePage().props.deliveryDate.max;
+const maxDeliveryDate = usePage().props.deliveryDate.max; 
 
 const masterForm = useForm({
-    item: props.order ? props.order.item : "Select",
-    branch: props.order ? props.order.branch : "Select",
+    item: "Select",
+    branch: "Select",
     files: [],
-    customerMobile: props.order ? usePage().props.order.user.mobile : "",
-    customerData: props.order ? usePage().props.order.user : {},
-    price: props.order ? props.order.price : "",
-    name: props.order ? props.order.name : "",
-    note: props.order ? props.order.note : "",
-    btnTag: props.order ? "Save" : "Submit",
-    date: props.order ? new Date(props.order.date) : new Date(minDeliveryDate),
-    deliveryAddress: props.order ? props.order.deliveryAddress : "",
-    orderNumber: props.order ? props.order.orderNumber : "",
-    quantity: props.order ? props.order.quantity : 1,
+    customerMobile: "",
+    customerData: {},
+    unitPrice: 0,
+    quantity:  1,
+    price: 0,
+    name: "",
+    note: "",
+    btnTag: "Submit",
+    date: new Date(minDeliveryDate),
+    deliveryAddress: "",
+    orderNumber: "",
+    print_price: 0,
+    sheet_price: 0,
+    cover_print_price: 0,
+    newCustomer: false,
+    customerName: null,
+    customerEmail: null,
 })
+
 
 const handleData = data => {
     const copyOfUploadedData = { ...data, pageNumber: "", note: "" }
@@ -291,7 +323,16 @@ const getCustomerInfo = async () => {
             },
             cancelToken: source.token
         });
-        masterForm.customerData = response.data;
+        
+        if(response.data && response.data.status == 'success')
+        {
+            if(response.data.customer == null){
+                masterForm.newCustomer = true;
+            } else {
+                masterForm.customerData = response.data.customer;
+            }
+            
+        }
     }
 }
 
@@ -317,6 +358,7 @@ const getProductDetails = async () => {
             
         }
 }
+
 
 </script>
 
