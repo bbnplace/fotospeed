@@ -482,7 +482,7 @@ class OrdersController extends Controller
     {
         // Log::info('Order ID: '. $orderId .', Waybill No: '. $request->waybillNo );
         $request->validate([
-            'waybillNumber' => 'required|unique:orders,waybill_number|string|max:16'
+            'waybillNumber' => 'required|unique:orders,waybill_number|string|max:32'
         ]);
 
         $order = Order::find($orderId);
