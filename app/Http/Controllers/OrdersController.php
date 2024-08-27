@@ -21,6 +21,7 @@ use App\Models\Task as TaskModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 
@@ -39,8 +40,6 @@ class OrdersController extends Controller
         'orderNumber' => 'integer|nullable|digits_between:1,16',
         'quantity' => 'integer|digits_between:1,7',
         'newCustomer' => 'required|boolean',
-        'customerName' => 'required_if:newCustomer,true|string|min:5|max:64',
-        'customerEmail' => 'nullable|max:124|email:rfc,dns|unique:users,email',
     ];
 
     public function index()
@@ -154,6 +153,8 @@ class OrdersController extends Controller
     {
         if ($request->newCustomer) {
             $this->rules['customerMobile'] = 'required|string|min:7|max:14|unique:users,mobile';
+            $this->rules['customerName'] = 'required|string|min:5|max:64';
+            $this->rules['customerEmail'] = 'nullable|max:124|email:rfc,dns|unique:users,email';
         }
         $request->validate($this->rules);
 
@@ -253,11 +254,21 @@ class OrdersController extends Controller
         $canGenerateInvoice = !$hasInvoice && ($canEditOrder || auth()->user()->isCashier());
         $canRegenerateInvoice = $hasInvoice && !$invoicePaid;
 
+        $settings = Setting::first();
+        $offlinePaymentApprover = null;
+        if(!empty($settings->who_approves_offline_payment)){
+            $approverRole = Role::where('name', $settings->who_approves_offline_payment)->first();
+            $offlinePaymentApprover = $approverRole->id;
+        }
+        $canApproveOfflinePayment = $hasInvoice && !$invoicePaid && $settings->support_offline_payment && (auth()->user()->isAdmin() || auth()->user()->role_id == $offlinePaymentApprover);
+        // dd($canApproveOfflinePayment);
         return [
             'order' => $order,
             'nextProcess' => $nextProcess->name ?? null,
             'orderDetail' => $orderDetail,
             'items' => Item::getItemsArray(),
+            'paymentMethods' => ['Bank Transfer', 'Cash'],
+            'paymentStatuses' => ['Paid', 'Unpaid'],
             'branches' => Branch::getBranchesArray(),
             'orderStatuses' => OrderStatus::getOrderStatusesArray(),
             'stkn' => csrf_token(),
@@ -265,6 +276,8 @@ class OrdersController extends Controller
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
             'activities' => $this->getOrderActivityLog($id),
             'hasInvoice' => $hasInvoice,
+            'invoice' => $invoice,
+            'canApproveOfflinePayment' => $canApproveOfflinePayment,
             'canGenerateInvoice' => $canGenerateInvoice,
             'invoicePaid' => $invoicePaid,
             'canEditOrder' => $canEditOrder,
@@ -289,6 +302,28 @@ class OrdersController extends Controller
             ]),
             'canPrintOrderCard' => $canGenerateInvoice && !empty($order->order_number) && !empty($order->total_cost),
         ];
+    }
+
+    public function updatePaymentStatus(Request $request)
+    {
+        $paymentMethods= ['Bank Transfer', 'Cash'];
+        $paymentStatuses = ['Paid', 'Unpaid'];
+        $request->validate([
+            'orderId' => 'required|integer|exists:orders,id|exists:invoices,order_id',
+            'status' => ['required', Rule::in($paymentStatuses)],
+            'method' => ['required', Rule::in($paymentMethods)]
+        ]);
+
+        $invoice = Invoice::where('order_id', $request->orderId)->first();
+        $invoice->invoice_status_id = $request->status == 'Paid' ? InvoiceStatus::STATUS_PAID : InvoiceStatus::STATUS_NEW;
+        $invoice->payment_method = $request->method;
+        $invoice->save();
+
+        return [
+            'status' => 'success',
+            'message' => 'Successfully Updated'
+        ];
+
     }
 
     public function edit($id)

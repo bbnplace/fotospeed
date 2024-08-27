@@ -334,13 +334,39 @@
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
+                            <h4 class="my-3">Offline Payment</h4>
+                            <VRow>
+                                <VCol>
+                                    <VCheckbox
+                                        id="support_offline_payment"
+                                        v-model="form.support_offline_payment"
+                                        label="Enable Support"
+                                        :hide-details="form.errors.support_offline_payment == undefined"
+                                        :error-messages="form.errors.support_offline_payment"
+                                    ></VCheckbox>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VAutocomplete
+                                        id="who_approves_offline_payment"
+                                        v-model="form.who_approves_offline_payment"
+                                        label="Who Approves?"
+                                        :items="roles"
+                                        variant="outlined"
+                                        :hide-details="form.errors.who_approves_offline_payment == undefined"
+                                        :error-messages="form.errors.who_approves_offline_payment"
+                                        density="compact"
+                                    ></VAutocomplete>
+                                </VCol>
+                            </VRow>
                             <h4 class="my-3">Loyalty Reward</h4>
                             <VRow>
                                 <VCol>
                                     <VTextField
                                     id="loyalty_reward_formula"
                                     v-model="form.loyalty_reward_formula"
-                                    label="Forumla"
+                                    label="Price Multiplier"
                                     variant="outlined"
                                     :hide-details="form.errors.loyalty_reward_formula == undefined"
                                     :error-messages="form.errors.loyalty_reward_formula"
@@ -464,6 +490,8 @@ const form = useForm({
     reportables: normalizeReportables(settings.reportables),
     reportViewers: JSON.parse(settings.reports_permission),
     processing: false,
+    support_offline_payment: settings.support_offline_payment == 1,
+    who_approves_offline_payment: settings.who_approves_offline_payment,
 });
 
 

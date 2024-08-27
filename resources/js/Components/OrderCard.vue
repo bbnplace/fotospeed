@@ -31,6 +31,12 @@
                             </VRow>
                             <VRow>
                                 <VCol>
+                                    <b>Delivery Address</b><br />
+                                    {{ order.delivery_address }}
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
                                     <b>Branch</b><br />
                                     {{ order.branch.name }}
                                 </VCol>
@@ -143,9 +149,71 @@
                                 </VCol>
                             </VRow>
                             <VRow v-if="hasInvoice">
-                                <VCol cols="12" sm="6">
+                                <VCol cols="12">
                                     <b>Invoice Status</b><br />
                                     {{ invoicePaid ? "Paid" : "Unpaid" }}
+                                </VCol>
+                            </VRow>
+                            <VRow v-if="hasInvoice && invoicePaid">
+                                <VCol cols="12">
+                                    <b>Payment Method</b><br />
+                                    {{ invoicePaymentMethod }}
+                                </VCol>
+                            </VRow>
+
+                            
+                            <VRow v-if="canApproveOfflinePayment">
+                                <VCol cols="12">
+                                    <v-btn
+                                        prepend-icon="mdi-account-credit-card"
+                                    >Update Payment
+                                    <v-overlay
+                                        v-model="showPaymentConfirmationOverlay"
+                                        activator="parent"
+                                        scroll-strategy="close"
+                                        location-strategy="connected"
+                                    >
+                                        <v-card width="300" class="p-2">
+                                            <v-card-title>Update Payment Status</v-card-title>
+                                            <v-card-text>
+                                                <v-row>
+                                                    <v-col cols="12" class="mt-2">
+                                                        <v-select
+                                                            v-model="selectedPaymentStatus"
+                                                            label="Select Status"
+                                                            :items="paymentStatuses"
+                                                            variant="outlined"
+                                                            hide-details
+                                                        ></v-select>
+                                                    </v-col>
+                                                    <v-col cols="12">
+                                                        <v-select
+                                                            v-model="selectedPaymentMethod"
+                                                            label="Payment Method"
+                                                            :items="paymentMethods"
+                                                            variant="outlined"
+                                                            hide-details
+                                                        ></v-select>
+                                                    </v-col>
+                                                    <v-col cols="12">
+                                                        <v-progress-linear indeterminate color="red" v-if="updatingPaymentStatus"></v-progress-linear>
+                                                        <p v-if="paymentUpdateError.length" class="text-red">{{ paymentUpdateError }}</p>
+                                                        <p v-if="paymentUpdateSuccess.length">{{ paymentUpdateSuccess }}</p>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                                <v-btn
+                                                    @click="updatePaymentStatus"
+                                                >Update</v-btn>
+                                                <v-btn
+                                                    color="red"
+                                                    @click="showPaymentConfirmationOverlay = !showPaymentConfirmationOverlay"
+                                                >Close</v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-overlay>
+                                    </v-btn>
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -191,12 +259,6 @@
                                             </VCard>
                                         </VOverlay>
                                     </VBtn>
-                                </VCol>
-                            </VRow>
-                            <VRow>
-                                <VCol>
-                                    <b>Delivery Address</b><br />
-                                    {{ order.delivery_address }}
                                 </VCol>
                             </VRow>
                         </VCol>
@@ -424,7 +486,7 @@ const order = usePage().props.order;
 const orderDetail = usePage().props.orderDetail;
 const hasInvoice = usePage().props.hasInvoice;
 const canGenerateInvoice = usePage().props.canGenerateInvoice;
-const invoicePaid = usePage().props.invoicePaid;
+const invoicePaid = ref(usePage().props.invoicePaid);
 const canEditOrder = usePage().props.canEditOrder;
 const canHoldOrder = usePage().props.canHoldOrder;
 const canCancelOrder = usePage().props.canCancelOrder;
@@ -439,6 +501,10 @@ const orderStatus = ref(order.order_status.name)
 const currentProcess = ref(order.process ? order.process.name : "-");
 const waybillNo = order.waybill_number;
 const enableHumanForwarding = ref(order.human_forwarding);
+const selectedPaymentMethod = ref("");
+const selectedPaymentStatus = ref("");
+const paymentMethods = usePage().props.paymentMethods;
+const paymentStatuses = usePage().props.paymentStatuses;
 
 const orderCancelError = ref("");
 let source = null;
@@ -730,6 +796,49 @@ const startNextProcess = async () => {
         nextProcessStartResponse.value = "";
         nextProcessStartError.value = "";
     }, 7000)
+}
+
+
+const canApproveOfflinePayment = usePage().props.canApproveOfflinePayment;
+const showPaymentConfirmationOverlay = ref(false);
+const paymentUpdateError = ref("");
+const paymentUpdateSuccess = ref("");
+const updatingPaymentStatus = ref(false);
+const orderInvoice = usePage().props.invoice;
+const invoicePaymentMethod = ref(orderInvoice == null ? "" : orderInvoice.payment_method);
+const updatePaymentStatus = async () => {
+    const payload = {
+        orderId: order.id,
+        status: selectedPaymentStatus.value,
+        method: selectedPaymentMethod.value
+    }
+    updatingPaymentStatus.value = true;
+    paymentUpdateError.value = "";
+    paymentUpdateSuccess.value = "";
+
+    try {
+        const response = await axios.post(route('order.update-payment'), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.data && response.data.status == "success") {
+            paymentUpdateSuccess.value = response.data.message;
+            invoicePaid.value = selectedPaymentStatus.value == 'Paid';
+            invoicePaymentMethod.value = selectedPaymentMethod.value;
+        } else {
+            
+        }
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            paymentUpdateError.value = error.response.data.message;
+        } else {
+            paymentUpdateError.value = "Something went wrong! Pls try again later.";
+        }
+    }
+
+    updatingPaymentStatus.value = false;
 }
 
 

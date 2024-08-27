@@ -65,7 +65,9 @@ class SettingsController extends Controller
             'reportViewers' => 'required|array',
             'reportViewers.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
             'invoice_no_src' => 'required|string|max:64',
-            'loyalty_reward_formula' => 'nullable|string|max:64'
+            'loyalty_reward_formula' => 'nullable|string|max:64',
+            'support_offline_payment' => 'nullable|boolean',
+            'who_approves_offline_payment' => 'nullable|string|max:64',
         ];
 
         $request->validate($rules);
@@ -99,6 +101,8 @@ class SettingsController extends Controller
         $settings->reports_permission = json_encode($request->reportViewers);
         $settings->invoice_no_src = $request->invoice_no_src;
         $settings->loyalty_reward_formula = $request->loyalty_reward_formula;
+        $settings->support_offline_payment = $request->support_offline_payment;
+        $settings->who_approves_offline_payment = $request->who_approves_offline_payment;
         $settings->save();
 
         return redirect(route('settings'));

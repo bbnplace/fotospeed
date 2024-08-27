@@ -136,6 +136,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::put('/order/{id}/reactivate', [OrdersController::class, 'reactivate'])->name('order.reactivate');
     Route::put('/order/{id}/add-reference', [OrdersController::class, 'editReferenceNumber'])->name('order.set-reference');
     Route::put('/order/{id}/set-price', [OrdersController::class, 'editPrice'])->name('order.set-price');
+    Route::post('/order/update-payment', [OrdersController::class, 'updatePaymentStatus'])->name('order.update-payment');
     Route::put('/order/{id}/save-waybill', [OrdersController::class, 'setWaybillNumber'])->name('order.save-waybill');
 
     // Media Library Management
