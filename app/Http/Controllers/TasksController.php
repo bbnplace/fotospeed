@@ -59,7 +59,7 @@ class TasksController extends Controller
         ];
 
         $query = Task::query();
-        $query->where('user_id', auth()->user()->role_id);
+        $query->where('user_id', auth()->user()->id);
         $query->with('order', function ($query){
             $query->select('id','name','order_number','paused');
         });

@@ -40,7 +40,7 @@ class OrdersController extends Controller
         'quantity' => 'integer|digits_between:1,7',
         'newCustomer' => 'required|boolean',
         'customerName' => 'required_if:newCustomer,true|string|min:5|max:64',
-        'customerEmail' => 'required_if:newCustomer,true|max:124|email:rfc,dns|unique:users,email',
+        'customerEmail' => 'nullable|max:124|email:rfc,dns|unique:users,email',
     ];
 
     public function index()
