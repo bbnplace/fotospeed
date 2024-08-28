@@ -241,10 +241,11 @@ class OrdersController extends Controller
 
     private function getOrder($id)
     {
+        $isFromAdministrativeBranch = auth()->user()->isFromAdministrativeBranch();
         $query = Order::query();
 
         // If user is not from Administrative branch only show order from their branch
-        if (!auth()->user()->isFromAdministrativeBranch())
+        if (!$isFromAdministrativeBranch)
         {
             $query->where('order_branch_id', auth()->user()->branch_id);
         }
@@ -277,12 +278,12 @@ class OrdersController extends Controller
         $invoice = Invoice::where('order_id', $order->id)->first();
         $hasInvoice = !empty($invoice);
         $invoicePaid = $hasInvoice && $invoice->invoice_status_id == InvoiceStatus::STATUS_PAID;
-        $canEditOrder = auth()->user()->isAdmin() || auth()->user()->isReception();
-        $canGenerateInvoice = !$hasInvoice && ($canEditOrder || auth()->user()->isCashier());
-        $canRegenerateInvoice = $hasInvoice && !$invoicePaid;
+        $canEditOrder = $isFromAdministrativeBranch && (auth()->user()->isAdmin() || auth()->user()->isReception());
+        $canGenerateInvoice = $isFromAdministrativeBranch && (!$hasInvoice && ($canEditOrder || auth()->user()->isCashier()));
+        $canRegenerateInvoice = $isFromAdministrativeBranch && $hasInvoice && !$invoicePaid;
 
         $orderProcessCoordinatorRole = $this->getOrderProcessCoordinatorRole($order);
-        $canForwardToNextProcess = auth()->user()->isAdmin() || (!empty($orderProcessCoordinatorRole) && auth()->user()->role_id == $orderProcessCoordinatorRole->id);
+        $canForwardToNextProcess = $isFromAdministrativeBranch && (auth()->user()->isAdmin() || (!empty($orderProcessCoordinatorRole) && auth()->user()->role_id == $orderProcessCoordinatorRole->id));
 
         $settings = Setting::first();
         $offlinePaymentApprover = null;
@@ -290,7 +291,7 @@ class OrdersController extends Controller
             $approverRole = Role::where('name', $settings->who_approves_offline_payment)->first();
             $offlinePaymentApprover = $approverRole->id;
         }
-        $canApproveOfflinePayment = $hasInvoice && !$invoicePaid && $settings->support_offline_payment && (auth()->user()->isAdmin() || auth()->user()->role_id == $offlinePaymentApprover);
+        $canApproveOfflinePayment = $isFromAdministrativeBranch && $hasInvoice && !$invoicePaid && $settings->support_offline_payment && (auth()->user()->isAdmin() || auth()->user()->role_id == $offlinePaymentApprover);
         // dd($canApproveOfflinePayment);
         return [
             'order' => $order,

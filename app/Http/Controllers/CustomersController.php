@@ -43,6 +43,12 @@ class CustomersController extends Controller
         $query = User::query();
         $query->where('role_id', $customerRole->id);
 
+        // If query is not from an administrative branch, only customers from that branch should appear in resultset
+        if (!auth()->user()->isFromAdministrativeBranch())
+        {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+
         if (!empty($search)) {
             $searchTerm = $search['_value'];
             if (!empty($searchTerm)) {
@@ -92,6 +98,12 @@ class CustomersController extends Controller
     {
         $query = User::query();
         $query->where('id', $customerId);
+        // If query is not from an administrative branch, only customers from that branch should appear in resultset
+        if (!auth()->user()->isFromAdministrativeBranch())
+        {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+
         $query->with(['role' => function ($query) {
             $query->select('id', 'name');
         }]);
@@ -189,6 +201,12 @@ class CustomersController extends Controller
     public function findCustomerByMobileOrName(Request $request)
     {
         $query = User::query();
+        // If query is not from an administrative branch, only customers from that branch should appear in resultset
+        if (!auth()->user()->isFromAdministrativeBranch())
+        {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+        
         $query->where('role_id', (Role::where('name', 'Customer')->first())->id);
         $query->where('mobile', $request->keyphrase);
         $query->with('state', function ($query){
