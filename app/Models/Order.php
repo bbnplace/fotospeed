@@ -22,6 +22,7 @@ class Order extends Model
         'note',
         'delivery_date',
         'branch_id',
+        'order_branch_id',
         'delivery_address',
         'order_number',
         'quantity',

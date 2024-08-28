@@ -199,6 +199,7 @@ class OrdersController extends Controller
             'user_id' => auth()->user()->isCustomer() ? auth()->user()->id :  $customerData->id,
             'item_id' => $item->id,
             'branch_id' => $branch->id,
+            'order_branch_id' => auth()->user()->branch_id ?? $branch->id,
             'process_id' => $process->id,
             'order_status_id' => 1,
             'detail' => json_encode($request->all()),

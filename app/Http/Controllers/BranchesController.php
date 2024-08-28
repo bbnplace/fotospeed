@@ -71,13 +71,15 @@ class BranchesController extends Controller
             'name' => 'required|string|unique:branches,name|min:2|max:64',
             'address' => 'required|string|min:10|max:200',
             'state' => 'required|string|exists:states,name|min:2|max:64',
+            'isAdministrative' => 'nullable|boolean',
         ]);
 
         $state = State::where('name', $request->state)->first();
         Branch::create([
             'name' => $request->name,
             'address' => $request->address,
-            'state_id' => $state->id
+            'state_id' => $state->id,
+            'is_administrative' => $request->isAdministrative
         ]);
 
         return redirect()->route('branches')->with('note', $request->name . ' branch has been registered.');
@@ -102,11 +104,13 @@ class BranchesController extends Controller
             'name' => $branch->name != $request->name ? 'required|string|unique:branches,name|min:2|max:64' : 'required|string|min:2|max:64',
             'address' => 'required|string|min:10|max:200',
             'state' => 'required|string|exists:states,name|min:2|max:64',
+            'isAdministrative' => 'nullable|boolean',
         ]);
 
         $branch->name = $request->name;
         $branch->address = $request->address;
         $branch->state_id = $state->id;
+        $branch->is_administrative = $request->isAdministrative;
         $branch->save();
 
         return redirect()->route('branch.view', [$id])->with('note', 'Updated.');

@@ -63,6 +63,7 @@
                 :hide-details="form.errors.groups == undefined"
                 :error-messages="form.errors.groups"
                 max-errors="5"
+                density="compact"
             ></VCombobox>
         </div>
         <VDivider class="border-opacity-75 my-8"></VDivider>

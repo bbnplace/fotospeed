@@ -11,7 +11,7 @@
                 :error-messages="form.errors.name"
             ></VTextField>
         </div>
-        <div class="mt-4">
+        <div class="mt-3">
             <VTextarea
                 id="address"
                 v-model="form.address"
@@ -22,7 +22,7 @@
                 density="compact"
             ></VTextarea>
         </div>
-        <div class="mt-4">
+        <div class="mt-3">
             <VAutocomplete
                 id="state"
                 label="State"
@@ -35,9 +35,16 @@
             >
             </VAutocomplete>
         </div>
-
-        <div class="flex items-center justify-end mt-4">
-
+        <div class="mt-3">
+            <v-checkbox
+                v-model="form.isAdministrative"
+                label="Is Administrative Branch"
+                :hide-details="form.errors.isAdministrative == undefined"
+                :error-messages="form.errors.isAdministrative"
+            ></v-checkbox>
+        </div>
+        <hr />
+        <div class="flex items-center justify-end mt-2">
             <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                 Save
             </PrimaryButton>
@@ -53,6 +60,7 @@ interface Branch {
     id: Number,
     name: String,
     address: String,
+    is_administrative: Boolean,
     state: {
         id: Number,
         name: String
@@ -70,6 +78,7 @@ const form = useForm({
     name: props.branch ? props.branch.name : "",
     address: props.branch ? props.branch.address : "",
     state: props.branch ? props.branch.state.name : "",
+    isAdministrative: props.branch ? props.branch.is_administrative == 1 : false,
 });
 
 const submit = () => {

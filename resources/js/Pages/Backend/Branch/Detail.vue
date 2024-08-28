@@ -10,9 +10,12 @@
             <div>
                 {{ branch.state.name }}
             </div>
+            <div>
+                {{ branch.is_administrative == 1 ? 'Administrative Branch' : 'Liason Office' }}
+            </div>
             <hr />
             <div class="mt-3 text-right">
-                <Link :href="route('branch.edit', branch.id)" class="btn btn-dark">Rename</Link>
+                <Link :href="route('branch.edit', branch.id)" class="btn btn-dark">Edit</Link>
             </div>
         </Centralize>
     </BackendLayout>
