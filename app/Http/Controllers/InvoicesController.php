@@ -90,7 +90,7 @@ class InvoicesController extends Controller
         ];
     }
 
-    private function getInvoice($id)
+    private function getInvoice($id, $isNewlyGeneratedInvoice = false)
     {
         $query = Invoice::query();
         $query->where('id', $id);
@@ -127,13 +127,15 @@ class InvoicesController extends Controller
                 'email' => $settings->org_email,
                 'phone' => $settings->org_phone,
                 'url' => $settings->org_url,
-            ]
+            ],
+            'newlyGeneratedInvoice' => $isNewlyGeneratedInvoice
         ];
     }
 
     public function view($id)
     {
-        return Inertia::render('Backend/Invoice/Detail', $this->getInvoice($id));
+        $sessionNote = session('note');
+        return Inertia::render('Backend/Invoice/Detail', $this->getInvoice($id, $sessionNote != null));
     }
 
     public function cancel($id)

@@ -6,7 +6,7 @@
                 <Link href="#" class="font-bold" @click="goBack">Back</Link>
             </VCol>
         </VRow>
-        <Panel snippet-title="Invoice Successfully Generated">
+        <Panel snippet-title="Invoice Successfully Generated" v-if="isNewlyGeneratedInvoice">
             <p>
                 Please Navigate to the task dashboard and move Invoice Generation Task to <b>Done</b>.<br />
                 Once all tasks in this process are <b>done</b>, a link to login and make payment will be sent to the customer.
@@ -74,10 +74,41 @@
                 </VCol>
             </VRow>
         </Panel>
-        <Panel snippet-title="Transaction Details">
-            <VRow>
-                <VCol>
-                    
+        <Panel snippet-title="Paystack Transaction Details" v-if="paystackPaymentDetails != null">
+            <VRow class="mb-2">
+                <VCol cols="12" sm="6" md="4">
+                    <h5 class="my-3 text-blue">Payment Channel</h5>
+                    <VRow>
+                        <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ paymentAuthorization.channel }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Card Type</b><br />{{ paymentAuthorization.card_type }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ paymentAuthorization.bank }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Card Brand</b><br />{{ paymentAuthorization.brand }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Card Number</b><br />xxxx xxxx xxxx {{ paymentAuthorization.last4 }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Country Code</b><br />{{ paymentAuthorization.country_code }}</VCol>
+                    </VRow>
+                </VCol>
+                <VCol cols="12" sm="6" md="4">
+                    <h5 class="my-3 text-blue">Transaction</h5>
+                    <VRow>
+                        <VCol cols="12" class="pb-0"><b>Transaction Status</b><br />{{ paystackPaymentDetails.status.toUpperCase() }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Paystack Trnx ID</b><br />{{ paystackPaymentDetails.id }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>OMS Reference</b><br />{{ paystackPaymentDetails.reference }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Mode / Domain</b><br />{{ paystackPaymentDetails.domain }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Transaction Amount</b><br />{{ paystackPaymentDetails.currency }} {{ formatter.format(paystackPaymentDetails.amount / 100) }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Transaction Fees</b><br />{{ paystackPaymentDetails.currency }} {{ formatter.format(paystackPaymentDetails.fees / 100) }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Date Paid</b><br />{{ moment(paystackPaymentDetails.paidAt).calendar() }}</VCol>
+                    </VRow>
+                </VCol>
+                <VCol cols="12" sm="6" md="4">
+                    <h5 class="my-3 text-blue">Customer</h5>
+                    <VRow>
+                        <VCol cols="12" class="pb-0"><b>Customer Name</b><br />{{ paymentCustomerDetail.first_name ?? '-' }} {{ paymentCustomerDetail.last_name ?? '-' }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Email</b><br />{{ paymentCustomerDetail.email }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Mobile</b><br />{{ paymentCustomerDetail.phone }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Customer ID</b><br />{{ paymentCustomerDetail.id }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Customer Code</b><br />{{ paymentCustomerDetail.customer_code }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Risk Action</b><br />{{ paymentCustomerDetail.risk_action }}</VCol>
+                    </VRow>
                 </VCol>
             </VRow>
         </Panel>
@@ -95,6 +126,10 @@
     const invoice = usePage().props.invoice;
     const paystackData = usePage().props.paystack;
     const invoiceRefSrc = usePage().props.invoice_no_src;
+    const paystackPaymentDetails = invoice.paystack_response != null ? JSON.parse(invoice.paystack_response) : null;
+    const paymentAuthorization = invoice.paystack_response != null ? paystackPaymentDetails.authorization : null;
+    const paymentCustomerDetail = invoice.paystack_response != null ? paystackPaymentDetails.customer : null;
+    const isNewlyGeneratedInvoice = usePage().props.newlyGeneratedInvoice;
 
     const handlePaymentCompletion = data => {
         setTimeout(()=>{

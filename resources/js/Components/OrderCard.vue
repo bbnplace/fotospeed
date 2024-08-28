@@ -102,7 +102,7 @@
                             <VRow>
                                 <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
-                                    ₦{{ price ?? " --:--" }} <VBtn
+                                    ₦{{ price ? formatter.format(price) : " --:--" }} <VBtn
                                         elevation="0"
                                         prepend-icon="mdi-pencil"
                                         class="mr-2 no-padding no-border"
@@ -158,6 +158,9 @@
                                 <VCol cols="12">
                                     <b>Invoice Status</b><br />
                                     {{ invoicePaid ? "Paid" : "Unpaid" }}
+                                </VCol>
+                                <VCol cols="12">
+                                    <Link class="font-bold underline" :href="route('invoice', [invoice.id])">Open Invoice</Link>
                                 </VCol>
                             </VRow>
                             <VRow v-if="hasInvoice && invoicePaid">
@@ -493,6 +496,7 @@ const orderDetail = usePage().props.orderDetail;
 const hasInvoice = usePage().props.hasInvoice;
 const canGenerateInvoice = usePage().props.canGenerateInvoice;
 const invoicePaid = ref(usePage().props.invoicePaid);
+const invoice = ref(usePage().props.invoice);
 const canEditOrder = usePage().props.canEditOrder;
 const canHoldOrder = usePage().props.canHoldOrder;
 const canCancelOrder = usePage().props.canCancelOrder;
@@ -512,6 +516,12 @@ const selectedPaymentMethod = ref("");
 const selectedPaymentStatus = ref("");
 const paymentMethods = usePage().props.paymentMethods;
 const paymentStatuses = usePage().props.paymentStatuses;
+
+const formatter = new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
 
 const orderCancelError = ref("");
 let source = null;
