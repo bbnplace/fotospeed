@@ -43,14 +43,16 @@
                     </Link>
                 </li>
                 <template v-for="(menu, index) in props.menus" :key="index">
-                    <li class="side-nav-title mt-3">{{ menu.heading }}</li>
+                    <template v-if="(!menu.adminOnly || userProps.isAdmin) || (!menu.adminBranchOnly || userProps.isAdminBranch)">
+                        <li class="side-nav-title mt-3">{{ menu.heading }}</li>
 
-                    <li class="side-nav-item" v-for="(link, i) in menu.links" :key="i" :class="{'menuitem-active': $page.url.startsWith('/panel/' + link.route)}">
-                        <Link :href="route(link.route)" class="side-nav-link" :class="{'active': $page.url.startsWith('/panel/' + link.route)}" v-if="link.adminOnly ? userProps.isAdmin : true">
-                            <VIcon :icon="link.icon"></VIcon>
-                            <span> {{ link.name }} </span>
-                        </Link>
-                    </li>
+                        <li class="side-nav-item" v-for="(link, i) in menu.links" :key="i" :class="{'menuitem-active': $page.url.startsWith('/panel/' + link.route)}">
+                            <Link :href="route(link.route)" class="side-nav-link" :class="{'active': $page.url.startsWith('/panel/' + link.route)}" v-if="(!link.adminOnly || userProps.isAdmin) && (!link.adminBranchOnly || userProps.isAdminBranch)">
+                                <VIcon :icon="link.icon"></VIcon>
+                                <span> {{ link.name }} </span>
+                            </Link>
+                        </li>
+                    </template>
                 </template>
 
             </ul>
