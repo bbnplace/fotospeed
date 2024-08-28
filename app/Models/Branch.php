@@ -12,8 +12,14 @@ class Branch extends Model
     protected $fillable = [
         'name',
         'address',
-        'state_id'
+        'state_id',
+        'is_administrative'
     ];
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 
     public function state()
     {

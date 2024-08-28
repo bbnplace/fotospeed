@@ -15,7 +15,7 @@
                         <VCol cols="6"><b>Mobile</b><br />{{ staff.mobile }}</VCol>
                     </VRow>
                     <VRow>
-                        <VCol cols="6"><b>Branch</b><br />{{ staff.branch.name }}</VCol>
+                        <VCol cols="6"><b>Branch</b><br />{{ staff.branch ? staff.branch.name : "" }}</VCol>
                         <VCol cols="6"><b>State</b><br />{{ staff.state.name }}</VCol>
                     </VRow>
                     <hr />

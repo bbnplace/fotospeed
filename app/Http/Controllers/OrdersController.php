@@ -63,10 +63,10 @@ class OrdersController extends Controller
         $query = Order::query();
 
         // ADMINISTRATORS CAN VIEW ORDERS ACROSS BRANCHES.
-        // If the user is not an Administrator, Limit their view to orders from their branch.
-        if (!auth()->user()->isAdmin())
+        // If user is not from Administrative Branch, only fetch order from their branch
+        if (!auth()->user()->isFromAdministrativeBranch())
         {
-            $query->where('branch_id', auth()->user()->branch_id);
+            $query->where('order_branch_id', auth()->user()->branch_id);
         }
 
         // MANAGERS SHOULD BE ABLE TO VIEW ALL ORDERS WITHIN THEIR BRANCH
@@ -98,6 +98,12 @@ class OrdersController extends Controller
             $query->select('id', 'name');
         }]);
         $query->with(['orderStatus' => function ($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['processingBranch' => function ($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['sourceBranch' => function ($query){
             $query->select('id', 'name');
         }]);
 
@@ -236,6 +242,13 @@ class OrdersController extends Controller
     private function getOrder($id)
     {
         $query = Order::query();
+
+        // If user is not from Administrative branch only show order from their branch
+        if (!auth()->user()->isFromAdministrativeBranch())
+        {
+            $query->where('order_branch_id', auth()->user()->branch_id);
+        }
+
         $query->where('id', $id);
         $query->with(['item' => function($query){
             $query->select('id', 'name');
@@ -243,7 +256,10 @@ class OrdersController extends Controller
         $query->with(['user' => function ($query){
             $query->select('id', 'name', 'mobile');
         }]);
-        $query->with(['branch' => function ($query){
+        $query->with(['processingBranch' => function ($query){
+            $query->select('id', 'name');
+        }]);
+        $query->with(['sourceBranch' => function ($query){
             $query->select('id', 'name');
         }]);
         $query->with(['orderStatus' => function ($query){

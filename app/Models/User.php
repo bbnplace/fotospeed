@@ -110,4 +110,9 @@ class User extends Authenticatable
     {
         return $this->isAdmin() || $this->isManagement() || $this->isReception() || $this->isCashier();
     }
+
+    public function isFromAdministrativeBranch()
+    {
+        return $this->branch->is_administrative == 1;
+    }
 }

@@ -37,8 +37,14 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Branch</b><br />
-                                    {{ order.branch.name }}
+                                    <b>Origin Branch</b><br />
+                                    {{ order.source_branch ? order.source_branch.name : "-" }}
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>Processing Branch</b><br />
+                                    {{ order.processing_branch.name }}
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -216,51 +222,6 @@
                                     </v-btn>
                                 </VCol>
                             </VRow>
-                            <VRow>
-                                <VCol>
-                                    <b>WayBill Number</b><br />
-                                    {{ waybillNumber ?? 'NOT SET' }}  <VBtn
-                                        elevation="0"
-                                        prepend-icon="mdi-pencil"
-                                        class="mr-2 no-padding no-border"
-                                        v-if="canEditWaybill && !orderOnHold"
-                                    >
-                                        <VOverlay
-                                            v-model="showWaybillOverlay"
-                                            activator="parent"
-                                            location-strategy="connected"
-                                            scroll-strategy="close"
-                                        >
-                                            <VCard max-width="400" class="p-1">
-                                                <VCardText class="pb-0">
-                                                    <VTextField
-                                                        v-model="waybillNumber"
-                                                        hide-details
-                                                        id="order-number"
-                                                        variant="outlined"
-                                                        label="Waybill Number"
-                                                        style="min-width: 200px"
-                                                        :loading="waybillSaving"
-                                                    ></VTextField>
-                                                    <div v-show="waybillResponse.length" class="text-center font-bold">{{ waybillResponse }}</div>
-                                                    <p v-if="waybillError.length" class="text-center text-red mt-1 mb-0">{{ waybillError }}</p>
-                                                </VCardText>
-                                                <VCardActions>
-                                                    <VBtn
-                                                        color="blue-darken-1 m-1"
-                                                        @click="saveWaybill"
-                                                        :disabled="waybillSaving"
-                                                    >Save</VBtn>
-                                                    <VBtn
-                                                        color="grey-darken-1 m-1"
-                                                        @click="showWaybillOverlay = false"
-                                                    >Close</VBtn>
-                                                </VCardActions>
-                                            </VCard>
-                                        </VOverlay>
-                                    </VBtn>
-                                </VCol>
-                            </VRow>
                         </VCol>
 
                         <VCol cols="12" md="6">
@@ -330,6 +291,51 @@
                                 <VCol>
                                     <b>Target Delivery Date</b><br />
                                     {{ moment(orderDetail.date).format('LL') }}
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <b>WayBill Number</b><br />
+                                    {{ waybillNumber ?? 'NOT SET' }}  <VBtn
+                                        elevation="0"
+                                        prepend-icon="mdi-pencil"
+                                        class="mr-2 no-padding no-border"
+                                        v-if="canEditWaybill && !orderOnHold"
+                                    >
+                                        <VOverlay
+                                            v-model="showWaybillOverlay"
+                                            activator="parent"
+                                            location-strategy="connected"
+                                            scroll-strategy="close"
+                                        >
+                                            <VCard max-width="400" class="p-1">
+                                                <VCardText class="pb-0">
+                                                    <VTextField
+                                                        v-model="waybillNumber"
+                                                        hide-details
+                                                        id="order-number"
+                                                        variant="outlined"
+                                                        label="Waybill Number"
+                                                        style="min-width: 200px"
+                                                        :loading="waybillSaving"
+                                                    ></VTextField>
+                                                    <div v-show="waybillResponse.length" class="text-center font-bold">{{ waybillResponse }}</div>
+                                                    <p v-if="waybillError.length" class="text-center text-red mt-1 mb-0">{{ waybillError }}</p>
+                                                </VCardText>
+                                                <VCardActions>
+                                                    <VBtn
+                                                        color="blue-darken-1 m-1"
+                                                        @click="saveWaybill"
+                                                        :disabled="waybillSaving"
+                                                    >Save</VBtn>
+                                                    <VBtn
+                                                        color="grey-darken-1 m-1"
+                                                        @click="showWaybillOverlay = false"
+                                                    >Close</VBtn>
+                                                </VCardActions>
+                                            </VCard>
+                                        </VOverlay>
+                                    </VBtn>
                                 </VCol>
                             </VRow>
                         </VCol>

@@ -46,7 +46,17 @@ class Order extends Model
 
     public function branch()
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function processingBranch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function sourceBranch()
+    {
+        return $this->belongsTo(Branch::class, 'order_branch_id');
     }
 
     public function orderConversations()

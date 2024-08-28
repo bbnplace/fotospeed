@@ -44,7 +44,7 @@ class StaffController extends Controller
         $systemAdminRole = Role::where('name', 'System Admin')->first();
         $query = User::query();
         $query->whereNot('role_id', $customerRole->id);
-        $query->whereNot('role_id', $systemAdminRole->id);
+        // $query->whereNot('role_id', $systemAdminRole->id);
 
         if (!empty($search)) {
             $searchTerm = $search['_value'];

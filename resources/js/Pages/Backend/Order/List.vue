@@ -35,6 +35,11 @@ const dataResources = {
             sortable: true
         },
         {
+            title: "Origin Branch",
+            key: "source_branch.name",
+            sortable: true
+        },
+        {
             title: "Status",
             key: "order_status.name",
             sortable: false
