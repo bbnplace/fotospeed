@@ -74,6 +74,13 @@
                 </VCol>
             </VRow>
         </Panel>
+        <Panel snippet-title="Transaction Details">
+            <VRow>
+                <VCol>
+                    
+                </VCol>
+            </VRow>
+        </Panel>
     </BackendLayout>
 </template>
 

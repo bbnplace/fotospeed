@@ -121,7 +121,6 @@ class CustomerInvoicesController extends Controller
 
     public function paymentCompleted(Request $request)
     {
-        Log::info($request);
         if ($request->event == 'charge.success') {
             # code...
             $data = $request->data;
@@ -140,7 +139,7 @@ class CustomerInvoicesController extends Controller
                         // TODO: Send mail to site administrator notifying that the status for flagging invoice to paid doe not exist
                     } else {
                         $invoice->invoice_status_id = $invoiceStatus->id; // Update the status ID
-                        $invoice->paystack_response = json_encode($request);
+                        $invoice->paystack_response = json_encode($data);
                         $invoice->save();
 
                         $ordersCount = 1; // TODO: Update to reflect the number of Orders the invoice covers
