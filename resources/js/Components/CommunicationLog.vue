@@ -6,10 +6,11 @@
                 <p>{{ note.message }}</p>
             </div>
         </div>
-        <VCard v-else class="p-3 text-center" color="grey-lighten-3">
-            Leave a note for other team members working on this Order.
-        </VCard>
-        <hr />
+        <div v-else>
+            <VCard class="mb-3 p-3 text-center" color="grey-lighten-3">
+                Leave a note for other team members working on this Order.
+            </VCard>
+        </div>
         <div>
             <form @submit.prevent="sendMessage">
                 <VTextarea
@@ -19,6 +20,7 @@
                 ></VTextarea>
                 <div class="text-right">
                     <VBtn
+                        prepend-icon="mdi-note-plus"
                         color="black"
                         type="submit"
                     >Add Note</VBtn>

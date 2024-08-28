@@ -288,7 +288,7 @@
                                     {{ currentProcess }}
                                 </VCol>
                             </VRow>
-                            <VRow v-if="user.isAdmin && enableHumanForwarding">
+                            <VRow v-if="canForwardToNextProcess && enableHumanForwarding">
                                 <VCol>
                                     <VBtn
                                         prepend-icon="mdi-play"
@@ -493,6 +493,7 @@ const canCancelOrder = usePage().props.canCancelOrder;
 const canEditReferenceNumber = usePage().props.canEditReferenceNumber;
 const canEditPrice = usePage().props.canEditPrice;
 const canEditWaybill = usePage().props.canEditWaybill;
+const canForwardToNextProcess = usePage().props.canForwardToNextProcess;
 const showOverlay = ref(false);
 
 const orderCancelResponse = ref("");

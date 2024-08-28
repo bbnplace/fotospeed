@@ -3,6 +3,7 @@
         
         <VRow>
             <VCol cols="12" md="6">
+                <h4 class="mb-3">Order Information</h4>
                 <VRow>
                     <VCol>
                         <VAutocomplete
@@ -71,7 +72,7 @@
                         ></VTextarea>
                     </VCol>
                 </VRow>
-                <h4 class="mt-4">Tracking Information</h4>
+                <h4 class="mt-4 mb-3">Tracking Information</h4>
                 <VRow>
                     <VCol>
                         <VTextField
@@ -101,7 +102,7 @@
             </VCol>
 
             <VCol cols="12" md="6">
-                <h4>Delivery Information</h4>
+                <h4 class="mb-3">Delivery Information</h4>
                 <VRow v-if="$page.props.auth.user.role != 'Customer'">
                     <VCol cols="12">
                         <VTextField
@@ -110,6 +111,7 @@
                             label="Customer Mobile"
                             variant="outlined"
                             autocomplete="off"
+                            append-inner-icon="mdi-cellphone"
                             type="tel"
                             @blur="getCustomerInfo"
                             :hide-details="masterForm.errors.customerMobile == undefined"
@@ -150,6 +152,7 @@
                             label="Delivery Address"
                             variant="outlined"
                             autocomplete="off"
+                            append-inner-icon="mdi-map-marker"
                             :hide-details="masterForm.errors.deliveryAddress == undefined"
                             :error-messages="masterForm.errors.deliveryAddress"
                         ></VTextarea>
@@ -175,7 +178,7 @@
         </VRow>
         <VRow>
             <VCol>
-                <h4>Upload Job Pages</h4>
+                <h4 class="mb-1">Upload Order Assets</h4>
                 <template v-if="orderForm.orderFiles">
                     <VRow>
                         <VCol cols="12" lg="6" v-for="orderFile, index in orderForm.orderFiles" :key="index">

@@ -22,18 +22,7 @@ use App\Report\ReportBuilder;
 
 class Task
 {
-    public static function getVerifiableTasks()
-    {
-        $verifiableTasks = [
-            'Order Number Input',
-            'Waybill Number Input',
-            'Invoice Generation',
-            'Invoice Payment',
-            'Price Input',
-        ];
-        sort($verifiableTasks);
-        return $verifiableTasks;
-    }
+    
     
     public static function assignProcessTasks(Item $item, Order $order, string $processName)
     {
@@ -220,6 +209,11 @@ class Task
         $message = sprintf('Please team members have completed all tasks in the %s process. ', $process);
         if ($autoStartNextProcess && !empty($nextProcess)) {
             $message .= sprintf('Tasks for %s process has been automatically created.', $nextProcess);
+        }
+
+        // Todo: If there is a Next Process but is not to start automatically, the coordinator should be notified to start
+        if (!$autoStartNextProcess && !empty($nextProcess)) {
+            # code...
         }
 
         // Create Notification for coordinators

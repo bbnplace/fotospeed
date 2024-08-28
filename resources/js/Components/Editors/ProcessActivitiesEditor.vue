@@ -107,7 +107,7 @@
                         </VBtn>
                     </div>
                     
-                    <VRow class="my-2">
+                    <VRow class="my-1">
                         <VCol>
                             <v-checkbox
                                 v-model="productProcesses[index].canCancelOrder"
@@ -118,11 +118,11 @@
                         </VCol>
                     </VRow>
                     <hr/>
-                    <VRow class="my-2">
+                    <VRow>
                         <VCol cols="12">
                             <VRow>
-                                <VCol cols="12" class="font-bold">
-                                    After all tasks in this process are completed
+                                <VCol cols="12">
+                                    <h4>On Tasks Completion</h4>
                                 </VCol>
                             </VRow>
                             <VRow>
@@ -137,24 +137,6 @@
                                         density="compact"
                                         autocomplete="off"
                                         bg-color="white"
-                                        class="mt-2"
-                                        @blur="updateProcesses"
-                                    ></VAutocomplete>
-                                </VCol>
-                            </VRow>
-                            <VRow>
-                                <VCol>
-                                    <VAutocomplete
-                                        :id="`coordinator${index}`"
-                                        v-model="productProcesses[index].whoCoordinates"
-                                        label="Send Notification To"
-                                        :items="teams"
-                                        variant="outlined"
-                                        hide-details
-                                        density="compact"
-                                        autocomplete="off"
-                                        bg-color="white"
-                                        class="mt-2"
                                         @blur="updateProcesses"
                                     ></VAutocomplete>
                                 </VCol>
@@ -169,30 +151,38 @@
                                     ></v-checkbox>
                                 </VCol>
                             </VRow>
-                            <!-- <VRow v-if="productProcesses[index].autoStartNextProcess">
-                                <VCol>
-                                    <VAutocomplete
-                                        id="nextProcess"
-                                        v-model="productProcesses[index].nextProcess"
-                                        label="Select Process"
-                                        :items="nextProcesses"
-                                        variant="outlined"
-                                        hide-details
-                                        density="compact"
-                                        aria-autocomplete="off"
-                                        autocomplete="off"
-                                        bg-color="white"
-                                        color="black"
-                                        @blur="updateProcesses"
-                                    ></VAutocomplete>
-                                </VCol>
-                            </VRow> -->
+                        </VCol>
+                    </VRow>
+                    <hr />
+                    <VRow>
+                        <VCol cols="12">
+                            <h4>Coordinating Team</h4>
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol>
+                            <VAutocomplete
+                                :id="`coordinator${index}`"
+                                v-model="productProcesses[index].whoCoordinates"
+                                label="Select Coordinator"
+                                :items="teams"
+                                variant="outlined"
+                                hide-details
+                                density="compact"
+                                autocomplete="off"
+                                bg-color="white"
+                                @blur="updateProcesses"
+                            ></VAutocomplete>
                         </VCol>
                     </VRow>
                     <hr/>
-                    <VRow class="my-2">
+                    <VRow>
                         <VCol cols="12">
-                            <h4>Engage Customer</h4>
+                            <h4>Engage Customers</h4>
+                        </VCol>
+                    </VRow>
+                    <VRow>
+                        <VCol cols="12">
                             <VRow>
                                 <VCol cols="12" sm="7">
                                     <VAutocomplete

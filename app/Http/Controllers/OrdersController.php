@@ -222,6 +222,16 @@ class OrdersController extends Controller
             ->with('note', 'Order Submitted.' . $additionalMsg);
     }
 
+    private function getOrderProcessCoordinatorRole(Order $order): Role | null
+    {
+        $processCoordinatorRole = null;
+        if (!empty($order->current_coordinator_role)) {
+            $processCoordinatorRole = Role::where('name', $order->current_coordinator_role)->first();
+        }
+
+        return $processCoordinatorRole;
+    }
+
     private function getOrder($id)
     {
         $query = Order::query();
@@ -254,6 +264,9 @@ class OrdersController extends Controller
         $canGenerateInvoice = !$hasInvoice && ($canEditOrder || auth()->user()->isCashier());
         $canRegenerateInvoice = $hasInvoice && !$invoicePaid;
 
+        $orderProcessCoordinatorRole = $this->getOrderProcessCoordinatorRole($order);
+        $canForwardToNextProcess = auth()->user()->isAdmin() || (!empty($orderProcessCoordinatorRole) && auth()->user()->role_id == $orderProcessCoordinatorRole->id);
+
         $settings = Setting::first();
         $offlinePaymentApprover = null;
         if(!empty($settings->who_approves_offline_payment)){
@@ -277,6 +290,7 @@ class OrdersController extends Controller
             'activities' => $this->getOrderActivityLog($id),
             'hasInvoice' => $hasInvoice,
             'invoice' => $invoice,
+            'canForwardToNextProcess' => $canForwardToNextProcess,
             'canApproveOfflinePayment' => $canApproveOfflinePayment,
             'canGenerateInvoice' => $canGenerateInvoice,
             'invoicePaid' => $invoicePaid,

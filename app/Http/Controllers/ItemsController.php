@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\SmsTemplate;
 use App\Models\WhatsappTemplate;
 use App\Tasks\Task;
+use App\Tasks\TaskAudit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -170,7 +171,7 @@ class ItemsController extends Controller
             'smsTemplates' => $smsTemplates,
             'whatsappTemplates' => $whatsappTemplates,
             'orderStatuses' => OrderStatus::getOrderStatusesArray(),
-            'verifiables' => Task::getVerifiableTasks(),
+            'verifiables' => TaskAudit::getVerifiableTasks(),
             'productMedia' => $productMedia,
             'stkn' => csrf_token(),
         ];

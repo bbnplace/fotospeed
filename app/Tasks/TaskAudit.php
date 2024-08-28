@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Tasks;
+use App\Models\CustomerFeedback;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,20 @@ class TaskAudit
             $auditables[$check] = self::matchVerifiableTask($check, $order);
         }
         return $auditables;
+    }
+
+    public static function getVerifiableTasks()
+    {
+        $verifiableTasks = [
+            'Order Number Input',
+            'Waybill Number Input',
+            'Invoice Generation',
+            'Invoice Payment',
+            'Price Input',
+            'Customer Feedback',
+        ];
+        sort($verifiableTasks);
+        return $verifiableTasks;
     }
 
     public static function matchVerifiableTask(string $check, $order): bool
@@ -30,9 +45,16 @@ class TaskAudit
             case 'Price Input':
             case 'Price Set':
                 return self::checkPriceSet($order);
+            case 'Customer Feedback':
+                return self::checkCustomerFeedback($order);
             default:
                 return false;
         }
+    }
+
+    public static function checkCustomerFeedback($order): bool
+    {
+        return !empty(CustomerFeedback::where('created_at', '>', $order->created_at)->first());
     }
 
     public static function checkOrderNumber($order): bool

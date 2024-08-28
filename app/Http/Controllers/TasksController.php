@@ -200,7 +200,7 @@ class TasksController extends Controller
             $task->task_status_id = $newStatus;
             $task->save();
 
-            // Todo: Notify Controller of the change in the status of the task.
+            // Todo: Notify Coordinator of the change in the status of the task.
             $order = Order::find($task->order_id);
 
             // Check if order has been cancelled or placed on Hold, stop further action.
@@ -211,7 +211,6 @@ class TasksController extends Controller
             }
 
             // Check if all tasks with the same orderId have been completed.
-            $undoneTasks = [];
             $orderTasks = Task::where('order_id', $task->order_id)->get();
             if ($orderTasks->count() == 0) {
                 return [
@@ -219,6 +218,7 @@ class TasksController extends Controller
                 ];
             }
 
+            $undoneTasks = [];
             foreach ($orderTasks as $orderTask) {
                 if($orderTask->task_status_id != TaskStatus::STATUS_DONE)
                 {
@@ -231,12 +231,13 @@ class TasksController extends Controller
                 // Get the Item Process Data and confirm whether to trigger the next process or to notify administrator
                 $processData = $this->getOrderProcesses($task->order);
                 $currentProcessName = $currentProcess->name;
-
                 $currentProcessData = $this->getCurrentProcessData($processData->processes, $currentProcessName);
 
                 if (!empty($currentProcessData)) {
                     // Update Order Status
-                    if (property_exists($currentProcessData, 'orderStatus') && $currentProcessData->orderStatus) $this->updateOrderStatus($order, $currentProcessData);
+                    if (property_exists($currentProcessData, 'orderStatus') && $currentProcessData->orderStatus){
+                        $this->updateOrderStatus($order, $currentProcessData);
+                    }
 
                     $autoStartNextProcess = $currentProcessData->autoStartNextProcess;
                     $nextProcess = $this->getNextProcess($processData->processes, $currentProcessName);
@@ -265,8 +266,9 @@ class TasksController extends Controller
                         if ($autoStartNextProcess) {
                             $this->initiateNextProcess($order, $nextProcess);
                         } else {
-                            // Flag Order so that An Admin can manually start the next process
+                            // Flag Order so that an Admin or the Coordinator of the current process can manually forward order to the process
                             $order->human_forwarding = true;
+                            $order->current_coordinator_role = $currentProcessData->whoCoordinates;
                             $order->save();
 
                             // Todo: Send Signal to Team responsible for task forwarding on client so that they can review and forward the task
