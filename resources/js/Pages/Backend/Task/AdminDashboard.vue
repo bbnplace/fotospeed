@@ -52,7 +52,7 @@
                                 <p v-if="taskAuditError[`card-${task.id}`]" class="bg-red-100 text-red p-2">
                                   {{ taskAuditError[`card-${task.id}`].message }}
                                   <ul class="mb-0">
-                                    <li class="list-disc my-2" v-for="(incompleteTask, idx) in taskAuditError[`card-${task.id}`].incompleteTasks" :key="idx">{{ incompleteTask }}</li>
+                                    <li class="list-disc my-2" v-for="(incompleteTask, idx) in taskAuditError[`card-${task.id}`].incompleteTasks" :key="idx">{{ incompleteTask }} <Link class="btn btn-secondary mt-2" v-if="incompleteTask == 'Customer Feedback'" :href="route('customer.view', taskAuditError[`card-${task.id}`].customer.id)">Write Feedback</Link></li>
                                   </ul>
                                 </p>
                                 <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>

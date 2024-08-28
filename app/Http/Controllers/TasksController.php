@@ -190,7 +190,10 @@ class TasksController extends Controller
                     return [
                         'status' => 'Failed',
                         'message' => 'The following online activities for this task have not been completed:',
-                        'incompleteTasks' => $failedAudits
+                        'incompleteTasks' => $failedAudits,
+                        'customer' => [
+                            'id' => $task->order->user_id
+                        ]
                     ];
                 }
             }
