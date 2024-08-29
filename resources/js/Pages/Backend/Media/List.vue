@@ -172,7 +172,7 @@
                                         <li v-for="product in mediaProducts" :key="product.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('item.view', [product.id])">{{ product.name }}</Link></li>
                                     </ul>
                                 </div>
-                                <div class="grid grid-cols-2 font-sm">
+                                <div class="grid grid-cols-2 font-sm mt-3">
                                     <div>Uploaded By</div>
                                     <div>{{ selectedMedia.uploadedBy }}</div>
                                     <div>Date Uploaded</div>
@@ -366,11 +366,14 @@ const deletingMedia = ref(false);
 const deleteSuccessResponse = ref("");
 const deleteFailureResponse = ref("");
 const deleteSelectedMedia = async () => {
-    if (selected.value.length === 0) {
-        // Notify user that they have not selected any contact
-        return false;
-    }
+    // if (selected.value.length === 0) {
+    //     // Notify user that they have not selected any contact
+    //     return false;
+    // }
     showDeleteOverlay.value = false;
+
+    console.log(selected.value)
+    return false;
 
     const payload = {
         selections: selected.value
