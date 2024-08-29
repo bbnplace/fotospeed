@@ -148,6 +148,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::put('panel/media/{id}/edit', [MediaController::class, 'update'])->name('media.edit');
     Route::get('panel/media/{id}', [MediaController::class, 'view'])->name('media.view');
     Route::post('panel/media/delete', [MediaController::class, 'delete'])->name('media.delete');
+    Route::post('panel/media/usage', [MediaController::class, 'getMediaUsage'])->name('media.usage');
 
     // Endpoint for fetching product information by the name of the product
     Route::post('panel/item/find', [ItemsController::class, 'getItemByName'])->name('item.get-by-name');

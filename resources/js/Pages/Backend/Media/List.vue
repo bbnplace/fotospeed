@@ -111,7 +111,7 @@
                         >Upload Media</VBtn>
                     </VCol>
                 </VRow>
-                <Panel snippet-title="Media Details">
+                <Panel snippet-title="Media Details" class="sticky top-0">
                     <form @submit.prevent="updateMediaDetails">
                         <VRow v-if="selectedMedia.thumbnail">
                             <VCol cols="12">
@@ -127,6 +127,7 @@
                                     label="Name"
                                     variant="outlined"
                                     hide-details
+                                    density="compact"
                                 ></VTextField>
                             </VCol>
                             <VCol cols="12">
@@ -135,6 +136,7 @@
                                     label="Description"
                                     variant="outlined"
                                     hide-details
+                                    density="compact"
                                 ></VTextarea>
                             </VCol>
                             <VCol cols="12">
@@ -144,20 +146,10 @@
                                     variant="outlined"
                                     :items="mediaUsages"
                                     hide-details
+                                    density="compact"
                                 ></VSelect>
                             </VCol>
-                            <VCol cols="12">
-                                <div class="grid grid-cols-2">
-                                    <div>Uploaded By</div>
-                                    <div class="font-bold">{{ selectedMedia.uploadedBy }}</div>
-                                    <div>Date Uploaded</div>
-                                    <div class="font-bold">{{ selectedMedia.created }}</div>
-                                    <div>Last Modified</div>
-                                    <div class="font-bold">{{ selectedMedia.lastUpdated }}</div>
-                                </div>
-                            </VCol>
                             <VCol cols="12" class="text-right">
-                                <hr/>
                                 <p v-if="selectedMedia.error.length" class="text-red">{{ selectedMedia.error }}</p>
                                 <p v-if="selectedMedia.response.length">{{ selectedMedia.response }}</p>
                                 <VBtn
@@ -165,7 +157,29 @@
                                     prepend-icon="mdi-content-save"
                                     :disabled="updatingMediaSettings"
                                     type="submit"
-                                >Update</VBtn>
+                                >Save</VBtn>
+                            </VCol>
+                            <VCol cols="12">
+                                <div v-if="mediaOrders.length">
+                                    <b>Linked Orders</b>
+                                    <ul>
+                                        <li v-for="order in mediaOrders" :key="order.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('order.view', [order.id])">{{ order.name }}</Link></li>
+                                    </ul>
+                                </div>
+                                <div v-if="mediaProducts.length">
+                                    <b>Linked Products</b>
+                                    <ul>
+                                        <li v-for="product in mediaProducts" :key="product.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('item.view', [product.id])">{{ product.name }}</Link></li>
+                                    </ul>
+                                </div>
+                                <div class="grid grid-cols-2 font-sm">
+                                    <div>Uploaded By</div>
+                                    <div>{{ selectedMedia.uploadedBy }}</div>
+                                    <div>Date Uploaded</div>
+                                    <div>{{ selectedMedia.created }}</div>
+                                    <div>Last Modified</div>
+                                    <div>{{ selectedMedia.lastUpdated }}</div>
+                                </div>
                             </VCol>
                         </VRow>
                         <VRow v-else>
@@ -186,7 +200,7 @@
 import { ref } from 'vue';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue'
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import moment from 'moment';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
@@ -205,6 +219,8 @@ const page = ref(1);
 const sortBy = null;
 const endpoint = usePage().props.endpoint;
 const mediaUsages = usePage().props.usage;
+const mediaProducts = ref([]);
+const mediaOrders = ref([]);
 
 const toggleSelection = () => {
     enableSelection.value = !enableSelection.value
@@ -272,9 +288,12 @@ const selectedMedia = ref({
 });
 
 const selectImage = image => {
+    mediaOrders.value = [];
+    mediaProducts.value = [];
     selectedMedia.value.id = image.id;
     selectedMedia.value.thumbnail = image.thumbnail;
     selectedMedia.value.name = image.name;
+    selectedMedia.value.usageData = JSON.parse(image.data);
     selectedMedia.value.description = image.description ?? "";
     selectedMedia.value.uploadedBy = image.staff.name == undefined ? image.customer.name : image.staff.name;
     selectedMedia.value.created = moment(image.created_at).format('LL');
@@ -282,6 +301,32 @@ const selectImage = image => {
     selectedMedia.value.error = "";
     selectedMedia.value.response = "";
     selectedMedia.value.usage = image.usage.charAt(0).toUpperCase() + image.usage.slice(1)
+
+    if (selectedMedia.value.usageData.orders || selectedMedia.value.usageData.products) {
+        getMediaUsageInfo(selectedMedia.value.usageData);
+    }
+}
+
+const getMediaUsageInfo = async usageData => {
+    const payload = {
+        data: usageData
+    }
+
+    try {
+        const response = await axios.post(route('media.usage'), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+
+        if (response.data && response.data.status == 'success') {
+            // Prepare Presentation with the response data
+            mediaProducts.value = response.data.products;
+            mediaOrders.value = response.data.orders;
+        }
+    } catch (error) {
+        
+    }
 }
 
 const mediaUploadResponse = ref("");

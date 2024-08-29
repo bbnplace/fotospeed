@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
 use App\Models\Media;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -133,6 +135,26 @@ class MediaController extends Controller
         return [
             'status' => 'success',
             'message' => 'Selected media files have been deleted'
+        ];
+    }
+
+    public function getMediaUsage(Request $request)
+    {
+        $orders = [];
+        $products = [];
+
+        if(isset($request->data['orders']) && is_array($request->data['orders'])){
+            $orders = Order::whereIn('id', $request->data['orders'])->get(['id', 'name']);
+        }
+
+        if(isset($request->data['products']) && is_array($request->data['products'])){
+            $products = Item::whereIn('id', $request->data['products'])->get(['id', 'name']);
+        }
+
+        return [
+            'status' => 'success',
+            'orders' => $orders,
+            'products' => $products
         ];
     }
 }
