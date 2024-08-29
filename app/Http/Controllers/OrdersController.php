@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Item;
+use App\Models\Media;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -155,6 +156,7 @@ class OrdersController extends Controller
         ]);
     }
 
+
     public function store(Request $request)
     {
         if ($request->newCustomer) {
@@ -219,8 +221,14 @@ class OrdersController extends Controller
             'quantity' => $request->quantity,
         ]);
 
-        // TODO: Trigger the first task for this order.
-        
+        // Link order to uploaded media
+        if (!empty($request['files'])) {
+            foreach ($request['files'] as $mediaRecord) {
+                Media::linkOrder($mediaRecord['file']['mediaId'], $order->id);
+            }
+        }
+
+        // Trigger the first task for this order
         Task::assignProcessTasks($item, $order, $firstProcess->name);
         
 

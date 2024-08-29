@@ -288,6 +288,34 @@ class ItemsController extends Controller
             ];
         }
 
+        // Identify the media that is not part of the new submission
+        $existingProductImageIds = Item::getProductPhotoIds($item);
+
+        // Link product to the submitted media
+        $updatedProductImageIds = [];
+        if (!empty($request->productPhotos)) {
+            foreach ($request->productPhotos['images'] as $mediaRecord) {
+                array_push($updatedProductImageIds, $mediaRecord['id']);
+            }
+        }
+
+        // Identify any left out images
+        // $commonMedia = array_intersect($existingProductImageIds, $updatedProductImageIds);
+        $removedMedia = array_diff($existingProductImageIds, $updatedProductImageIds);
+        $addedMedia = array_diff($updatedProductImageIds, $existingProductImageIds);
+
+        if (!empty($removedMedia)) {
+            foreach ($removedMedia as $mediaId) {
+                Media::unlinkProduct($mediaId, $item->id);
+            }
+        }
+        
+        if (!empty($addedMedia)) {
+            foreach ($addedMedia as $mediaId) {
+                Media::linkProduct($mediaId, $item->id);
+            }
+        }
+
         try {
             $item->product_photos = $request->productPhotos;
             $item->save();

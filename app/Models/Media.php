@@ -65,4 +65,66 @@ class Media extends Model
             }
         }
     }
+
+    public static function linkOrder($id, $orderId)
+    {
+        $mediaData = [];
+        $media = self::find($id);
+        if (!empty($media)) {
+            $mediaData = empty($media->data) ? [] : json_decode($media->data, true);
+            if(isset($mediaData['orders'])) {
+                if (!in_array($orderId, $mediaData['orders'])) {
+                    array_push($mediaData['orders'], $orderId);
+                }
+            } else {
+                $mediaData['orders'] = [$orderId];
+            }
+        } else {
+            $mediaData = [
+                'orders' => [$orderId]
+            ];
+        }
+        $media->data = json_encode($mediaData);
+        $media->save();
+    }
+
+
+    public static function linkProduct($id, $productId)
+    {
+        $mediaData = [];
+        $media = self::find($id);
+        if (!empty($media)) {
+            $mediaData = empty($media->data) ? [] : json_decode($media->data, true);
+            if(isset($mediaData['products'])) {
+                if (!in_array($productId, $mediaData['products'])) {
+                    array_push($mediaData['products'], $productId);
+                }
+            } else {
+                $mediaData['products'] = [$productId];
+            }
+        } else {
+            $mediaData = [
+                'products' => [$productId]
+            ];
+        }
+        $media->data = json_encode($mediaData);
+        $media->save();
+    }
+
+    public static function unlinkProduct($id, $productId)
+    {
+        $mediaData = [];
+        $media = self::find($id);
+        if (!empty($media)) {
+            $mediaData = empty($media->data) ? [] : json_decode($media->data, true);
+            if(isset($mediaData['products'])) {
+                if (in_array($productId, $mediaData['products'])) {
+                    $productIndex = array_search($productId, $mediaData['products']);
+                    array_splice($mediaData['products'], $productIndex);
+                }
+            } 
+        } 
+        $media->data = json_encode($mediaData);
+        $media->save();
+    }
 }

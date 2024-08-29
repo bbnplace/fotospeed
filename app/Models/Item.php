@@ -69,4 +69,18 @@ class Item extends Model
     public static function getProcessTasks(int $itemId, string $process) : array {
         return self::getProcessData($itemId)->tasks->$process;
     }
+
+    public static function getProductPhotoIds(Item $item): array
+    {
+        $mediaIds = [];
+        if (!empty($item->product_photos)) {
+            $productPhotos = json_decode($item->product_photos);
+            if (!empty($productPhotos->images)) {
+                foreach ($productPhotos->images as $media) {
+                    array_push($mediaIds, $media->id);
+                }
+            }
+        }
+        return $mediaIds;
+    }
 }
