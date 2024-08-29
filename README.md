@@ -76,5 +76,3 @@ The software will help enterprises to:
 
 ## Manually Trigger Next Process
 After all cards have been forwarded, check if there is a next process. Check if user has selected to automatically trigger the next process. If user has set to automatically trigger next process, automate otherwise, set field for admin to initiate the next process manually.
-
-
