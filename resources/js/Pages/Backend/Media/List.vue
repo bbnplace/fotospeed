@@ -76,7 +76,16 @@
                         </VCol>
                     </VRow>
                     <VRow>
-                        <VCol cols="12" sm="6" md="4" lg="3" xl="2" v-for="image in loadedRecords" :key="image.id">
+                        
+                        <VCol cols="12" v-if="cannotDeleteMessage.length" class="text-red">
+                            <v-alert
+                                type="error"
+                                :text="cannotDeleteMessage"
+                                closable
+                                v-if="cannotDeleteMessage.length"
+                            ></v-alert>
+                        </VCol>
+                        <VCol cols="12" sm="6" md="4" lg="3" xl="2" v-for="image in loadedRecords" :key="image.id" :class="image.isInUse ? 'bg-red-100 border-1 rounded-sm border-red-200' : ''">
                             <div class="m-0 p-0 relative bottom-0 left-0">
                                 <VCheckbox
                                     v-model="selected"
@@ -365,15 +374,30 @@ const showDeleteOverlay = ref(false);
 const deletingMedia = ref(false);
 const deleteSuccessResponse = ref("");
 const deleteFailureResponse = ref("");
+const cannotDeleteMessage = ref("");
 const deleteSelectedMedia = async () => {
-    // if (selected.value.length === 0) {
-    //     // Notify user that they have not selected any contact
-    //     return false;
-    // }
     showDeleteOverlay.value = false;
+    cannotDeleteMessage.value = "";
 
-    console.log(selected.value)
-    return false;
+    let imagesInUse = 0
+    for (let ind = 0; ind < selected.value.length; ind++) {
+        const selectedItem = selected.value[ind];
+        for (let index = 0; index < loadedRecords.value.length; index++) {
+            const element = loadedRecords.value[index];
+            if (element.id == selectedItem) {
+                const elementUsageData = JSON.parse(element.data);
+                loadedRecords.value[index]['isInUse'] = elementUsageData != null && ((elementUsageData.orders && elementUsageData.orders.length > 0) || (elementUsageData.products && elementUsageData.products.length > 0));
+                if(loadedRecords.value[index]['isInUse']){
+                    imagesInUse++;
+                }
+            }
+        }
+    }
+    
+    if(imagesInUse > 0) {
+        cannotDeleteMessage.value = "The highlighted files cannot be deleted because they are currently in use. To see how these files are being used, click on each file and check the media details panel. To delete the media, you must first disconnect them from the utility they are associated with."
+        return false;
+    }
 
     const payload = {
         selections: selected.value
