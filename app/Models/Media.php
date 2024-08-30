@@ -52,13 +52,19 @@ class Media extends Model
                 }
                 
                 // Delete the thumbnail
-                if (!empty($image->thumbnail) && File::exists($image->thumbnail)) {
-                    File::delete($image->thumbnail);
+                if (!empty($image->thumbnail) && strstr($image->thumbnail, 'thumbnail')) {
+                    $thumbnail_path = __DIR__."/../../public".str_replace(env('APP_URL'), '', $image->thumbnail);
+                    if (File::exists($thumbnail_path)) {
+                        File::delete($thumbnail_path);
+                    }
                 }
 
                 // Delete the avatar
-                if (!empty($image->thumbnail_100) && File::exists($image->thumbnail_100)) {
-                    File::delete($image->thumbnail_100);
+                if (!empty($image->thumbnail_100)  && strstr($image->thumbnail_100, 'thumbnail')) {
+                    $avatar_path = __DIR__."/../../public".str_replace(env('APP_URL'), '', $image->thumbnail_100);
+                    if (File::exists($avatar_path)) {
+                        File::delete($avatar_path);
+                    }
                 }
 
                 $image->delete();

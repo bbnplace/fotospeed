@@ -13,6 +13,7 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PaystackController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Item;
+use App\Models\Media;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
@@ -29,14 +30,43 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/test', function(){
-    // if (extension_loaded('gd')) {
-    //     echo "GD extension is installed.";
-    // } else {
-    //     echo "GD extension is not installed.";
-    // 
-    // }
-    return redirect(route('login'));
+Route::get('/cleanup-untracked-files', function(){
+    $path = __DIR__.'/../public/images/thumbnails';
+    $avatarPath = __DIR__.'/../public/images/thumbnails/100';
+    $files = File::allFiles($path);
+    $thumbnailsDeleted = 0;
+    $avatarsDeleted = 0;
+    if (is_array($files)) {
+        foreach ($files as $file) {
+            if ($file->isFile()) {
+                // Check media table for the file. If the file does not exist delete
+                $record = Media::where('thumbnail', 'LIKE', '%%'.$file->getFilename())->first();
+                if(empty($record)) {
+                    File::delete($path.'/'.$file->getFilename());
+                    $thumbnailsDeleted++;
+
+                    if (File::exists($avatarPath.'/'.$file->getFilename())) {
+                        File::delete($avatarPath.'/'.$file->getFilename());
+                        $avatarsDeleted++;
+                    }
+                }
+            }
+        }
+    }
+
+    $files = Storage::allFiles();
+    $storageFilesDeleted = 0;
+    if (is_array($files)) {
+        foreach ($files as $file) {
+            $record = Media::where('path', $file)->first();
+            if(empty($record)) {
+                Storage::delete($file);
+                $storageFilesDeleted++;
+            }
+        }
+    }
+
+    printf('Deleted %d Storage Files, %d Thumbnail and %d Avatars', $storageFilesDeleted, $thumbnailsDeleted, $avatarsDeleted);
 });
 
 Route::get('/', function () {

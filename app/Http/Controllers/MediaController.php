@@ -150,9 +150,25 @@ class MediaController extends Controller
                         }
                     }
 
-                    // if (property_exists($mediaUsageData, 'products')) {
-                    //     # code...
-                    // }
+                    if (property_exists($mediaUsageData, 'products')) {
+                        $products = Item::whereIn('id', $mediaUsageData->products)->get();
+                        if (!empty($products)) {
+                            $linkedProducts = [];
+                            foreach ($products as $product) {
+                                array_push($linkedProducts, [
+                                    'id' => $product->id,
+                                    'name' => $product->name,
+                                ]);
+                            }
+
+                            if (!empty($linkedProducts)) {
+                                array_push($indelibleMediaFiles, [
+                                    'mediaId' => $mediaData->id,
+                                    'products' => $linkedProducts,
+                                ]);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -170,7 +186,7 @@ class MediaController extends Controller
         $indelibleMediaFiles = $this->getIndelibleFiles($request->selections);
         if (!empty($indelibleMediaFiles)) {
             return response()->json([
-                'message' => 'The highlighted files cannot be deleted because they are still in use. To review the order statuses where file deletion is permitted, go to Settings > File Upload > Order Files / Space Management.',
+                'message' => 'The highlighted files cannot be deleted because they are still in use. Click on highlighted file to see where they are used. To review the order statuses where file deletion is permitted, go to Settings > File Upload > Order Files / Space Management.',
                 'mediaData' => $indelibleMediaFiles,
             ], 422);
         }

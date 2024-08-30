@@ -46,7 +46,7 @@
                                     {{ deleteFailureResponse }}
                                 </span>
                                 <v-btn
-                                    color="gray-darken-3"
+                                    color="red"
                                     prepend-icon="mdi-delete"
                                 >
                                     Delete
@@ -89,7 +89,7 @@
                         <VCol cols="12" class="text-right" v-if="mediaRecords.total">Showing {{ mediaRecords.from }} to {{ mediaRecords.to }} of {{ mediaRecords.total }} files.</VCol>
                     </VRow>
                     <VRow class="shadow p-2">
-                        <VCol cols="12" sm="6" md="4" lg="3" xl="2" v-for="image in loadedRecords" :key="image.id" :class="image.isInUse ? 'bg-red-100 border-1 rounded-sm border-red-200' : ''">
+                        <VCol cols="12" sm="6" md="4" lg="3" xl="2" v-for="image in loadedRecords" :key="image.id" :class="image.isInUse ? 'bg-red-100 border-1 border-red-200' : ''">
                             <div class="m-0 p-0 relative bottom-0 left-0">
                                 <VCheckbox
                                     v-model="selected"
@@ -126,7 +126,7 @@
                     <VCol cols="12" class="text-right mt-3">
                         <VBtn
                             prepend-icon="mdi-multimedia"
-                            color="red"
+                            color="grey-darken-3"
                             @click="showMediaUploader = true"
                         >Upload Media</VBtn>
                     </VCol>
