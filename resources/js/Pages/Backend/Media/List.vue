@@ -87,6 +87,8 @@
                             ></v-alert>
                         </VCol>
                         <VCol cols="12" class="text-right" v-if="mediaRecords.total">Showing {{ mediaRecords.from }} to {{ mediaRecords.to }} of {{ mediaRecords.total }} files.</VCol>
+                    </VRow>
+                    <VRow class="shadow p-2">
                         <VCol cols="12" sm="6" md="4" lg="3" xl="2" v-for="image in loadedRecords" :key="image.id" :class="image.isInUse ? 'bg-red-100 border-1 rounded-sm border-red-200' : ''">
                             <div class="m-0 p-0 relative bottom-0 left-0">
                                 <VCheckbox
@@ -111,7 +113,7 @@
                         </VCol>
                     </VRow>
                     <VRow>
-                        <VCol cols="12" class="text-right">
+                        <VCol cols="12" class="text-center mt-2">
                             <Link v-for="(pageLink, index) in paginationLinks" :key="index" :href="pageLink.url" :class="`btn rounded ${pageLink.active ? 'bg-black' : ''}`">
                                 <span v-html="pageLink.label"></span>
                             </Link>
@@ -367,6 +369,11 @@ const updateMediaDetails = async () => {
     updatingMediaSettings.value = false;
 }
 
+const clearMediaInUseHighlights = () => {
+    for (let index = 0; index < loadedRecords.value.length; index++) {
+        loadedRecords.value[index]['isInUse'] = false;
+    }
+}
 
 const showDeleteOverlay = ref(false);
 const deletingMedia = ref(false);
@@ -377,6 +384,8 @@ const deleteSelectedMedia = async () => {
     showDeleteOverlay.value = false;
     cannotDeleteMessage.value = "";
 
+    clearMediaInUseHighlights();
+
     let imagesInUse = 0
     for (let ind = 0; ind < selected.value.length; ind++) {
         const selectedItem = selected.value[ind];
@@ -384,7 +393,7 @@ const deleteSelectedMedia = async () => {
             const element = loadedRecords.value[index];
             if (element.id == selectedItem) {
                 const elementUsageData = JSON.parse(element.data);
-                loadedRecords.value[index]['isInUse'] = elementUsageData != null && ((elementUsageData.orders && elementUsageData.orders.length > 0) || (elementUsageData.products && elementUsageData.products.length > 0));
+                loadedRecords.value[index]['isInUse'] = elementUsageData != null && elementUsageData.products && elementUsageData.products.length > 0;
                 if(loadedRecords.value[index]['isInUse']){
                     imagesInUse++;
                 }
@@ -393,7 +402,7 @@ const deleteSelectedMedia = async () => {
     }
     
     if(imagesInUse > 0) {
-        cannotDeleteMessage.value = "The highlighted files cannot be deleted because they are currently in use. To see how these files are being used, click on each file and check the media details panel. To delete the media, you must first disconnect them from the utility they are associated with."
+        cannotDeleteMessage.value = "The highlighted files cannot be deleted because they are currently in use. To see how these files are being used, click on each file and check the media details panel. To delete the file, you must first disconnect them from the utilities they are associated with."
         return false;
     }
 
@@ -418,9 +427,21 @@ const deleteSelectedMedia = async () => {
         }
     } catch (error) {
         if (error.response && error.response.status === 422) {
-            deleteFailureResponse.value = error.response.data.message;
+            cannotDeleteMessage.value = error.response.data.message;
+            const mediaData = error.response.data.mediaData ?? []
+            if (mediaData.length) {
+                for (let ind = 0; ind < mediaData.length; ind++) {
+                const selectedItem = mediaData[ind];
+                for (let index = 0; index < loadedRecords.value.length; index++) {
+                    const element = loadedRecords.value[index];
+                    if (element.id == selectedItem.mediaId) {
+                        loadedRecords.value[index]['isInUse'] = element.id == selectedItem.mediaId;
+                    }
+                }
+            }
+            }
         } else {
-            deleteFailureResponse.value = "Something went wrong! Pls try again later.";
+            cannotDeleteMessage.value = "Something went wrong! Pls try again later.";
         }
     }
     deletingMedia.value = false;

@@ -68,6 +68,8 @@ class SettingsController extends Controller
             'loyalty_reward_formula' => 'nullable|string|max:64',
             'support_offline_payment' => 'nullable|boolean',
             'who_approves_offline_payment' => 'nullable|string|max:64',
+            'order_file_delible_states' => 'nullable|array',
+            'auto_delete_order_files_after' => 'nullable|string|max:32'
         ];
 
         $request->validate($rules);
@@ -103,6 +105,8 @@ class SettingsController extends Controller
         $settings->loyalty_reward_formula = $request->loyalty_reward_formula;
         $settings->support_offline_payment = $request->support_offline_payment;
         $settings->who_approves_offline_payment = $request->who_approves_offline_payment;
+        $settings->order_file_delible_states = json_encode($request->order_file_delible_states);
+        $settings->auto_delete_order_files_after = $request->auto_delete_order_files_after;
         $settings->save();
 
         return redirect(route('settings'));

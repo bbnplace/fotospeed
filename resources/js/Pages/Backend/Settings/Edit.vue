@@ -120,6 +120,37 @@
                                 ></VTextField>
                                 </VCol>
                             </VRow>
+                            <h4 class="my-3">Order Files / Space Management</h4>
+                            
+                            <VRow>
+                                <VCol cols="12">
+                                    <p>To manage storage space, consider setting up automatic deletion of files attached to orders after a specified period. Define the duration for which these files should be retained before they are automatically deleted.</p>
+                                    <v-select
+                                        v-model="form.auto_delete_order_files_after"
+                                        label="Select Duration"
+                                        variant="outlined"
+                                        :items="['Two Weeks', 'One Month', 'Three Months', 'Six Months', 'One Year', 'Two Years', 'Forever']"
+                                        :hide-details="form.errors.auto_delete_order_files_after == undefined"
+                                        :error-messages="form.errors.auto_delete_order_files_after"
+                                    ></v-select>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol cols="12">
+                                    <p>At what order status should the file be eligible for deletion? Choose the Order Statuses when the files will no longer be needed.</p>
+                                    <v-combobox
+                                        v-model="form.order_file_delible_states"
+                                        label="Select Statuses"
+                                        variant="outlined"
+                                        :items="reportStates"
+                                        :hide-details="form.errors.order_file_delible_states == undefined"
+                                        :error-messages="form.errors.order_file_delible_states"
+                                        multiple
+                                        chips
+                                        small-chips
+                                    ></v-combobox>
+                                </VCol>
+                            </VRow>
                         </VCard>
                     </v-window-item>
                     <v-window-item value="messaging">
@@ -435,7 +466,6 @@
 import { Head, usePage, useForm } from '@inertiajs/vue3';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
-import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue';
 
 const tab = ref(null);
@@ -492,6 +522,8 @@ const form = useForm({
     processing: false,
     support_offline_payment: settings.support_offline_payment == 1,
     who_approves_offline_payment: settings.who_approves_offline_payment,
+    order_file_delible_states: settings.order_file_delible_states ? JSON.parse(settings.order_file_delible_states) : ['Delivered'],
+    auto_delete_order_files_after: settings.auto_delete_order_files_after ?? 'Two Weeks',
 });
 
 

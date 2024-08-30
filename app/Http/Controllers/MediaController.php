@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\Media;
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -114,11 +115,65 @@ class MediaController extends Controller
 
     }
 
+    private function getIndelibleFiles(array $fileIds): array
+    {
+        $indelibleMediaFiles = [];
+        $media = Media::whereIn('id', $fileIds)->get(['id', 'data']);
+        if (!empty($media)) {
+            $settings = Setting::first();
+            $orderFileDelibleStates = json_decode($settings->order_file_delible_states); // Gets the Order Status where media files can be deleted
+            foreach ($media as $mediaData) {
+                // Use Check the status of orders that can be deleted from settings.
+                // If the order cannot be deleted, add to list that should be returned and highlighted.
+                if (!empty($mediaData->data)) {
+                    $mediaUsageData = json_decode($mediaData->data);
+                    if (property_exists($mediaUsageData, 'orders')) {
+                        $orders = Order::whereIn('id', $mediaUsageData->orders)->get();
+                        if (!empty($orders)) {
+                            $indelibleOrders = [];
+                            foreach ($orders as $order) {
+                                if (!in_array($order->orderStatus->name, $orderFileDelibleStates)) {
+                                    array_push($indelibleOrders, [
+                                        'id' => $order->id,
+                                        'name' => $order->name,
+                                        'status' => $order->orderStatus->name,
+                                    ]);
+                                }
+                            }
+
+                            if (!empty($indelibleOrders)) {
+                                array_push($indelibleMediaFiles, [
+                                    'mediaId' => $mediaData->id,
+                                    'indelibleOrders' => $indelibleOrders,
+                                ]);
+                            }
+                        }
+                    }
+
+                    // if (property_exists($mediaUsageData, 'products')) {
+                    //     # code...
+                    // }
+                }
+            }
+        }
+
+        return $indelibleMediaFiles;
+    }
+
     public function delete(Request $request)
     {
         $request->validate([
             'selections' => 'required|array'
         ]);
+
+        // Todo: Before deleting images that are linked to an order, check that the order has been completed and the No-Delete period has been exceeded.
+        $indelibleMediaFiles = $this->getIndelibleFiles($request->selections);
+        if (!empty($indelibleMediaFiles)) {
+            return response()->json([
+                'message' => 'The highlighted files cannot be deleted because they are still in use. To review the order statuses where file deletion is permitted, go to Settings > File Upload > Order Files / Space Management.',
+                'mediaData' => $indelibleMediaFiles,
+            ], 422);
+        }
 
         Media::deleteMedia($request->selections);
 
