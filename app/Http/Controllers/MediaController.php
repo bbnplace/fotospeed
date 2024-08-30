@@ -12,10 +12,10 @@ use Inertia\Inertia;
 
 class MediaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         return Inertia::render("Backend/Media/List", [
-            'endpoint' => route('media.records'),
+            'records' => $this->records($request),
             'note' => session('note'),
             'stkn' => csrf_token(),
             'usage' => [
@@ -24,7 +24,7 @@ class MediaController extends Controller
         ]);
     }
 
-    public function records(Request $request)
+    private function records(Request $request)
     {
         $items = [];
         $itemsCount = 0;
@@ -46,12 +46,6 @@ class MediaController extends Controller
             $searchTerm = $search;
             if (!empty($searchTerm)) {
                $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('height', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('width', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('weight', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('print_price', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('cover_print_price', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('sheet_price', 'LIKE', sprintf('%%%s%%', $searchTerm));
             }
         }
 
@@ -63,14 +57,10 @@ class MediaController extends Controller
             $query->orderBy('id', 'desc');
         }
 
-        $itemsCount = $query->count();
-        $items = $query->take($itemsPerPage)
-            ->skip($itemsPerPage * ($page - 1))
-            ->get();
-
+        $items = $query->paginate($itemsPerPage, ['*'],'pg', $page);
         return [
             'records' => $items,
-            'totalRecords' => $itemsCount,
+            'searchPhrase' => $search,
         ];
     }
 

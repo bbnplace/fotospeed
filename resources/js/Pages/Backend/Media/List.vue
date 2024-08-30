@@ -7,15 +7,17 @@
                 <DropzoneUploader usage="Order" @file-uploaded="showUploadedFile" v-if="showMediaUploader" />
                 <Panel snippet-title="Media Library">
                     <div>
-                        <VTextField
+                        <form @submit.prevent="loadRecords">
+                            <VTextField
                             label="Filter Media"
                             variant="outlined"
                             append-inner-icon="mdi-magnify"
                             v-model="search"
-                            @keyup="loadRecords"
+                            @click:append-inner="loadRecords"
                             :loading="loading"
                         >
                         </VTextField>
+                        </form>
                     </div>
                     <VRow>
                         <VCol class="flex flex-row">
@@ -76,7 +78,6 @@
                         </VCol>
                     </VRow>
                     <VRow>
-                        
                         <VCol cols="12" v-if="cannotDeleteMessage.length" class="text-red">
                             <v-alert
                                 type="error"
@@ -85,6 +86,7 @@
                                 v-if="cannotDeleteMessage.length"
                             ></v-alert>
                         </VCol>
+                        <VCol cols="12" class="text-right" v-if="mediaRecords.total">Showing {{ mediaRecords.from }} to {{ mediaRecords.to }} of {{ mediaRecords.total }} files.</VCol>
                         <VCol cols="12" sm="6" md="4" lg="3" xl="2" v-for="image in loadedRecords" :key="image.id" :class="image.isInUse ? 'bg-red-100 border-1 rounded-sm border-red-200' : ''">
                             <div class="m-0 p-0 relative bottom-0 left-0">
                                 <VCheckbox
@@ -108,6 +110,13 @@
                             </div>
                         </VCol>
                     </VRow>
+                    <VRow>
+                        <VCol cols="12" class="text-right">
+                            <Link v-for="(pageLink, index) in paginationLinks" :key="index" :href="pageLink.url" :class="`btn rounded ${pageLink.active ? 'bg-black' : ''}`">
+                                <span v-html="pageLink.label"></span>
+                            </Link>
+                        </VCol>
+                    </VRow>
                 </Panel>
             </VCol>
             <VCol cols="4">
@@ -129,6 +138,21 @@
                                     class="shadow"
                                 >
                                 </VImg>
+                            </VCol>
+                            <VCol cols="12" v-if="mediaOrders.length || mediaProducts.length">
+                                
+                                <div v-if="mediaOrders.length">
+                                    <b>Linked Orders</b>
+                                    <ul>
+                                        <li v-for="order in mediaOrders" :key="order.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('order.view', [order.id])">{{ order.name }}</Link></li>
+                                    </ul>
+                                </div>
+                                <div v-if="mediaProducts.length">
+                                    <b>Linked Products</b>
+                                    <ul>
+                                        <li v-for="product in mediaProducts" :key="product.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('item.view', [product.id])">{{ product.name }}</Link></li>
+                                    </ul>
+                                </div>
                             </VCol>
                             <VCol cols="12">
                                 <VTextField
@@ -169,18 +193,6 @@
                                 >Save</VBtn>
                             </VCol>
                             <VCol cols="12">
-                                <div v-if="mediaOrders.length">
-                                    <b>Linked Orders</b>
-                                    <ul>
-                                        <li v-for="order in mediaOrders" :key="order.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('order.view', [order.id])">{{ order.name }}</Link></li>
-                                    </ul>
-                                </div>
-                                <div v-if="mediaProducts.length">
-                                    <b>Linked Products</b>
-                                    <ul>
-                                        <li v-for="product in mediaProducts" :key="product.id" class="list-disc pt-1"><Link class="underline underline-offset-2" :href="route('item.view', [product.id])">{{ product.name }}</Link></li>
-                                    </ul>
-                                </div>
                                 <div class="grid grid-cols-2 font-sm mt-3">
                                     <div>Uploaded By</div>
                                     <div>{{ selectedMedia.uploadedBy }}</div>
@@ -209,7 +221,7 @@
 import { ref } from 'vue';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue'
-import { usePage, Link } from '@inertiajs/vue3';
+import { usePage, Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import moment from 'moment';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
@@ -219,14 +231,13 @@ const showMediaUploader = ref(false);
 const enableSelection= ref(false)
 const selected = ref([]);
 const selectAll = ref(false);
-const itemsPerPage = ref(25);
-const totalRecords = ref(0);
-const loadedRecords = ref([]);
+const mediaRecords = usePage().props.records.records;
+const loadedRecords = ref(mediaRecords.data);
+const paginationLinks = mediaRecords.links;
+
 let loading = ref(false);
-const search = ref("");
+const search = ref(usePage().props.records.searchPhrase);
 const page = ref(1);
-const sortBy = null;
-const endpoint = usePage().props.endpoint;
 const mediaUsages = usePage().props.usage;
 const mediaProducts = ref([]);
 const mediaOrders = ref([]);
@@ -259,30 +270,17 @@ let source = null;
 const loadRecords = async () => {
     const payload = {
         page: page.value,
-        itemsPerPage: itemsPerPage.value,
-        sortBy,
         search: search.value
     }
     
-    loading.value = true;
-    if(source) source.cancel('Request cancelled by user');
-    source = axios.CancelToken.source();
-    const response = await axios.post(endpoint, payload, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        cancelToken: source.token
-    });
-    loadedRecords.value = response.data.records;
-    totalRecords.value = response.data.totalRecords
-    loading.value = false;
+    router.visit(route('media', payload))
 }
 
 const showUploadedFile = () => {
     loadRecords();
 }
 
-loadRecords();
+// loadRecords();
 
 const selectedMedia = ref({
     thumbnail: "",
