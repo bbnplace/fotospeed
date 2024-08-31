@@ -303,6 +303,7 @@ class OrdersController extends Controller
         // dd($canApproveOfflinePayment);
         return [
             'order' => $order,
+            'customer' => User::find($order->user_id),
             'nextProcess' => $nextProcess->name ?? null,
             'orderDetail' => $orderDetail,
             'items' => Item::getItemsArray(),

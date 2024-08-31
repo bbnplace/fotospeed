@@ -9,7 +9,7 @@ class CustomerFeedback extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['customer_id', 'staff_id', 'note'];
+    protected $fillable = ['customer_id', 'staff_id', 'note', 'order_id'];
 
     public function customer()
     {

@@ -15,12 +15,18 @@
                 v-model="logMessage.newMessage"
                 label="Type Feedback" 
                 variant="outlined"
+                density="compact"
+                rows="2"
+                max-rows="4"
+                auto-grow
+                clearable
             ></VTextarea>
             <div class="text-right">
                 <VBtn
+                    prepend-icon="mdi-content-save"
                     color="black"
                     type="submit"
-                >Save Feedback</VBtn>
+                >Save</VBtn>
             </div>
         </form>
     </div>
@@ -29,11 +35,11 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { usePage } from "@inertiajs/vue3";
-import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
 import axios from 'axios';
 
 const customer = usePage().props.customer;
+const order = usePage().props.order ?? {};
 const user = usePage().props.auth.user;
 
 const logMessage = reactive({
@@ -45,7 +51,8 @@ const feedbackLog = ref([]);
 const sendMessage = async () => {
     const payload = {
         message: logMessage.newMessage,
-        customerId: customer.id
+        customerId: customer.id,
+        orderId: order.id ?? null,
     }
 
     const response = await axios.post(route("customer.feedback.write"), payload, {
@@ -65,7 +72,8 @@ const sendMessage = async () => {
 }
 
 const loadCustomerFeedback = async () => {
-    const response = await axios.get(route("customer.feedback", [customer.id]));
+    const url = order.id == undefined ? route("customer.feedback", [customer.id]) : route("customer.feedback.order", [customer.id, order.id])
+    const response = await axios.get(url);
     feedbackLog.value = response.data;
 }
 

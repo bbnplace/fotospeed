@@ -17,6 +17,11 @@
                     v-model="logMessage.newMessage"
                     label="Type Comment" 
                     variant="outlined"
+                    density="compact"
+                    rows="2"
+                    max-rows="4"
+                    auto-grow
+                    clearable
                 ></VTextarea>
                 <div class="text-right">
                     <VBtn

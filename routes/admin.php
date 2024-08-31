@@ -101,6 +101,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
 
     // Customer Feedback Log
     Route::get('/customer-feedback-log/{customerId}', [CustomerFeedbacksController::class, 'index'])->name('customer.feedback');
+    Route::get('/customer-feedback-log/{customerId}/order/{orderId}', [CustomerFeedbacksController::class, 'index'])->name('customer.feedback.order');
     Route::post('/customer-feedback-log/write', [CustomerFeedbacksController::class, 'store'])->name('customer.feedback.write');
 
     // Whatsapp Message

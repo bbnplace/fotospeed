@@ -54,7 +54,7 @@ class TaskAudit
 
     public static function checkCustomerFeedback($order): bool
     {
-        return !empty(CustomerFeedback::where('created_at', '>', $order->created_at)->first());
+        return !empty(CustomerFeedback::where('order_id', $order->id)->first());
     }
 
     public static function checkOrderNumber($order): bool

@@ -7,10 +7,15 @@ use Illuminate\Http\Request;
 
 class CustomerFeedbacksController extends Controller
 {
-    public function index($customerId)
+    public function index($customerId, $orderId = null)
     {
         $query = CustomerFeedback::query();
         $query->where("customer_id", $customerId);
+
+        if (!is_null($orderId)) {
+            $query->where('order_id', $orderId);
+        }
+        
         $query->with("customer", function ($query){
             $query->select("id", "name", "mobile");
         });
@@ -23,11 +28,13 @@ class CustomerFeedbacksController extends Controller
         return $log;
     }
 
+
     public function store(Request $request)
     {
         $orderConversation = CustomerFeedback::create([
             "customer_id"=> $request->customerId,
             "staff_id" => auth()->user()->id,
+            "order_id" => $request->orderId,
             "note"=> $request->message,
         ]);
 

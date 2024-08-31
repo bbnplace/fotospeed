@@ -28,6 +28,10 @@
             </VCol>
             <VCol cols="12" sm="6">
                 <CommunicationLog />
+
+                <Panel snippet-title="Customer Feedback">
+                    <CustomerFeedback />
+                </Panel>
             </VCol>
         </VRow>
         <Panel :snippet-title="`Order Assets`">
@@ -66,6 +70,7 @@ import moment from 'moment';
 import CommunicationLog from '@/Components/CommunicationLog.vue';
 import DownloadAllMediaBtn from '@/Components/DownloadAllMediaBtn.vue';
 import OrderCard from '@/Components/OrderCard.vue';
+import CustomerFeedback from '@/Components/CustomerFeedback.vue';
 
 const order = usePage().props.order;
 const orderDetail = usePage().props.orderDetail;
