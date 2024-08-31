@@ -173,56 +173,7 @@
                             
                             <VRow v-if="canApproveOfflinePayment">
                                 <VCol cols="12">
-                                    <v-btn
-                                        prepend-icon="mdi-account-credit-card"
-                                    >Update Payment
-                                    <v-overlay
-                                        v-model="showPaymentConfirmationOverlay"
-                                        activator="parent"
-                                        scroll-strategy="close"
-                                        location-strategy="connected"
-                                    >
-                                        <v-card width="300" class="p-2">
-                                            <v-card-title>Update Payment Status</v-card-title>
-                                            <v-card-text>
-                                                <v-row>
-                                                    <v-col cols="12" class="mt-2">
-                                                        <v-select
-                                                            v-model="selectedPaymentStatus"
-                                                            label="Select Status"
-                                                            :items="paymentStatuses"
-                                                            variant="outlined"
-                                                            hide-details
-                                                        ></v-select>
-                                                    </v-col>
-                                                    <v-col cols="12">
-                                                        <v-select
-                                                            v-model="selectedPaymentMethod"
-                                                            label="Payment Method"
-                                                            :items="paymentMethods"
-                                                            variant="outlined"
-                                                            hide-details
-                                                        ></v-select>
-                                                    </v-col>
-                                                    <v-col cols="12">
-                                                        <v-progress-linear indeterminate color="red" v-if="updatingPaymentStatus"></v-progress-linear>
-                                                        <p v-if="paymentUpdateError.length" class="text-red">{{ paymentUpdateError }}</p>
-                                                        <p v-if="paymentUpdateSuccess.length">{{ paymentUpdateSuccess }}</p>
-                                                    </v-col>
-                                                </v-row>
-                                            </v-card-text>
-                                            <v-card-actions>
-                                                <v-btn
-                                                    @click="updatePaymentStatus"
-                                                >Update</v-btn>
-                                                <v-btn
-                                                    color="red"
-                                                    @click="showPaymentConfirmationOverlay = !showPaymentConfirmationOverlay"
-                                                >Close</v-btn>
-                                            </v-card-actions>
-                                        </v-card>
-                                    </v-overlay>
-                                    </v-btn>
+                                    <OfflinePayment @statusUpdated="handleOfflinePaymentConfirmation"/>
                                 </VCol>
                             </VRow>
                         </VCol>
@@ -488,7 +439,7 @@ import { usePage, useForm, Link } from "@inertiajs/vue3";
 import axios from 'axios';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
-// import { VTextField } from 'vuetify/lib/components/index.mjs';
+import OfflinePayment from './OfflinePayment.vue';
 
 const user = usePage().props.auth.user;
 const order = usePage().props.order;
@@ -512,10 +463,15 @@ const orderStatus = ref(order.order_status.name)
 const currentProcess = ref(order.process ? order.process.name : "-");
 const waybillNo = order.waybill_number;
 const enableHumanForwarding = ref(order.human_forwarding);
-const selectedPaymentMethod = ref("");
-const selectedPaymentStatus = ref("");
-const paymentMethods = usePage().props.paymentMethods;
-const paymentStatuses = usePage().props.paymentStatuses;
+const orderInvoice = usePage().props.invoice;
+const invoicePaymentMethod = ref(orderInvoice == null ? "" : orderInvoice.payment_method);
+const canApproveOfflinePayment = ref(usePage().props.canApproveOfflinePayment);
+
+const handleOfflinePaymentConfirmation = (response) => {
+    canApproveOfflinePayment.value = false;
+    invoicePaid.value = response.invoicePaid;
+    invoicePaymentMethod.value = response.paymentMethod;
+}
 
 const formatter = new Intl.NumberFormat('en-US', {
         style: 'decimal',
@@ -815,48 +771,6 @@ const startNextProcess = async () => {
     }, 7000)
 }
 
-
-const canApproveOfflinePayment = usePage().props.canApproveOfflinePayment;
-const showPaymentConfirmationOverlay = ref(false);
-const paymentUpdateError = ref("");
-const paymentUpdateSuccess = ref("");
-const updatingPaymentStatus = ref(false);
-const orderInvoice = usePage().props.invoice;
-const invoicePaymentMethod = ref(orderInvoice == null ? "" : orderInvoice.payment_method);
-const updatePaymentStatus = async () => {
-    const payload = {
-        orderId: order.id,
-        status: selectedPaymentStatus.value,
-        method: selectedPaymentMethod.value
-    }
-    updatingPaymentStatus.value = true;
-    paymentUpdateError.value = "";
-    paymentUpdateSuccess.value = "";
-
-    try {
-        const response = await axios.post(route('order.update-payment'), payload, {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.data && response.data.status == "success") {
-            paymentUpdateSuccess.value = response.data.message;
-            invoicePaid.value = selectedPaymentStatus.value == 'Paid';
-            invoicePaymentMethod.value = selectedPaymentMethod.value;
-        } else {
-            
-        }
-    } catch (error) {
-        if (error.response && error.response.status === 422) {
-            paymentUpdateError.value = error.response.data.message;
-        } else {
-            paymentUpdateError.value = "Something went wrong! Pls try again later.";
-        }
-    }
-
-    updatingPaymentStatus.value = false;
-}
 
 
 const printOrderCard = () => {

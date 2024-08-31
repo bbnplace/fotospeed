@@ -351,12 +351,37 @@ class OrdersController extends Controller
         $request->validate([
             'orderId' => 'required|integer|exists:orders,id|exists:invoices,order_id',
             'status' => ['required', Rule::in($paymentStatuses)],
-            'method' => ['required', Rule::in($paymentMethods)]
+            'paymentMethod' => ['required', Rule::in($paymentMethods)],
+            'amountPaid' => 'nullable|required_if:status,Paid|integer|digits_between:1,9',
+            'transactionReference' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'customerAccountName' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'customerAccountNumber' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'customerBank' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'paymentDate' => 'required|string|max:64',
+            'organizationBank' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'organizationAccountName' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'organizationAccountNumber' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:16',
+            'whoReceivedCash' => 'nullable|required_if:paymentMethod,Cash|string|max:300',
         ]);
 
         $invoice = Invoice::where('order_id', $request->orderId)->first();
         $invoice->invoice_status_id = $request->status == 'Paid' ? InvoiceStatus::STATUS_PAID : InvoiceStatus::STATUS_NEW;
-        $invoice->payment_method = $request->method;
+        $invoice->payment_method = $request->paymentMethod;
+        $invoice->offline_payment_data = json_encode([
+            'status' => $request->status,
+            'paymentMethod' => $request->paymentMethod,
+            'amountPaid' => $request->amountPaid,
+            'transactionReference' => $request->transactionReference,
+            'customerAccountName' => $request->customerAccountName,
+            'customerAccountNumber' => $request->customerAccountNumber,
+            'customerBank' => $request->customerBank,
+            'paymentDate' => $request->paymentDate,
+            'organizationBank' => $request->organizationBank,
+            'organizationAccountName' => $request->organizationAccountName,
+            'organizationAccountNumber' => $request->organizationAccountNumber,
+            'whoReceivedCash' => $request->whoReceivedCash,
+            'currency' => $request->currency ?? 'NGN',
+        ]);
         $invoice->save();
 
         return [

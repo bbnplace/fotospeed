@@ -112,6 +112,45 @@
                 </VCol>
             </VRow>
         </Panel>
+        <Panel snippet-title="Payment Details" v-if="offlinePaymentData">
+                <template v-if="offlinePaymentData.paymentMethod == 'Bank Transfer'">
+                    <VRow class="mb-3">
+                        <VCol cols="12" sm="6" md="4">
+                            <h5 class="my-3 text-blue">Customer</h5>
+                            <VRow>
+                                <VCol cols="12" class="pb-0"><b>Name</b><br />{{ offlinePaymentData.customerAccountName ?? '-' }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ offlinePaymentData.customerBank }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ offlinePaymentData.customerAccountNumber }}</VCol>
+                            </VRow>
+                        </VCol>
+                        <VCol cols="12" sm="6" md="4">
+                            <h5 class="my-3 text-blue">Receiving Account</h5>
+                            <VRow>
+                                <VCol cols="12" class="pb-0"><b>Name</b><br />{{ offlinePaymentData.organizationAccountName ?? '-' }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ offlinePaymentData.organizationBank }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ offlinePaymentData.organizationAccountNumber }}</VCol>
+                            </VRow>
+                        </VCol>
+                        <VCol cols="12" sm="6" md="4">
+                            <h5 class="my-3 text-blue">Transaction</h5>
+                            <VRow>
+                                <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ offlinePaymentData.transactionReference ?? '-' }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Amount</b><br />{{ offlinePaymentData.currency ?? '' }} {{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(offlinePaymentData.paymentDate).calendar() }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ offlinePaymentData.paymentMethod }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Status</b><br />{{ offlinePaymentData.status }}</VCol>
+                            </VRow>
+                        </VCol>
+                    </VRow>
+            </template>
+            <template v-if="offlinePaymentData.paymentMethod == 'Cash'">
+                <VRow class="mb-3">
+                    <VCol cols="12" md="4" class="pb-0"><b>Payment Method</b><br />{{ offlinePaymentData.paymentMethod }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Amount</b><br />{{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Cash Received By</b><br />{{ offlinePaymentData.whoReceivedCash }}</VCol>
+                </VRow>
+            </template>
+        </Panel>
     </BackendLayout>
 </template>
 
@@ -130,6 +169,7 @@
     const paymentAuthorization = invoice.paystack_response != null ? paystackPaymentDetails.authorization : null;
     const paymentCustomerDetail = invoice.paystack_response != null ? paystackPaymentDetails.customer : null;
     const isNewlyGeneratedInvoice = usePage().props.newlyGeneratedInvoice;
+    const offlinePaymentData = invoice.offline_payment_data != null ? JSON.parse(invoice.offline_payment_data) : null;
 
     const handlePaymentCompletion = data => {
         setTimeout(()=>{
