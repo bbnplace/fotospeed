@@ -208,4 +208,38 @@ class StaffController extends Controller
             'logged_out'
         ]);
     }
+
+    public function filter(Request $request)
+    {
+        $staffList = [];
+        $request->validate([
+            'keyword' => 'required|string|min:2|max:64'
+        ]);
+
+        $keyword = $request->keyword;
+        $customerRole = Role::where('name','Customer')->first();
+        $systemAdminRole = Role::where('name', 'System Admin')->first();
+
+        $query = User::query();
+        $query->whereNot('role_id', $customerRole->id);
+
+        if (!empty($keyword)) {
+            if (!empty($keyword)) {
+               $query->where(function($query) use($keyword){
+                    $query->where('name', 'LIKE', sprintf('%%%s%%', $keyword))
+                         ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $keyword))
+                         ->orWhere('email', 'LIKE', sprintf('%%%s%%', $keyword));
+               });
+            }
+        }
+
+        $records = $query->get(['name']);
+        if (!empty($records)) {
+            foreach ($records as $staff) {
+                array_push($staffList, $staff->name);
+            }
+        }
+
+        return $staffList;
+    }
 }

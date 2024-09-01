@@ -5,7 +5,7 @@
             <p>{{ feedback.note }}</p>
         </div>
     </div>
-    <VCard v-else class="p-3 mt-2 text-center" color="grey-lighten-3">
+    <VCard v-else class="p-3 mt-2" color="grey-lighten-3">
         Customer Feedback help your organisation deliver better customer experiences.
     </VCard>
     <hr />

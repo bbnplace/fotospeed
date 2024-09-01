@@ -153,6 +153,9 @@ Route::middleware(['auth', 'team.console'])->group(function (){
 
     // Endpoint for fetching product information by the name of the product
     Route::post('panel/item/find', [ItemsController::class, 'getItemByName'])->name('item.get-by-name');
+
+    // Endpoint for find staff by name
+    Route::post('panel/find-staff', [StaffController::class, 'filter'])->name('staff.filter');
 });
 
 

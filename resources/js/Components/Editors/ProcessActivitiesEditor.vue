@@ -11,7 +11,8 @@
                         </VCard>
                     </template>
                     <template v-else>
-                        <VCard class="p-2 my-3" color="grey-lighten-5" v-for="(productProcessActivity, index) in productProcessActivities[process.name]" :key="index" :title="`Task ${index + 1}`">
+                        <VCard class="p-2 my-3" color="grey-lighten-5" v-for="(productProcessActivity, index) in productProcessActivities[process.name]" :key="index">
+                            <v-card-title class="mb-1" style="font-size: 17px;">Task {{index + 1}}</v-card-title>
                             <VRow>
                                 <VCol>
                                     <VTextField
@@ -34,12 +35,16 @@
                                         v-model="productProcessActivities[process.name][index].description"
                                         label="Brief Guidelines (Optional)"
                                         variant="outlined"
+                                        rows="1"
+                                        auto-grow
+                                        max-rows="4"
                                         hide-details
                                         density="compact"
                                         autocomplete="off"
                                         bg-color="white"
                                         :rules="[taskDetailRule]"
                                         @blur="updateProcesses"
+                                        clearable
                                     ></VTextarea>
                                 </VCol>
                             </VRow>
@@ -52,6 +57,7 @@
                                         :items="teams"
                                         variant="outlined"
                                         density="compact"
+                                        hide-details
                                         autocomplete="off"
                                         bg-color="white"
                                         @update:model-value="updateProcesses"

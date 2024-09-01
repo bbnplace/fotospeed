@@ -45,7 +45,7 @@
                             v-model="showAcceptedTaskOverlay[task.id]"
                             activator="parent"
                             location-strategy="connected"
-                            scroll-strategy="close">
+                            scroll-strategy="static">
                             <VCard class="px-3 py-8 w-96" :title="task.name">
                               <VCardText>
                                 <p class="mb-2">{{ task.description }}</p>
@@ -58,6 +58,23 @@
                                 <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
                                 <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
                                 <p class="mt-3"><b>Team Member:</b> {{ task.user.name }}</p>
+                                <div>
+                                  <div class="pb-2" v-if="!showTaskTransferField">
+                                    <v-btn
+                                      color="blue-darken-3"
+                                      prepend-icon="mdi-transfer"
+                                      @click="showTaskTransferField = !showTaskTransferField"
+                                    >Transfer Task</v-btn>
+                                  </div>
+                                  <div class="mt-2" v-if="showTaskTransferField">
+                                    <Suggest label="Transfer Task To" noDataText="Find team member" variant="outlined" :endpoint="route('staff.filter')" @selected="useSelectedStaff" />
+                                    <v-btn
+                                      color="blue-darken-3"
+                                      class="mt-1"
+                                      :disabled="transferTaskTo.selection == undefined"
+                                    >Transfer</v-btn>
+                                  </div>
+                                </div>
                               </VCardText>
                               <VCardActions>
                                 <VBtn
@@ -87,6 +104,7 @@ import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import axios from 'axios';
 import moment from 'moment';
+import Suggest from '@/Components/Suggest.vue';
 
 const user = usePage().props.auth.user;
 const order = usePage().props.order;
@@ -96,6 +114,7 @@ const showOverlay = ref([]);
 const showAcceptedTaskOverlay = ref([]);
 const taskAuditError = ref({});
 
+const showTaskTransferField = ref(false);
 
 const columns = ref({
   Todo: [],
@@ -274,6 +293,11 @@ const pickTask = async (task, index) => {
       loadPickedTasks();
     }
   }
+}
+
+const transferTaskTo = ref({});
+const useSelectedStaff = data => {
+  transferTaskTo.value = data;
 }
 
 // let checkNewTaskInterval = 0;
