@@ -94,6 +94,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/tasks/accepted', [TasksController::class,'loadTasks'])->name('tasks.usertasks');
     Route::post('/task/pick', [TasksController::class,'pickTask'])->name('task.pick');
     Route::post('/task/update', [TasksController::class,'updateTasks'])->name('task.update');
+    Route::post('/task/transfer', [TasksController::class,'transfer'])->name('task.transfer');
 
     // Order Communication Log
     Route::get('/order-log/{orderId}', [CommunicationLogController::class, 'index'])->name('order.log');

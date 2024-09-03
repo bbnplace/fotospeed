@@ -30,6 +30,13 @@
             <div v-else><VIcon icon="mdi-information-outline"></VIcon> This panel holds {{ order.name }} tasks that has not been picked up by any team member.</div>
         </Panel>
         <Panel snippet-title="Accepted Tasks">
+            <v-alert 
+              v-if="acceptedCardAlertMessage.length"
+              class="mb-2 p-2"
+              :type="acceptedCardAlertType"
+              :text="acceptedCardAlertMessage"
+              closable
+            ></v-alert>
             <div class="kanban-board">
                 <VCard class="column" v-for="(tasks, status) in columns" :key="status" :title="status">
                     <div class="task-list" :ref="setRef(status)" :id="status">
@@ -59,19 +66,22 @@
                                 <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
                                 <p class="mt-3"><b>Team Member:</b> {{ task.user.name }}</p>
                                 <div>
-                                  <div class="pb-2" v-if="!showTaskTransferField">
+                                  <div class="pb-2" v-if="!showTaskTransferField[task.id]">
                                     <v-btn
                                       color="blue-darken-3"
                                       prepend-icon="mdi-transfer"
-                                      @click="showTaskTransferField = !showTaskTransferField"
+                                      @click="showTaskTransferField[task.id] = !showTaskTransferField[task.id]"
                                     >Transfer Task</v-btn>
                                   </div>
-                                  <div class="mt-2" v-if="showTaskTransferField">
+                                  <div class="mt-2" v-if="showTaskTransferField[task.id]">
                                     <Suggest label="Transfer Task To" noDataText="Find team member" variant="outlined" :endpoint="route('staff.filter')" @selected="useSelectedStaff" />
+                                    <v-progress-linear v-if="transferringTask" class="mt-1" color="red" indeterminate></v-progress-linear>
+                                    <p v-if="taskTransferError.length" class="text-red pt-2 mb-0">{{ taskTransferError }}</p>
                                     <v-btn
                                       color="blue-darken-3"
                                       class="mt-1"
-                                      :disabled="transferTaskTo.selection == undefined"
+                                      :disabled="transferTaskTo.selection == undefined || transferringTask"
+                                      @click="transferTask(task.id)"
                                     >Transfer</v-btn>
                                   </div>
                                 </div>
@@ -114,7 +124,7 @@ const showOverlay = ref([]);
 const showAcceptedTaskOverlay = ref([]);
 const taskAuditError = ref({});
 
-const showTaskTransferField = ref(false);
+const showTaskTransferField = ref([]);
 
 const columns = ref({
   Todo: [],
@@ -296,8 +306,48 @@ const pickTask = async (task, index) => {
 }
 
 const transferTaskTo = ref({});
-const useSelectedStaff = data => {
+const useSelectedStaff = (data) => {
   transferTaskTo.value = data;
+}
+
+const transferringTask = ref(false);
+const acceptedCardAlertType = ref('');
+const acceptedCardAlertMessage = ref('');
+const taskTransferError = ref('');
+const transferTask = async (taskId) => {
+  taskTransferError.value = "";
+  acceptedCardAlertMessage.value = "";
+  transferringTask.value = true;
+  const payload = {
+    taskId: taskId,
+    receiverId: transferTaskTo.value.selection.id,
+  }
+
+  try {
+    const response = await axios.post(route('task.transfer'), payload, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    if(response.status == 200){
+      if (response.data.status == "success") {
+        loadNewTasks();
+        loadPickedTasks();
+        showAcceptedTaskOverlay.value[taskId] = false;
+        acceptedCardAlertType.value = "success";
+        acceptedCardAlertMessage.value = response.data.message;
+      }
+    }
+  } catch (error) {
+    acceptedCardAlertType.value = "error";
+    if (error.response && error.response.status === 422) {
+      taskTransferError.value = error.response.data.message;
+    } else {
+      taskTransferError.value = "Something went wrong! Pls try again later.";
+    }
+  }
+  transferringTask.value = false;
 }
 
 // let checkNewTaskInterval = 0;

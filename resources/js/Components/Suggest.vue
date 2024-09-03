@@ -5,10 +5,14 @@
         :items="suggestions"
         :variant="variant"
         :no-data-text="noDataText"
+        item-value="id"
+        item-title="name"
+        return-object
         @input="fetchList"
         @change="emitChoice"
         hide-details
         density="compact"
+        class="autocomplete"
     ></v-autocomplete>
 </template>
 
@@ -47,7 +51,10 @@ const fetchList = async (event) => {
         });
 
         if (response.data) {
-            suggestions.value = response.data
+            suggestions.value = response.data.map(item => ({
+                id: item.id,
+                name: item.name + (item.branch ? ' - ' + item.branch.name : '')
+            }))
         }
     } catch (error) {
         

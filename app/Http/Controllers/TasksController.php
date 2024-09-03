@@ -371,4 +371,25 @@ class TasksController extends Controller
         $item = $order->item;
         return json_decode($item->process_data);
     }
+
+    public function transfer(Request $request)
+    {
+        $request->validate([
+            'taskId' => 'required|integer|exists:tasks,id',
+            'receiverId' => 'required|integer|exists:users,id',
+        ]);
+
+        $task = Task::find($request->taskId);
+        $task->user_id = $request->receiverId;
+        $task->save();
+
+        $receiver = User::find($request->receiverId);
+        // Todo: Send push message to notify the staff that a new task has been received.
+        
+
+        return [
+            'status' => 'success',
+            'message' => sprintf('Task %s has been transferred to %s', $task->name, $receiver->name)
+        ];
+    }
 }

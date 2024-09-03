@@ -218,10 +218,21 @@ class StaffController extends Controller
 
         $keyword = $request->keyword;
         $customerRole = Role::where('name','Customer')->first();
-        $systemAdminRole = Role::where('name', 'System Admin')->first();
 
         $query = User::query();
+
+        // If user is not from Administrative Branch, select their branch
+        if (!auth()->user()->isFromAdministrativeBranch()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+        
+        $query->with(['branch' => function ($query) {
+            $query->select('id', 'name');
+        }]);
+
         $query->whereNot('role_id', $customerRole->id);
+
+        
 
         if (!empty($keyword)) {
             if (!empty($keyword)) {
@@ -233,13 +244,13 @@ class StaffController extends Controller
             }
         }
 
-        $records = $query->get(['name']);
-        if (!empty($records)) {
-            foreach ($records as $staff) {
-                array_push($staffList, $staff->name);
-            }
-        }
+        $records = $query->get(['id', 'name', 'branch_id']);
+        // if (!empty($records)) {
+        //     foreach ($records as $staff) {
+        //         array_push($staffList, $staff->name);
+        //     }
+        // }
 
-        return $staffList;
+        return $records;
     }
 }
