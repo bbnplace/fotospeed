@@ -6,6 +6,7 @@ use App\Helper\URLGenerator;
 use App\Messaging\TemplateManager;
 use App\Models\Process;
 use App\Models\User;
+use App\Notifications\TaskTransferNotification;
 use App\Report\ReportBuilder;
 use App\Tasks\Task as TaskAssigner;
 use App\Models\Order;
@@ -122,12 +123,38 @@ class TasksController extends Controller
             $task->user_id = auth()->user()->id;
             $task->save();
 
-            // TODO: Notify Controller that the task has been accepted. Show the user that accepted the task
+            // Notify Controller that the task has been accepted. Show the user that accepted the task
+            $message = sprintf('%s has accepted to %s', auth()->user()->name, $task->name);
+            $this->notifyTaskCoordinator($task, 'App\Notifications\TaskStatusNotification', $message);
 
             return [
                 'status' => 'success'
             ];
         }
+    }
+
+    private function notifyTaskCoordinator(Task $task, string $notificationObject, string $message)
+    {
+        $taskCoordinator = $this->getTaskCoordinator($task);
+        if (!empty($taskCoordinator)) {
+            $role = Role::where('name', $taskCoordinator)->first();
+                if (!empty($role)) {
+                    // Notify Coordinator that the task has been picked.
+                    TaskAssigner::sendTeamNotification($role, $task->branch, $notificationObject, $message, $task->order);
+                }
+        }
+    }
+
+    private function getTaskCoordinator(Task $task)
+    {
+        $coordinator = null;
+        $orderProcess = $this->getOrderProcesses($task->order);
+        $currentProcessData = $this->getCurrentProcessData($orderProcess->processes, $task->order->process->name);
+        if (!empty($currentProcessData)) {
+            $coordinator = $currentProcessData->whoCoordinates;
+        }
+        
+        return $coordinator;
     }
 
     private function getTaskAudits($task, $taskName): array | bool
@@ -203,7 +230,10 @@ class TasksController extends Controller
             $task->task_status_id = $newStatus;
             $task->save();
 
-            // Todo: Notify Coordinator of the change in the status of the task.
+            // Notify Coordinator of the change in the status of the task.
+            $message = sprintf('%s has moved task %s to %s', auth()->user()->name, $task->name, $task->taskStatus->name);
+            $this->notifyTaskCoordinator($task, 'App\Notifications\TaskStatusNotification', $message);
+
             $order = Order::find($task->order_id);
 
             // Check if order has been cancelled or placed on Hold, stop further action.
@@ -267,6 +297,9 @@ class TasksController extends Controller
                     // If there is a next process, set the status of the order to the next process' and trigger task for the next process
                     if (!empty($nextProcess)) {
                         if ($autoStartNextProcess) {
+                            $message = sprintf('%s tasks on Order# %s completed.', $currentProcessName, $task->order->order_number);
+                            $this->notifyTaskCoordinator($task, 'App\Notifications\TaskStatusNotification', $message);
+
                             $this->initiateNextProcess($order, $nextProcess);
                         } else {
                             // Flag Order so that an Admin or the Coordinator of the current process can manually forward order to the process
@@ -274,7 +307,9 @@ class TasksController extends Controller
                             $order->current_coordinator_role = $currentProcessData->whoCoordinates;
                             $order->save();
 
-                            // Todo: Send Signal to Team responsible for task forwarding on client so that they can review and forward the task
+                            // Send Signal to Team responsible for task forwarding on client so that they can review and forward the task
+                            $message = sprintf('%s tasks on Order# %s await your review.', $currentProcessName, $task->order->order_number);
+                            $this->notifyTaskCoordinator($task, 'App\Notifications\TaskStatusNotification', $message);
                         }
                     }
                 }
@@ -384,7 +419,8 @@ class TasksController extends Controller
         $task->save();
 
         $receiver = User::find($request->receiverId);
-        // Todo: Send push message to notify the staff that a new task has been received.
+        // Send push message to notify the staff that a new task has been received.
+        $receiver->notify(new TaskTransferNotification(sprintf('Transferred Task from %s', auth()->user()->name), $task, $receiver));
         
 
         return [

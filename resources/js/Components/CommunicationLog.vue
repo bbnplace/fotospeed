@@ -7,7 +7,7 @@
             </div>
         </div>
         <div v-else>
-            <VCard class="mb-3 p-3 text-center" color="grey-lighten-3">
+            <VCard class="mb-2 p-2" color="grey-lighten-3">
                 Leave a note for other team members working on this Order.
             </VCard>
         </div>

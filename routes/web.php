@@ -85,7 +85,9 @@ Route::get('/', function () {
 
 Route::get('/al/{token}', [AutoLoginController::class, 'autoLogin'])->name('auto.login');
 
-Route::post('/broadcasting/auth', [SettingsController::class, 'authBroadcast']);
+// Route::post('/broadcasting/auth', [SettingsController::class, 'authBroadcast']);
+// Broadcast::routes(['middleware' => ['auth:api']]);
+
 
 
 Route::middleware('auth')->group(function () {

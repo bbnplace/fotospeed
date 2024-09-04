@@ -2,7 +2,6 @@
 
 namespace App\Tasks;
 
-use App\Events\AnnounceNewOrder;
 use App\Helper\URLGenerator;
 use App\Messaging\EmailClient;
 use App\Messaging\SMSClient;
@@ -19,6 +18,7 @@ use App\Models\User;
 use App\Models\Task as TaskModel;
 use App\Models\Notification;
 use App\Report\ReportBuilder;
+use Log;
 
 class Task
 {
@@ -71,11 +71,44 @@ class Task
             self::createTask($taskName, $taskDescription, $order, $processName, $branch, $team);
 
             // Broadcast Push Notification to team members within the selected branch
-            $message = sprintf("You just received a new Order");
-            broadcast(new AnnounceNewOrder($message, $branch->id))->toOthers();
+            self::sendTeamNotification($team, $branch, 'App\Notifications\NewTaskNotification', $taskName, $order);
+
             
             // Save Notifications for each staff member on the team
             self::generateNotification($branch, $team, $processName, $taskName);
+        }
+    }
+
+    /**
+     * Send Team Notification
+     * Send notification to team members
+     * @param \App\Models\Role $team     The team to send the message to
+     * @param \App\Models\Branch $branch The branch the teams must belong to
+     * @param string $notification       The notification to send to the team
+     * @param string $message            The notification message
+     * @param \App\Models\Order $order   The Order the notification is related to
+     * @param array $exceptUsers         An array of ids of users to exempt from the broadcast
+     * @param array $types               The types of notifications to send. Supported values ['broadcast','mail','sms']
+     * @return void
+     */
+    public static function sendTeamNotification(Role $team, Branch $branch, string $notification,  string $message, Order $order = null, array $exceptUsers = [], array $types = ['broadcast'])
+    {
+        $teamMembers = User::where('role_id', $team->id)
+            ->where('branch_id', $branch->id)->get();
+        
+        if (!empty($teamMembers)) {
+            foreach ($teamMembers as $teamMember) {
+                if (empty($exceptUsers) || !in_array($teamMember->id, $exceptUsers)) {
+                    $config = [
+                        'message' => $message,
+                        'user' => $teamMember,
+                        'types' => $types,
+                        'order' => $order,
+                    ];
+                    
+                    $teamMember->notify(new $notification($config));
+                }
+            }
         }
     }
 

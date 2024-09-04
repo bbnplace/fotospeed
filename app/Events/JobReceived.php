@@ -35,8 +35,6 @@ class JobReceived implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        // return new Channel($this->branch);
-        // Log::info('notify.'.$this->branchId);
         return [
             new PrivateChannel('notify.'.$this->branchId),
         ];

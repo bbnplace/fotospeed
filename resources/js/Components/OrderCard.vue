@@ -61,7 +61,7 @@
                                             v-model="showOrderRefOverlay"
                                             activator="parent"
                                             location-strategy="connected"
-                                            scroll-strategy="close"
+                                            scroll-strategy="static"
                                         >
                                             <VCard max-width="400" class="p-1">
                                                 <VCardText class="pb-0">
@@ -112,7 +112,7 @@
                                             v-model="showPriceOverlay"
                                             activator="parent"
                                             location-strategy="connected"
-                                            scroll-strategy="close"
+                                            scroll-strategy="static"
                                         >
                                             <VCard max-width="400" class="p-1">
                                                 <VCardText class="pb-0">

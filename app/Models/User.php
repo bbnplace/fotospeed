@@ -68,7 +68,7 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return in_array($this->role->name, ['Admnistrator', 'System Admin']);
+        return in_array($this->role->name, ['Administrator', 'System Admin']);
     }
 
     public function isCustomer()

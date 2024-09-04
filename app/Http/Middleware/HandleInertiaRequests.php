@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
         if ($userData) {
             $role = Role::where('id', $userData->role_id)->first();
             $userData = [
+                'id' => $userData->id,
                 'email' => $userData->email,
                 'mobile' => $userData->mobile,
                 'name' => $userData->name,

@@ -135,7 +135,7 @@
                             <h5 class="my-3 text-blue">Transaction</h5>
                             <VRow>
                                 <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ offlinePaymentData.transactionReference ?? '-' }}</VCol>
-                                <VCol cols="12" class="pb-0"><b>Amount</b><br />{{ offlinePaymentData.currency ?? '' }} {{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Amount</b><br />₦{{ offlinePaymentData.currency ?? '' }} {{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
                                 <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(offlinePaymentData.paymentDate).calendar() }}</VCol>
                                 <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ offlinePaymentData.paymentMethod }}</VCol>
                                 <VCol cols="12" class="pb-0"><b>Status</b><br />{{ offlinePaymentData.status }}</VCol>
@@ -146,7 +146,7 @@
             <template v-if="offlinePaymentData.paymentMethod == 'Cash'">
                 <VRow class="mb-3">
                     <VCol cols="12" md="4" class="pb-0"><b>Payment Method</b><br />{{ offlinePaymentData.paymentMethod }}</VCol>
-                    <VCol cols="12" md="4" class="pb-0"><b>Amount</b><br />{{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Amount</b><br />₦{{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Cash Received By</b><br />{{ offlinePaymentData.whoReceivedCash }}</VCol>
                 </VRow>
             </template>

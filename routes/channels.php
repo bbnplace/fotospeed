@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Log;
 |
 */
 
-// Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-//     return (int) $user->id === (int) $id;
-// });
+Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+    // return true;
+});
 
 // Defining Channel for each branch
 Broadcast::channel('notify.{branchId}', function ($user, $branchId) {
@@ -27,4 +28,9 @@ Broadcast::channel('notify.{branchId}', function ($user, $branchId) {
 Broadcast::channel('new-order.{branchId}', function ($user, $branchId) {
     return (int) $user->branch_id === (int) $branchId && ($user->isReception() || $user->isManagement());
 });
+
+// Broadcast::channel('App.Models.User.{id}', function($user, $id){
+//     Log::info('User ID: %s, Pair User Id: %s', $user->id, $id);
+//     return (int) $user->id === (int) $id;
+// });
 

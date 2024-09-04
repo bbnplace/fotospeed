@@ -118,7 +118,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { usePage, useForm, Link } from  '@inertiajs/vue3';
+import { usePage, useForm, Link, router } from  '@inertiajs/vue3';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
@@ -129,6 +129,7 @@ const userProps = usePage().props.auth.user;
 const name = userProps.name;
 const role = userProps.role;
 const branchId = usePage().props.auth.user.branch_id;
+const userId = usePage().props.auth.user.id;
 
 const form = useForm({})
 const submitForm = () => {
@@ -136,6 +137,7 @@ const submitForm = () => {
 }
 
 window.Pusher = Pusher;
+// window.Pusher.logToConsole = true;
 
 const echo = new Echo({
   broadcaster: 'pusher',
@@ -144,6 +146,28 @@ const echo = new Echo({
   encrypted: true,
 });
 
+const showBrowserNotification = notification => {
+    if (Notification.permission === 'granted') {
+        new Notification(notification.message, {
+            body: 'Click to view',
+            icon: 'http://localhost:8000/images/logo.png',
+            data: { url: notification.url },
+        }).onclick = function(event) {
+            try {
+                window.focus();
+                router.visit(event.target.data.url);
+            } catch (error) {
+                window.open(event.target.data.url, '_blank');
+            }
+        };
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+                showBrowserNotification(notification);
+            }
+        });
+    }
+}
 
 onMounted(() => {
     // Listening for branch event as message is passed through different processing stages.
@@ -154,15 +178,21 @@ onMounted(() => {
 
     // Notifying user when there is a new order
     echo.private(`new-order.${branchId}`)
-    .listen('AnnounceNewOrder', (e) => {
-        showSnackbar(e.message);
-    });
+        .listen('AnnounceNewOrder', (e) => {
+            showSnackbar(e.message);
+        });
+
+    echo.private(`App.Models.User.${userId}`)
+        .notification((notification) => {
+            showBrowserNotification(notification);
+        });
 
 });
 
 onBeforeUnmount(() => {
     echo.private(`notify.${branchId}`).stopListening('JobReceived');
     echo.private(`new-order.${branchId}`).stopListening('AnnounceNewOrder');
+    echo.leave(`App.Models.User.${userId}`);
 });
 </script>
 
