@@ -91,6 +91,12 @@ class User extends Authenticatable
         return $this->role->name == 'Cashier';
     }
 
+    public function isAccountant()
+    {
+        return $this->role->name == 'Accountant';
+    }
+
+
     public function isReception()
     {
         return $this->role->name == 'Reception';
@@ -103,7 +109,7 @@ class User extends Authenticatable
 
     public function canViewAllOrders()
     {
-        return $this->isAdmin() || $this->isManagement() || $this->isReception();
+        return $this->isAdmin() || $this->isManagement() || $this->isReception() || $this->isAccountant() || $this->isCashier();
     }
 
     public function canViewAllFinancials()

@@ -5,8 +5,8 @@
             <VRow v-if="unclaimedTasks.length" class="mt-3">
               <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
                 <VCard class="p-2 cursor-pointer" hover color="blue-darken-2">
-                  <h5>{{ task.name }}</h5>
-                  <p class="mb-0"><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                  <h5 class="mb-0">{{ task.name }}</h5>
+                  <p class="my-0"><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
                   <VOverlay
                       v-model="showOverlay[task.id]"
                       activator="parent"
@@ -44,8 +44,8 @@
                         :class="`task-card ${task.order.paused ? 'non-draggable bg-gray-500' : ''}`"
                         :ref="setCardRef(task.id)"
                         >
-                          <h5>{{ task.name }}</h5>
-                          <p class="mb-0 flex "><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>{{ task.order.paused ? 'ON HOLD' : '' }}</b></p>
+                          <h5 class="mb-0">{{ task.name }}</h5>
+                          <p class="my-0 flex "><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>{{ task.order.paused ? 'ON HOLD' : '' }}</b></p>
                           <VOverlay
                             v-model="showAcceptedTaskOverlay[task.id]"
                             activator="parent"
