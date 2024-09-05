@@ -148,10 +148,14 @@ const echo = new Echo({
 
 const showBrowserNotification = notification => {
     if (Notification.permission === 'granted') {
-        new Notification(notification.message, {
-            body: 'Click to view',
-            icon: 'http://localhost:8000/images/logo.png',
+        const uniqueTag = `notification-${Date.now()}`;
+        
+        new Notification('OMS Notification', {
+            body: notification.message,
+            icon: window.location.origin + '/images/logo.png',
             data: { url: notification.url },
+            requireInteraction: true,
+            tag: uniqueTag
         }).onclick = function(event) {
             try {
                 window.focus();

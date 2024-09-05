@@ -16,6 +16,7 @@ use App\Models\Role;
 use App\Models\TaskStatus;
 use App\Models\User;
 use App\Models\Setting;
+use App\Notifications\GenericNotification;
 use App\Report\ReportBuilder;
 use App\Tasks\Task;
 use App\Models\Task as TaskModel;
@@ -245,6 +246,14 @@ class OrdersController extends Controller
         }
 
         return $processCoordinatorRole;
+    }
+
+    private function getOrderTasksInProcess(Order $order)
+    {
+        return TaskModel::where('order_id', $order->id)
+            ->whereNot('task_status_id', TaskStatus::STATUS_DONE)
+            ->whereNotNull('user_id')
+            ->get();
     }
 
     private function getOrder($id)
@@ -484,8 +493,21 @@ class OrdersController extends Controller
             ReportBuilder::build('cancelled', $order->quantity);
 
             // Todo: Log the ID of the user that cancelled the order
-            // Todo: Send notification to all team members with uncompleted tasks that order has been cancelled
-            $tasks = TaskModel::where('order_id', $order->id)->whereNot('task_status_id', TaskStatus::STATUS_DONE)->get();
+
+            // Send notification to all team members with uncompleted tasks that order has been cancelled
+            $tasks = $this->getOrderTasksInProcess($order);
+            if (!empty($tasks)) {
+                foreach ($tasks as $task) {
+                    $message = sprintf('Stop Work. Order %s has been cancelled. See details.', $order->order_number ?? $order->name);
+                    $task->user->notify(new GenericNotification([
+                        'message' => $message,
+                        'type' => ['broadcast'],
+                        'user' => $task->user,
+                        'url' => route('order.view', $order->id)
+                    ]));
+                }
+            }
+
             // if (!$tasks->isEmpty()) {
             //     $tasks->each(function ($task) use ($order) {
             //         $user = $task->user;
@@ -497,6 +519,7 @@ class OrdersController extends Controller
             //     });
             // }
             // Todo: Send notification to customer that order has been cancelled.
+            
 
             return [
                 'response' => 'Success',
@@ -521,7 +544,19 @@ class OrdersController extends Controller
         $order->hold_reason = $request->reason;
         $order->save();
 
-        // Todo: Send stop work notice to all team members that have task for this order
+        // Send stop work notice to all team members that have task for this order
+        $tasks = $this->getOrderTasksInProcess($order);
+        if (!empty($tasks)) {
+            foreach ($tasks as $task) {
+                $message = sprintf('Stop Work. Order %s has been placed on hold. Click to see reason.', $order->order_number ?? $order->name);
+                $task->user->notify(new GenericNotification([
+                    'message' => $message,
+                    'type' => ['broadcast'],
+                    'user' => $task->user,
+                    'url' => route('order.view', $order->id)
+                ]));
+            }
+        }
 
         return [
             'status' => 'success',
@@ -536,7 +571,19 @@ class OrdersController extends Controller
         $order->hold_reason = null;
         $order->save();
 
-        // Todo: Send order reactivation notice to all team members that have task for this order
+        // Send order reactivation notice to all team members that have task for this order
+        $tasks = $this->getOrderTasksInProcess($order);
+        if (!empty($tasks)) {
+            foreach ($tasks as $task) {
+                $message = sprintf('Resume Work. Order %s has been reactivated. Open Order.', $order->order_number ?? $order->name);
+                $task->user->notify(new GenericNotification([
+                    'message' => $message,
+                    'type' => ['broadcast'],
+                    'user' => $task->user,
+                    'url' => route('order.view', $order->id)
+                ]));
+            }
+        }
 
         return [
             'status' => 'success',

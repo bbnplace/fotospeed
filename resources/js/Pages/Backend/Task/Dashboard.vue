@@ -1,7 +1,7 @@
 <template>
     <Head title="Task Dashboard" />
     <BackendLayout>
-        <Panel :snippet-title="`${user.role} Tasks`">
+        <Panel :snippet-title="`Unclaimed ${user.role} Tasks`">
             <VRow v-if="unclaimedTasks.length" class="mt-3">
               <VCol v-for="(task, index) in unclaimedTasks" :key="index" cols="12" sm="6" md="4">
                 <VCard class="p-2 cursor-pointer" hover color="blue-darken-2">
@@ -25,7 +25,7 @@
                 </VCard>
               </VCol>
             </VRow>
-            <div v-else>This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept Task</b> button to pick up a task.</div>
+            <div v-else class="text-grey-darken-2">This panel holds {{ user.role }} Team tasks that has not been picked up by any team member. Click the <b>Accept Task</b> button to pick up a task.</div>
         </Panel>
         <Panel snippet-title="My Tasks">
             <v-alert 
