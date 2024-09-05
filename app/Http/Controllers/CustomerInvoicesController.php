@@ -6,12 +6,14 @@ use App\Messaging\EmailClient;
 use App\Messaging\SMSClient;
 use App\Models\EmailTemplate;
 use App\Models\RewardPoint;
+use App\Models\Role;
 use App\Models\SmsTemplate;
 use App\Models\Setting;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -122,7 +124,6 @@ class CustomerInvoicesController extends Controller
     public function paymentCompleted(Request $request)
     {
         if ($request->event == 'charge.success') {
-            # code...
             $data = $request->data;
             $customer = $data['customer'];
             $authorization = $data['authorization'];
@@ -144,44 +145,66 @@ class CustomerInvoicesController extends Controller
 
                         $ordersCount = 1; // TODO: Update to reflect the number of Orders the invoice covers
 
-                        // TODO: Send a push notification to receptionist to notify them that payment has been received.
-
                         $settings = Setting::first();
                         $order = Order::where('id', $invoice->order_id)->first();
+
+
                         $nextProcess = $order->orderStatus->nextProcess;
-                        $team = User::where('branch_id', $order->branch_id)->where('role_id', $nextProcess->role_id)->get();
+                        if (!empty($nextProcess)) {
+                            $team = User::where('branch_id', $order->branch_id)->where('role_id', $nextProcess->role_id)->get();
 
-                        $messagingData = [
-                            'customer' => User::where('id', $invoice->user_id)->first(),
-                            'order' => $order,
-                            'nextProcess' => $nextProcess,
-                            'team' => $team,
-                            'url' => '',
-                        ];
+                            $messagingData = [
+                                'customer' => User::where('id', $invoice->user_id)->first(),
+                                'order' => $order,
+                                'nextProcess' => $nextProcess,
+                                'team' => $team,
+                                'url' => '',
+                            ];
 
-                        // Send email receipt to customer
-                        if(!empty($settings->payment_email_temp))
-                        {
-                            // Fetch the email template
-                            $emailTemplate = EmailTemplate::where('name', $settings->payment_email_temp)->first();
-                            if(!empty($emailTemplate))
+                            // Send email receipt to customer
+                            if(!empty($settings->payment_email_temp))
                             {
-                                $emailClient = new EmailClient($messagingData);
-                                $emailClient->sendCustomerEmail($emailTemplate->template);
+                                // Fetch the email template
+                                $emailTemplate = EmailTemplate::where('name', $settings->payment_email_temp)->first();
+                                if(!empty($emailTemplate))
+                                {
+                                    $emailClient = new EmailClient($messagingData);
+                                    $emailClient->sendCustomerEmail($emailTemplate->template);
+                                }
+                            }
+
+                            // Send sms receipt to customer
+                            if(!empty($settings->payment_sms_temp))
+                            {
+                                // Fetch the sms template
+                                $smsTemplate = SmsTemplate::where('name', $settings->payment_sms_temp)->first();
+                                if(!empty($smsTemplate))
+                                {
+                                    $smsClient = new SMSClient($messagingData);
+                                    $smsClient->sendCustomerSms($smsTemplate->template);
+                                }
                             }
                         }
+                        
 
-                        // Send sms receipt to customer
-                        if(!empty($settings->payment_sms_temp))
-                        {
-                            // Fetch the sms template
-                            $smsTemplate = SmsTemplate::where('name', $settings->payment_sms_temp)->first();
-                            if(!empty($smsTemplate))
-                            {
-                                $smsClient = new SMSClient($messagingData);
-                                $smsClient->sendCustomerSms($smsTemplate->template);
+                        
+                        // Send a push notification to receptionist to notify them that payment has been received.
+                        $approvalRoleName = $settings->who_approves_offline_payment ?? 'Administrator';
+                        $approvalRole = Role::where('name', $approvalRoleName)->first();
+                        if (!empty($approvalRole)) {
+                            $eligiblePaymentValidators = User::where('role_id', $approvalRole->id)->where('branch_id', $order->branch_id)->get();
+                            if (!empty($eligiblePaymentValidators)) {
+                                foreach ($eligiblePaymentValidators as $eligiblePaymentValidator) {
+                                    $eligiblePaymentValidator->notify(new GenericNotification([
+                                        'message' => sprintf('%s has paid for Invoice# %s via PayStack. View Details.', $order->user->name, $invoice->id),
+                                        'url' => route('invoice', $invoice->id),
+                                        'user' => $eligiblePaymentValidator,
+                                        'type' => ['broadcast']
+                                    ]));
+                                }
                             }
                         }
+                        
 
                         // Save Loyalty Reward
                         $this->saveLoyaltyRewardPoints($order, $invoice, $settings->loyalty_reward_formula);
