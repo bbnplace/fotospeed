@@ -34,6 +34,37 @@
                     density="compact"
                 ></VTextarea>
             </v-col>
+            <h5 class="m-2">Optional Information</h5>
+            <v-col cols="12">
+                <v-select
+                    v-model="form.usage"
+                    label="Usage"
+                    :items="usages"
+                    variant="outlined"
+                    :hide-details="form.errors.usage == undefined"
+                    :error-messages="form.errors.usage"
+                ></v-select>
+            </v-col>
+            <v-col cols="6">
+                <v-select
+                    v-model="form.timing"
+                    label="Timing"
+                    :items="timings"
+                    variant="outlined"
+                    :hide-details="form.errors.usage == undefined"
+                    :error-messages="form.errors.usage"
+                ></v-select>
+            </v-col>
+            <v-col cols="6">
+                <v-select
+                    v-model="form.target"
+                    label="Target"
+                    :items="targets"
+                    variant="outlined"
+                    :hide-details="form.errors.usage == undefined"
+                    :error-messages="form.errors.usage"
+                ></v-select>
+            </v-col>
     
             <v-col class="flex items-center justify-end">
                 <v-btn
@@ -49,24 +80,33 @@
  
  <script setup lang="ts">
  import { useForm, usePage, Link } from '@inertiajs/vue3';
- import PrimaryButton from '@/Components/PrimaryButton.vue';
  
  interface NotificationTemplateEditor {
      id?: Number,
      name: String,
      title: String,
-     template: String
+     template: String,
+     usage?: String,
+     target?: String,
+     timing?: String,
  }
  
  const props = defineProps<{
      notificationTemplate: NotificationTemplateEditor
  }>()
+
+ const usages = usePage().props.usage;
+ const targets = usePage().props.targets;
+ const timings = usePage().props.timings;
  
  const form = useForm({
      id: props.notificationTemplate ? props.notificationTemplate.id: "",
      name: props.notificationTemplate ? props.notificationTemplate.name: "",
      title: props.notificationTemplate ? props.notificationTemplate.title: "",
      template: props.notificationTemplate ? props.notificationTemplate.template: "",
+     usage: props.notificationTemplate ? props.notificationTemplate.usage : "",
+     target: props.notificationTemplate ? props.notificationTemplate.target : "",
+     timing: props.notificationTemplate ? props.notificationTemplate.timing : "",
  });
  
  const submit = () => {

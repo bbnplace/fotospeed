@@ -23,6 +23,37 @@
                     density="compact"
                 ></VTextarea>
             </v-col>
+            <h5 class="m-2">Optional Information</h5>
+            <v-col cols="12">
+                <v-select
+                    v-model="form.usage"
+                    label="Usage"
+                    :items="usages"
+                    variant="outlined"
+                    :hide-details="form.errors.usage == undefined"
+                    :error-messages="form.errors.usage"
+                ></v-select>
+            </v-col>
+            <v-col cols="6">
+                <v-select
+                    v-model="form.timing"
+                    label="Timing"
+                    :items="timings"
+                    variant="outlined"
+                    :hide-details="form.errors.usage == undefined"
+                    :error-messages="form.errors.usage"
+                ></v-select>
+            </v-col>
+            <v-col cols="6">
+                <v-select
+                    v-model="form.target"
+                    label="Target"
+                    :items="targets"
+                    variant="outlined"
+                    :hide-details="form.errors.usage == undefined"
+                    :error-messages="form.errors.usage"
+                ></v-select>
+            </v-col>
 
             <v-col class="flex items-center justify-end">
                 <v-btn
@@ -37,23 +68,32 @@
 </template>
 
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { useForm, usePage } from '@inertiajs/vue3';
 
 interface EmailTemplateEditor {
     id?: Number,
     name: String,
-    template: String
+    template: String,
+    usage?: String,
+    target?: String,
+    timing?: String,
 }
 
 const props = defineProps<{
     emailTemplate: EmailTemplateEditor
 }>()
 
+const usages = usePage().props.usage;
+ const targets = usePage().props.targets;
+ const timings = usePage().props.timings;
+
 const form = useForm({
     id: props.emailTemplate ? props.emailTemplate.id: "",
     name: props.emailTemplate ? props.emailTemplate.name: "",
     template: props.emailTemplate ? props.emailTemplate.template: "",
+    usage: props.emailTemplate ? props.emailTemplate.usage : "",
+    target: props.emailTemplate ? props.emailTemplate.target : "",
+    timing: props.emailTemplate ? props.emailTemplate.timing : "",
 });
 
 const submit = () => {

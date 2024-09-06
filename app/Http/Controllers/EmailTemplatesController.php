@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Config\TemplateItem;
 use App\Models\EmailTemplate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
 
 class EmailTemplatesController extends Controller
 {
@@ -59,6 +61,9 @@ class EmailTemplatesController extends Controller
     public function add()
     {
         return Inertia::render('Backend/EmailTemplate/Add', [
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ]);
     }
 
@@ -66,7 +71,10 @@ class EmailTemplatesController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|unique:email_templates,name|min:2|max:64',
-            'template' => 'required|string|min:1|max:1530'
+            'template' => 'required|string|min:1|max:1530',
+            'usage' => ['nullable', Rule::in(TemplateItem::usage())],
+            'timing' => ['nullable', Rule::in(TemplateItem::timing())],
+            'target' => ['nullable', Rule::in(TemplateItem::target())],
         ]);
 
         // Save the record to database
@@ -81,6 +89,9 @@ class EmailTemplatesController extends Controller
 
         return [
             'emailTemplate' => $emailTemplate,
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ];
     }
 
@@ -94,11 +105,17 @@ class EmailTemplatesController extends Controller
         // In the event where the template name changed, user should be notified
         $request->validate([
             'name' => $emailTemplate->name != $request->name ? 'required|string|unique:email_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
-            'template' => 'required|string|min:1|max:1530'
+            'template' => 'required|string|min:1|max:1530',
+            'usage' => ['nullable', Rule::in(TemplateItem::usage())],
+            'timing' => ['nullable', Rule::in(TemplateItem::timing())],
+            'target' => ['nullable', Rule::in(TemplateItem::target())],
         ]);
 
         $emailTemplate->name = $request->name;
         $emailTemplate->template = $request->template;
+        $emailTemplate->usage = $request->usage;
+        $emailTemplate->timing = $request->timing;
+        $emailTemplate->target = $request->target;
         $emailTemplate->save();
 
         return redirect()->route('email-template.view', [$id])->with('note', 'Updated.');

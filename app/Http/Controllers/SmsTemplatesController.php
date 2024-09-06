@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Config\TemplateItem;
 use App\Models\SmsTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SmsTemplatesController extends Controller
 {
     protected $rules = [
         'name' => 'required|string|unique:sms_templates,name|min:2|max:64',
-        'template' => 'required|string|min:1|max:1530'
+        'template' => 'required|string|min:1|max:1530',
     ];
 
     public function index()
@@ -65,11 +67,17 @@ class SmsTemplatesController extends Controller
     public function add()
     {
         return Inertia::render('Backend/SmsTemplate/Add', [
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->rules['usage'] = ['nullable', Rule::in(TemplateItem::usage())];
+        $this->rules['timing'] = ['nullable', Rule::in(TemplateItem::timing())];
+        $this->rules['target'] = ['nullable', Rule::in(TemplateItem::target())];
         $validated = $request->validate($this->rules);
 
         // Save the record to database
@@ -83,6 +91,9 @@ class SmsTemplatesController extends Controller
         $smsTemplate = SmsTemplate::where('id', $templateId)->first();
         return [
             'smsTemplate' => $smsTemplate,
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ];
     }
 
@@ -96,11 +107,17 @@ class SmsTemplatesController extends Controller
         // In the event where the template name changed, user should be notified
         $request->validate([
             'name' => $smsTemplate->name != $request->name ? 'required|string|unique:sms_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
-            'template' => 'required|string|min:1|max:1530'
+            'template' => 'required|string|min:1|max:1530',
+            'usage' => ['nullable', Rule::in(TemplateItem::usage())],
+            'timing' => ['nullable', Rule::in(TemplateItem::timing())],
+            'target' => ['nullable', Rule::in(TemplateItem::target())],
         ]);
 
         $smsTemplate->name = $request->name;
         $smsTemplate->template = $request->template;
+        $smsTemplate->usage = $request->usage;
+        $smsTemplate->timing = $request->timing;
+        $smsTemplate->target = $request->target;
         $smsTemplate->save();
 
         return redirect()->route('sms-template.view', [$id])->with('note', 'Updated.');

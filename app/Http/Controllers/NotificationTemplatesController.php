@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Config\TemplateItem;
 use App\Models\NotificationTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class NotificationTemplatesController extends Controller
@@ -67,11 +69,17 @@ class NotificationTemplatesController extends Controller
     public function add()
     {
         return Inertia::render('Backend/NotificationTemplate/Add', [
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->rules['usage'] = ['nullable', Rule::in(TemplateItem::usage())];
+        $this->rules['timing'] = ['nullable', Rule::in(TemplateItem::timing())];
+        $this->rules['target'] = ['nullable', Rule::in(TemplateItem::target())];
         $validated = $request->validate($this->rules);
 
         // Save the record to database
@@ -85,6 +93,9 @@ class NotificationTemplatesController extends Controller
         $notificationTemplate = NotificationTemplate::where('id', $templateId)->first();
         return [
             'notificationTemplate' => $notificationTemplate,
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ];
     }
 
@@ -99,12 +110,18 @@ class NotificationTemplatesController extends Controller
         $request->validate([
             'name' => $notificationTemplate->name != $request->name ? 'required|string|unique:notification_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
             'title' => 'required|string|min:2|max:64',
-            'template' => 'required|string|min:1|max:1530'
+            'template' => 'required|string|min:1|max:1530',
+            'usage' => ['nullable', Rule::in(TemplateItem::usage())],
+            'timing' => ['nullable', Rule::in(TemplateItem::timing())],
+            'target' => ['nullable', Rule::in(TemplateItem::target())],
         ]);
 
         $notificationTemplate->name = $request->name;
         $notificationTemplate->title = $request->title;
         $notificationTemplate->template = $request->template;
+        $notificationTemplate->usage = $request->usage;
+        $notificationTemplate->timing = $request->timing;
+        $notificationTemplate->target = $request->target;
         $notificationTemplate->save();
 
         return redirect()->route('notification-template.view', [$id])->with('note', 'Updated.');

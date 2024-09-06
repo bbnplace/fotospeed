@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Config\TemplateItem;
 use App\Models\WhatsappTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class WhatsappTemplatesController extends Controller
@@ -65,11 +67,17 @@ class WhatsappTemplatesController extends Controller
     public function add()
     {
         return Inertia::render('Backend/WhatsappTemplate/Add', [
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->rules['usage'] = ['nullable', Rule::in(TemplateItem::usage())];
+        $this->rules['timing'] = ['nullable', Rule::in(TemplateItem::timing())];
+        $this->rules['target'] = ['nullable', Rule::in(TemplateItem::target())];
         $validated = $request->validate($this->rules);
 
         // Save the record to database
@@ -83,6 +91,9 @@ class WhatsappTemplatesController extends Controller
         $whatsAppTemplate = WhatsappTemplate::where('id', $templateId)->first();
         return [
             'whatsAppTemplate' => $whatsAppTemplate,
+            'usage' => TemplateItem::usage(),
+            'targets' => TemplateItem::target(),
+            'timings' => TemplateItem::timing(),
         ];
     }
 
@@ -96,11 +107,17 @@ class WhatsappTemplatesController extends Controller
         // In the event where the template name changed, user should be notified
         $request->validate([
             'name' => $whatsAppTemplate->name != $request->name ? 'required|string|unique:whatsapp_templates,name|min:2|max:64' : 'required|string|min:2|max:64',
-            'template' => 'required|string|min:1|max:1530'
+            'template' => 'required|string|min:1|max:1530',
+            'usage' => ['nullable', Rule::in(TemplateItem::usage())],
+            'timing' => ['nullable', Rule::in(TemplateItem::timing())],
+            'target' => ['nullable', Rule::in(TemplateItem::target())],
         ]);
 
         $whatsAppTemplate->name = $request->name;
         $whatsAppTemplate->template = $request->template;
+        $whatsAppTemplate->usage = $request->usage;
+        $whatsAppTemplate->timing = $request->timing;
+        $whatsAppTemplate->target = $request->target;
         $whatsAppTemplate->save();
 
         return redirect()->route('whatsapp-template.view', [$id])->with('note', 'Updated.');

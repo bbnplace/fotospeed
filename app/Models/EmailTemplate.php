@@ -11,7 +11,10 @@ class EmailTemplate extends Model
 
     protected $fillable = [
         'name',
-        'template'
+        'template',
+        'usage',
+        'timing',
+        'target',
     ];
 
     public static function getEmailTemplatesArray()
