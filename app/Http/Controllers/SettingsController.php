@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\Setting;
 use App\Models\SmsTemplate;
 use App\Report\ReportBuilder;
+use Cecula\MessagingApi\Messaging;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -43,6 +44,7 @@ class SettingsController extends Controller
             'cecula_sync_api_key' => 'nullable|string|min:32|max:64',
             'cecula_a2p_api_key' => 'nullable|string|min:32|max:64',
             'sms_type' => 'nullable|in:SIM,A2P',
+            'a2p_identity' => 'nullable|string|max:11',
             'email_sender_name' => 'nullable|string|min:2|max:64',
             'from_email' => 'nullable|email:dns,rfc|max:128',
             'replyto_email' => 'nullable|email:dns,rfc|max:128',
@@ -92,6 +94,7 @@ class SettingsController extends Controller
         $settings->cecula_sync_api_key = $request->cecula_sync_api_key;
         $settings->cecula_a2p_api_key = $request->cecula_a2p_api_key;
         $settings->sms_type = $request->sms_type;
+        $settings->a2p_identity = $request->a2p_identity;
         $settings->paystack_secret_key = $request->paystack_secret_key;
         $settings->paystack_public_key = $request->paystack_public_key;
         $settings->org_name = $request->org_name;
@@ -128,5 +131,22 @@ class SettingsController extends Controller
     public function authBroadcast(Request $request)
     {
         dd($request);
+    }
+
+    public function fetchIdentities()
+    {
+        $settings = Setting::first();
+
+        $ceculaA2pApiKey = trim($settings->cecula_a2p_api_key);
+
+        if (strlen($ceculaA2pApiKey) < 32) {
+            return [];
+        }
+
+        $ceculaA2pApiClient = new Messaging([
+            'apiKey' => $ceculaA2pApiKey
+        ]);
+
+        return $ceculaA2pApiClient->getSenderNames();
     }
 }

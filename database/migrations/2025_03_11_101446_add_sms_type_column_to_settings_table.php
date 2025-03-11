@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('settings', function (Blueprint $table) {
             $table->enum('sms_type', ['SIM', 'A2P'])->nullable()->after('cecula_a2p_api_key');
+            $table->string('a2p_identity', 14)->nullable()->after('sms_type');
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('settings', function (Blueprint $table) {
             $table->dropColumn('sms_type');
+            $table->dropColumn('a2p_identity');
         });
     }
 };

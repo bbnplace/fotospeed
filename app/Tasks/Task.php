@@ -182,10 +182,10 @@ class Task
         //     $emailClient->sendCustomerEmail($process->emailTemplate);
         // }
 
-        // if ($process->smsTemplate != 'None' && !empty($process->smsTemplate) && $process->sendSmsAt == $sendTime) {
-        //     $smsClient = new SMSClient($config);
-        //     $smsClient->sendCustomerSms($process->smsTemplate);
-        // }
+        if ($process->smsTemplate != 'None' && !empty($process->smsTemplate) && $process->sendSmsAt == $sendTime) {
+            $smsClient = new SMSClient($config);
+            $smsClient->sendCustomerSms($process->smsTemplate);
+        }
 
         // if ($process->whatsappTemplate != 'None' && !empty($process->whatsappTemplate) && $process->sendWhatsappAt == $sendTime) {
         //     $whatsappClient = new WhatsAppClient($config);

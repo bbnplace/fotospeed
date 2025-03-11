@@ -2,6 +2,7 @@
 
 namespace App\Messaging;
 use App\Models\Item;
+use Illuminate\Support\Facades\Log;
 
 class TemplateManager
 {
@@ -67,7 +68,7 @@ class TemplateManager
      * @param string|null $template
      * @return string
      */
-    public function prepareMessage(string | null $template)
+    public function prepareMessage($template)
     {
         $message = $template ?? "";
         if (!empty($message)) {
@@ -91,7 +92,7 @@ class TemplateManager
      * @param string|null $template
      * @return string
      */
-    public function prepareText(string | null $template)
+    public function prepareText($template)
     {
         return $this->prepareMessage($template);
     }

@@ -90,7 +90,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     // Task Routes
     Route::get('/tasks/unassigned', [TasksController::class,'loadUnassignedTeamTasks'])->name('tasks.team');
     Route::get('/tasks/unassigned/{orderId}', [TasksController::class,'loadUnassignedOrderTasks'])->name('tasks.order.unassigned');
-    
+
     Route::get('/tasks/accepted', [TasksController::class,'loadTasks'])->name('tasks.usertasks');
     Route::post('/task/pick', [TasksController::class,'pickTask'])->name('task.pick');
     Route::post('/task/update', [TasksController::class,'updateTasks'])->name('task.update');
@@ -201,7 +201,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::get('panel/state/{id}', [StatesController::class, 'view'])->name('state.view');
     Route::delete('panel/states/delete', [StatesController::class, 'delete'])->name('states.delete');
 
-     
+
     // Branch Management Module
     Route::get('panel/branches', [BranchesController::class, 'index'])->name('branches');
     Route::post('panel/branches', [BranchesController::class, 'records'])->name('branches.records');
@@ -286,5 +286,7 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     // Settings
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings');
     Route::post('settings', [SettingsController::class, 'update'])->name('settings');
+
+    Route::get('settings/identities', [SettingsController::class, 'fetchIdentities'])->name('get-identities');
 });
 

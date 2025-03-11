@@ -191,6 +191,19 @@
                                         :error-messages="form.errors.cecula_a2p_api_key"
                                     ></VTextField>
                                 </VCol>
+                                <VCol v-if="form.sms_type == 'A2P' && form.cecula_a2p_api_key.length >= 32">
+                                    <VSelect
+                                        id="a2p_identity"
+                                        v-model="form.a2p_identity"
+                                        label="Select Identity"
+                                        variant="outlined"
+                                        :items="approvedIdentities"
+                                        :hide-details="form.errors.a2p_identity == undefined"
+                                        :error-messages="form.errors.a2p_identity"
+                                        :loading="loadingIdentities"
+                                        
+                                    ></VSelect>
+                                </VCol>
                             </VRow>
                             <h4 class="my-3">WhatsApp</h4>
                             <VRow>
@@ -503,6 +516,7 @@ const roles = props.roles;
 let saveStatus = ref(null);
 const reportStatusSearch = ref(null);
 const reportViewersSearch = ref(null);
+const approvedIdentities = ref([]);
 
 const normalizeReportables = (reportables) => {
     const normalizedReportables = [];
@@ -530,6 +544,7 @@ const form = useForm({
     cecula_sync_api_key: settings.cecula_sync_api_key,
     cecula_a2p_api_key: settings.cecula_a2p_api_key,
     sms_type: settings.sms_type ?? 'A2P',
+    a2p_identity: settings.a2p_identity,
     paystack_secret_key: settings.paystack_secret_key,
     paystack_public_key: settings.paystack_public_key,
     loyalty_reward_formula: settings.loyalty_reward_formula,
@@ -552,7 +567,20 @@ const form = useForm({
     auto_delete_order_files_after: settings.auto_delete_order_files_after ?? 'Two Weeks',
 });
 
-
+const loadingIdentities = ref(false);
+const getIdentities = async () => {
+    try {
+        loadingIdentities.value = true;
+        const response = await axios.get(route("get-identities"));
+        const responseData = response.data;
+        if(responseData.status === 200) {
+            approvedIdentities.value = responseData.data;
+        }
+    } catch (error) {
+        // console.log(error)
+    }
+    loadingIdentities.value = false;
+}
 
 const submit = () =>{
     form.post(route('settings'), {
@@ -560,7 +588,10 @@ const submit = () =>{
             saveStatus.value = "Saved Changes";
             setTimeout(()=>{
                 saveStatus.value = null;
-            }, 5000)
+            }, 5000);
+
+            // Refetch Identities
+            getIdentities();
         },
         onError: (errors) => {
             handleReportablesError(errors);
@@ -592,5 +623,9 @@ const handleReportViewersError = (errors) =>{
     })
     form.errors.reportViewers = invalidReportViewers.length > 0 ? [`The following values are not supported: ${invalidReportViewers.join(', ')}`] : []
 }
+
+onMounted(() => {
+    getIdentities();
+})
 
 </script>

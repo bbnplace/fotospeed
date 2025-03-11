@@ -42,6 +42,9 @@ class EmailClient
 
     public function sendEmail(String $emailTemplate, Array $emails)
     {
+        if (empty($smsTemplate)) {
+            return false;
+        }
         if (count($emails)> 0) {
             $message = $this->templateManager->prepareMessage($emailTemplate);
 
