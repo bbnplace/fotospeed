@@ -37,9 +37,9 @@ const loading = ref(false);
 
 const onClick = () => {
     loading.value = true;
-    
+
     setTimeout(()=>{
-        loading = false;
+        loading.value = false;
         loaded.value = true;
     }, 2000);
 }

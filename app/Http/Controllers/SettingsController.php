@@ -41,6 +41,8 @@ class SettingsController extends Controller
             'thumbnail_size' => 'required|integer|min:10|max:1080',
             'file_mime_types' => 'required|string|min:2|max:200',
             'cecula_sync_api_key' => 'nullable|string|min:32|max:64',
+            'cecula_a2p_api_key' => 'nullable|string|min:32|max:64',
+            'sms_type' => 'nullable|in:SIM,A2P',
             'email_sender_name' => 'nullable|string|min:2|max:64',
             'from_email' => 'nullable|email:dns,rfc|max:128',
             'replyto_email' => 'nullable|email:dns,rfc|max:128',
@@ -88,6 +90,8 @@ class SettingsController extends Controller
         $settings->min_order_processing_days = $request->min_order_processing_days;
         $settings->max_order_processing_days = $request->max_order_processing_days;
         $settings->cecula_sync_api_key = $request->cecula_sync_api_key;
+        $settings->cecula_a2p_api_key = $request->cecula_a2p_api_key;
+        $settings->sms_type = $request->sms_type;
         $settings->paystack_secret_key = $request->paystack_secret_key;
         $settings->paystack_public_key = $request->paystack_public_key;
         $settings->org_name = $request->org_name;

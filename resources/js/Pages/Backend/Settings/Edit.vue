@@ -121,7 +121,7 @@
                                 </VCol>
                             </VRow>
                             <h4 class="my-3">Order Files / Space Management</h4>
-                            
+
                             <VRow>
                                 <VCol cols="12">
                                     <p>To manage storage space, consider setting up automatic deletion of files attached to orders after a specified period. Define the duration for which these files should be retained before they are automatically deleted.</p>
@@ -157,15 +157,39 @@
                         <VCard>
                             <h4 class="my-3">SMS</h4>
                             <VRow>
+
+                            </VRow>
+                            <VRow>
                                 <VCol>
+                                    <VSelect
+                                        id="sms_type"
+                                        v-model="form.sms_type"
+                                        label="Select SMS Origin"
+                                        variant="outlined"
+                                        :items="['SIM', 'A2P']"
+                                        :hide-details="form.errors.sms_type == undefined"
+                                        :error-messages="form.errors.sms_type"
+                                    ></VSelect>
+                                </VCol>
+                                <VCol v-if="form.sms_type == 'SIM'">
                                     <VTextField
-                                    id="cecula_sync_api_key"
-                                    v-model="form.cecula_sync_api_key"
-                                    label="Cecula Sync API Key"
-                                    variant="outlined"
-                                    :hide-details="form.errors.cecula_sync_api_key == undefined"
-                                    :error-messages="form.errors.cecula_sync_api_key"
-                                ></VTextField>
+                                        id="cecula_sync_api_key"
+                                        v-model="form.cecula_sync_api_key"
+                                        label="Hosted SIM API Key"
+                                        variant="outlined"
+                                        :hide-details="form.errors.cecula_sync_api_key == undefined"
+                                        :error-messages="form.errors.cecula_sync_api_key"
+                                    ></VTextField>
+                                </VCol>
+                                <VCol v-if="form.sms_type == 'A2P'">
+                                    <VTextField
+                                        id="cecula_a2p_api_key"
+                                        v-model="form.cecula_a2p_api_key"
+                                        label="A2P API Key"
+                                        variant="outlined"
+                                        :hide-details="form.errors.cecula_a2p_api_key == undefined"
+                                        :error-messages="form.errors.cecula_a2p_api_key"
+                                    ></VTextField>
                                 </VCol>
                             </VRow>
                             <h4 class="my-3">WhatsApp</h4>
@@ -298,14 +322,14 @@
                             <VRow>
                                 <VCol>
                                     <VSelect
-                                    id="invoice_number_src"
-                                    v-model="form.invoice_no_src"
-                                    label="Invoice Number Source"
-                                    variant="outlined"
-                                    :items="['Order Reference Number', 'System Generated']"
-                                    :hide-details="form.errors.invoice_no_src == undefined"
-                                    :error-messages="form.errors.invoice_no_src"
-                                ></VSelect>
+                                        id="invoice_number_src"
+                                        v-model="form.invoice_no_src"
+                                        label="Invoice Number Source"
+                                        variant="outlined"
+                                        :items="['Order Reference Number', 'System Generated']"
+                                        :hide-details="form.errors.invoice_no_src == undefined"
+                                        :error-messages="form.errors.invoice_no_src"
+                                    ></VSelect>
                                 </VCol>
                             </VRow>
                         </VCard>
@@ -447,8 +471,8 @@
                         </VCard>
                     </v-window-item>
                 </v-window>
-                
-                
+
+
                 <div class="flex flex-row-reverse mt-3">
                     <VBtn
                         color="blue-darken-1"
@@ -504,6 +528,8 @@ const form = useForm({
     min_order_processing_days: settings.min_order_processing_days,
     max_order_processing_days: settings.max_order_processing_days,
     cecula_sync_api_key: settings.cecula_sync_api_key,
+    cecula_a2p_api_key: settings.cecula_a2p_api_key,
+    sms_type: settings.sms_type ?? 'A2P',
     paystack_secret_key: settings.paystack_secret_key,
     paystack_public_key: settings.paystack_public_key,
     loyalty_reward_formula: settings.loyalty_reward_formula,
