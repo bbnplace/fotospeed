@@ -201,7 +201,7 @@
                                         :hide-details="form.errors.a2p_identity == undefined"
                                         :error-messages="form.errors.a2p_identity"
                                         :loading="loadingIdentities"
-                                        
+
                                     ></VSelect>
                                 </VCol>
                             </VRow>
@@ -209,28 +209,73 @@
                             <VRow>
                                 <VCol>
                                     <VTextField
-                                    id="wa_phone_id"
-                                    v-model="form.wa_phone_id"
-                                    label="Phone Number ID"
-                                    variant="outlined"
-                                    :hide-details="form.errors.wa_phone_id == undefined"
-                                    :error-messages="form.errors.wa_phone_id"
-                                ></VTextField>
+                                        id="wa_business_account_id"
+                                        v-model="form.wa_business_account_id"
+                                        label="WhatsApp Business Account ID"
+                                        variant="outlined"
+                                        :hide-details="form.errors.wa_business_account_id == undefined"
+                                        :error-messages="form.errors.wa_business_account_id"
+                                    ></VTextField>
                                 </VCol>
-                            </VRow>
-                            <VRow>
                                 <VCol>
                                     <VTextField
+                                        id="wa_phone_id"
+                                        v-model="form.wa_phone_id"
+                                        label="Phone Number ID"
+                                        variant="outlined"
+                                        :hide-details="form.errors.wa_phone_id == undefined"
+                                        :error-messages="form.errors.wa_phone_id"
+                                    ></VTextField>
+                                </VCol>
+                            </VRow>
+
+                            <VRow>
+                                <VCol>
+                                    <VTextarea
                                     id="wa_access_token"
+                                    rows="1"
+                                    auto-grow
                                     v-model="form.wa_access_token"
                                     label="Access Token"
                                     variant="outlined"
                                     :hide-details="form.errors.wa_access_token == undefined"
                                     :error-messages="form.errors.wa_access_token"
-                                ></VTextField>
+                                ></VTextarea>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VTextField
+                                        id="wa_webhook_verification_token"
+                                        v-model="form.wa_webhook_verification_token"
+                                        label="Webhook Verification Token"
+                                        variant="outlined"
+                                        :hide-details="form.errors.wa_webhook_verification_token == undefined"
+                                        :error-messages="form.errors.wa_webhook_verification_token"
+                                    ></VTextField>
+                                    <div>
+                                        <h5>Hint:</h5>
+                                        Type any word into the field above, then login to <b><a href="https://developers.facebook.com" target="_blank">Meta Developer</a></b> and navigate to <b>WhatsApp > Configuration > Webhook</b>.<br />
+                                        In the Callback URL field enter <B>THIS_WEBSITE_ADDRESS/api/whatsapp/inbound</B>.<br />
+                                        In the <b>Verify token</b> field, enter the <b>Webhook Verification Token</b> you created above. Then click the <b>Verify and Save</b> button.
+                                    </div>
                                 </VCol>
                             </VRow>
                             <h4 class="my-3">Email</h4>
+                            <VRow>
+                                <VCol cols="6" sm="12">
+                                    <VSelect
+                                        id="email_method"
+                                        v-model="form.email_method"
+                                        label="Send Method"
+                                        variant="outlined"
+                                        :items="emailSendMethods"
+                                        :hide-details="form.errors.email_method == undefined"
+                                        :error-messages="form.errors.email_method"
+
+                                    ></VSelect>
+                                </VCol>
+                            </VRow>
                             <VRow>
                                 <VCol>
                                     <VTextField
@@ -517,6 +562,7 @@ let saveStatus = ref(null);
 const reportStatusSearch = ref(null);
 const reportViewersSearch = ref(null);
 const approvedIdentities = ref([]);
+const emailSendMethods = ['API', 'SMTP'];
 
 const normalizeReportables = (reportables) => {
     const normalizedReportables = [];
@@ -533,6 +579,7 @@ const form = useForm({
     max_file_size: settings.max_file_size,
     thumbnail_size: settings.thumbnail_size,
     file_mime_types: settings.file_mime_types,
+    email_method: settings.email_method ?? 'API',
     email_sender_name: settings.email_sender_name,
     from_email: settings.from_email,
     replyto_email: settings.replyto_email,
@@ -549,7 +596,9 @@ const form = useForm({
     paystack_public_key: settings.paystack_public_key,
     loyalty_reward_formula: settings.loyalty_reward_formula,
     wa_phone_id: settings.wa_phone_id,
+    wa_business_account_id: settings.wa_business_account_id,
     wa_access_token: settings.wa_access_token,
+    wa_webhook_verification_token: settings.wa_webhook_verification_token,
     org_name: settings.org_name,
     org_address: settings.org_address,
     org_email: settings.org_email,

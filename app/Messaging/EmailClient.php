@@ -2,6 +2,8 @@
 
 namespace App\Messaging;
 
+use App\Models\EmailTemplate;
+
 class EmailClient
 {
     private $customer;
@@ -40,13 +42,15 @@ class EmailClient
         $this->sendEmail($customerEmailTemplate, [$this->customer->email]);
     }
 
-    public function sendEmail(String $emailTemplate, Array $emails)
+    public function sendEmail(String $templateName, Array $emails)
     {
         if (empty($smsTemplate)) {
             return false;
         }
+
         if (count($emails)> 0) {
-            $message = $this->templateManager->prepareMessage($emailTemplate);
+            $emailTemplate = EmailTemplate::where('name', $templateName)->first();
+            $message = $this->templateManager->prepareMessage($emailTemplate->template);
 
             foreach ($emails as $email)
             {

@@ -17,7 +17,7 @@ class WhatsappTemplatesController extends Controller
 
     public function index()
     {
-        return inertia::render('Backend/WhatsappTemplate/List', [
+        return inertia::render('Backend/WhatsAppTemplate/List', [
             'endpoint' => route('whatsapp-templates.records'),
             'note' => session('note')
         ]);
@@ -66,7 +66,7 @@ class WhatsappTemplatesController extends Controller
 
     public function add()
     {
-        return Inertia::render('Backend/WhatsappTemplate/Add', [
+        return Inertia::render('Backend/WhatsAppTemplate/Add', [
             'usage' => TemplateItem::usage(),
             'targets' => TemplateItem::target(),
             'timings' => TemplateItem::timing(),
@@ -125,18 +125,18 @@ class WhatsappTemplatesController extends Controller
 
     public function edit($id)
     {
-        return Inertia::render('Backend/WhatsappTemplate/Edit', $this->getWhatsappTemplate($id));
+        return Inertia::render('Backend/WhatsAppTemplate/Edit', $this->getWhatsappTemplate($id));
     }
 
     public function view($id)
     {
-        return Inertia::render('Backend/WhatsappTemplate/Detail', $this->getWhatsappTemplate($id));
+        return Inertia::render('Backend/WhatsAppTemplate/Detail', $this->getWhatsappTemplate($id));
     }
 
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
-            // TODO: Check if the selected template is linked with a process or setting. 
+            // TODO: Check if the selected template is linked with a process or setting.
             // If template is linked, do not delete. User should be requested to unlink
             // the template before proceeding.
             WhatsappTemplate::whereIn('id', $request->ids)->delete();

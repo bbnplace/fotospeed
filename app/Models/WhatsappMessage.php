@@ -10,7 +10,7 @@ class WhatsappMessage extends Model
     use HasFactory;
 
     protected $fillable = [
-        "recipient","message","response","status","order_id","delivery_status","direction"
+        "recipient","body","response","status","order_id","delivery_status","direction"
     ];
 
     public function order()

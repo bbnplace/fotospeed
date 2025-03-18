@@ -18,12 +18,14 @@ use App\Models\User;
 use App\Models\Task as TaskModel;
 use App\Models\Notification;
 use App\Report\ReportBuilder;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Log;
+use PhpParser\Node\Stmt\TryCatch;
 
 class Task
 {
-    
-    
+
+
     public static function assignProcessTasks(Item $item, Order $order, string $processName)
     {
         $processesData = json_decode($item->process_data);
@@ -36,7 +38,7 @@ class Task
         $branchName = in_array($order->branch->name, $productionBranches) ? $order->branch->name : $primaryBranch;
 
         $processData = json_decode($item->process_data); // Get data for each of the processes
-        
+
         $tasks = $processData->tasks->$processName; // Get tasks for new Process
 
         if (is_array($tasks)) {
@@ -73,7 +75,7 @@ class Task
             // Broadcast Push Notification to team members within the selected branch
             self::sendTeamNotification($team, $branch, 'App\Notifications\NewTaskNotification', $taskName, $order);
 
-            
+
             // Save Notifications for each staff member on the team
             self::generateNotification($branch, $team, $processName, $taskName);
         }
@@ -95,7 +97,7 @@ class Task
     {
         $teamMembers = User::where('role_id', $team->id)
             ->where('branch_id', $branch->id)->get();
-        
+
         if (!empty($teamMembers)) {
             foreach ($teamMembers as $teamMember) {
                 if (empty($exceptUsers) || !in_array($teamMember->id, $exceptUsers)) {
@@ -105,7 +107,7 @@ class Task
                         'types' => $types,
                         'order' => $order,
                     ];
-                    
+
                     $teamMember->notify(new $notification($config));
                 }
             }
@@ -134,7 +136,7 @@ class Task
     private static function isSupportedProcess($processesData, string $processName) : bool
     {
         $isSupportedProcess = false;
-        // Check that the process is supported for the product 
+        // Check that the process is supported for the product
         foreach ($processesData->processes as $processObject) {
             if ($processName == $processObject->name) {
                 $isSupportedProcess = true;
@@ -160,7 +162,7 @@ class Task
         $primaryBranch = $item->primary_order_processing_branch; // Principal Production Branch
         $branchName = in_array($order->branch->name, $productionBranches) ? $order->branch->name : $primaryBranch;
         $processData = json_decode($item->process_data); // Get data for each of the processes
-        
+
         $tasks = $processData->tasks->$process; // Get tasks for new Process
 
         if (is_array($tasks)) {
@@ -177,20 +179,33 @@ class Task
     {
         // Get Invoice for the Order
 
-        // if ($process->emailTemplate != 'None' && !empty($process->emailTemplate) && $process->sendEmailAt == $sendTime) {
-        //    $emailClient = new EmailClient($config);
-        //     $emailClient->sendCustomerEmail($process->emailTemplate);
-        // }
-
-        if ($process->smsTemplate != 'None' && !empty($process->smsTemplate) && $process->sendSmsAt == $sendTime) {
-            $smsClient = new SMSClient($config);
-            $smsClient->sendCustomerSms($process->smsTemplate);
+        try {
+            if ($process->emailTemplate != 'None' && !empty($process->emailTemplate) && $process->sendEmailAt == $sendTime) {
+                $emailClient = new EmailClient($config);
+                 $emailClient->sendCustomerEmail($process->emailTemplate);
+             }
+        } catch (\Throwable $th) {
+            FacadesLog::error($th->getMessage());
         }
 
-        // if ($process->whatsappTemplate != 'None' && !empty($process->whatsappTemplate) && $process->sendWhatsappAt == $sendTime) {
-        //     $whatsappClient = new WhatsAppClient($config);
-        //     $whatsappClient->sendCustomerMessage($process->whatsappTemplate);
-        // }
+        try {
+            if ($process->smsTemplate != 'None' && !empty($process->smsTemplate) && $process->sendSmsAt == $sendTime) {
+                $smsClient = new SMSClient($config);
+                $smsClient->sendCustomerSms($process->smsTemplate);
+            }
+        } catch (\Throwable $th) {
+            FacadesLog::error($th->getMessage());
+        }
+
+
+        try {
+            if ($process->whatsappTemplate != 'None' && !empty($process->whatsappTemplate) && $process->sendWhatsappAt == $sendTime) {
+                $whatsappClient = new WhatsAppClient($config);
+                $whatsappClient->sendCustomerMessage($process->whatsappTemplate);
+            }
+        } catch (\Throwable $th) {
+            FacadesLog::error($th->getMessage());
+        }
     }
 
 

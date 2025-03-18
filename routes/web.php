@@ -129,6 +129,7 @@ Route::middleware('auth')->group(function () {
 
     // Payment Providers
     Route::get('/payments/paystackk', [PaystackController::class, 'getConfig'])->name('paystack.config');
+
 });
 
 
