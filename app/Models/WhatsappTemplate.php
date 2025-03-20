@@ -12,6 +12,13 @@ class WhatsappTemplate extends Model
     protected $fillable = [
         'name',
         'template',
+        'template_detail',
+        'whatsapp_reference',
+        'status',
+        'language',
+        'category',
+        'sub_category',
+        'parameter_format',
         'usage',
         'timing',
         'target',

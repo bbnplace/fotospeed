@@ -30,11 +30,15 @@ const dataResources = {
             sortable: false
         },
         {
-            title: "Actions",
-            key: "actions",
-            sortable: false,
-            width: '100px'
+            title: "Category",
+            key: "category",
+            sortable: false
         },
+        {
+            title: "Status",
+            key: "status",
+            sortable: false
+        }
     ],
     name: {
         singular: "WhatsApp Template",

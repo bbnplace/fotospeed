@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Config\TemplateItem;
+use App\Models\Setting;
 use App\Models\WhatsappTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -22,6 +25,20 @@ class WhatsappTemplatesController extends Controller
             'note' => session('note')
         ]);
     }
+
+    private function metaLoadWhatsAppTemplates()
+    {
+        $settings = Setting::first();
+        $validationResponse = $this->checkMetaCredentials($settings);
+        if (is_array($validationResponse)) {
+            return $validationResponse;
+        }
+
+        $url = "https://graph.facebook.com/v22.0/{$settings->wa_business_account_id}/message_templates";
+        $response = Http::withToken($settings->wa_access_token)->get($url);
+        return $response->json();
+    }
+
 
     public function records(Request $request)
         {
@@ -54,6 +71,48 @@ class WhatsappTemplatesController extends Controller
             }
 
             $whatsAppTemplatesCount = $query->count();
+            $whatsAppTemplatesError = [];
+
+            if ($whatsAppTemplatesCount === 0) {
+                $whatsAppTemplates = $this->metaLoadWhatsAppTemplates();
+                if (isset($whatsAppTemplates['error'])) {
+                    $whatsAppTemplatesError = $whatsAppTemplates['error'];
+                } else {
+                    // Log::info($whatsAppTemplates);
+                    if (isset($whatsAppTemplates['data']) && count($whatsAppTemplates['data'])) {
+                        foreach($whatsAppTemplates['data'] as $row)
+                        {
+                            // Check if a record exists with the reference
+                            $existingWhatsappTemplate = WhatsappTemplate::where('whatsapp_reference', $row['id'])->first();
+                            if (empty($existingWhatsappTemplate)) {
+                                WhatsappTemplate::create([
+                                    'name' => $row['name'],
+                                    'template' => str_replace(['{{', '}}'], ['[', ']'], $row['components'][0]['text']),
+                                    'template_detail' => json_encode($row),
+                                    'whatsapp_reference' => $row['id'],
+                                    'status' => $row['status'],
+                                    'language' => $row['language'],
+                                    'category' => $row['category'],
+                                    'sub_category' => $row['sub_category'] ?? '',
+                                    'parameter_format' => $row['parameter_format'],
+                                ]);
+                            } else {
+                                $existingWhatsappTemplate->name = $row['name'];
+                                $existingWhatsappTemplate->status = $row['status'];
+                                $existingWhatsappTemplate->language = $row['language'];
+                                $existingWhatsappTemplate->category = $row['category'];
+                                $existingWhatsappTemplate->sub_category = $row['sub_category'] ?? '';
+                                $existingWhatsappTemplate->parameter_format = $row['parameter_format'];
+                                $existingWhatsappTemplate->template = str_replace(['{{', '}}'], ['[', ']'], $row['components'][0]['text']);
+                                $existingWhatsappTemplate->template_detail = json_encode($row);
+                                $existingWhatsappTemplate->save();
+                            }
+                        }
+                    }
+                }
+            }
+
+            $whatsAppTemplatesCount = $query->count();
             $whatsAppTemplates = $query->take($whatsAppTemplatesPerPage)
                 ->skip($whatsAppTemplatesPerPage * ($page - 1))
                 ->get();
@@ -61,6 +120,7 @@ class WhatsappTemplatesController extends Controller
             return [
                 'records' => $whatsAppTemplates,
                 'totalRecords' => $whatsAppTemplatesCount,
+                'error' => $whatsAppTemplatesError,
             ];
         }
 
@@ -71,6 +131,53 @@ class WhatsappTemplatesController extends Controller
             'targets' => TemplateItem::target(),
             'timings' => TemplateItem::timing(),
         ]);
+    }
+
+
+    private function checkMetaCredentials(Setting $settings)
+    {
+        if (empty($settings->wa_business_account_id)) {
+            return [
+                'error' => [
+                    'message' => 'WhatsApp Business Account ID not set'
+                    ]
+            ];
+        }
+
+        if (empty($settings->wa_access_token)) {
+            return [
+                'error' => [
+                    'message' => 'WhatsApp Access Token not set'
+                    ]
+            ];
+        }
+
+        return true;
+    }
+
+
+    private function metaSaveWhatsAppTemplate($templateName, $templateBody)
+    {
+        $settings = Setting::first();
+        $validationResponse = $this->checkMetaCredentials($settings);
+        if (is_array($validationResponse)) {
+            return $validationResponse;
+        }
+
+        $url = "https://graph.facebook.com/v22.0/{$settings->wa_business_account_id}/message_templates";
+        $response = Http::withToken($settings->wa_access_token)->post($url, [
+            'name' => $templateName,
+            'language' => 'en_US',
+            'category' => 'UTILITY',
+            'components' => [
+                [
+                    'type' => 'BODY',
+                    'text' => str_replace(['[', ']'], ['{{', '}}'], $templateBody),
+                ]
+            ]
+        ]);
+
+        return $response->json();
     }
 
     public function store(Request $request)

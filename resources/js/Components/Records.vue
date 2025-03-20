@@ -2,6 +2,16 @@
     <div class="d-flex flex-row-reverse mb-2" v-if="props.endpoint.add">
         <Link :href="route(props.endpoint.add)" class="btn btn-primary">Add {{ props.name.singular }}</Link>
     </div>
+
+    <div class="mb-2">
+        <v-alert
+            v-if="errorMessage"
+            type="error"
+            variant="tonal"
+            :text="errorMessage"
+            closable
+        ></v-alert>
+    </div>
     <div class="d-flex mb-2 bg-white rounded shadow">
         <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter {{ props.name.singular }}</v-sheet>
             <v-text-field
@@ -97,6 +107,7 @@ const loadedRecords = ref([]);
 let loading = ref(false);
 const search = ref("");
 const pageNo = ref(1);
+const errorMessage = ref("");
 
 // const actions = {
 //     edit: true,
@@ -134,6 +145,7 @@ const loadRecords = async ({page, itemsPerPage, sortBy}) => {
     });
     loadedRecords.value = response.data.records;
     totalRecords.value = response.data.totalRecords
+    errorMessage.value = response.data.error ? response.data.error.message : "";
     loading = false;
 }
 
