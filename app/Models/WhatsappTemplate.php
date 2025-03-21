@@ -27,7 +27,7 @@ class WhatsappTemplate extends Model
     public static function getWhatsappTemplatesArray()
     {
         $whatsAppTemplates = [];
-        $whatsAppTemplatesCollection = self::get('name');
+        $whatsAppTemplatesCollection = self::where('status', 'APPROVED')->get('name');
         if(!empty($whatsAppTemplatesCollection))
         {
             foreach($whatsAppTemplatesCollection as $whatsAppTemplate){

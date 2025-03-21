@@ -134,7 +134,7 @@ class WhatsappController extends Controller
                 $this->processInboundMessage($messageData);
             }
         } else {
-            Log::warn('This request is not for Phone ID: ' . $settings->wa_phone_id);
+            Log::info('This request is not for Phone ID: ' . $settings->wa_phone_id);
         }
     }
 

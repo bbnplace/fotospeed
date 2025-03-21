@@ -13,6 +13,7 @@ class WhatsAppClient
     private $customer;
     private $nextProcess;
     private $team;
+    private $order;
     private $templateManager;
 
     public function __construct(array $config)
@@ -20,6 +21,7 @@ class WhatsAppClient
         $this->customer = $config['customer'] ?? null;
         $this->nextProcess = $config['nextProcess'] ?? null;
         $this->team = $config['team'] ?? null;
+        $this->order = $config['order'] ?? null;
 
         // Load the template into the template manager
         $this->templateManager = new TemplateManager($config);
@@ -53,6 +55,38 @@ class WhatsAppClient
             $messageBodyPreview = $this->templateManager->prepareMessage($whatsAppTemplate->template);
             $whatsAppTemplateBodyParams = $this->templateManager->prepareWhatsappTemplateParams($whatsAppTemplate->template);
 
+            // See if the template has a header.
+            
+            $fullTemplate = json_decode($whatsAppTemplate->template_detail, true);
+            $componentHeaderFormat = $this->getComponentHeaderFormat($fullTemplate['components']);
+            // $footerText = $this->getComponentFooter($fullTemplate['components']);
+
+            $components = [];
+            // Set the Header
+            if(strtolower($componentHeaderFormat) == 'image' && !empty($this->order->item->wa_media_id))
+            {
+                array_push($components, [
+                    'type' => 'header',
+                    'parameters' => [
+                        [
+                            'type' => 'image',
+                            'image' => [
+                                'id' => $this->order->item->wa_media_id
+                            ]
+                        ]
+                    ],
+                    
+                ]);
+            }
+
+            // Set the Body
+            array_push($components, [
+                'type' => 'body',
+                'parameters' => $whatsAppTemplateBodyParams
+            ]);
+
+            // The Media ID for the product
+
             $settings = Setting::first(['wa_access_token','wa_phone_id']);
             if (!empty($settings->wa_access_token) && !empty($settings->wa_phone_id)) {
                 $url = "https://graph.facebook.com/v22.0/{$settings->wa_phone_id}/messages";
@@ -63,9 +97,6 @@ class WhatsAppClient
                 }
 
                 foreach ($processedRecipients as $recipient) {
-                    // Log::info('Phone: ' . $recipient);
-                    // Log::info('Access Token: ' . $settings->wa_access_token);
-                    // Log::info('Body: ' . json_encode($whatsAppTemplateBodyParams));
                     // Send WhatsappMessage
                     $response = Http::withToken($settings->wa_access_token)->post($url, [
                         'messaging_product' => 'whatsapp',
@@ -77,12 +108,7 @@ class WhatsAppClient
                             'language' => [
                                 'code' => $whatsAppTemplate->language,
                             ],
-                            'components' => [
-                                [
-                                    'type' => 'body',
-                                    'parameters' => $whatsAppTemplateBodyParams
-                                ]
-                            ]
+                            'components' => $components
                         ],
                     ]);
 
@@ -103,18 +129,36 @@ class WhatsAppClient
                             'response' => $response->successful() ? json_encode($response->json()) : $response->body()
                         ]);
                     }
-
-                    // Log Response on WhatsApp Messages Table
-                    // WhatsappMessage::create([
-                    //     'recipient'=> $recipient,
-                    //     'body' => $messageBodyPreview,
-                    //     'status' => $response->successful() ? 'Success' : 'Failed',
-                    //     'response' => $response->successful() ? json_encode($response->json()) : $response->body(),
-                    // ]);
                 }
             } else {
                 // Todo: Notify Admin of attempt to send WhatsApp Message while WhatsApp Accesskey and Phone ID not set
             }
         }
+    }
+
+    private function getComponentHeaderFormat($componentParts)
+    {
+        $componentFormat = null;
+        foreach ($componentParts as $componentPart) {
+            if (strtolower($componentPart['type']) == 'header') {
+                $componentFormat = $componentPart['format'];
+                break;
+            }
+        }
+
+        return $componentFormat;
+    }
+
+    private function getComponentFooter($componentParts)
+    {
+        $componentFooter = null;
+        foreach ($componentParts as $componentPart) {
+            if (strtolower($componentPart['type']) == 'footer') {
+                $componentFooter = $componentPart['text'];
+                break;
+            }
+        }
+
+        return $componentFooter;
     }
 }

@@ -41,88 +41,106 @@ class WhatsappTemplatesController extends Controller
 
 
     public function records(Request $request)
-        {
-            $whatsAppTemplates = [];
-            $whatsAppTemplatesCount = 0;
+    {
+        $whatsAppTemplates = [];
+        $whatsAppTemplatesCount = 0;
 
-            $page = $request->page;
-            $whatsAppTemplatesPerPage = $request->itemsPerPage;
-            $sortBys = $request->sortBy;
-            $search = $request->search;
+        $page = $request->page;
+        $whatsAppTemplatesPerPage = $request->itemsPerPage;
+        $sortBys = $request->sortBy;
+        $search = $request->search;
 
-            $query = WhatsappTemplate::query();
+        $query = WhatsappTemplate::query();
 
-            if (!empty($search)) {
-                $searchTerm = $search['_value'];
-                if (!empty($searchTerm)) {
-                   $query->where(function ($query) use ($searchTerm){
-                        $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm))
-                              ->orWhere('template', 'LIKE', sprintf('%%%s%%', $searchTerm));
-                   });
-                }
+        if (!empty($search)) {
+            $searchTerm = $search['_value'];
+            if (!empty($searchTerm)) {
+                $query->where(function ($query) use ($searchTerm){
+                    $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm))
+                            ->orWhere('template', 'LIKE', sprintf('%%%s%%', $searchTerm));
+                });
             }
+        }
 
-            if (!empty($sortBys)) {
-                foreach ($sortBys as $sortBy) {
-                    $query->orderBy($sortBy['key'], $sortBy['order']);
-                }
-            }else{
-                $query->orderBy('id', 'desc');
+        if (!empty($sortBys)) {
+            foreach ($sortBys as $sortBy) {
+                $query->orderBy($sortBy['key'], $sortBy['order']);
             }
+        }else{
+            $query->orderBy('id', 'desc');
+        }
 
-            $whatsAppTemplatesCount = $query->count();
-            $whatsAppTemplatesError = [];
+        $whatsAppTemplatesCount = $query->count();
+        $whatsAppTemplatesError = [];
 
-            if ($whatsAppTemplatesCount === 0) {
-                $whatsAppTemplates = $this->metaLoadWhatsAppTemplates();
-                if (isset($whatsAppTemplates['error'])) {
-                    $whatsAppTemplatesError = $whatsAppTemplates['error'];
-                } else {
-                    // Log::info($whatsAppTemplates);
-                    if (isset($whatsAppTemplates['data']) && count($whatsAppTemplates['data'])) {
-                        foreach($whatsAppTemplates['data'] as $row)
-                        {
-                            // Check if a record exists with the reference
-                            $existingWhatsappTemplate = WhatsappTemplate::where('whatsapp_reference', $row['id'])->first();
-                            if (empty($existingWhatsappTemplate)) {
-                                WhatsappTemplate::create([
-                                    'name' => $row['name'],
-                                    'template' => str_replace(['{{', '}}'], ['[', ']'], $row['components'][0]['text']),
-                                    'template_detail' => json_encode($row),
-                                    'whatsapp_reference' => $row['id'],
-                                    'status' => $row['status'],
-                                    'language' => $row['language'],
-                                    'category' => $row['category'],
-                                    'sub_category' => $row['sub_category'] ?? '',
-                                    'parameter_format' => $row['parameter_format'],
-                                ]);
-                            } else {
-                                $existingWhatsappTemplate->name = $row['name'];
-                                $existingWhatsappTemplate->status = $row['status'];
-                                $existingWhatsappTemplate->language = $row['language'];
-                                $existingWhatsappTemplate->category = $row['category'];
-                                $existingWhatsappTemplate->sub_category = $row['sub_category'] ?? '';
-                                $existingWhatsappTemplate->parameter_format = $row['parameter_format'];
-                                $existingWhatsappTemplate->template = str_replace(['{{', '}}'], ['[', ']'], $row['components'][0]['text']);
-                                $existingWhatsappTemplate->template_detail = json_encode($row);
-                                $existingWhatsappTemplate->save();
-                            }
+        // if ($whatsAppTemplatesCount === 0) {
+            $whatsAppTemplates = $this->metaLoadWhatsAppTemplates();
+            if (isset($whatsAppTemplates['error'])) {
+                $whatsAppTemplatesError = $whatsAppTemplates['error'];
+            } else {
+                // Log::info($whatsAppTemplates);
+                if (isset($whatsAppTemplates['data']) && count($whatsAppTemplates['data'])) {
+                    foreach($whatsAppTemplates['data'] as $row)
+                    {
+                        // Log::info($row);
+                        // Check if a record exists with the reference
+                        $existingWhatsappTemplate = WhatsappTemplate::where('whatsapp_reference', $row['id'])->first();
+                        if (empty($existingWhatsappTemplate)) {
+                            WhatsappTemplate::create([
+                                'name' => $row['name'],
+                                'template' => str_replace(['{{', '}}'], ['[', ']'], $this->getComponentBody($row['components'])),
+                                'template_detail' => json_encode($row),
+                                'whatsapp_reference' => $row['id'],
+                                'status' => $row['status'],
+                                'language' => $row['language'],
+                                'category' => $row['category'],
+                                'sub_category' => $row['sub_category'] ?? '',
+                                'parameter_format' => $row['parameter_format'],
+                            ]);
+                        } else {
+                            $existingWhatsappTemplate->name = $row['name'];
+                            $existingWhatsappTemplate->status = $row['status'];
+                            $existingWhatsappTemplate->language = $row['language'];
+                            $existingWhatsappTemplate->category = $row['category'];
+                            $existingWhatsappTemplate->sub_category = $row['sub_category'] ?? '';
+                            $existingWhatsappTemplate->parameter_format = $row['parameter_format'];
+                            $existingWhatsappTemplate->template = str_replace(['{{', '}}'], ['[', ']'], $this->getComponentBody($row['components']));
+                            $existingWhatsappTemplate->template_detail = json_encode($row);
+                            $existingWhatsappTemplate->save();
                         }
                     }
                 }
             }
+        // }
 
-            $whatsAppTemplatesCount = $query->count();
-            $whatsAppTemplates = $query->take($whatsAppTemplatesPerPage)
-                ->skip($whatsAppTemplatesPerPage * ($page - 1))
-                ->get();
+        $whatsAppTemplatesCount = $query->count();
+        $whatsAppTemplates = $query->take($whatsAppTemplatesPerPage)
+            ->skip($whatsAppTemplatesPerPage * ($page - 1))
+            ->get();
 
-            return [
-                'records' => $whatsAppTemplates,
-                'totalRecords' => $whatsAppTemplatesCount,
-                'error' => $whatsAppTemplatesError,
-            ];
+        return [
+            'records' => $whatsAppTemplates,
+            'totalRecords' => $whatsAppTemplatesCount,
+            'error' => $whatsAppTemplatesError,
+        ];
+    }
+
+    
+
+    private function getComponentBody($componentParts)
+    {
+        $componentBody = '';
+        foreach ($componentParts as $componentPart) {
+            if (strtolower($componentPart['type']) == 'body') {
+                $componentBody = $componentPart['text'];
+                break;
+            }
         }
+
+        return $componentBody;
+    }
+
+    
 
     public function add()
     {
