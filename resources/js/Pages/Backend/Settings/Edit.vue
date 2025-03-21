@@ -209,6 +209,16 @@
                             <VRow>
                                 <VCol>
                                     <VTextField
+                                        id="wa_app_id"
+                                        v-model="form.wa_app_id"
+                                        label="App ID"
+                                        variant="outlined"
+                                        :hide-details="form.errors.wa_app_id == undefined"
+                                        :error-messages="form.errors.wa_app_id"
+                                    ></VTextField>
+                                </VCol>
+                                <VCol>
+                                    <VTextField
                                         id="wa_business_account_id"
                                         v-model="form.wa_business_account_id"
                                         label="WhatsApp Business Account ID"
@@ -595,6 +605,7 @@ const form = useForm({
     paystack_secret_key: settings.paystack_secret_key,
     paystack_public_key: settings.paystack_public_key,
     loyalty_reward_formula: settings.loyalty_reward_formula,
+    wa_app_id: settings.wa_app_id,
     wa_phone_id: settings.wa_phone_id,
     wa_business_account_id: settings.wa_business_account_id,
     wa_access_token: settings.wa_access_token,

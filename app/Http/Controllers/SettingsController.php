@@ -63,6 +63,7 @@ class SettingsController extends Controller
             'payment_sms_temp' => 'nullable|string|max:64',
             'payment_email_temp' => 'nullable|string|max:64',
             'wa_business_account_id' => 'nullable|string|max:64',
+            'wa_app_id' => 'nullable|string|max:32',
             'wa_phone_id' => 'nullable|string|max:64',
             'wa_webhook_verification_token' => 'nullable|string|max:64',
             'wa_access_token' => 'nullable|string|max:255',
@@ -107,6 +108,7 @@ class SettingsController extends Controller
         $settings->payment_sms_temp = $request->payment_sms_temp == 'None' ? null : $request->payment_sms_temp;
         $settings->payment_email_temp = $request->payment_email_temp  == 'None' ? null : $request->payment_email_temp;
         $settings->wa_business_account_id = $request->wa_business_account_id;
+        $settings->wa_app_id = $request->wa_app_id;
         $settings->wa_phone_id = $request->wa_phone_id;
         $settings->wa_access_token = $request->wa_access_token;
         $settings->wa_webhook_verification_token = $request->wa_webhook_verification_token;
