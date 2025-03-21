@@ -10,11 +10,14 @@ use App\Models\Media;
 use App\Models\OrderStatus;
 use App\Models\Process;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\SmsTemplate;
 use App\Models\WhatsappTemplate;
 use App\Tasks\Task;
 use App\Tasks\TaskAudit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ItemsController extends Controller
@@ -320,11 +323,20 @@ class ItemsController extends Controller
             $item->product_photos = $request->productPhotos;
             $item->save();
 
+            // Upload the primary photo to whatsapp
+            $whatsappMedia = $this->uploadPhotoToWhatsapp($request->productPhotos['primaryPhotoId']);
+            if (is_array($whatsappMedia)) {
+                $item->wa_media_id = $whatsappMedia['id'];
+                $item->wa_media_updated = date('Y-m-d');
+                $item->save();
+            }
+
             return [
                 'status' => 'success',
                 'message' => 'Successfully Saved'
             ];
         } catch (\Throwable $th) {
+            Log::error($th->getMessage());
             return [
                 'status' => 'failed',
                 'message' => 'Could not save product photos. Admin has been notified.',
@@ -332,4 +344,74 @@ class ItemsController extends Controller
             ];
         }
     }
+
+    private function uploadPhotoToWhatsapp($photoId)
+    {
+        // Get the Photo
+        $media = Media::find($photoId);
+        // Log::info($media);
+        // Example usage
+        $mimeType = '';
+        $filePath = '';
+        try {
+            $filePath = storage_path('app/' . $media->path);
+            Log::info("File Path: " . $filePath);
+            $mimeType = $this->getImageMimeType($filePath);
+            // Log::info("MIME type of $filePath is: $mimeType\n");
+        } catch (\Exception $e) {
+            Log::error("Error: " . $e->getMessage() . "\n");
+        }
+
+        $settings = Setting::first(['wa_access_token','wa_phone_id']);
+        if (!empty($settings->wa_access_token) && !empty($settings->wa_phone_id)) {
+            $url = "https://graph.facebook.com/v22.0/{$settings->wa_phone_id}/media";
+
+            $response = Http::withToken($settings->wa_access_token)
+            ->attach('file', file_get_contents($filePath), $media->path, [
+                'Content-Type' => $mimeType
+            ])
+            ->post($url, [
+                'messaging_product' => 'whatsapp'
+            ]);
+
+            if ($response->successful()) {
+                // Log::info($response->json());
+                return $response->json();
+            } else {
+                return false;
+            }
+        }
+
+    }
+
+    private function getImageMimeType($filePath) {
+        // Check if the file exists
+        if (!file_exists($filePath)) {
+            throw new \Exception("File does not exist: $filePath");
+        }
+    
+        // Get the file extension
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+    
+        // Map common image extensions to their MIME types
+        $extensionToMime = [
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',
+            'gif'  => 'image/gif',
+            'bmp'  => 'image/bmp',
+            'webp' => 'image/webp',
+            'svg'  => 'image/svg+xml',
+            'mp4'  => 'video/mp4',
+        ];
+    
+        // Check if the extension is in the map
+        if (array_key_exists($extension, $extensionToMime)) {
+            return $extensionToMime[$extension];
+        }
+    
+        // Fallback to using mime_content_type if the extension is not in the map
+        return mime_content_type($filePath);
+    }
+
 }
