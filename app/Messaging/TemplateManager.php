@@ -57,7 +57,7 @@ class TemplateManager
         if (!empty($this->autoSignInUrl)) {
             $matches['invoice_link'] = $this->autoSignInUrl;
         }
-        
+
         return $matches;
     }
 
@@ -83,6 +83,29 @@ class TemplateManager
         }
 
         return $message;
+    }
+
+    public function prepareWhatsappTemplateParams($template)
+    {
+        $whatsappParameters = [];
+        $message = $template ?? "";
+        
+        if (!empty($message)) {
+            $templateMatches = $this->matchTemplateKeyWithValues();
+            foreach ($templateMatches as $key => $value) {
+                $searchTerm = sprintf('[%s]', $key);
+                if (strstr($message, $searchTerm)) {
+                    // $message = str_replace($searchTerm, $value, $message);
+                    array_push($whatsappParameters, [
+                        'type' => 'text',
+                        'parameter_name' => $key,
+                        'text' => $value
+                    ]);
+                }
+            }
+        }
+
+        return $whatsappParameters;
     }
 
 

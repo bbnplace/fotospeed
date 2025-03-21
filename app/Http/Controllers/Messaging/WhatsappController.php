@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Messaging;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\WhatsappMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -58,13 +59,42 @@ class WhatsappController extends Controller
 
     public function processRequest(Request $request)
     {
-        $from = $request->input('From');
-        $body = $request->input('Body');
+        // $from = $request->input('From');
+        // $body = $request->input('Body');
 
-        Log::info('Whatsapp From: '. $from);
-        Log::info('Body: '. $body);
+        // Log::info('Whatsapp From: '. $from);
+        // Log::info('Body: '. $body);
 
         Log::info('Incoming Webhook Payload:', $request->all());
+        Log::info('Message Part:', $request->input('entry'));
+
+        // $messageObject = json_decode($request->input('entry'));
+
+        $object = $request->input('object');
+        $entries = $request->input('entry');
+
+        if (is_array($entries)) {
+            foreach ($entries as $entry) {
+                $entryId = $entry['id'];
+                $changes = $entry['changes'];
+
+                if (is_array($changes) && !empty($changes)) {
+                    foreach ($changes as $change) {
+                        // Note: $change->field usually indicates the type of feedback that is being sent over the webhook
+                        // Note: $change->value usually contains the changed data
+                        switch($change['field'])
+                        {
+                            case 'messages':
+                                $this->processMessage($change['value']);
+                                break;
+                            case 'message_template_status_update':
+                                $this->updateTemplateStatus($change['value']);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
 
         return response('Received', 200);
     }
@@ -85,5 +115,85 @@ class WhatsappController extends Controller
 
         // If the token is invalid, return an error
         return response('Invalid verify token', 403);
+    }
+
+
+    private function processMessage($messageData)
+    {
+        $settings = Setting::first();
+        $metaData = $messageData['metadata'];
+
+        if ($settings->wa_phone_id == $metaData['phone_number_id']) {
+            // Process as delivery report
+            if (isset($messageData['statuses'])) {
+                $this->processDeliveryReport($messageData['statuses']);
+            }
+
+            // Process as inbound message
+            if (isset($messageData['messages'])) {
+                $this->processInboundMessage($messageData);
+            }
+        } else {
+            Log::warn('This request is not for Phone ID: ' . $settings->wa_phone_id);
+        }
+    }
+
+    private function processDeliveryReport($statuses)
+    {
+        if (is_array($statuses)) {
+            foreach ($statuses as $receivedStatus) {
+                $whatsappMessage = WhatsappMessage::where('wa_reference', $receivedStatus['id'])->first();
+                if (!empty($whatsappMessage)) {
+                    $whatsappMessage->status = $receivedStatus['status'];
+                    $whatsappMessage->save();
+                }
+            }
+        }
+    }
+
+    private function processInboundMessage($messageData)
+    {
+        $contacts = $messageData['contacts'];
+        $messages = $messageData['messages'];
+        $metaData = $messageData['metadata'];
+        // Todo: When building multi-tenant version, look in metadata for phone number ID
+
+        if (is_array($messages)) {
+            for ($i=0; $i < count($messages); $i++) { 
+                $message = $messages[$i];
+                $contact = $contacts[$i];
+
+                $mobile = $message['from'];
+                $localNumber = $message['from'];
+                if (substr($mobile, 0, 3) == '234' && strlen($mobile) === 13) {
+                    $localNumber = '0'.substr($mobile, 3);
+                }
+
+                $user = User::where('mobile', $mobile)->first();
+                if (empty($user) && $mobile != $localNumber) {
+                    $user = User::where('mobile', $localNumber)->first();
+                }
+
+                $waMessageData = [
+                    'customer_wa_profile' => json_encode($contact),
+                    'sender' => $message['from'],
+                    'recipient' => $metaData['display_phone_number'],
+                    'body' => $message['text']['body'],
+                    'direction' => 'in',
+                    'wa_reference' => $message['id'],
+                ];
+
+                if (!empty($user)) {
+                    $waMessageData['customer_id'] = $user->id;
+                }
+
+                WhatsappMessage::create($waMessageData);
+            }
+        }
+    }
+
+    private function updateTemplateStatus($templateData)
+    {
+
     }
 }
