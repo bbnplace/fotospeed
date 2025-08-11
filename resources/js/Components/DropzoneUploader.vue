@@ -71,6 +71,16 @@ const initDropzone = () => {
 
     dropzoneUpload.on("sending", handleSendingStarted);
     dropzoneUpload.on("uploadprogress", handleUploadProgress);
+    dropzoneUpload.on("complete", removeFilePreview);
+}
+
+const removeFilePreview = (file) => {
+    const previewElement = file.previewElement;
+    if (previewElement) {
+        // previewElement.classList.remove("dz-preview");
+        // Or to remove the entire preview:
+        previewElement.remove();
+    }
 }
 
 const handleSendingStarted = (file, xhr, formData) => {
