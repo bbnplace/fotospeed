@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('whatsapp_templates', function (Blueprint $table) {
-            $table->string('status')->nullable()->after('template_detail');
+            $table->string('status')->nullable()->after('template');
             $table->string('language', 6)->nullable()->after('status');
             $table->string('category', 16)->nullable()->after('language');
             $table->string('sub_category', 16)->nullable()->after('category');

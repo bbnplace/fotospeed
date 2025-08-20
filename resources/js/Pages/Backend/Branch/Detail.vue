@@ -13,6 +13,14 @@
             <div>
                 {{ branch.is_administrative == 1 ? 'Administrative Branch' : 'Liason Office' }}
             </div>
+            <div class="mt-3">
+                <h4>Contacts:</h4>
+                <ul>
+                    <li v-for="contact in branch.contacts" :key="contact">
+                        {{ contact }}
+                    </li>
+                </ul>
+            </div>
             <hr />
             <div class="mt-3 text-right">
                 <Link :href="route('branch.edit', branch.id)" class="btn btn-dark">Edit</Link>

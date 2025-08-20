@@ -43,12 +43,22 @@ class HandleInertiaRequests extends Middleware
                 'role_ref' => $userData->role_id,
                 'isAdmin' => $userData->isAdmin(),
                 'isClient' => $userData->isCustomer(),
-                'isAdminBranch' => $userData->branch->is_administrative == 1,
+                'isAdminBranch' => $userData->branch ? $userData->branch->is_administrative == 1 : false,
             ];
         }
 
         return [
             ...parent::share($request),
+            'site' => [
+                'name' => config('app.name'),
+                'url' => config('app.url'),
+                'homeRoute' => route('marketing.home'),
+                'logo' => asset('images/logo.png'),
+                'favicon' => asset('images/favicon.ico'),
+                'currency' => config('app.currency', '₦'),
+                'currencyCode' => 'NGN',
+                'locale' => config('app.locale', 'en'),
+            ],
             'auth' => [
                 'user' => $userData,
             ],

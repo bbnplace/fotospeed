@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class CategoriesController extends Controller
@@ -80,6 +81,8 @@ class CategoriesController extends Controller
             'name' => 'required|string|unique:categories,name|min:2|max:64'
         ]);
 
+        $validated['slug'] = Str::slug($validated['name']);
+
         Category::create($validated);
 
         return redirect()->route('categories')->with('note', $request->name . ' has been created.');
@@ -115,6 +118,7 @@ class CategoriesController extends Controller
         ]);
 
         $category->name = $request->name;
+        $category->slug = Str::slug($request->name);
         $category->save();
 
         return redirect()->route('category.view', [$ref])->with('note', 'Updated.');

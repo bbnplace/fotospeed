@@ -18,6 +18,7 @@
                         <VCol cols="4"><b>Weight</b><br />{{ item.weight }}</VCol>
                     </VRow>
                     <VRow>
+                        <VCol cols="4"><b>Base Price</b><br />₦{{ item.starting_price }}</VCol>
                         <VCol cols="4"><b>Print Price</b><br />₦{{ item.print_price }}</VCol>
                         <VCol cols="4"><b>Sheet Price</b><br />₦{{ item.sheet_price }}</VCol>
                         <VCol cols="4"><b>Cover Print</b><br />₦{{ item.cover_print_price }}</VCol>

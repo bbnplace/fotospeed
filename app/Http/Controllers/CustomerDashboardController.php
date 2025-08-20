@@ -11,7 +11,7 @@ class CustomerDashboardController extends Controller
 {
     public function home()
     {
-        return redirect(route('customer.new-order'));
+        return Inertia::render('Client/Home');
     }
 
     public function add()

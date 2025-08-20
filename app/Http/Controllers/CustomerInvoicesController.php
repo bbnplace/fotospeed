@@ -24,7 +24,8 @@ class CustomerInvoicesController extends Controller
     {
         return Inertia::render('Client/Invoice/List', [
             'endpoint' => route('customer.invoice-records'),
-            'note' => session('note')
+            'note' => session('note'),
+            'theme' => 'fotospeed', // Assuming you want to pass the theme here
         ]);
     }
 
@@ -72,6 +73,7 @@ class CustomerInvoicesController extends Controller
         return [
             'records' => $invoices,
             'totalRecords' => $invoicesCount,
+            'theme' => 'fotospeed', // Assuming you want to pass the theme here
         ];
     }
 

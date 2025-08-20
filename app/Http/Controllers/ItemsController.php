@@ -18,6 +18,7 @@ use App\Tasks\TaskAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ItemsController extends Controller
@@ -32,6 +33,7 @@ class ItemsController extends Controller
             'height' => 'nullable|string|max:12',
             'width' => 'nullable|string|max:12',
             'weight' => 'nullable|string|max:12',
+            'starting_price' => 'nullable|integer|digits_between:2,9',
             'print_price' => 'nullable|integer|digits_between:2,9',
             'sheet_price' => 'nullable|integer|digits_between:2,9',
             'cover_print_price' => 'nullable|integer|digits_between:2,9',
@@ -112,10 +114,12 @@ class ItemsController extends Controller
         Item::create([
             'category_id' => $category->id,
             'name' => $request->name,
+            'slug' => Str::slug($request->name),
             'description' => $request->description,
             'height' => $request->height,
             'width' => $request->width,
             'weight' => $request->weight,
+            'starting_price' => $request->starting_price,
             'print_price' => $request->print_price,
             'sheet_price' => $request->sheet_price,
             'cover_print_price' => $request->cover_print_price,
@@ -197,7 +201,6 @@ class ItemsController extends Controller
             return redirect()->route('items')->with('note', 'Select an item to edit.');
         }
 
-        // Validate the submitted data
         $rules = $this->getRules();
         if ($item->name == $request->name) {
             $rules['name'] = 'string|required|min:2|max:64';
@@ -206,13 +209,14 @@ class ItemsController extends Controller
 
         $category = Category::where('name', $request->category)->first();
 
-        // Save changes
         $item->category_id = $category->id;
         $item->name = $request->name;
+        $item->slug = Str::slug($request->name);
         $item->description = $request->description;
         $item->height = $request->height;
         $item->width = $request->width;
         $item->weight = $request->weight;
+        $item->starting_price = $request->starting_price;
         $item->print_price = $request->print_price;
         $item->sheet_price = $request->sheet_price;
         $item->cover_print_price = $request->cover_print_price;

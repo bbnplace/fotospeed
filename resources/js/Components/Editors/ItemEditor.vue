@@ -74,7 +74,18 @@
             </VRow>
             <h4 class="mt-3">Pricing</h4>
             <VRow>
-                <VCol cols="12" sm="4">
+                <VCol cols="12" sm="4" lg="3">
+                    <VTextField
+                        id="starting-price"
+                        v-model="form.starting_price"
+                        label="Base Price"
+                        variant="outlined"
+                        prefix="₦"
+                        :hide-details="form.errors.starting_price == undefined"
+                        :error-messages="form.errors.starting_price"
+                    ></VTextField>
+                </VCol>
+                <VCol cols="12" sm="4" lg="3">
                     <VTextField
                         id="print-price"
                         v-model="form.print_price"
@@ -85,7 +96,7 @@
                         :error-messages="form.errors.print_price"
                     ></VTextField>
                 </VCol>
-                <VCol cols="12" sm="4">
+                <VCol cols="12" sm="4" lg="3">
                     <VTextField
                         id="sheet-price"
                         v-model="form.sheet_price"
@@ -96,7 +107,7 @@
                         :error-messages="form.errors.sheet_price"
                     ></VTextField>
                 </VCol>
-                <VCol cols="12" sm="4">
+                <VCol cols="12" sm="4" lg="3">
                     <VTextField
                         id="cover-print-price"
                         v-model="form.cover_print_price"
@@ -165,6 +176,7 @@ interface ItemEditor {
     height: String,
     width: String,
     weight: String,
+    starting_price: Number,
     print_price: Number,
     sheet_price: Number,
     cover_print_price: Number,
@@ -187,6 +199,7 @@ const form = useForm({
     height: props.item ? props.item.height : "",
     width: props.item ? props.item.width : "",
     weight: props.item ? props.item.weight : "",
+    starting_price: props.item ? props.item.starting_price : "",
     print_price: props.item ? props.item.print_price : "",
     sheet_price: props.item ? props.item.sheet_price : "",
     cover_print_price: props.item ? props.item.cover_print_price : "",

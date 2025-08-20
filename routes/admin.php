@@ -148,7 +148,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::post('panel/media/add', [MediaController::class, 'store'])->name('media.store');
     Route::get('panel/media/{id}/edit', [MediaController::class, 'edit'])->name('media.edit');
     Route::put('panel/media/{id}/edit', [MediaController::class, 'update'])->name('media.edit');
-    Route::get('panel/media/{id}', [MediaController::class, 'view'])->name('media.view');
+    // Route::get('panel/media/{id}', [MediaController::class, 'view'])->name('media.view');
     Route::post('panel/media/delete', [MediaController::class, 'delete'])->name('media.delete');
     Route::post('panel/media/usage', [MediaController::class, 'getMediaUsage'])->name('media.usage');
 

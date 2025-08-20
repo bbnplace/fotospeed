@@ -72,6 +72,7 @@ class BranchesController extends Controller
             'address' => 'required|string|min:10|max:200',
             'state' => 'required|string|exists:states,name|min:2|max:64',
             'isAdministrative' => 'nullable|boolean',
+            'contacts' => 'nullable|array',
         ]);
 
         $state = State::where('name', $request->state)->first();
@@ -79,7 +80,8 @@ class BranchesController extends Controller
             'name' => $request->name,
             'address' => $request->address,
             'state_id' => $state->id,
-            'is_administrative' => $request->isAdministrative
+            'is_administrative' => $request->isAdministrative,
+            'contacts' => $request->contacts ? json_encode($request->contacts) : null,
         ]);
 
         return redirect()->route('branches')->with('note', $request->name . ' branch has been registered.');
@@ -105,12 +107,14 @@ class BranchesController extends Controller
             'address' => 'required|string|min:10|max:200',
             'state' => 'required|string|exists:states,name|min:2|max:64',
             'isAdministrative' => 'nullable|boolean',
+            'contacts' => 'nullable|array',
         ]);
 
         $branch->name = $request->name;
         $branch->address = $request->address;
         $branch->state_id = $state->id;
         $branch->is_administrative = $request->isAdministrative;
+        $branch->contacts = $request->contacts ? json_encode($request->contacts) : null;
         $branch->save();
 
         return redirect()->route('branch.view', [$id])->with('note', 'Updated.');
@@ -131,6 +135,7 @@ class BranchesController extends Controller
         }]);
 
         $branch = $query->first();
+        $branch->contacts = $branch->contacts ? json_decode($branch->contacts, true) : [];
 
         return [
             'states' => State::getStatesArray(),

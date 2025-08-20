@@ -36,6 +36,20 @@
             </VAutocomplete>
         </div>
         <div class="mt-3">
+            
+            <VCombobox
+                id="contacts"
+                chips
+                multiple
+                v-model="form.contacts"
+                label="Phone Numbers"
+                variant="outlined"
+                :items="[]"
+                :hide-details="form.errors.contacts == undefined"
+                :error-messages="form.errors.contacts"
+            ></VCombobox>
+        </div>
+        <div class="mt-3">
             <v-checkbox
                 v-model="form.isAdministrative"
                 label="Is Administrative Branch"
@@ -55,6 +69,7 @@
 <script setup lang="ts">
 import { useForm, usePage, Link } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { VCombobox } from 'vuetify/lib/components/index.mjs';
 
 interface Branch {
     id: Number,
@@ -64,7 +79,8 @@ interface Branch {
     state: {
         id: Number,
         name: String
-    }
+    },
+    contacts: String[]
 }
 
 const props = defineProps<{
@@ -79,6 +95,7 @@ const form = useForm({
     address: props.branch ? props.branch.address : "",
     state: props.branch ? props.branch.state.name : "",
     isAdministrative: props.branch ? props.branch.is_administrative == 1 : false,
+    contacts: props.branch && props.branch.contacts ? props.branch.contacts : [],
 });
 
 const submit = () => {

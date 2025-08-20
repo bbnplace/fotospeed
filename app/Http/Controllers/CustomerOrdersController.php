@@ -35,7 +35,8 @@ class CustomerOrdersController extends Controller
     {
         return Inertia::render('Client/Order/List', [
             'endpoint' => route('customer.order-records'),
-            'note' => session('note')
+            'note' => session('note'),
+            'theme' => 'fotospeed',
         ]);
     }
 

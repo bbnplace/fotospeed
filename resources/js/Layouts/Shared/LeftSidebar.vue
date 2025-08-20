@@ -3,19 +3,19 @@
 
         <Link href="#" class="logo logo-light">
             <span class="logo-lg">
-                <ApplicationLogo  class="w-10 h-10 fill-current text-gray-500"></ApplicationLogo>
+                <ApplicationLogo></ApplicationLogo>
             </span>
             <span class="logo-sm">
-                <ApplicationLogo  class="w-10 h-10 fill-current text-gray-500"></ApplicationLogo>
+                <ApplicationLogo></ApplicationLogo>
             </span>
         </Link>
 
         <Link href="#" class="logo logo-dark">
             <span class="logo-lg">
-                <ApplicationLogo  class="w-10 h-10 fill-current text-gray-500"></ApplicationLogo>
+                <ApplicationLogo></ApplicationLogo>
             </span>
             <span class="logo-sm">
-                <ApplicationLogo  class="w-10 h-10 fill-current text-gray-500"></ApplicationLogo>
+                <ApplicationLogo></ApplicationLogo>
             </span>
         </Link>
 

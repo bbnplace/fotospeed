@@ -1,16 +1,7 @@
 <template>
-    <svg width="100%" height="100%" viewBox="0 0 328 328" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
-    <g transform="matrix(0.827784,0,0,0.827784,-378.561,-198.98)">
-        <circle cx="655.018" cy="438.077" r="194.982" style="fill:none;stroke:rgb();stroke-width:5.44px;"/>
-    </g>
-    <g transform="matrix(1,0,0,1,-707.603,-388.928)">
-        <path d="M855.937,713.264C793.474,707.372 741.324,665.821 720.087,609.219L766.256,498.819L855.937,713.264Z"/>
-    </g>
-    <g transform="matrix(1,0,0,1,-707.603,-388.928)">
-        <path d="M1022.43,609.219C1001.18,665.829 949.031,707.374 886.575,713.264L976.256,498.819L1022.43,609.219Z"/>
-    </g>
-    <g transform="matrix(1,0,0,1,-707.603,-388.928)">
-        <path d="M785.221,416.027C810.138,400.287 839.641,391.178 871.256,391.178C903.263,391.178 933.106,400.514 958.204,416.607L871.828,634.033L785.221,416.027Z"/>
-    </g>
-</svg>
+    <img :src="image" alt="logo-img" class="logo" :style="{ width: '200', height: 'auto' }">
 </template>
+
+<script setup>
+import image from '@/assets/logo.png';
+</script>

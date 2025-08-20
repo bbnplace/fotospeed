@@ -112,7 +112,21 @@ class MediaController extends Controller
 
     public function view($id)
     {
+        $media = Media::findOrFail($id);
 
+        // Get the file path
+        $filePath = $media->path;
+
+        // Get the file's mime type
+        $mimeType = Storage::mimeType($filePath);
+
+        // Get the file contents
+        $file = Storage::get($filePath);
+
+        // Return the response with image headers
+        return response($file, 200)
+            ->header('Content-Type', $mimeType)
+            ->header('Content-Disposition', 'inline; filename="' . basename($filePath) . '"');
     }
 
     private function getIndelibleFiles(array $fileIds): array

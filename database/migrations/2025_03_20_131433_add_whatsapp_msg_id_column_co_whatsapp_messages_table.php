@@ -13,7 +13,22 @@ return new class extends Migration
     {
         Schema::table('whatsapp_messages', function (Blueprint $table) {
             $table->string('wa_reference')->unique()->nullable()->after('direction');
-            $table->enum('status', ['read', 'delivered', 'sent', 'accepted', 'failed'])->after('wa_reference');
+            $table->enum('status', [
+                'read',
+                'delivered',
+                'sent',
+                'accepted',
+                'failed',
+                'success',
+                'pending',
+                'queued',
+                'scheduled',
+                'cancelled',
+                // Add your new status values here, for example:
+                'expired',
+                'processing',
+                'on_hold'
+            ])->change();
         });
     }
 
