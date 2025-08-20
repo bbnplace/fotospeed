@@ -12,7 +12,7 @@
             // $theme = session('theme', 'default'); // Or get from user/settings
         @endphp
 
-        @if($routePrefix == '/shop')
+        @if($routePrefix == '/showroom')
             @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"])
         @else
             @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])

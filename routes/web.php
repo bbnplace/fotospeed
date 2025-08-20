@@ -15,6 +15,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Marketing\ContactsController;
 use App\Http\Controllers\Marketing\ShopController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\Marketing\LandingPageController;
+use App\Http\Controllers\Marketing\LoggedInController;
 use App\Models\Item;
 use App\Models\Media;
 use Illuminate\Foundation\Application;
@@ -87,7 +89,7 @@ Route::get('/al/{token}', [AutoLoginController::class, 'autoLogin'])->name('auto
 
 Route::get('/image/{id}', [MediaController::class, 'view'])->name('media.view');
 
-Route::prefix('shop')->group(function () {
+Route::prefix('showroom')->group(function () {
 
     Route::get('/products', [ShopController::class, 'index'])->name('marketing.products');
     Route::get('/products/{id}', [ShopController::class, 'details'])->name('marketing.product.show');
@@ -95,14 +97,16 @@ Route::prefix('shop')->group(function () {
     Route::get('/client/home', [CustomerDashboardController::class, 'home'])->name('customer.home');
    
     Route::middleware(['auth'])->group(function () {
-       Route::get('/client-order/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');
+        // Logged-in user routes
+        Route::get('/home', [LoggedInController::class, 'loggedIn'])->name('customer.logged-in');
+
+        Route::get('/client-order/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');
         Route::get('/client-order/my-orders', [CustomerOrdersController::class, 'index'])->name('customer.my-orders');
         Route::get('/client-order/{id}', [CustomerOrdersController::class, 'view'])->name('client.order.view');
         Route::get('/client-order/{id}/edit', [CustomerOrdersController::class, 'edit'])->name('client.order.edit');
         Route::put('/client-order/{id}/edit', [CustomerOrdersController::class, 'update'])->name('client.order.edit');
         Route::post('/client-order/orders', [CustomerDashboardController::class, 'records'])->name('customer.order-records');
 
-        // Customer Invoice
         // Route::get('/client/home', [CustomerInvoiceController::class, 'home'])->name('customer.home');
         Route::get('/client-invoice/invoices', [CustomerInvoicesController::class, 'index'])->name('customer.invoices');
         Route::post('/client-invoice/invoices', [CustomerInvoicesController::class, 'records'])->name('customer.invoice-records');
@@ -137,126 +141,13 @@ Route::middleware(['auth'])->group(function () {
     // Payment Providers
     Route::get('/payments/paystackk', [PaystackController::class, 'getConfig'])->name('paystack.config');
 
+    
 });
 
 
 
 Route::prefix('ng')->group(function () {
-    Route::get('/', function () {
-        return view('marketing.home', [
-            'title' => 'Welcome to Fotospeed',
-            'description' => 'Capture your memories with our custom photo books.',
-            'page' => 'home',
-            'faqs' => [
-                [
-                    'question' => 'What is Fotospeed?',
-                    'answer' => 'Fotospeed is a service that allows you to create custom photo books to preserve your memories.',
-                ],
-                [
-                    'question' => 'How do I order a photo book?',
-                    'answer' => 'You can place an order online, in-person at one of our branches, or by contacting our customer service team.',
-                ],
-                [
-                    'question' => 'What payment methods do you accept?',
-                    'answer' => 'We accept various payment methods, including cash, and online payment.',
-                ],
-                [
-                    'question' => 'What are your business hours?',
-                    'answer' => 'Our business hours are Monday to Friday from 9 AM to 5 PM',
-                ],
-                [
-                    'question' => 'What is your delivery policy?',
-                    'answer' => 'We offer delivery services within Lagos and nationwide.',
-                ],
-            ],
-            'team' => [
-                [
-                    'id' => 1,
-                    'name' => 'Antony Issac',
-                    'role' => 'Founder & CEO',
-                    'image' => 'letest-team-img2.jpg',
-                    'socials' => [
-                        'facebook' => 'https://www.facebook.com/antony.issac',
-                        'twitter' => 'https://twitter.com/antony_issac',
-                        'instagram' => 'https://www.instagram.com/antony_issac',
-                    ],
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Jane Doe',
-                    'role' => 'Creative Director',
-                    'image' => 'letest-team-img2.jpg',
-                    'socials' => [
-                        'facebook' => 'https://www.facebook.com/jane.doe',
-                        'twitter' => 'https://twitter.com/jane_doe',
-                        'instagram' => 'https://www.instagram.com/jane_doe',
-                    ],
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'John Smith',
-                    'role' => 'Marketing Manager',
-                    'image' => 'letest-team-img2.jpg',
-                    'socials' => [
-                        'facebook' => 'https://www.facebook.com/john.smith',
-                        'twitter' => 'https://twitter.com/john_smith',
-                        'instagram' => 'https://www.instagram.com/john_smith',
-                    ],
-                ],
-            ],
-            'testimonials' => [
-                [
-                    'name' => 'Alice Johnson',
-                    'role' => 'Photographer',
-                    'organization' => 'Organization Name',
-                    'feedback' => 'Fotospeed helped me create a beautiful album for my wedding. Highly recommend!',
-                    'image' => '01.png',
-                ],
-                [
-                    'name' => 'Bob Brown',
-                    'role' => 'CEO',
-                    'organization' => 'Agency Name',
-                    'feedback' => 'Great service and quality! My family loved the photo book I created.',
-                    'image' => '01.png',
-                ],
-                [
-                    'name' => 'Charlie Davis',
-                    'role' => 'Customer',
-                    'organization' => '',
-                    'feedback' => 'Fast delivery and excellent customer support. Will order again!',
-                    'image' => '01.png',
-                ],
-            ],
-            'kpis' => [
-                'total_orders' => 36200,
-                'happy_customers' => 1200,
-                'branches' => 6,
-                'team_members' => 20,
-                'experience' => 11,
-                'projects_completed' => 300,
-            ],
-            'features' => [
-                [
-                    'title' => 'High Quality Prints',
-                    'description' => 'We use the best printing technology to ensure your photos look stunning.',
-                    'icon' => 'feature-img1.svg',
-                    'link' => '',
-                ],
-                [
-                    'title' => 'Nation-wide Delivery',
-                    'description' => 'Get your photo books delivered nationwide quickly and safely.',
-                    'icon' => 'service3.svg',
-                    'link' => '',
-                ],
-                [
-                    'title' => 'Best Online Support',
-                    'description' => 'Available from 9am - 5pm Mon - Sat to assist you on call and on Whatsapp.',
-                    'icon' => 'feature-img3.svg',
-                    'link' => '',
-                ],
-            ],
-        ]);
-    })->name('marketing.home');
+    Route::get('/', [LandingPageController::class, 'index'])->name('marketing.home');
 
     Route::get('/about', function () {
         return view('about', [
@@ -281,7 +172,7 @@ Route::prefix('ng')->group(function () {
         ]);
     })->name('privacy');
 
-    Route::get('/shop', function () {
+    Route::get('/showroom', function () {
         return view('marketing.shop', [
             'title' => 'Shop Indigo',
             'description' => 'Explore our range of products available for purchase.',
