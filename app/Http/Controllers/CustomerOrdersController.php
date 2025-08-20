@@ -100,7 +100,7 @@ class CustomerOrdersController extends Controller
         ];
     }
 
-    public function add()
+    public function add(Request $request)
     {
         // TODO: Define a setting that will allow Administrator to setup the minimum delivery date.
         return Inertia::render('Client/Order/Add', [
@@ -109,6 +109,7 @@ class CustomerOrdersController extends Controller
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
+            'selectedProduct' => $request->input('product') ? (Item::where('slug', $request->input('product'))->first(['name']))->name : null,
         ]);
     }
 

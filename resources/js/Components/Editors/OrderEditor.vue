@@ -229,9 +229,10 @@ const branches = usePage().props.branches;
 
 const minDeliveryDate = usePage().props.deliveryDate.min;
 const maxDeliveryDate = usePage().props.deliveryDate.max; 
+const selectedProduct = usePage().props.selectedProduct;
 
 const masterForm = useForm({
-    item: "Select",
+    item: selectedProduct ?? "Select",
     branch: "Select",
     files: [],
     customerMobile: "",
