@@ -14,7 +14,11 @@ class ShopController extends Controller
     {
         $search = null;
         $category = null;
-        $categories = ProductCategory::withCount('items')->get();
+        $categories = ProductCategory::withCount([
+            'items as items_count' => function ($query) {
+                $query->whereNotNull('process_data');
+            }
+        ])->get();
         $perPage = 12; // Set items per page
 
         if ($request->has('category') && $request->has('search')) {
@@ -30,16 +34,17 @@ class ShopController extends Controller
         elseif ($request->has('category')) {
             $slug = $request->input('category');
             $category = ProductCategory::where('slug', $slug)->firstOrFail();
-            $products = Item::where('category_id', $category->id)->paginate($perPage);
+            $products = Item::where('category_id', $category->id)->whereNotNull('process_data')->paginate($perPage);
         }
         elseif ($request->has('search')) {
             $search = $request->input('search');
-            $products = Item::where('name', 'like', "%{$search}%")
+            $products = Item::whereNotNull('process_data')
+                ->where('name', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%")
                 ->paginate($perPage);
         }
         else {
-            $products = Item::paginate($perPage);
+            $products = Item::whereNotNull('process_data')->paginate($perPage);
         }
 
         return Inertia::render('Shop', [

@@ -39,7 +39,7 @@ class Task
 
         $processData = json_decode($item->process_data); // Get data for each of the processes
 
-        $tasks = $processData->tasks->$processName; // Get tasks for new Process
+        $tasks = is_array($processData->tasks) ? $processData->tasks[$processName] : $processData->tasks->$processName; // Get tasks for new Process
 
         if (is_array($tasks)) {
             self::showTasksToTeams($tasks, $order, $processName, $branchName);
@@ -163,7 +163,7 @@ class Task
         $branchName = in_array($order->branch->name, $productionBranches) ? $order->branch->name : $primaryBranch;
         $processData = json_decode($item->process_data); // Get data for each of the processes
 
-        $tasks = $processData->tasks->$process; // Get tasks for new Process
+        $tasks = is_array($processData->tasks) ? $processData->tasks[$process] : $processData->tasks->$process; // Get tasks for new Process
 
         if (is_array($tasks)) {
             self::showTasksToTeams($tasks, $order, $process, $branchName);

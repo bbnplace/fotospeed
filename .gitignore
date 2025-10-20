@@ -25,3 +25,4 @@ yarn-error.log
 /.ceculasync.json
 /app/Http/Controllers/PaystackController.php
 /notifications.json
+/test.sql
