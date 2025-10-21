@@ -7,9 +7,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="author" content="modinatheme">
-        <meta name="description" content="Printnow - Printing Company & Design Services HTML Template">
+        <meta name="description" content="FotoSpeed - Printing Company, Photobooks, Synthetic Albums">
         <!-- ======== Page title ============ -->
-        <title>Printnow - Printing Company & Design Services HTML Template</title>
+        <title>FotoSpeed - Printing Company, Photobooks, Synthetic Albums</title>
         <!--<< Favcion >>-->
         <link rel="shortcut icon" href="{{ config('app.url') }}/assets/img/favicon.svg">
         <!--<< Bootstrap min.css >>-->
