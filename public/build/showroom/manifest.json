@@ -1,0 +1,296 @@
+{
+  "_DefaultLayout-D-MEvjtS.js": {
+    "file": "assets/DefaultLayout-D-MEvjtS.js",
+    "name": "DefaultLayout",
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "assets": [
+      "assets/logo-B9xom2Yo.png"
+    ]
+  },
+  "_Panel.vue_vue_type_script_setup_true_lang-BKwp8Nvm.js": {
+    "file": "assets/Panel.vue_vue_type_script_setup_true_lang-BKwp8Nvm.js",
+    "name": "Panel.vue_vue_type_script_setup_true_lang",
+    "imports": [
+      "resources/themes/fotospeed/app.js"
+    ]
+  },
+  "_Records--Q1_22q4.js": {
+    "file": "assets/Records--Q1_22q4.js",
+    "name": "Records",
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_moment-C5S46NFB.js"
+    ]
+  },
+  "__plugin-vue_export-helper-DlAUqK2U.js": {
+    "file": "assets/_plugin-vue_export-helper-DlAUqK2U.js",
+    "name": "_plugin-vue_export-helper"
+  },
+  "_moment-C5S46NFB.js": {
+    "file": "assets/moment-C5S46NFB.js",
+    "name": "moment"
+  },
+  "_usePrimaryPhoto-C72TQhFZ.js": {
+    "file": "assets/usePrimaryPhoto-C72TQhFZ.js",
+    "name": "usePrimaryPhoto",
+    "imports": [
+      "resources/themes/fotospeed/app.js"
+    ]
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot": {
+    "file": "assets/materialdesignicons-webfont-CSr8KVlo.eot",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf": {
+    "file": "assets/materialdesignicons-webfont-B7mPwVP_.ttf",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff": {
+    "file": "assets/materialdesignicons-webfont-PXm3-2wK.woff",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
+    "file": "assets/materialdesignicons-webfont-Dp5v-WZN.woff2",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
+  },
+  "public/assets/fonts/fa-brands-400.eot": {
+    "file": "assets/fa-brands-400-COek5EKm.eot",
+    "src": "public/assets/fonts/fa-brands-400.eot"
+  },
+  "public/assets/fonts/fa-brands-400.woff": {
+    "file": "assets/fa-brands-400-CD72hoPl.woff",
+    "src": "public/assets/fonts/fa-brands-400.woff"
+  },
+  "public/assets/fonts/fa-brands-400.woff2": {
+    "file": "assets/fa-brands-400-s4WtYxoZ.woff2",
+    "src": "public/assets/fonts/fa-brands-400.woff2"
+  },
+  "public/assets/fonts/fa-light-300.eot": {
+    "file": "assets/fa-light-300-DleI9zkH.eot",
+    "src": "public/assets/fonts/fa-light-300.eot"
+  },
+  "public/assets/fonts/fa-light-300.woff": {
+    "file": "assets/fa-light-300-TjvrnP5K.woff",
+    "src": "public/assets/fonts/fa-light-300.woff"
+  },
+  "public/assets/fonts/fa-light-300.woff2": {
+    "file": "assets/fa-light-300-Bl-0CywU.woff2",
+    "src": "public/assets/fonts/fa-light-300.woff2"
+  },
+  "public/assets/fonts/fa-regular-400.eot": {
+    "file": "assets/fa-regular-400-CsIw_Nyy.eot",
+    "src": "public/assets/fonts/fa-regular-400.eot"
+  },
+  "public/assets/fonts/fa-regular-400.woff": {
+    "file": "assets/fa-regular-400-BZto0AcE.woff",
+    "src": "public/assets/fonts/fa-regular-400.woff"
+  },
+  "public/assets/fonts/fa-regular-400.woff2": {
+    "file": "assets/fa-regular-400-BwVjTAL1.woff2",
+    "src": "public/assets/fonts/fa-regular-400.woff2"
+  },
+  "public/assets/fonts/fa-solid-900.eot": {
+    "file": "assets/fa-solid-900-B0Qj5wNM.eot",
+    "src": "public/assets/fonts/fa-solid-900.eot"
+  },
+  "public/assets/fonts/fa-solid-900.woff": {
+    "file": "assets/fa-solid-900-nFBXavsv.woff",
+    "src": "public/assets/fonts/fa-solid-900.woff"
+  },
+  "public/assets/fonts/fa-solid-900.woff2": {
+    "file": "assets/fa-solid-900-B3gBt1v4.woff2",
+    "src": "public/assets/fonts/fa-solid-900.woff2"
+  },
+  "public/assets/fonts/flaticon.eot": {
+    "file": "assets/flaticon-DTwyjA1x.eot",
+    "src": "public/assets/fonts/flaticon.eot"
+  },
+  "public/assets/fonts/flaticon.woff": {
+    "file": "assets/flaticon-DDMkYche.woff",
+    "src": "public/assets/fonts/flaticon.woff"
+  },
+  "public/assets/fonts/flaticon.woff2": {
+    "file": "assets/flaticon-BIaY01mp.woff2",
+    "src": "public/assets/fonts/flaticon.woff2"
+  },
+  "public/assets/img/quotepost.png": {
+    "file": "assets/quotepost-Byy8Ip5o.png",
+    "src": "public/assets/img/quotepost.png"
+  },
+  "resources/js/assets/logo.png": {
+    "file": "assets/logo-B9xom2Yo.png",
+    "src": "resources/js/assets/logo.png"
+  },
+  "resources/themes/fotospeed/Pages/Auth/Login.vue": {
+    "file": "assets/Login-CrrQ14qe.js",
+    "name": "Login",
+    "src": "resources/themes/fotospeed/Pages/Auth/Login.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/Invoice/Detail.vue": {
+    "file": "assets/Detail-QYoHzuFg.js",
+    "name": "Detail",
+    "src": "resources/themes/fotospeed/Pages/Client/Invoice/Detail.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_DefaultLayout-D-MEvjtS.js",
+      "_moment-C5S46NFB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/Detail-Cn2Bxahg.css"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/Invoice/List.vue": {
+    "file": "assets/List-CuX_wyL3.js",
+    "name": "List",
+    "src": "resources/themes/fotospeed/Pages/Client/Invoice/List.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_DefaultLayout-D-MEvjtS.js",
+      "resources/themes/fotospeed/app.js",
+      "_Records--Q1_22q4.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_moment-C5S46NFB.js"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/Invoice/Receipt.vue": {
+    "file": "assets/Receipt-B_FRcsrK.js",
+    "name": "Receipt",
+    "src": "resources/themes/fotospeed/Pages/Client/Invoice/Receipt.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_DefaultLayout-D-MEvjtS.js",
+      "_moment-C5S46NFB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/Receipt-Bura-so3.css"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/LoggedIn.vue": {
+    "file": "assets/LoggedIn-B07nY-87.js",
+    "name": "LoggedIn",
+    "src": "resources/themes/fotospeed/Pages/Client/LoggedIn.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/Order/Add.vue": {
+    "file": "assets/Add-DOD_qDA9.js",
+    "name": "Add",
+    "src": "resources/themes/fotospeed/Pages/Client/Order/Add.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_DefaultLayout-D-MEvjtS.js",
+      "resources/themes/fotospeed/app.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_Panel.vue_vue_type_script_setup_true_lang-BKwp8Nvm.js"
+    ],
+    "css": [
+      "assets/Add-DNF4wDXp.css"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/Order/Detail.vue": {
+    "file": "assets/Detail--4sOGhmo.js",
+    "name": "Detail",
+    "src": "resources/themes/fotospeed/Pages/Client/Order/Detail.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_DefaultLayout-D-MEvjtS.js",
+      "_Panel.vue_vue_type_script_setup_true_lang-BKwp8Nvm.js",
+      "_moment-C5S46NFB.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Client/Order/List.vue": {
+    "file": "assets/List-O8ibaSdp.js",
+    "name": "List",
+    "src": "resources/themes/fotospeed/Pages/Client/Order/List.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_DefaultLayout-D-MEvjtS.js",
+      "_Records--Q1_22q4.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js",
+      "_moment-C5S46NFB.js"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/ProductDetails.vue": {
+    "file": "assets/ProductDetails-BV8Z8F-m.js",
+    "name": "ProductDetails",
+    "src": "resources/themes/fotospeed/Pages/ProductDetails.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_DefaultLayout-D-MEvjtS.js",
+      "_usePrimaryPhoto-C72TQhFZ.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ]
+  },
+  "resources/themes/fotospeed/Pages/Shop.vue": {
+    "file": "assets/Shop-D0oLgcKD.js",
+    "name": "Shop",
+    "src": "resources/themes/fotospeed/Pages/Shop.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/themes/fotospeed/app.js",
+      "_DefaultLayout-D-MEvjtS.js",
+      "_usePrimaryPhoto-C72TQhFZ.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ]
+  },
+  "resources/themes/fotospeed/app.js": {
+    "file": "assets/app-B18ikqzH.js",
+    "name": "app",
+    "src": "resources/themes/fotospeed/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/themes/fotospeed/Pages/Auth/Login.vue",
+      "resources/themes/fotospeed/Pages/Client/Invoice/Detail.vue",
+      "resources/themes/fotospeed/Pages/Client/Invoice/List.vue",
+      "resources/themes/fotospeed/Pages/Client/Invoice/Receipt.vue",
+      "resources/themes/fotospeed/Pages/Client/LoggedIn.vue",
+      "resources/themes/fotospeed/Pages/Client/Order/Add.vue",
+      "resources/themes/fotospeed/Pages/Client/Order/Detail.vue",
+      "resources/themes/fotospeed/Pages/Client/Order/List.vue",
+      "resources/themes/fotospeed/Pages/ProductDetails.vue",
+      "resources/themes/fotospeed/Pages/Shop.vue"
+    ],
+    "css": [
+      "assets/app-B4Ltn98g.css"
+    ],
+    "assets": [
+      "assets/materialdesignicons-webfont-CSr8KVlo.eot",
+      "assets/materialdesignicons-webfont-Dp5v-WZN.woff2",
+      "assets/materialdesignicons-webfont-PXm3-2wK.woff",
+      "assets/materialdesignicons-webfont-B7mPwVP_.ttf",
+      "assets/fa-brands-400-COek5EKm.eot",
+      "assets/fa-brands-400-s4WtYxoZ.woff2",
+      "assets/fa-brands-400-CD72hoPl.woff",
+      "assets/fa-light-300-DleI9zkH.eot",
+      "assets/fa-light-300-Bl-0CywU.woff2",
+      "assets/fa-light-300-TjvrnP5K.woff",
+      "assets/fa-regular-400-CsIw_Nyy.eot",
+      "assets/fa-regular-400-BwVjTAL1.woff2",
+      "assets/fa-regular-400-BZto0AcE.woff",
+      "assets/fa-solid-900-B0Qj5wNM.eot",
+      "assets/fa-solid-900-B3gBt1v4.woff2",
+      "assets/fa-solid-900-nFBXavsv.woff",
+      "assets/flaticon-BIaY01mp.woff2",
+      "assets/flaticon-DDMkYche.woff",
+      "assets/flaticon-DTwyjA1x.eot",
+      "assets/quotepost-Byy8Ip5o.png"
+    ]
+  }
+}

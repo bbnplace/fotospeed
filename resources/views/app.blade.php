@@ -2,7 +2,8 @@
 <html lang="en">
     <head>
         <title inertia>{{ config('app.name', 'Fotospeed') }}</title>
-        <link rel="stylesheet" href="{{ env('APP_URL') }}/build/assets/app-DoJU4k58.css">
+
+        
 
         <!-- Scripts -->
         @php
@@ -12,11 +13,14 @@
             // $theme = session('theme', 'default'); // Or get from user/settings
         @endphp
 
-        {{-- @if($routePrefix == '/showroom')
-            @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"])
+        @if($routePrefix == '/showroom')
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-B4Ltn98g.css">
+            
+            {{-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) --}}
         @else
-            @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
-        @endif --}}
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-BMcj8y2u.css">
+            {{-- @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"]) --}}
+        @endif
 
         @routes
         @inertiaHead
@@ -26,5 +30,10 @@
          {{-- {{ $routePrefix }} --}}
          <div id="mod"></div>
     </body>
-    <script src="{{ env('APP_URL') }}/build/assets/app-BwdOb-Ii.js" type="module"></script>
+    @if($routePrefix == '/showroom')
+        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-B18ikqzH.js" type="module"></script>
+    @else
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-BYxSoFy6.js" type="module"></script>
+    @endif
+    
 </html>

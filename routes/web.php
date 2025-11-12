@@ -172,13 +172,13 @@ Route::prefix('ng')->group(function () {
         ]);
     })->name('privacy');
 
-    Route::get('/showroom', function () {
-        return view('marketing.shop', [
-            'title' => 'Shop Indigo',
-            'description' => 'Explore our range of products available for purchase.',
-            'page' => 'shop',
-        ]);
-    })->name('shop');
+    // Route::get('/showroom', function () {
+    //     return view('marketing.shop', [
+    //         'title' => 'Shop Indigo',
+    //         'description' => 'Explore our range of products available for purchase.',
+    //         'page' => 'shop',
+    //     ]);
+    // })->name('shop');
 
     Route::get('/products/{id}', function ($id) {
         return view('marketing.product', ['id' => $id]);

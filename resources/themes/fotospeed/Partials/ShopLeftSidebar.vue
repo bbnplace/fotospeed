@@ -110,7 +110,7 @@ const props = defineProps({
     }
 });
 
-console.log(props.products);
+// console.log(props.products);
 
 const mutateLabel = (label) =>  {
     if (label === '&laquo; Previous') return '&laquo;';
