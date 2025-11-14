@@ -191,7 +191,7 @@
                                         :error-messages="form.errors.cecula_a2p_api_key"
                                     ></VTextField>
                                 </VCol>
-                                <VCol v-if="form.sms_type == 'A2P' && form.cecula_a2p_api_key.length >= 32">
+                                <VCol v-if="form.sms_type == 'A2P' && form.cecula_a2p_api_key && form.cecula_a2p_api_key.length >= 32">
                                     <VSelect
                                         id="a2p_identity"
                                         v-model="form.a2p_identity"

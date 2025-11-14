@@ -15,7 +15,6 @@
 
         @if($routePrefix == '/showroom')
             <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-B4Ltn98g.css">
-            
             {{-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) --}}
         @else
             <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-BMcj8y2u.css">
@@ -31,9 +30,9 @@
          <div id="mod"></div>
     </body>
     @if($routePrefix == '/showroom')
-        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-B18ikqzH.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BCfMDDsl.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-BYxSoFy6.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-DeQ-qCBF.js" type="module"></script>
     @endif
     
 </html>

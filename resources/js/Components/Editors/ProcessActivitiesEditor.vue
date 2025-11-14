@@ -442,7 +442,7 @@ const updateProcesses = async () => {
     const payload = {
         data: {
             processes: productProcesses.value,
-            tasks: productProcessActivities
+            tasks: JSON.parse(JSON.stringify(productProcessActivities))
         }
     }
 
