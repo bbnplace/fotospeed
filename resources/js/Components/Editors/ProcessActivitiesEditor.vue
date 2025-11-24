@@ -181,6 +181,22 @@
                             ></VAutocomplete>
                         </VCol>
                     </VRow>
+                    <VRow class="mt-2">
+                        <VCol>
+                            <VAutocomplete
+                                :id="`teamWhatsappTemplate${index}`"
+                                v-model="productProcesses[index].teamWhatsappTemplate"
+                                label="Team WhatsApp Template"
+                                :items="whatsappTemplates"
+                                variant="outlined"
+                                hide-details
+                                density="compact"
+                                autocomplete="off"
+                                bg-color="white"
+                                @blur="updateProcesses"
+                            ></VAutocomplete>
+                        </VCol>
+                    </VRow>
                     <hr/>
                     <VRow>
                         <VCol cols="12">

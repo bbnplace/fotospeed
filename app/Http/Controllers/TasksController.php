@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Notifications\TaskTransferNotification;
 use App\Report\ReportBuilder;
 use App\Tasks\Task as TaskAssigner;
+use App\Messaging\WhatsAppClient;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Role;
@@ -276,9 +277,26 @@ class TasksController extends Controller
                     $nextProcess = $this->getNextProcess($processData->processes, $currentProcessName);
                     
                     // Notify Project Coordinator that all tasks have been completed
+                    // Notify Project Coordinator that all tasks have been completed
                     if (property_exists($currentProcessData, 'whoCoordinates') && !empty($currentProcessData->whoCoordinates) && $currentProcessData->whoCoordinates != 'None') {
                         $projectCoordinatorRole = Role::where('name', $currentProcessData->whoCoordinates)->first();
                         TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess->name ?? null, $autoStartNextProcess);
+                        
+                        // Send WhatsApp Notification to Coordinator
+                        if (property_exists($currentProcessData, 'teamWhatsappTemplate') && !empty($currentProcessData->teamWhatsappTemplate) && $currentProcessData->teamWhatsappTemplate != 'None') {
+                            $staff = User::where('branch_id', $order->branch_id)->where('role_id', $projectCoordinatorRole->id)->get();
+                            if ($staff->count() > 0) {
+                                $waConfig = [
+                                    'order' => $order,
+                                    'team' => $staff,
+                                    'nextProcess' => $nextProcess,
+                                    'customer' => $order->user,
+                                ];
+                                
+                                $waClient = new WhatsAppClient($waConfig);
+                                $waClient->sendTeamMessage($currentProcessData->teamWhatsappTemplate);
+                            }
+                        }
                     }
 
                     $nextProcessRecord = $nextProcess ? Process::where('name', $nextProcess->name)->first() : null;
@@ -419,8 +437,16 @@ class TasksController extends Controller
         $task->save();
 
         $receiver = User::find($request->receiverId);
+        $sourceBranch = $task->branch;
+        
+        // Build message with branch context if different branch
+        $message = sprintf('Transferred Task from %s', auth()->user()->name);
+        if ($receiver->branch_id !== $task->branch_id) {
+            $message .= sprintf(' (from %s branch)', $sourceBranch->name);
+        }
+        
         // Send push message to notify the staff that a new task has been received.
-        $receiver->notify(new TaskTransferNotification(sprintf('Transferred Task from %s', auth()->user()->name), $task, $receiver));
+        $receiver->notify(new TaskTransferNotification($message, $task, $receiver));
         
 
         return [

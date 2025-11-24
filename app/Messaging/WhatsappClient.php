@@ -30,13 +30,19 @@ class WhatsAppClient
     public function sendTeamMessage($template=null)
     {
         if ($this->team->count() > 0) {
-            $teamSms = empty($template) ? $this->nextProcess->whatsAppTemplate->template : $template;
-            $contacts = [];
-            foreach($this->team as $teamMember)
-            {
-                array_push($contacts, $teamMember->mobile);
+            $teamSms = $template;
+            if (empty($teamSms) && !empty($this->nextProcess)) {
+                 $teamSms = property_exists($this->nextProcess, 'whatsappTemplate') ? $this->nextProcess->whatsappTemplate : null;
             }
-            $this->sendMessage($teamSms, $contacts);
+
+            if (!empty($teamSms)) {
+                $contacts = [];
+                foreach($this->team as $teamMember)
+                {
+                    array_push($contacts, $teamMember->mobile);
+                }
+                $this->sendMessage($teamSms, $contacts);
+            }
         }
     }
 

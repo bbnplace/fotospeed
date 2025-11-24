@@ -71,14 +71,14 @@
                                     >Transfer Task</v-btn>
                                   </div>
                                   <div class="mt-2" v-if="showTaskTransferField[task.id]">
-                                    <Suggest label="Transfer Task To" noDataText="Find team member" variant="outlined" :endpoint="route('staff.filter')" @selected="useSelectedStaff" />
+                                    <Suggest label="Transfer Task To" noDataText="Find team member" variant="outlined" :params="{ allow_cross_branch: true }" :endpoint="route('staff.filter')" @selected="useSelectedStaff" />
                                     <v-progress-linear v-if="transferringTask" class="mt-1" color="red" indeterminate></v-progress-linear>
                                     <p v-if="taskTransferError.length" class="text-red pt-2 mb-0">{{ taskTransferError }}</p>
                                     <v-btn
                                       color="blue-darken-3"
                                       class="mt-1"
                                       :disabled="transferTaskTo.selection == undefined || transferringTask"
-                                      @click="transferTask(task.id)"
+                                      @click="initiateTransfer(task)"
                                     >Transfer</v-btn>
                                   </div>
                                 </div>
@@ -100,6 +100,22 @@
                 </VCard>
             </div>
         </Panel>
+
+        <!-- Cross-branch transfer confirmation dialog -->
+        <v-dialog v-model="showCrossBranchDialog" max-width="500px">
+          <v-card>
+            <v-card-title class="headline">Transfer Task to Different Branch?</v-card-title>
+            <v-card-text>
+              You are about to transfer this task to <strong>{{ transferTaskTo.selection?.name }}</strong>. 
+              The task will be moved outside your branch.
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="grey" text @click="showCrossBranchDialog = false">Cancel</v-btn>
+              <v-btn color="blue" text @click="confirmTransfer">Proceed</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
     </BackendLayout>
 </template>
 
@@ -313,6 +329,28 @@ const transferringTask = ref(false);
 const acceptedCardAlertType = ref('');
 const acceptedCardAlertMessage = ref('');
 const taskTransferError = ref('');
+const showCrossBranchDialog = ref(false);
+const currentTaskForTransfer = ref(null);
+
+const initiateTransfer = (task) => {
+  currentTaskForTransfer.value = task;
+  
+  // Check if selected staff is from a different branch
+  const selectedStaff = transferTaskTo.value.selection;
+  if (selectedStaff && selectedStaff.branch_id !== task.branch_id) {
+    // Show confirmation dialog
+    showCrossBranchDialog.value = true;
+  } else {
+    // Same branch, proceed directly
+    transferTask(task.id);
+  }
+};
+
+const confirmTransfer = () => {
+  showCrossBranchDialog.value = false;
+  transferTask(currentTaskForTransfer.value.id);
+};
+
 const transferTask = async (taskId) => {
   taskTransferError.value = "";
   acceptedCardAlertMessage.value = "";
@@ -371,17 +409,42 @@ onMounted(async () => {
     }
   });
 
+  // Request Notification Permission
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+
+  // Listen for new tasks
+  Echo.private(`App.Models.User.${user.id}`)
+    .notification((notification) => {
+      if (notification.type === 'App\\Notifications\\NewTaskNotification' || notification.type === 'App\\Notifications\\TaskTransferNotification') {
+        // Play sound (optional, simple beep)
+        // const audio = new Audio('/path/to/sound.mp3'); audio.play();
+        
+        // Show Browser Notification
+        if (Notification.permission === "granted") {
+           new Notification("New Task Assigned", {
+              body: notification.message,
+              icon: '/images/logo.png' // Adjust path as needed
+           });
+        }
+
+        // Reload tasks to update UI
+        loadNewTasks();
+        loadPickedTasks();
+        
+        // Optional: Show a toast/alert in the UI
+        // toast.success(notification.message);
+      }
+    });
+
   loadNewTasks();
   loadPickedTasks();
-
-  // checkNewTaskInterval = setInterval(function (){
-  //   loadNewTasks();
-  //   loadPickedTasks();
-  // }, 30000)
 });
 
 onUnmounted(() => {
   // clearInterval(checkNewTaskInterval);
+  Echo.leave(`App.Models.User.${user.id}`);
 })
 
 </script>

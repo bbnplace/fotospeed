@@ -288,6 +288,36 @@ class OrdersController extends Controller
         }]);
 
         $order = $query->first();
+        
+        // If order not found and user is not from administrative branch, check if they have a task for this order
+        if (empty($order) && !$isFromAdministrativeBranch) {
+            // Try to find the order without branch restriction
+            $order = Order::where('id', $id)
+                ->with(['item' => function($query){ $query->select('id', 'name'); }])
+                ->with(['user' => function ($query){ $query->select('id', 'name', 'mobile'); }])
+                ->with(['processingBranch' => function ($query){ $query->select('id', 'name'); }])
+                ->with(['sourceBranch' => function ($query){ $query->select('id', 'name'); }])
+                ->with(['orderStatus' => function ($query){ $query->select('id', 'name'); }])
+                ->with(['process' => function ($query){ $query->select('id', 'name'); }])
+                ->first();
+            
+            // If order exists, check if user has a task for it
+            if (!empty($order)) {
+                $userHasTask = TaskModel::where('order_id', $order->id)
+                    ->where('user_id', auth()->id())
+                    ->exists();
+                
+                // If user doesn't have a task for this order, deny access
+                if (!$userHasTask) {
+                    return null;
+                }
+            }
+        }
+        
+        if (empty($order)) {
+            return null;
+        }
+
         $orderDetail = json_decode($order->detail);
         $nextProcess = OrderStatus::where('id', $order->orderStatus->next_process)->first(['name']);
 
@@ -403,12 +433,20 @@ class OrdersController extends Controller
 
     public function edit($id)
     {
-        return Inertia::render('Backend/Order/Edit', $this->getOrder($id));
+        $data = $this->getOrder($id);
+        if (empty($data)) {
+            abort(404);
+        }
+        return Inertia::render('Backend/Order/Edit', $data);
     }
 
     public function view($id)
     {
-        return Inertia::render('Backend/Order/Detail', $this->getOrder($id));
+        $data = $this->getOrder($id);
+        if (empty($data)) {
+            abort(404);
+        }
+        return Inertia::render('Backend/Order/Detail', $data);
     }
 
     public function update(Request $request, $id)

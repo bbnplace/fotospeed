@@ -12,7 +12,9 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Broadcasting\PrivateChannel;
 
-class TaskTransferNotification extends Notification
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+
+class TaskTransferNotification extends Notification implements ShouldBroadcastNow
 {
     use Queueable;
 
@@ -50,7 +52,7 @@ class TaskTransferNotification extends Notification
 
     public function broadcastOn()
     {
-        return ['private-App.Models.User.' . $this->user->id];
+        return new PrivateChannel('App.Models.User.' . $this->user->id);
     }
 
     /**

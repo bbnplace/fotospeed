@@ -40,7 +40,7 @@ class Task
         $processData = json_decode($item->process_data); // Get data for each of the processes
 
         $tasks = is_array($processData->tasks) ? $processData->tasks[$processName] : $processData->tasks->$processName; // Get tasks for new Process
-
+        
         if (is_array($tasks)) {
             self::showTasksToTeams($tasks, $order, $processName, $branchName);
         }
@@ -59,6 +59,14 @@ class Task
             // Use Primary Branch if order cannot be processed at branch selected by the customer
             $team = Role::where('name', $taskTeam)->first();
             $branch = Branch::where('name', $targetBranch)->first();
+
+            if (empty($team)) {
+                continue;
+            }
+
+            if (empty($branch)) {
+                continue;
+            }
 
             $templateManager = new TemplateManager([
                 'customer' => $order->user,
@@ -221,6 +229,11 @@ class Task
     private static function createTask($taskName, $taskDescription, Order $order, string $processName, Branch $branch, Role $team): void
     {
         $process = Process::where('name', $processName)->first(['id']);
+        
+        if (empty($process)) {
+            return;
+        }
+
         TaskModel::create([
             'name'=> $taskName,
             'description'=> $taskDescription,

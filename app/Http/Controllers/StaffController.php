@@ -213,17 +213,26 @@ class StaffController extends Controller
     {
         $staffList = [];
         $request->validate([
-            'keyword' => 'required|string|min:2|max:64'
+            'keyword' => 'nullable|string|max:64',
+            'branch_id' => 'nullable|integer|exists:branches,id',
+            'allow_cross_branch' => 'nullable|boolean'
         ]);
 
         $keyword = $request->keyword;
+        $branchId = $request->branch_id;
+        $allowCrossBranch = $request->allow_cross_branch ?? false;
         $customerRole = Role::where('name','Customer')->first();
 
         $query = User::query();
 
-        // If user is not from Administrative Branch, select their branch
-        if (!auth()->user()->isFromAdministrativeBranch()) {
+        // If user is not from Administrative Branch, select their branch (unless cross-branch is allowed)
+        if (!auth()->user()->isFromAdministrativeBranch() && !$allowCrossBranch) {
             $query->where('branch_id', auth()->user()->branch_id);
+        }
+
+        // If branch_id is provided and cross-branch is not allowed, filter by it
+        if ($branchId && !$allowCrossBranch) {
+            $query->where('branch_id', $branchId);
         }
         
         $query->with(['branch' => function ($query) {
@@ -231,20 +240,17 @@ class StaffController extends Controller
         }]);
 
         $query->whereNot('role_id', $customerRole->id);
-
-        
+        $query->whereNot('id', auth()->id());
 
         if (!empty($keyword)) {
-            if (!empty($keyword)) {
                $query->where(function($query) use($keyword){
                     $query->where('name', 'LIKE', sprintf('%%%s%%', $keyword))
                          ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $keyword))
                          ->orWhere('email', 'LIKE', sprintf('%%%s%%', $keyword));
                });
-            }
         }
 
-        $records = $query->get(['id', 'name', 'branch_id']);
+        $records = $query->limit(20)->get(['id', 'name', 'branch_id']);
         // if (!empty($records)) {
         //     foreach ($records as $staff) {
         //         array_push($staffList, $staff->name);
