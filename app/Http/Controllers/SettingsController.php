@@ -45,6 +45,12 @@ class SettingsController extends Controller
             'cecula_a2p_api_key' => 'nullable|string|min:32|max:64',
             'sms_type' => 'nullable|in:SIM,A2P',
             'a2p_identity' => 'nullable|string|max:11',
+            'email_method' => 'nullable|in:API,SMTP',
+            'email_api_provider' => 'nullable|string|max:64',
+            'email_api_key' => 'nullable|string|max:255',
+            'email_api_secret' => 'nullable|string|max:255',
+            'email_api_endpoint' => 'nullable|string|max:255',
+            'email_api_region' => 'nullable|string|max:64',
             'email_sender_name' => 'nullable|string|min:2|max:64',
             'from_email' => 'nullable|email:dns,rfc|max:128',
             'replyto_email' => 'nullable|email:dns,rfc|max:128',
@@ -66,7 +72,7 @@ class SettingsController extends Controller
             'wa_app_id' => 'nullable|string|max:32',
             'wa_phone_id' => 'nullable|string|max:64',
             'wa_webhook_verification_token' => 'nullable|string|max:64',
-            'wa_access_token' => 'nullable|string|max:255',
+            'wa_access_token' => 'nullable|string',
             'reportables' => 'required|array',
             'reportables.*' => sprintf('in:Received,%s', implode(',', ReportBuilder::getReportStates())),
             'reportViewers' => 'required|array',
@@ -81,11 +87,19 @@ class SettingsController extends Controller
 
         $request->validate($rules);
 
+        Log::info(strlen($request->wa_access_token));
+
         $settings = Setting::first();
 
         $settings->max_file_size = $request->max_file_size;
         $settings->thumbnail_size = $request->thumbnail_size;
         $settings->file_mime_types = $request->file_mime_types;
+        $settings->email_method = $request->email_method;
+        $settings->email_api_provider = $request->email_api_provider;
+        $settings->email_api_key = $request->email_api_key;
+        $settings->email_api_secret = $request->email_api_secret;
+        $settings->email_api_endpoint = $request->email_api_endpoint;
+        $settings->email_api_region = $request->email_api_region;
         $settings->email_sender_name = $request->email_sender_name;
         $settings->from_email = $request->from_email;
         $settings->replyto_email = $request->replyto_email;

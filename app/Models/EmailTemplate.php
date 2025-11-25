@@ -15,6 +15,8 @@ class EmailTemplate extends Model
         'usage',
         'timing',
         'target',
+        'provider',
+        'provider_template_id',
     ];
 
     public static function getEmailTemplatesArray()

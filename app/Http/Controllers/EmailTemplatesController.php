@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Config\TemplateItem;
 use App\Models\EmailTemplate;
+use App\Models\Setting;
+use App\Services\EmailProviderService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
@@ -13,8 +15,12 @@ class EmailTemplatesController extends Controller
 
     public function index()
     {
+        $settings = Setting::first();
         return Inertia::render('Backend/EmailTemplate/List', [
             'endpoint' => route('email-templates.records'),
+            'syncEndpoint' => route('email-templates.sync'),
+            'emailProvider' => $settings->email_api_provider ?? null,
+            'emailMethod' => $settings->email_method ?? 'SMTP',
             'note' => session('note')
         ]);
     }
@@ -141,6 +147,25 @@ class EmailTemplatesController extends Controller
             
             EmailTemplate::whereIn('id', $request->ids)->delete();
             return redirect()->route('email-templates')->with('note', 'Selected email templates have been deleted');
+        }
+    }
+
+    public function syncProviderTemplates()
+    {
+        $service = new EmailProviderService();
+        $result = $service->fetchProviderTemplates();
+
+        if ($result['success']) {
+            return response()->json([
+                'status' => 'success',
+                'message' => $result['message'],
+                'count' => $result['count'] ?? 0
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => $result['message']
+            ], 400);
         }
     }
 }

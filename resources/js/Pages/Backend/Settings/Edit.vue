@@ -273,7 +273,7 @@
                             </VRow>
                             <h4 class="my-3">Email</h4>
                             <VRow>
-                                <VCol cols="6" sm="12">
+                                <VCol cols="12">
                                     <VSelect
                                         id="email_method"
                                         v-model="form.email_method"
@@ -282,34 +282,128 @@
                                         :items="emailSendMethods"
                                         :hide-details="form.errors.email_method == undefined"
                                         :error-messages="form.errors.email_method"
-
                                     ></VSelect>
                                 </VCol>
                             </VRow>
-                            <VRow>
-                                <VCol>
-                                    <VTextField
-                                    id="email_host"
-                                    v-model="form.email_host"
-                                    label="Host"
-                                    variant="outlined"
-                                    :hide-details="form.errors.email_host == undefined"
-                                    :error-messages="form.errors.email_host"
-                                ></VTextField>
-                                </VCol>
-                            </VRow>
-                            <VRow>
-                                <VCol>
-                                    <VTextField
-                                    id="email_port"
-                                    v-model="form.email_port"
-                                    label="Port"
-                                    variant="outlined"
-                                    :hide-details="form.errors.email_port == undefined"
-                                    :error-messages="form.errors.email_port"
-                                ></VTextField>
-                                </VCol>
-                            </VRow>
+                            
+                            <!-- API Configuration -->
+                            <template v-if="form.email_method === 'API'">
+                                <VRow>
+                                    <VCol cols="12">
+                                        <VSelect
+                                            id="email_api_provider"
+                                            v-model="form.email_api_provider"
+                                            label="Email Provider"
+                                            variant="outlined"
+                                            :items="emailApiProviders"
+                                            :hide-details="form.errors.email_api_provider == undefined"
+                                            :error-messages="form.errors.email_api_provider"
+                                        ></VSelect>
+                                    </VCol>
+                                </VRow>
+                                
+                                <!-- API Key (shown for all providers) -->
+                                <VRow v-if="form.email_api_provider">
+                                    <VCol>
+                                        <VTextField
+                                            id="email_api_key"
+                                            v-model="form.email_api_key"
+                                            :label="getApiKeyLabel(form.email_api_provider)"
+                                            variant="outlined"
+                                            :hide-details="form.errors.email_api_key == undefined"
+                                            :error-messages="form.errors.email_api_key"
+                                        ></VTextField>
+                                    </VCol>
+                                </VRow>
+                                
+                                <!-- API Secret (for Amazon SES and Custom) -->
+                                <VRow v-if="form.email_api_provider && needsApiSecret(form.email_api_provider)">
+                                    <VCol>
+                                        <VTextField
+                                            id="email_api_secret"
+                                            v-model="form.email_api_secret"
+                                            :label="getApiSecretLabel(form.email_api_provider)"
+                                            variant="outlined"
+                                            :hide-details="form.errors.email_api_secret == undefined"
+                                            :error-messages="form.errors.email_api_secret"
+                                        ></VTextField>
+                                    </VCol>
+                                </VRow>
+                                
+                                <!-- Endpoint (for Mailgun and Custom) -->
+                                <VRow v-if="form.email_api_provider && needsEndpoint(form.email_api_provider)">
+                                    <VCol>
+                                        <VTextField
+                                            id="email_api_endpoint"
+                                            v-model="form.email_api_endpoint"
+                                            :label="getEndpointLabel(form.email_api_provider)"
+                                            variant="outlined"
+                                            :hide-details="form.errors.email_api_endpoint == undefined"
+                                            :error-messages="form.errors.email_api_endpoint"
+                                            :hint="getEndpointHint(form.email_api_provider)"
+                                            persistent-hint
+                                        ></VTextField>
+                                    </VCol>
+                                </VRow>
+                                
+                                <!-- Region (for Mailgun and Amazon SES) -->
+                                <VRow v-if="form.email_api_provider && needsRegion(form.email_api_provider)">
+                                    <VCol>
+                                        <VSelect
+                                            id="email_api_region"
+                                            v-model="form.email_api_region"
+                                            :label="getRegionLabel(form.email_api_provider)"
+                                            variant="outlined"
+                                            :items="getRegionOptions(form.email_api_provider)"
+                                            :hide-details="form.errors.email_api_region == undefined"
+                                            :error-messages="form.errors.email_api_region"
+                                        ></VSelect>
+                                    </VCol>
+                                </VRow>
+                            </template>
+                            
+                            <!-- SMTP Configuration -->
+                            <template v-if="form.email_method === 'SMTP'">
+                                <VRow>
+                                    <VCol>
+                                        <VTextField
+                                        id="email_host"
+                                        v-model="form.email_host"
+                                        label="Host"
+                                        variant="outlined"
+                                        :hide-details="form.errors.email_host == undefined"
+                                        :error-messages="form.errors.email_host"
+                                    ></VTextField>
+                                    </VCol>
+                                </VRow>
+                                <VRow>
+                                    <VCol>
+                                        <VTextField
+                                        id="email_port"
+                                        v-model="form.email_port"
+                                        label="Port"
+                                        variant="outlined"
+                                        :hide-details="form.errors.email_port == undefined"
+                                        :error-messages="form.errors.email_port"
+                                    ></VTextField>
+                                    </VCol>
+                                </VRow>
+                                <VRow>
+                                    <VCol>
+                                        <VTextField
+                                        id="email_password"
+                                        v-model="form.email_password"
+                                        label="Password"
+                                        variant="outlined"
+                                        type="password"
+                                        :hide-details="form.errors.email_password == undefined"
+                                        :error-messages="form.errors.email_password"
+                                    ></VTextField>
+                                    </VCol>
+                                </VRow>
+                            </template>
+                            
+                            <!-- Common fields for both API and SMTP -->
                             <VRow>
                                 <VCol>
                                     <VTextField
@@ -331,18 +425,6 @@
                                     variant="outlined"
                                     :hide-details="form.errors.from_email == undefined"
                                     :error-messages="form.errors.from_email"
-                                ></VTextField>
-                                </VCol>
-                            </VRow>
-                            <VRow>
-                                <VCol>
-                                    <VTextField
-                                    id="email_password"
-                                    v-model="form.email_password"
-                                    label="Password"
-                                    variant="outlined"
-                                    :hide-details="form.errors.email_password == undefined"
-                                    :error-messages="form.errors.email_password"
                                 ></VTextField>
                                 </VCol>
                             </VRow>
@@ -573,6 +655,70 @@ const reportStatusSearch = ref(null);
 const reportViewersSearch = ref(null);
 const approvedIdentities = ref([]);
 const emailSendMethods = ['API', 'SMTP'];
+const emailApiProviders = ['SendGrid', 'Mailgun', 'Postmark', 'Resend', 'Sendpulse', 'Amazon SES', 'Custom'];
+
+// Helper functions for dynamic field display
+const getApiKeyLabel = (provider) => {
+    const labels = {
+        'SendGrid': 'API Key',
+        'Mailgun': 'API Key',
+        'Postmark': 'Server Token',
+        'Resend': 'API Key',
+        'Sendpulse': 'API Key',
+        'Amazon SES': 'Access Key ID',
+        'Custom': 'API Key'
+    };
+    return labels[provider] || 'API Key';
+};
+
+const getApiSecretLabel = (provider) => {
+    const labels = {
+        'Amazon SES': 'Secret Access Key',
+        'Custom': 'API Secret (Optional)'
+    };
+    return labels[provider] || 'API Secret';
+};
+
+const getEndpointLabel = (provider) => {
+    const labels = {
+        'Mailgun': 'Domain',
+        'Custom': 'API Endpoint URL'
+    };
+    return labels[provider] || 'Endpoint';
+};
+
+const getEndpointHint = (provider) => {
+    const hints = {
+        'Mailgun': 'e.g., mg.yourdomain.com',
+        'Custom': 'Full API endpoint URL including protocol'
+    };
+    return hints[provider] || '';
+};
+
+const getRegionLabel = (provider) => {
+    return provider === 'Mailgun' ? 'Region' : 'AWS Region';
+};
+
+const getRegionOptions = (provider) => {
+    if (provider === 'Mailgun') {
+        return ['US', 'EU'];
+    } else if (provider === 'Amazon SES') {
+        return ['us-east-1', 'us-west-2', 'eu-west-1', 'eu-central-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1'];
+    }
+    return [];
+};
+
+const needsApiSecret = (provider) => {
+    return ['Amazon SES', 'Custom'].includes(provider);
+};
+
+const needsEndpoint = (provider) => {
+    return ['Mailgun', 'Custom'].includes(provider);
+};
+
+const needsRegion = (provider) => {
+    return ['Mailgun', 'Amazon SES'].includes(provider);
+};
 
 const normalizeReportables = (reportables) => {
     const normalizedReportables = [];
@@ -589,7 +735,12 @@ const form = useForm({
     max_file_size: settings.max_file_size,
     thumbnail_size: settings.thumbnail_size,
     file_mime_types: settings.file_mime_types,
-    email_method: settings.email_method ?? 'API',
+    email_method: settings.email_method ?? 'SMTP',
+    email_api_provider: settings.email_api_provider,
+    email_api_key: settings.email_api_key,
+    email_api_secret: settings.email_api_secret,
+    email_api_endpoint: settings.email_api_endpoint,
+    email_api_region: settings.email_api_region,
     email_sender_name: settings.email_sender_name,
     from_email: settings.from_email,
     replyto_email: settings.replyto_email,

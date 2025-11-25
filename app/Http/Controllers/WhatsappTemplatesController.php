@@ -34,6 +34,8 @@ class WhatsappTemplatesController extends Controller
             return $validationResponse;
         }
 
+        // $accessToken = 'EAASqtVWqgPABQL22ZB380HTub8e8VFkWvTGyAkidj8oZAFRuTv6afZCZB67TZCzCA4JtxbCZAz6kT9ZBZBnHC9SYmhiV9EuuJS4g0z84Dwxed0nD4VFbx61CYr9mcLZCX0qnAZAdhUGGeCkeaXShRbhtu0kwrYaCr0oQAnY65ZAYTPlyUewAqCccL9cJRQGVm9zTqQvfgZDZD';
+        // $settings->wa_access_token
         $url = "https://graph.facebook.com/v22.0/{$settings->wa_business_account_id}/message_templates";
         $response = Http::withToken($settings->wa_access_token)->get($url);
         return $response->json();

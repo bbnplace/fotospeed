@@ -339,6 +339,12 @@ class OrdersController extends Controller
             $offlinePaymentApprover = $approverRole->id;
         }
         $canApproveOfflinePayment = $isFromAdministrativeBranch && $hasInvoice && !$invoicePaid && $settings->support_offline_payment && (auth()->user()->isAdmin() || auth()->user()->role_id == $offlinePaymentApprover);
+        
+        // Check if user has tasks for this order (for cross-branch access)
+        $userHasTasksForOrder = TaskModel::where('order_id', $order->id)
+            ->where('user_id', auth()->id())
+            ->exists();
+        
         // dd($canApproveOfflinePayment);
         return [
             'order' => $order,
@@ -358,6 +364,7 @@ class OrdersController extends Controller
             'invoice' => $invoice,
             'canForwardToNextProcess' => $canForwardToNextProcess,
             'canApproveOfflinePayment' => $canApproveOfflinePayment,
+            'userHasTasksForOrder' => $userHasTasksForOrder,
             'canGenerateInvoice' => $canGenerateInvoice,
             'invoicePaid' => $invoicePaid,
             'canEditOrder' => $canEditOrder,

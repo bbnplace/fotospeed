@@ -263,15 +263,18 @@ Route::middleware(['auth', 'admin.only'])->group(function (){
     Route::get('panel/whatsapp-template/{id}', [WhatsappTemplatesController::class, 'view'])->name('whatsapp-template.view');
     Route::delete('panel/whatsapp-templates/delete', [WhatsappTemplatesController::class, 'delete'])->name('whatsapp-templates.delete');
 
+
     // Email Template Management Module
     Route::get('panel/email-templates', [EmailTemplatesController::class, 'index'])->name('email-templates');
     Route::post('panel/email-templates', [EmailTemplatesController::class, 'records'])->name('email-templates.records');
+    Route::post('panel/email-templates/sync', [EmailTemplatesController::class, 'syncProviderTemplates'])->name('email-templates.sync');
     Route::get('panel/email-template/add', [EmailTemplatesController::class, 'add'])->name('email-template.add');
     Route::post('panel/email-template/add', [EmailTemplatesController::class, 'store'])->name('email-template.add');
     Route::get('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'edit'])->name('email-template.edit');
     Route::put('panel/email-template/{id}/edit', [EmailTemplatesController::class, 'update'])->name('email-template.edit');
     Route::get('panel/email-template/{id}', [EmailTemplatesController::class, 'view'])->name('email-template.view');
     Route::delete('panel/email-templates/delete', [EmailTemplatesController::class, 'delete'])->name('email-templates.delete');
+
 
     // Notifications Template Management Module
     Route::get('panel/notification-templates', [NotificationTemplatesController::class, 'index'])->name('notification-templates');
