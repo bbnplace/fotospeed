@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helper\URLGenerator;
 use App\Messaging\TemplateManager;
+use App\Models\Branch;
 use App\Models\Process;
 use App\Models\User;
 use App\Notifications\TaskTransferNotification;
@@ -39,8 +40,28 @@ class TasksController extends Controller
 
     public function loadUnassignedOrderTasks(int $orderId)
     {
+        // First, verify the order's primary processing center matches user's branch
+        $order = Order::find($orderId);
+        if (!$order) {
+            return [
+                'unclaimedTasks' => [],
+                'message' => 'Order not found.'
+            ];
+        }
+        
+        $item = $order->item;
+        $primaryBranchName = $item->primary_order_processing_branch;
+        $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+        
+        if (!$primaryBranch || $primaryBranch->id !== auth()->user()->branch_id) {
+            return [
+                'unclaimedTasks' => [],
+                'message' => 'Tasks for this order are not accessible from your branch.'
+            ];
+        }
+        
         $query = Task::query();
-        $query->where('order_id', $orderId); // Ensures user is from the target team
+        $query->where('order_id', $orderId);
         $query->whereNull('user_id'); // Task has not been claimed
         $query->orderBy('id', 'desc');
         $unclaimedTasks = $query->get([
@@ -81,6 +102,30 @@ class TasksController extends Controller
 
     public function loadOrderTasks(int $orderId)
     {
+        // First, verify the order's primary processing center matches user's branch
+        $order = Order::find($orderId);
+        if (!$order) {
+            return [
+                'Todo' => [],
+                'Doing' => [],
+                'Done' => [],
+                'message' => 'Order not found.'
+            ];
+        }
+        
+        $item = $order->item;
+        $primaryBranchName = $item->primary_order_processing_branch;
+        $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+        
+        if (!$primaryBranch || $primaryBranch->id !== auth()->user()->branch_id) {
+            return [
+                'Todo' => [],
+                'Doing' => [],
+                'Done' => [],
+                'message' => 'Tasks for this order are not accessible from your branch.'
+            ];
+        }
+        
         $tasks = [
             'Todo' => [],
             'Doing' => [],
@@ -119,7 +164,21 @@ class TasksController extends Controller
         $task = $request->task;
         $taskId = $task['id'];
         $task = Task::find($taskId);
+        
         if (!empty($task)) {
+            // Validate user's branch matches product's primary processing center
+            $order = $task->order;
+            $item = $order->item;
+            $primaryBranchName = $item->primary_order_processing_branch;
+            $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+            
+            if (!$primaryBranch || $primaryBranch->id !== auth()->user()->branch_id) {
+                return [
+                    'status' => 'error',
+                    'message' => 'You cannot pick tasks for orders assigned to other branches.'
+                ];
+            }
+            
             $task->task_status_id = TaskStatus::STATUS_TODO;
             $task->user_id = auth()->user()->id;
             $task->save();
@@ -203,6 +262,22 @@ class TasksController extends Controller
         $newStatus = TaskStatus::getTaskStatusId($request->toStatus);
         
         $task = Task::find($taskId);
+        
+        // Validate user's branch matches product's primary processing center
+        if (!empty($task)) {
+            $order = $task->order;
+            $item = $order->item;
+            $primaryBranchName = $item->primary_order_processing_branch;
+            $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+            
+            if (!$primaryBranch || $primaryBranch->id !== auth()->user()->branch_id) {
+                return [
+                    'status' => 'Failed',
+                    'message' => 'You cannot update tasks for orders assigned to other branches.'
+                ];
+            }
+        }
+        
         if ($newStatus === TaskStatus::STATUS_DONE) {
             $auditables = $this->getTaskAudits($task, $taskName);
             if (is_array($auditables)) {
@@ -433,6 +508,31 @@ class TasksController extends Controller
         ]);
 
         $task = Task::find($request->taskId);
+        
+        // Validate user's branch matches product's primary processing center
+        if (!empty($task)) {
+            $order = $task->order;
+            $item = $order->item;
+            $primaryBranchName = $item->primary_order_processing_branch;
+            $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+            
+            if (!$primaryBranch || $primaryBranch->id !== auth()->user()->branch_id) {
+                return [
+                    'status' => 'error',
+                    'message' => 'You cannot transfer tasks for orders assigned to other branches.'
+                ];
+            }
+            
+            // Validate receiver is also from the same branch (primary processing center)
+            $receiver = User::find($request->receiverId);
+            if (!$receiver || $receiver->branch_id !== $primaryBranch->id) {
+                return [
+                    'status' => 'error',
+                    'message' => 'You can only transfer tasks to team members at the same branch.'
+                ];
+            }
+        }
+        
         $task->user_id = $request->receiverId;
         $task->save();
 

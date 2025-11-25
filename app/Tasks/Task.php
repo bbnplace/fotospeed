@@ -35,7 +35,7 @@ class Task
 
         $productionBranches = json_decode($item->order_processing_branches); // Array of production branches
         $primaryBranch = $item->primary_order_processing_branch; // Principal Production Branch
-        $branchName = in_array($order->branch->name, $productionBranches) ? $order->branch->name : $primaryBranch;
+        $branchName = $primaryBranch; // Always use primary processing center
 
         $processData = json_decode($item->process_data); // Get data for each of the processes
 

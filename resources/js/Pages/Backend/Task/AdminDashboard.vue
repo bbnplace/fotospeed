@@ -337,6 +337,10 @@ const transferTask = async (taskId) => {
         showAcceptedTaskOverlay.value[taskId] = false;
         acceptedCardAlertType.value = "success";
         acceptedCardAlertMessage.value = response.data.message;
+      } else if (response.data.status == "error") {
+        // Handle validation errors from backend
+        acceptedCardAlertType.value = "error";
+        acceptedCardAlertMessage.value = response.data.message || "Transfer failed.";
       }
     }
   } catch (error) {

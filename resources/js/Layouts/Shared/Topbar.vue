@@ -147,47 +147,71 @@ const echo = new Echo({
 });
 
 const showBrowserNotification = notification => {
+    // Check if notifications are supported
+    if (!("Notification" in window)) {
+        console.error("This browser does not support notifications");
+        return;
+    }
+
     if (Notification.permission === 'granted') {
-        const uniqueTag = `notification-${Date.now()}`;
-        
-        new Notification('OMS Notification', {
-            body: notification.message,
-            icon: window.location.origin + '/images/logo.png',
-            data: { url: notification.url },
-            requireInteraction: true,
-            tag: uniqueTag
-        }).onclick = function(event) {
-            try {
-                window.focus();
-                router.visit(event.target.data.url);
-            } catch (error) {
-                window.open(event.target.data.url, '_blank');
-            }
-        };
+        try {
+            const uniqueTag = `notification-${Date.now()}`;
+            
+            const notif = new Notification('OMS Notification', {
+                body: notification.message,
+                icon: window.location.origin + '/images/logo.png',
+                data: { url: notification.url },
+                tag: uniqueTag,
+                // Remove requireInteraction for better Chrome compatibility
+                // requireInteraction: true
+            });
+            
+            notif.onclick = function(event) {
+                event.preventDefault();
+                try {
+                    window.focus();
+                    router.visit(event.target.data.url);
+                } catch (error) {
+                    console.error("Navigation error:", error);
+                    window.open(event.target.data.url, '_blank');
+                }
+                notif.close();
+            };
+        } catch (error) {
+            console.error("Notification error:", error);
+        }
     } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then((permission) => {
+            console.log("Notification permission:", permission);
             if (permission === 'granted') {
                 showBrowserNotification(notification);
             }
         });
+    } else {
+        console.warn("Notifications are denied. Please enable them in browser settings.");
     }
 }
 
 onMounted(() => {
+    console.log('Topbar mounted - Echo listening for user:', userId);
+    
     // Listening for branch event as message is passed through different processing stages.
     echo.private(`notify.${branchId}`)
         .listen('JobReceived', (e) => {
+            console.log('JobReceived event:', e);
             showSnackbar(e.message);
         });
 
     // Notifying user when there is a new order
     echo.private(`new-order.${branchId}`)
         .listen('AnnounceNewOrder', (e) => {
+            console.log('AnnounceNewOrder event:', e);
             showSnackbar(e.message);
         });
 
     echo.private(`App.Models.User.${userId}`)
         .notification((notification) => {
+            console.log('Notification received:', notification);
             showBrowserNotification(notification);
         });
 
