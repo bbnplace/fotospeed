@@ -33,7 +33,7 @@ class TaskStatusNotification extends Notification
     {
         return new BroadcastMessage([
             'message' => $this->message,
-            'url' => $this->user->isAdmin() ? route('tasks.order.dashboard', $this->order->id) : route('order', $this->order->id)
+            'url' => $this->user->isAdmin() ? route('tasks.order.dashboard', $this->order->id) : route('order.view', $this->order->id)
         ]);
     }
 
