@@ -21,7 +21,7 @@ class WhatsAppClient
         $this->customer = $config['customer'] ?? null;
         $this->nextProcess = $config['nextProcess'] ?? null;
         $this->team = $config['team'] ?? null;
-        $this->order = $config['order'] ?? null;
+        $this->order = $config['order'] ?? null; 
 
         // Load the template into the template manager
         $this->templateManager = new TemplateManager($config);
