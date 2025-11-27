@@ -203,6 +203,7 @@
                                     {{ currentProcess }}
                                 </VCol>
                             </VRow>
+                            
                             <VRow v-if="canForwardToNextProcess && enableHumanForwarding">
                                 <VCol>
                                     <VBtn
@@ -774,64 +775,338 @@ const startNextProcess = async () => {
 
 
 const printOrderCard = () => {
-    const printableElementId = 'order-card';
-    const printContent = document.getElementById(printableElementId).innerHTML;
+    // Get order data
+    const clientName = order.user.name;
+    const clientPhone = order.user.mobile;
+    const deliveryAddress = order.delivery_address;
+    const originBranch = order.source_branch ? order.source_branch.name : "-";
+    const processingBranch = order.processing_branch.name;
+    const orderNumber = reference.value;
+    const orderName = order.name;
+    const productName = order.item.name;
+    const quantity = order.quantity;
+    const orderPrice = price.value ? `₦${formatter.format(price.value)}` : "--";
+    const orderStatusText = orderOnHold.value ? "On Hold" : orderStatus.value;
+    const currentProcessText = currentProcess.value;
+    const orderDate = moment(order.created_at).format('MMMM DD, YYYY');
+    const targetDeliveryDate = moment(orderDetail.date).format('MMMM DD, YYYY');
+    const waybill = waybillNumber.value ?? 'NOT SET';
+    const orderNotes = order.note;
 
-    const printWindow = window.open('','', 'height=600,width=800');
-    // Add the HTML content to the new window
-    // printWindow.document.open();
+    const printWindow = window.open('', '', 'height=800,width=900');
     printWindow.document.write(`
+        <!DOCTYPE html>
         <html>
         <head>
-            <title>Print Job Card</title>
-            <link href="https://cdn.jsdelivr.net/npm/vuetify@2.6.0/dist/vuetify.min.css" rel="stylesheet">
+            <title>Order Card - ${orderNumber}</title>
             <style>
-            /* Add any specific styles for printing here */
-            @media print {
-                /* Print styles */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                
                 body {
-                    font-family: Arial, sans-serif;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    color: #333;
+                    background: #f5f5f5;
+                    padding: 20px;
                 }
-                .v-row {
-                    display: flex !important;
-                    flex-wrap: wrap !important;
-                    margin-right: 0 !important;
-                    margin-left: 0 !important;
+                
+                .print-container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    background: white;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    border-radius: 8px;
+                    overflow: hidden;
                 }
-
-                /* Ensure columns behave correctly in print */
-                .v-col {
-                    flex-grow: 1 !important;
-                    padding-right: 0 !important;
-                    padding-left: 0 !important;
-                    max-width: 100% !important;
-                    box-sizing: border-box !important;
+                
+                .header {
+                    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+                    color: white;
+                    padding: 30px;
+                    text-align: center;
                 }
-
-                /* Full-width column for print */
-                .v-col-12 {
-                    flex-basis: 100% !important;
-                    max-width: 100% !important;
+                
+                .header h1 {
+                    font-size: 32px;
+                    font-weight: 700;
+                    margin-bottom: 5px;
+                    letter-spacing: -0.5px;
                 }
-
-                /* 50% width column for print */
-                .v-col-md-6 {
-                    flex-basis: 50% !important;
-                    max-width: 50% !important;
+                
+                .header .subtitle {
+                    font-size: 14px;
+                    opacity: 0.9;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
                 }
-            }
+                
+                .order-number {
+                    background: rgba(255,255,255,0.2);
+                    padding: 15px 25px;
+                    margin-top: 20px;
+                    border-radius: 6px;
+                    display: inline-block;
+                }
+                
+                .order-number-label {
+                    font-size: 12px;
+                    opacity: 0.8;
+                    margin-bottom: 5px;
+                }
+                
+                .order-number-value {
+                    font-size: 24px;
+                    font-weight: 700;
+                    letter-spacing: 1px;
+                }
+                
+                .content {
+                    padding: 0 30px;
+                }
+                
+                .status-bar {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 15px 20px;
+                    background: ${orderOnHold.value ? '#ef4444' : '#10b981'};
+                    color: white;
+                    border-radius: 6px;
+                    margin-bottom: 30px;
+                }
+                
+                .status-label {
+                    font-size: 12px;
+                    opacity: 0.9;
+                }
+                
+                .status-value {
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+                
+                .section {
+                    margin-bottom: 30px;
+                }
+                
+                .section-title {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #1e3a8a;
+                    margin-bottom: 15px;
+                    padding-bottom: 8px;
+                    border-bottom: 2px solid #e5e7eb;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 20px;
+                }
+                
+                .info-item {
+                    background: #f9fafb;
+                    padding: 15px;
+                    border-radius: 6px;
+                    border-left: 3px solid #3b82f6;
+                }
+                
+                .info-label {
+                    font-size: 11px;
+                    color: #6b7280;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 6px;
+                    font-weight: 600;
+                }
+                
+                .info-value {
+                    font-size: 15px;
+                    color: #111827;
+                    font-weight: 500;
+                }
+                
+                .info-value.large {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #1e3a8a;
+                }
+                
+                .full-width {
+                    grid-column: 1 / -1;
+                }
+                
+                .notes-box {
+                    background: #fef3c7;
+                    padding: 15px;
+                    border-radius: 6px;
+                    border-left: 4px solid #f59e0b;
+                    margin-top: 10px;
+                }
+                
+                .notes-content {
+                    color: #78350f;
+                    font-size: 14px;
+                    line-height: 1.6;
+                }
+                
+                .footer {
+                    background: #f9fafb;
+                    padding: 20px 30px;
+                    text-align: center;
+                    border-top: 2px solid #e5e7eb;
+                }
+                
+                .footer-text {
+                    font-size: 12px;
+                    color: #6b7280;
+                }
+                
+                .print-date {
+                    font-size: 11px;
+                    color: #9ca3af;
+                    margin-top: 5px;
+                }
+                
+                @media print {
+                    body {
+                        background: white;
+                        padding: 0;
+                    }
+                    
+                    .print-container {
+                        box-shadow: none;
+                        border-radius: 0;
+                    }
+                    
+                    @page {
+                        margin: 15mm;
+                    }
+                }
             </style>
         </head>
         <body>
-            ${printContent}
-        </body>
-        </html>
+            <div class="print-container">
+                <div class="header">
+                    <h1>Fotoplanet</h1>
+                    <div class="subtitle">Professional Photography Services</div>
+                    <div class="order-number">
+                        <div class="order-number-label">Order Number</div>
+                        <div class="order-number-value">${orderNumber}</div>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <div class="status-bar">
+                        <div>
+                            <div class="status-label">Current Status</div>
+                            <div class="status-value">${orderStatusText}</div>
+                        </div>
+                        <div>
+                            <div class="status-label">Process</div>
+                            <div class="status-value">${currentProcessText}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Client Information</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Client Name</div>
+                                <div class="info-value">${clientName}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Phone Number</div>
+                                <div class="info-value">${clientPhone}</div>
+                            </div>
+                            <div class="info-item full-width">
+                                <div class="info-label">Delivery Address</div>
+                                <div class="info-value">${deliveryAddress}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Order Details</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Order Name</div>
+                                <div class="info-value large">${orderName}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Product</div>
+                                <div class="info-value">${productName}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Quantity</div>
+                                <div class="info-value">${quantity}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Total Cost</div>
+                                <div class="info-value large">${orderPrice}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Processing Information</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Origin Branch</div>
+                                <div class="info-value">${originBranch}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Processing Branch</div>
+                                <div class="info-value">${processingBranch}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Order Date</div>
+                                <div class="info-value">${orderDate}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Target Delivery</div>
+                                <div class="info-value">${targetDeliveryDate}</div>
+                            </div>
+                            <div class="info-item full-width">
+                                <div class="info-label">Waybill Number</div>
+                                <div class="info-value">${waybill}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${orderNotes ? `
+                        <div class="section">
+                            <div class="section-title">Special Notes</div>
+                            <div class="notes-box">
+                                <div class="notes-content">${orderNotes}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="footer">
+                    <div class="footer-text">This is an official order card from Fotoplanet Professional Photography Services</div>
+                    <div class="print-date">Printed on ${moment().format('MMMM DD, YYYY [at] h:mm A')}</div>
+                </div>
+            </div>
+            
+            <script>
+                window.onload = function() {
+                    window.print();
+                    window.onafterprint = function() {
+                        window.close();
+                    };
+                };
+            <` + `/script>
+        <` + `/body>
+        <` + `/html>
     `);
     printWindow.document.close();
-
-    // Trigger the print dialog
-    printWindow.focus();
-    printWindow.print();
 }
 </script>
 

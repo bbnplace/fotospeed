@@ -174,11 +174,38 @@ class WhatsappController extends Controller
                     $user = User::where('mobile', $localNumber)->first();
                 }
 
+                $body = '';
+                if (isset($message['type'])) {
+                    switch ($message['type']) {
+                        case 'text':
+                            $body = $message['text']['body'] ?? '';
+                            break;
+                        case 'image':
+                            $body = '[Image received]';
+                            break;
+                        case 'document':
+                            $body = '[Document received]';
+                            break;
+                        case 'audio':
+                            $body = '[Audio received]';
+                            break;
+                        case 'video':
+                            $body = '[Video received]';
+                            break;
+                        case 'sticker':
+                            $body = '[Sticker received]';
+                            break;
+                        default:
+                            $body = '[' . ucfirst($message['type']) . ' message received]';
+                            break;
+                    }
+                }
+
                 $waMessageData = [
                     'customer_wa_profile' => json_encode($contact),
                     'sender' => $message['from'],
                     'recipient' => $metaData['display_phone_number'],
-                    'body' => $message['text']['body'],
+                    'body' => $body,
                     'direction' => 'in',
                     'wa_reference' => $message['id'],
                 ];

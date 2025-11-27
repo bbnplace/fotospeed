@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use App\Messaging\WhatsAppClient;
 
 class OrdersController extends Controller
 {
@@ -229,6 +230,15 @@ class OrdersController extends Controller
             }
         }
 
+        // Send WhatsApp Confirmation
+        $customer = auth()->user()->isCustomer() ? auth()->user() : $customerData;
+        $waConfig = [
+            'order' => $order,
+            'customer' => $customer,
+        ];
+        $waClient = new WhatsAppClient($waConfig);
+        $waClient->sendCustomerMessage('order_management_6');
+
         // Trigger the first task for this order
         Task::assignProcessTasks($item, $order, $firstProcess->name);
         
@@ -269,7 +279,7 @@ class OrdersController extends Controller
 
         $query->where('id', $id);
         $query->with(['item' => function($query){
-            $query->select('id', 'name');
+            $query->select('id', 'name', 'primary_order_processing_branch');
         }]);
         $query->with(['user' => function ($query){
             $query->select('id', 'name', 'mobile');
@@ -293,7 +303,7 @@ class OrdersController extends Controller
         if (empty($order) && !$isFromAdministrativeBranch) {
             // Try to find the order without branch restriction
             $order = Order::where('id', $id)
-                ->with(['item' => function($query){ $query->select('id', 'name'); }])
+                ->with(['item' => function($query){ $query->select('id', 'name', 'primary_order_processing_branch'); }])
                 ->with(['user' => function ($query){ $query->select('id', 'name', 'mobile'); }])
                 ->with(['processingBranch' => function ($query){ $query->select('id', 'name'); }])
                 ->with(['sourceBranch' => function ($query){ $query->select('id', 'name'); }])
@@ -330,7 +340,41 @@ class OrdersController extends Controller
         $canRegenerateInvoice = $isFromAdministrativeBranch && $hasInvoice && !$invoicePaid;
 
         $orderProcessCoordinatorRole = $this->getOrderProcessCoordinatorRole($order);
-        $canForwardToNextProcess = $isFromAdministrativeBranch && (auth()->user()->isAdmin() || (!empty($orderProcessCoordinatorRole) && auth()->user()->role_id == $orderProcessCoordinatorRole->id));
+        
+        // Check if all tasks for current process are complete
+        $allTasksComplete = true;
+        if ($order->process_id) {
+            $incompleteTasksCount = TaskModel::where('order_id', $order->id)
+                ->where('process_id', $order->process_id)
+                ->where('task_status_id', '!=', TaskStatus::STATUS_DONE)
+                ->count();
+            
+            $allTasksComplete = $incompleteTasksCount === 0;
+        }
+        
+        // Check if user is at product's primary processing branch
+        $atPrimaryBranch = false;
+        if ($order->item && $order->item->primary_order_processing_branch) {
+            $primaryBranch = Branch::where('name', $order->item->primary_order_processing_branch)->first();
+            $atPrimaryBranch = $primaryBranch && auth()->user()->branch_id === $primaryBranch->id;
+        }
+        
+
+        
+        // Only allow forwarding if:
+        // 1. Order has human_forwarding flag set (manual forward required)
+        // 2. All tasks are complete
+        // 3. User is at product's primary processing branch
+        // 4. User is coordinator or admin
+        $canForwardToNextProcess = $order->human_forwarding &&
+            $allTasksComplete &&
+            $atPrimaryBranch &&
+            $isFromAdministrativeBranch && 
+            (auth()->user()->isAdmin() || 
+             (!empty($orderProcessCoordinatorRole) && 
+              auth()->user()->role_id == $orderProcessCoordinatorRole->id));
+        
+
 
         $settings = Setting::first();
         $offlinePaymentApprover = null;

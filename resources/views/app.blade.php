@@ -14,11 +14,11 @@
         @endphp
 
         @if($routePrefix == '/showroom')
-            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-B4Ltn98g.css">
-            {{-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) --}}
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-iUJq-8zk.css">
+            {{--@vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"])--}}
         @else
-            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-BMcj8y2u.css">
-            {{-- @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"]) --}}
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-10M8oEWk.css">
+            {{--@vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])--}}
         @endif
 
         @routes
@@ -30,9 +30,9 @@
          <div id="mod"></div>
     </body>
     @if($routePrefix == '/showroom')
-        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-TOlBBm7_.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BQbSImc_.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-Bc2pWFvm.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-CgCfFwwk.js" type="module"></script>
     @endif
     
 </html>

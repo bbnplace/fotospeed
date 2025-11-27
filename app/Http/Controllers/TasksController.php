@@ -351,15 +351,22 @@ class TasksController extends Controller
                     $autoStartNextProcess = $currentProcessData->autoStartNextProcess;
                     $nextProcess = $this->getNextProcess($processData->processes, $currentProcessName);
                     
-                    // Notify Project Coordinator that all tasks have been completed
+                    // Get primary processing branch for notifications
+                    $primaryBranchName = $order->item->primary_order_processing_branch;
+                    $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+                    
                     // Notify Project Coordinator that all tasks have been completed
                     if (property_exists($currentProcessData, 'whoCoordinates') && !empty($currentProcessData->whoCoordinates) && $currentProcessData->whoCoordinates != 'None') {
                         $projectCoordinatorRole = Role::where('name', $currentProcessData->whoCoordinates)->first();
-                        TaskAssigner::generateTaskCompletionNotice($order->branch, $projectCoordinatorRole, $currentProcessName, $nextProcess->name ?? null, $autoStartNextProcess);
                         
-                        // Send WhatsApp Notification to Coordinator
-                        if (property_exists($currentProcessData, 'teamWhatsappTemplate') && !empty($currentProcessData->teamWhatsappTemplate) && $currentProcessData->teamWhatsappTemplate != 'None') {
-                            $staff = User::where('branch_id', $order->branch_id)->where('role_id', $projectCoordinatorRole->id)->get();
+                        // Send notification to coordinators at PRIMARY PROCESSING BRANCH
+                        if ($primaryBranch) {
+                            TaskAssigner::generateTaskCompletionNotice($primaryBranch, $projectCoordinatorRole, $currentProcessName, $nextProcess->name ?? null, $autoStartNextProcess);
+                        }
+                        
+                        // Send WhatsApp Notification to Coordinator at PRIMARY PROCESSING BRANCH
+                        if (property_exists($currentProcessData, 'teamWhatsappTemplate') && !empty($currentProcessData->teamWhatsappTemplate) && $currentProcessData->teamWhatsappTemplate != 'None' && $primaryBranch) {
+                            $staff = User::where('branch_id', $primaryBranch->id)->where('role_id', $projectCoordinatorRole->id)->get();
                             if ($staff->count() > 0) {
                                 $waConfig = [
                                     'order' => $order,
@@ -475,23 +482,98 @@ class TasksController extends Controller
     public function humanInitiateNextProcess(Request $request)
     {
         $order = Order::find($request->orderId);
-        if (!empty($order)) {
-            $currentProcess = $order->process->name;
-            $orderProcesses = $this->getOrderProcesses($order);
-            $nextProcess = $this->getNextProcess($orderProcesses->processes, $currentProcess);
-            $this->initiateNextProcess($order, $nextProcess);
-
+        
+        if (empty($order)) {
             return [
-                'status' => 'success',
-                'message' => sprintf('%s process successfully initialized', $nextProcess->name),
-                'currentProcess' => $nextProcess->name,
-            ];
-        } else {
-            return [
-                'status' => 'failed',
-                'message' => 'Unable to identify the order'
+                'status' => 'error',
+                'message' => 'Order not found'
             ];
         }
+        
+        // 1. Verify all current process tasks are complete
+        $incompleteTasks = Task::where('order_id', $order->id)
+            ->where('process_id', $order->process_id)
+            ->where('task_status_id', '!=', TaskStatus::STATUS_DONE)
+            ->count();
+            
+        if ($incompleteTasks > 0) {
+            return [
+                'status' => 'error', 
+                'message' => 'Cannot forward - all tasks must be completed first'
+            ];
+        }
+        
+        // 2. Verify user is at product's primary processing branch
+        $item = $order->item;
+        $primaryBranchName = $item->primary_order_processing_branch;
+        $primaryBranch = Branch::where('name', $primaryBranchName)->first();
+        
+        if (!$primaryBranch) {
+            return [
+                'status' => 'error',
+                'message' => 'Primary processing branch not found for this product'
+            ];
+        }
+        
+        if (auth()->user()->branch_id !== $primaryBranch->id) {
+            return [
+                'status' => 'error',
+                'message' => 'Unauthorized - you must be at the product\'s primary processing branch'
+            ];
+        }
+        
+        // 3. Verify user is coordinator or admin
+        $processData = $this->getOrderProcesses($order);
+        $currentProcessData = $this->getCurrentProcessData(
+            $processData->processes, 
+            $order->process->name
+        );
+        
+        if (empty($currentProcessData)) {
+            return [
+                'status' => 'error',
+                'message' => 'Process configuration not found'
+            ];
+        }
+        
+        $coordinatorRole = Role::where('name', $currentProcessData->whoCoordinates)->first();
+        $isCoordinator = $coordinatorRole && auth()->user()->role_id === $coordinatorRole->id;
+        $isAdmin = auth()->user()->isAdmin();
+        
+        if (!$isCoordinator && !$isAdmin) {
+            return [
+                'status' => 'error', 
+                'message' => 'Unauthorized - only process coordinator or admin can forward'
+            ];
+        }
+        
+        // 4. Verify human_forwarding flag is set (order is ready for manual forward)
+        if (!$order->human_forwarding) {
+            return [
+                'status' => 'error',
+                'message' => 'Order is not ready for manual forwarding'
+            ];
+        }
+        
+        // 5. Get next process
+        $currentProcess = $order->process->name;
+        $nextProcess = $this->getNextProcess($processData->processes, $currentProcess);
+        
+        if (empty($nextProcess)) {
+            return [
+                'status' => 'error',
+                'message' => 'No next process available'
+            ];
+        }
+        
+        // All validations passed - proceed with forwarding
+        $this->initiateNextProcess($order, $nextProcess);
+        
+        return [
+            'status' => 'success',
+            'message' => sprintf('%s process successfully initialized', $nextProcess->name),
+            'currentProcess' => $nextProcess->name,
+        ];
     }
 
     private function getOrderProcesses(Order $order)

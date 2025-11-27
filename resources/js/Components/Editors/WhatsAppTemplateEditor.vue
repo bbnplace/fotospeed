@@ -71,7 +71,7 @@
         <VRow>
             <VCol>
                 <p>
-                    To create WhatsApp Template, go to the Meta WhatsApp Manager platform. select the <b>Manage templates</b> menu and <b>Create Template</b>.
+                    To create WhatsApp Template, go to the <a href="https://business.facebook.com/wa/manage/message-templates/" target="_blank" class="text-blue-600 hover:underline">Meta WhatsApp Manager</a> platform. select the <b>Manage templates</b> menu and <b>Create Template</b>.
                 </p>
                 <p>
                     <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates/template-library#creating-templates-via-whatsapp-manager--wam-" target="_blank">See Guide on How to Create Whatsapp Template</a>

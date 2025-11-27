@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use App\Tasks\Task;
+use App\Messaging\WhatsAppClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -156,6 +157,14 @@ class CustomerOrdersController extends Controller
                 $firstProcess = $processData->processes[0];
                 Task::assignProcessTasks($item, $order, $firstProcess->name);
             }
+
+            // Send WhatsApp Confirmation
+            $waConfig = [
+                'order' => $order,
+                'customer' => auth()->user(),
+            ];
+            $waClient = new WhatsAppClient($waConfig);
+            $waClient->sendCustomerMessage('order_management_6');
 
         return redirect(route('customer.my-orders'))->with('note', 'Order Submitted');
     }
