@@ -32,7 +32,7 @@
     @if($routePrefix == '/showroom')
         <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BQbSImc_.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-CgCfFwwk.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-Ce_FSW7Q.js" type="module"></script>
     @endif
     
 </html>

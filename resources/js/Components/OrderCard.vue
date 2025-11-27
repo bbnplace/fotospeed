@@ -794,6 +794,7 @@ const printOrderCard = () => {
     const orderNotes = order.note;
 
     const printWindow = window.open('', '', 'height=800,width=900');
+    const siteName = usePage().props.site.name;
     printWindow.document.write(`
         <!DOCTYPE html>
         <html>
@@ -993,8 +994,7 @@ const printOrderCard = () => {
         <body>
             <div class="print-container">
                 <div class="header">
-                    <h1>Fotoplanet</h1>
-                    <div class="subtitle">Professional Photography Services</div>
+                    <h1>${siteName}</h1>
                     <div class="order-number">
                         <div class="order-number-label">Order Number</div>
                         <div class="order-number-value">${orderNumber}</div>
