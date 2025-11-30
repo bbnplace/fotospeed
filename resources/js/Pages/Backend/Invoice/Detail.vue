@@ -151,6 +151,57 @@
                 </VRow>
             </template>
         </Panel>
+
+        <Panel snippet-title="Customer Payment Proof" v-if="customerPaymentProof">
+            <VRow class="mb-3">
+                <VCol cols="12" sm="6" md="4">
+                    <h5 class="my-3 text-blue">Customer</h5>
+                    <VRow>
+                        <VCol cols="12" class="pb-0"><b>Name</b><br />{{ customerPaymentProof.customerAccountName ?? '-' }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ customerPaymentProof.customerBank }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ customerPaymentProof.customerAccountNumber ?? '-' }}</VCol>
+                    </VRow>
+                </VCol>
+                <VCol cols="12" sm="6" md="4">
+                    <h5 class="my-3 text-blue">Receiving Account</h5>
+                    <VRow>
+                        <VCol cols="12" class="pb-0"><b>Name</b><br />{{ customerPaymentProof.organizationAccountName ?? '-' }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ customerPaymentProof.organizationBank }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ customerPaymentProof.organizationAccountNumber }}</VCol>
+                    </VRow>
+                </VCol>
+                <VCol cols="12" sm="6" md="4">
+                    <h5 class="my-3 text-blue">Transaction</h5>
+                    <VRow>
+                        <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ customerPaymentProof.transactionReference ?? '-' }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Amount</b><br />₦{{ customerPaymentProof.currency ?? '' }} {{ formatter.format(customerPaymentProof.amountPaid) }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(customerPaymentProof.paymentDate).calendar() }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ customerPaymentProof.paymentMethod }}</VCol>
+                        <VCol cols="12" class="pb-0"><b>Status</b><br />{{ invoice.invoice_status.name == 'Paid' ? 'Confirmed' : customerPaymentProof.status }}</VCol>
+                    </VRow>
+                </VCol>
+            </VRow>
+        </Panel>
+
+
+
+        <div class="my-4 text-right" v-if="customerPaymentProof && invoice.invoice_status.name == 'Unpaid'">
+             <VBtn color="success" @click="showAcknowledgeModal = true">Acknowledge Payment</VBtn>
+        </div>
+
+        <VDialog v-model="showAcknowledgeModal" max-width="500">
+            <VCard>
+                <VCardTitle>Confirm Payment Receipt</VCardTitle>
+                <VCardText>
+                    By clicking the 'Yes' button below you confirm that you have received payment of <b>₦{{ formatter.format(customerPaymentProof.amountPaid) }}</b> from the customer.
+                </VCardText>
+                <VCardActions>
+                    <VSpacer></VSpacer>
+                    <VBtn color="error" text @click="showAcknowledgeModal = false">No</VBtn>
+                    <VBtn color="success" text @click="confirmPayment" :loading="processingPayment">Yes</VBtn>
+                </VCardActions>
+            </VCard>
+        </VDialog>
     </BackendLayout>
 </template>
 
@@ -160,6 +211,8 @@
     import Panel from '@/Layouts/Shared/Panel.vue'
     import Paystack from '@/Components/Paystack.vue';
     import moment from 'moment';
+    import { ref } from 'vue';
+    import axios from 'axios';
 
     const user = usePage().props.auth.user;
     const invoice = usePage().props.invoice;
@@ -170,11 +223,48 @@
     const paymentCustomerDetail = invoice.paystack_response != null ? paystackPaymentDetails.customer : null;
     const isNewlyGeneratedInvoice = usePage().props.newlyGeneratedInvoice;
     const offlinePaymentData = invoice.offline_payment_data != null ? JSON.parse(invoice.offline_payment_data) : null;
+    const customerPaymentProof = invoice.customer_payment_proof != null ? JSON.parse(invoice.customer_payment_proof) : null;
 
     const handlePaymentCompletion = data => {
         setTimeout(()=>{
             router.visit(route('customer.receipt', [invoice.id]))
         }, 1000);
+    }
+
+    const showAcknowledgeModal = ref(false);
+    const processingPayment = ref(false);
+
+    const confirmPayment = async () => {
+        processingPayment.value = true;
+        
+        const payload = {
+            orderId: invoice.order_id,
+            status: 'Paid',
+            paymentMethod: customerPaymentProof.paymentMethod,
+            amountPaid: customerPaymentProof.amountPaid,
+            customerBank: customerPaymentProof.customerBank,
+            customerAccountName: customerPaymentProof.customerAccountName,
+            customerAccountNumber: customerPaymentProof.customerAccountNumber,
+            organizationBank: customerPaymentProof.organizationBank,
+            organizationAccountName: customerPaymentProof.organizationAccountName,
+            organizationAccountNumber: customerPaymentProof.organizationAccountNumber,
+            whoReceivedCash: customerPaymentProof.whoReceivedCash,
+            paymentDate: customerPaymentProof.paymentDate,
+            transactionReference: customerPaymentProof.transactionReference,
+        };
+
+        try {
+            const response = await axios.post(route('order.update-payment'), payload);
+            if (response.data && response.data.status == "success") {
+                showAcknowledgeModal.value = false;
+                router.reload();
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to update payment status. Please try again.");
+        } finally {
+            processingPayment.value = false;
+        }
     }
 
 // Other data

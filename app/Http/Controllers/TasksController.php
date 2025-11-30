@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TaskClaimedEvent;
 use App\Helper\URLGenerator;
 use App\Messaging\TemplateManager;
 use App\Models\Branch;
@@ -65,7 +66,7 @@ class TasksController extends Controller
         $query->whereNull('user_id'); // Task has not been claimed
         $query->orderBy('id', 'desc');
         $unclaimedTasks = $query->get([
-            'id', 'name', 'description', 'created_at'                
+            'id', 'name', 'description', 'created_at', 'role_id', 'branch_id'                
         ]);
 
         return [
@@ -182,6 +183,12 @@ class TasksController extends Controller
             $task->task_status_id = TaskStatus::STATUS_TODO;
             $task->user_id = auth()->user()->id;
             $task->save();
+
+            // Load relationships for broadcasting
+            $task->load('user');
+
+            // Broadcast to all users viewing unclaimed tasks for this role/branch
+            broadcast(new TaskClaimedEvent($task))->toOthers();
 
             // Notify Controller that the task has been accepted. Show the user that accepted the task
             $message = sprintf('%s has accepted to %s', auth()->user()->name, $task->name);

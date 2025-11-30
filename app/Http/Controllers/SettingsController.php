@@ -7,6 +7,7 @@ use App\Models\EmailTemplate;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\SmsTemplate;
+use App\Models\WhatsappTemplate;
 use App\Report\ReportBuilder;
 use Cecula\MessagingApi\Messaging;
 use Inertia\Inertia;
@@ -19,18 +20,23 @@ class SettingsController extends Controller
     {
         $settings = Setting::first();
         $smsTemplates = SmsTemplate::getSmsTemplatesArray();
+        $whatsappTemplates = WhatsappTemplate::getWhatsappTemplatesArray();
         $emailTemplates = EmailTemplate::getEmailTemplatesArray();
         $reportStates = ReportBuilder::getReportStates();
+        $banks = \App\Models\Bank::pluck('name')->toArray();
         array_unshift($smsTemplates, 'None');
+        array_unshift($whatsappTemplates, 'None');
         array_unshift($emailTemplates, 'None');
         // array_unshift($reportStates, 'Received');
 
         return Inertia::render('Backend/Settings/Edit', [
             'settings' => $settings,
             'smsTemplates' => $smsTemplates,
+            'whatsappTemplates' => $whatsappTemplates,
             'emailTemplates' => $emailTemplates,
             'reportStates' => $reportStates,
             'roles' => Role::getRolesArray(),
+            'banks' => $banks,
         ]);
     }
 
@@ -82,7 +88,10 @@ class SettingsController extends Controller
             'support_offline_payment' => 'nullable|boolean',
             'who_approves_offline_payment' => 'nullable|string|max:64',
             'order_file_delible_states' => 'nullable|array',
-            'auto_delete_order_files_after' => 'nullable|string|max:32'
+            'auto_delete_order_files_after' => 'nullable|string|max:32',
+            'customer_creation_whatsapp_template' => 'nullable|string|max:64',
+            'bank_name' => 'nullable|string|max:128',
+            'account_number' => 'nullable|string|max:20',
         ];
 
         $request->validate($rules);
@@ -134,6 +143,9 @@ class SettingsController extends Controller
         $settings->who_approves_offline_payment = $request->who_approves_offline_payment;
         $settings->order_file_delible_states = json_encode($request->order_file_delible_states);
         $settings->auto_delete_order_files_after = $request->auto_delete_order_files_after;
+        $settings->customer_creation_whatsapp_template = $request->customer_creation_whatsapp_template == 'None' ? null : $request->customer_creation_whatsapp_template;
+        $settings->bank_name = $request->bank_name;
+        $settings->account_number = $request->account_number;
         $settings->save();
 
         return redirect(route('settings'));

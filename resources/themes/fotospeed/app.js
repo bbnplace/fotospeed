@@ -20,18 +20,14 @@ import "@/../../public/assets/css/style.css"
 import "@/../../public/assets/js/jquery-3.7.1.min.js"
 import "@/../../public/assets/js/viewport.jquery.js"
 import "@/../../public/assets/js/bootstrap.bundle.min.js"
-// import "@/../../public/assets/js/gsap/gsap.js"
-// import "@/../../public/assets/js/gsap/gsap-scroll-to-plugin.js"
-// import "@/../../public/assets/js/gsap/gsap-scroll-smoother.js"
-// import "@/../../public/assets/js/gsap/gsap-scroll-trigger.js"
-// import "@/../../public/assets/js/gsap/gsap-split-text.js"
-// import "@/../../public/assets/js/jquery.nice-select.min.js"
+
+import "@/../../public/assets/js/jquery.nice-select.min.js"
 import "@/../../public/assets/js/jquery.waypoints.js"
 import "@/../../public/assets/js/jquery.counterup.min.js"
 import "@/../../public/assets/js/swiper-bundle.min.js"
 import "@/../../public/assets/js/jquery.meanmenu.min.js"
 import "@/../../public/assets/js/jquery.magnific-popup.min.js"
-// import "@/../../public/assets/js/wow.min.js"
+// WOW.js is loaded via script tag in app.blade.php to ensure proper global initialization
 import "@/../../public/assets/js/main.js"
 
 
@@ -50,7 +46,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const vuetify = createVuetify({
     components,
     directives,
-  })
+})
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

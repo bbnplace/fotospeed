@@ -192,6 +192,18 @@
                                     class="modern-input"
                                 ></VTextField>
                             </VCol>
+                            <VCol cols="12" v-if="masterForm.newCustomer" class="mt-2">
+                                <VTextField
+                                    v-model="masterForm.password"
+                                    label="Password"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    :hide-details="masterForm.errors.password == undefined"
+                                    :error-messages="masterForm.errors.password"
+                                    prepend-inner-icon="mdi-lock"
+                                    class="modern-input"
+                                ></VTextField>
+                            </VCol>
                         </VRow>
 
                         <VRow :class="$page.props.auth.user.role != 'Customer' ? 'mt-2' : ''">
@@ -322,6 +334,7 @@ const masterForm = useForm({
     newCustomer: false,
     customerName: null,
     customerEmail: null,
+    password: null,
 });
 
 const handleData = data => {

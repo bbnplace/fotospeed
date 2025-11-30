@@ -106,15 +106,17 @@
                         <h4>To</h4>
                         <v-row>
                             <v-col cols="12">
-                                <v-text-field
+                                <v-combobox
                                     v-model="organizationBank"
                                     label="Organization's Bank"
-                                    type="text"
+                                    :items="banks"
+                                    item-title="name"
+                                    item-value="name"
                                     variant="outlined"
                                     density="compact"
                                     :hide-details="paymentErrors.errors.organizationBank == undefined"
                                     :error-messages="paymentErrors.errors.organizationBank"
-                                ></v-text-field>
+                                ></v-combobox>
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field
@@ -187,12 +189,20 @@ import { usePage } from "@inertiajs/vue3";
 import axios from 'axios';
 
 const emit = defineEmits(['statusUpdated']);
+const props = defineProps({
+    initialData: {
+        type: Object,
+        default: () => ({})
+    }
+});
 
 const order = usePage().props.order;
 const selectedPaymentMethod = ref("");
 const selectedPaymentStatus = ref("");
 const paymentMethods = usePage().props.paymentMethods;
 const paymentStatuses = usePage().props.paymentStatuses;
+const banks = usePage().props.banks || [];
+const settings = usePage().props.settings || {};
 const paymentDate = ref(new Date());
 const todayDate = ref(new Date());
 const showPaymentConfirmationOverlay = ref(false);
@@ -200,15 +210,15 @@ const paymentUpdateError = ref("");
 const paymentUpdateSuccess = ref("");
 const updatingPaymentStatus = ref(false);
 
-const customerBank = ref("");
-const customerAccountNumber = ref("");
-const customerAccountName = ref("");
-const organizationBank = ref("");
-const organizationAccountNumber = ref("");
-const organizationAccountName = ref("");
-const whoReceivedCash = ref("");
-const amountPaid = ref(order.total_cost);
-const transactionReference = ref("");
+const customerBank = ref(props.initialData?.customerBank || props.initialData?.customer_bank || "");
+const customerAccountNumber = ref(props.initialData?.customerAccountNumber || props.initialData?.account_number || "");
+const customerAccountName = ref(props.initialData?.customerAccountName || props.initialData?.depositor_name || "");
+const organizationBank = ref(props.initialData?.organizationBank || settings?.bank_name || "");
+const organizationAccountNumber = ref(props.initialData?.organizationAccountNumber || settings?.account_number || "");
+const organizationAccountName = ref(props.initialData?.organizationAccountName || settings?.org_name || "");
+const whoReceivedCash = ref(props.initialData?.whoReceivedCash || "");
+const amountPaid = ref(props.initialData?.amountPaid || props.initialData?.amount || order.total_cost);
+const transactionReference = ref(props.initialData?.transactionReference || props.initialData?.transaction_reference || "");
 const paymentErrors = ref({
     errors: {}
 });

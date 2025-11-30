@@ -40,5 +40,7 @@ class Setting extends Model
         'wa_phone_id',
         'wa_access_token',
         'invoice_no_src',
+        'bank_name',
+        'account_number',
     ];
 }

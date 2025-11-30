@@ -28,6 +28,7 @@ class FileUploadsController extends Controller
         $file = $request->file('files');
         // If the file is an image, generate a thumbnail
         $thumbnailPath = null;
+        $previewImgPath = null;
 
         $fileDirectory = "";
         switch (true) {
@@ -50,10 +51,12 @@ class FileUploadsController extends Controller
             case strstr($file->getMimeType(), 'pdf'):
                 $path = $file->store("/pdfs");
                 $thumbnailPath = sprintf('%s/%s', env('APP_URL'), 'images/pdf-icon.png');
+                $previewImgPath = $thumbnailPath;
                 break;
             case strstr($file->getMimeType(), 'zip'):
                 $path = $file->store("/zips");
                 $thumbnailPath = sprintf('%s/%s', env('APP_URL'), 'images/zip-icon.png');
+                $previewImgPath = $thumbnailPath;
                 break;
         }
         

@@ -482,6 +482,20 @@
                                     ></VSelect>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VAutocomplete
+                                        id="customer_creation_whatsapp_template"
+                                        v-model="form.customer_creation_whatsapp_template"
+                                        label="Customer Creation WhatsApp Message"
+                                        :items="whatsappTemplates"
+                                        variant="outlined"
+                                        :hide-details="form.errors.customer_creation_whatsapp_template == undefined"
+                                        :error-messages="form.errors.customer_creation_whatsapp_template"
+                                        density="compact"
+                                    ></VAutocomplete>
+                                </VCol>
+                            </VRow>
                         </VCard>
                     </v-window-item>
                     <v-window-item value="payment">
@@ -563,6 +577,33 @@
                                         :error-messages="form.errors.who_approves_offline_payment"
                                         density="compact"
                                     ></VAutocomplete>
+                                </VCol>
+                            </VRow>
+                            <h4 class="my-3">Bank Account Details</h4>
+                            <VRow>
+                                <VCol cols="12" sm="6">
+                                    <VCombobox
+                                        id="bank_name"
+                                        v-model="form.bank_name"
+                                        label="Bank Name"
+                                        :items="banks"
+                                        variant="outlined"
+                                        :hide-details="form.errors.bank_name == undefined"
+                                        :error-messages="form.errors.bank_name"
+                                        density="compact"
+                                    ></VCombobox>
+                                </VCol>
+                                <VCol cols="12" sm="6">
+                                    <VTextField
+                                        id="account_number"
+                                        v-model="form.account_number"
+                                        label="Account Number"
+                                        variant="outlined"
+                                        :hide-details="form.errors.account_number == undefined"
+                                        :error-messages="form.errors.account_number"
+                                        density="compact"
+                                        type="text"
+                                    ></VTextField>
                                 </VCol>
                             </VRow>
                             <h4 class="my-3">Loyalty Reward</h4>
@@ -647,9 +688,11 @@ const tab = ref(null);
 const props = usePage().props;
 const settings = props.settings;
 const smsTemplates = props.smsTemplates;
+const whatsappTemplates = props.whatsappTemplates;
 const emailTemplates = props.emailTemplates;
 const reportStates = props.reportStates;
 const roles = props.roles;
+const banks = props.banks;
 let saveStatus = ref(null);
 const reportStatusSearch = ref(null);
 const reportViewersSearch = ref(null);
@@ -769,6 +812,7 @@ const form = useForm({
     invoice_no_src: settings.invoice_no_src,
     payment_sms_temp: settings.payment_sms_temp ?? 'None',
     payment_email_temp: settings.payment_email_temp ?? 'None',
+    customer_creation_whatsapp_template: settings.customer_creation_whatsapp_template ?? 'None',
     reportables: normalizeReportables(settings.reportables),
     reportViewers: JSON.parse(settings.reports_permission),
     processing: false,
@@ -776,6 +820,8 @@ const form = useForm({
     who_approves_offline_payment: settings.who_approves_offline_payment,
     order_file_delible_states: settings.order_file_delible_states ? JSON.parse(settings.order_file_delible_states) : ['Delivered'],
     auto_delete_order_files_after: settings.auto_delete_order_files_after ?? 'Two Weeks',
+    bank_name: settings.bank_name,
+    account_number: settings.account_number,
 });
 
 const loadingIdentities = ref(false);

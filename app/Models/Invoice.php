@@ -15,6 +15,7 @@ class Invoice extends Model
         'invoice_status_id',
         'description',
         'track_id',
+        'customer_payment_proof',
     ];
 
     public function order()

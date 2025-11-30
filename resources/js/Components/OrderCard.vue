@@ -1069,7 +1069,7 @@ const printOrderCard = () => {
                                 <div class="info-value">${orderDate}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">Target Delivery</div>
+                                <div class="info-label">${orderStatus.value === 'Delivered' || orderStatus.value === 'Fulfilled' ? 'Delivery Date' : 'Estimated Delivery Date'}</div>
                                 <div class="info-value">${targetDeliveryDate}</div>
                             </div>
                             <div class="info-item full-width">
@@ -1090,7 +1090,7 @@ const printOrderCard = () => {
                 </div>
                 
                 <div class="footer">
-                    <div class="footer-text">This is an official order card from Fotoplanet Professional Photography Services</div>
+                    <div class="footer-text">This is an official order card from ${siteName}</div>
                     <div class="print-date">Printed on ${moment().format('MMMM DD, YYYY [at] h:mm A')}</div>
                 </div>
             </div>

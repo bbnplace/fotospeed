@@ -97,7 +97,7 @@ class CustomerInvoicesController extends Controller
         $paystack= [
             'key'=> $settings->paystack_public_key,
             'reference' => $invoice->track_id, // Get the reference for the invoice
-            'email' => auth()->user()->email,
+            'email' => $invoice->user->email,
             'callback' => '',
             'close' => true,
             'amount' => $invoice->order->total_cost,
@@ -114,7 +114,12 @@ class CustomerInvoicesController extends Controller
                 'email' => $settings->org_email,
                 'phone' => $settings->org_phone,
                 'url' => $settings->org_url,
-            ]
+            ],
+            'bank_account' => [
+                'bank_name' => $settings->bank_name,
+                'account_number' => $settings->account_number,
+            ],
+            'banks' => \App\Models\Bank::pluck('name')->toArray(),
         ];
     }
 
@@ -235,5 +240,87 @@ class CustomerInvoicesController extends Controller
     public function receipt(Request $request, $id)
     {
         return Inertia::render('Client/Invoice/Receipt',$this->getInvoice($id));
+    }
+
+    public function submitBankPayment(Request $request, $id)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|in:Transfer,USSD,Bank Deposit',
+            'customer_bank' => 'required|string|max:128',
+            'depositor_name' => 'required|string|max:128',
+            'transaction_reference' => 'nullable|string|max:128',
+            'payment_date' => 'required|date|before_or_equal:today',
+        ]);
+
+        // Check if invoice exists and belongs to user
+        $invoice = Invoice::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        if ($invoice->invoiceStatus->name != 'Unpaid') {
+            return response()->json(['message' => 'Invoice is already paid or cancelled.'], 403);
+        }
+
+        $settings = Setting::first();
+
+        // Prepare payment data
+        $paymentData = [
+            'amountPaid' => $validated['amount'],
+            'paymentMethod' => 'Bank Transfer', // Normalized for admin view check
+            'subMethod' => $validated['payment_method'], // Store specific method (Transfer, USSD, etc)
+            'customerBank' => $validated['customer_bank'],
+            'customerAccountName' => $validated['depositor_name'],
+            'customerAccountNumber' => null, // Not collected
+            'transactionReference' => $validated['transaction_reference'],
+            'paymentDate' => $validated['payment_date'],
+            'organizationBank' => $settings->bank_name,
+            'organizationAccountNumber' => $settings->account_number,
+            'organizationAccountName' => $settings->org_name,
+            'status' => 'Pending Verification',
+            'submitted_at' => now()->toDateTimeString(),
+            'submitted_by' => auth()->user()->name,
+        ];
+
+        // Update invoice
+        $invoice->payment_method = 'Bank Transfer';
+        $invoice->customer_payment_proof = json_encode($paymentData);
+        $invoice->save();
+
+        // Send notification to approvers
+        $settings = Setting::first();
+        $order = $invoice->order;
+        $approvalRoleName = $settings->who_approves_offline_payment ?? 'Administrator';
+        $approvalRole = Role::where('name', $approvalRoleName)->first();
+        
+        if (!empty($approvalRole)) {
+            $eligibleApprovers = User::where('role_id', $approvalRole->id)
+                ->where('branch_id', $order->branch_id)
+                ->get();
+            
+            if (!empty($eligibleApprovers)) {
+                foreach ($eligibleApprovers as $approver) {
+                    $approver->notify(new GenericNotification([
+                        'message' => sprintf(
+                            '%s submitted bank transfer payment for Invoice #%s. Amount: ₦%s, Bank: %s, Reference: %s. View Details.',
+                            $invoice->user->name,
+                            $invoice->id,
+                            number_format($validated['amount'], 2),
+                            $validated['customer_bank'],
+                            $validated['transaction_reference']
+                        ),
+                        'url' => route('invoice', $invoice->id),
+                        'user' => $approver,
+                        'type' => ['broadcast', 'database']
+                    ]));
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Payment submitted successfully! Your payment is pending verification.'
+        ]);
     }
 }

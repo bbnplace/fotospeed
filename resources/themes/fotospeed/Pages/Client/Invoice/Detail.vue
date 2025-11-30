@@ -58,7 +58,145 @@
             </VRow>
             <VRow v-if="invoice.invoice_status.name == 'Unpaid'">
                 <VCol class="text-right">
-                    <Paystack :data="paystackData" @paymentCompleted="handlePaymentCompletion" />
+                    <div v-if="emailMissing">
+                        <VAlert type="warning" class="mb-4 text-left">
+                            Please update your email address to proceed with payment.
+                        </VAlert>
+                        <VForm @submit.prevent="updateEmail">
+                            <VRow>
+                                <VCol cols="12" sm="8" offset-sm="4">
+                                    <VTextField
+                                        v-model="emailUpdateForm.email"
+                                        label="Email Address"
+                                        type="email"
+                                        :error-messages="emailUpdateForm.errors.email"
+                                        required
+                                    ></VTextField>
+                                </VCol>
+                                <VCol cols="12" sm="8" offset-sm="4" class="text-right">
+                                    <VBtn
+                                        color="primary"
+                                        type="submit"
+                                        :loading="emailUpdateForm.processing"
+                                    >Save Email & Continue</VBtn>
+                                </VCol>
+                            </VRow>
+                        </VForm>
+                    </div>
+                    <div v-else>
+                        <Paystack :data="paystackData" @paymentCompleted="handlePaymentCompletion" />
+                        
+                        <!-- Bank Transfer Payment Section -->
+                        <div v-if="bank_account.bank_name && bank_account.account_number" class="mt-6">
+                            <VDivider class="my-4"></VDivider>
+                            <h3 class="mb-3">Or Pay via Bank Transfer</h3>
+                            <VCard class="mb-4">
+                                <VCardText>
+                                    <h4 class="mb-2">Bank Account Details</h4>
+                                    <p><strong>Bank Name:</strong> {{ bank_account.bank_name }}</p>
+                                    <p><strong>Account Number:</strong> {{ bank_account.account_number }}</p>
+                                    <p><strong>Account Name:</strong> {{ company.name }}</p>
+                                </VCardText>
+                            </VCard>
+                            
+                            <VBtn
+                                v-if="!showBankPaymentForm"
+                                color="success"
+                                @click="showBankPaymentForm = true"
+                                class="mb-4"
+                            >I have paid</VBtn>
+                            
+                            <VAlert v-if="bankPaymentError" type="error" class="mb-4" closable @click:close="bankPaymentError = ''">{{ bankPaymentError }}</VAlert>
+                            <VAlert v-if="bankPaymentSuccess" type="success" class="mb-4">{{ bankPaymentSuccess }}</VAlert>
+
+                            <VCard v-if="showBankPaymentForm">
+                                <VCardTitle>Payment Confirmation</VCardTitle>
+                                <VCardText>
+                                    <VForm @submit.prevent="submitBankPayment">
+                                        <VRow>
+                                            <VCol cols="12" sm="6">
+                                                <VTextField
+                                                    v-model="bankPaymentForm.amount"
+                                                    label="Amount Paid"
+                                                    prefix="₦"
+                                                    type="number"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.amount"
+                                                    required
+                                                ></VTextField>
+                                            </VCol>
+                                            <VCol cols="12" sm="6">
+                                                <VSelect
+                                                    v-model="bankPaymentForm.payment_method"
+                                                    label="Payment Method"
+                                                    :items="['Transfer', 'USSD', 'Bank Deposit']"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.payment_method"
+                                                    required
+                                                ></VSelect>
+                                            </VCol>
+                                            <VCol cols="12" sm="6">
+                                                <VCombobox
+                                                    v-model="bankPaymentForm.customer_bank"
+                                                    label="Your Bank"
+                                                    :items="banks"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.customer_bank"
+                                                    required
+                                                ></VCombobox>
+                                            </VCol>
+                                            <VCol cols="12" sm="6">
+                                                <VTextField
+                                                    v-model="bankPaymentForm.depositor_name"
+                                                    label="Depositor/Account Name"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.depositor_name"
+                                                    required
+                                                ></VTextField>
+                                            </VCol>
+                                            <VCol cols="12" sm="6">
+                                                <VTextField
+                                                    v-model="bankPaymentForm.transaction_reference"
+                                                    label="Transaction Reference"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.transaction_reference"
+                                                ></VTextField>
+                                            </VCol>
+                                            <VCol cols="12" sm="6">
+                                                <VTextField
+                                                    v-model="bankPaymentForm.payment_date"
+                                                    label="Payment Date"
+                                                    type="date"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.payment_date"
+                                                    :max="todayDate"
+                                                    required
+                                                ></VTextField>
+                                            </VCol>
+                                            <VCol cols="12" class="text-right">
+                                                <VBtn
+                                                    type="submit"
+                                                    color="primary"
+                                                    :loading="submittingBankPayment"
+                                                    :disabled="submittingBankPayment"
+                                                >Submit Payment</VBtn>
+                                                <VBtn
+                                                    @click="showBankPaymentForm = false"
+                                                    class="ml-2"
+                                                >Cancel</VBtn>
+                                            </VCol>
+                                        </VRow>
+                                    </VForm>
+                                </VCardText>
+                            </VCard>
+                        </div>
+                    </div>
                 </VCol>
             </VRow>
         </div>
@@ -66,15 +204,18 @@
 </template>
 
 <script setup>
-    import { usePage, Head, router } from "@inertiajs/vue3";
+    import { usePage, Head, router, useForm } from "@inertiajs/vue3";
     import DefaultLayout from '../../../Layouts/DefaultLayout.vue';
     import { ref, computed } from 'vue';
     import Paystack from '@/Components/Paystack.vue';
     import moment from 'moment';
+    import axios from 'axios';
 
     const invoice = usePage().props.invoice;
     const paystackData = usePage().props.paystack;
     const invoiceRefSrc = usePage().props.invoice_no_src;
+    const bank_account = usePage().props.bank_account;
+    const banks = usePage().props.banks;
 
     const handlePaymentCompletion = data => {
         setTimeout(()=>{
@@ -85,10 +226,42 @@
 // Other data
     const company = usePage().props.company;
 
-    const client = {
-        name: invoice.user.name,
-        address: invoice.order.delivery_address,
-        email: invoice.user.email
+    const client = computed(() => {
+        const inv = usePage().props.invoice;
+        return {
+            name: inv.user.name,
+            address: inv.order.delivery_address,
+            email: inv.user.email
+        }
+    });
+
+    const emailMissing = computed(() => !client.value.email || client.value.email == null || client.value.email == '');
+
+    const emailUpdateForm = useForm({
+        email: ''
+    });
+
+    const updateEmail = async () => {
+        emailUpdateForm.clearErrors();
+        try {
+            const response = await axios.put(route('customer.update-email'), {
+                email: emailUpdateForm.email
+            });
+            
+            if (response.data.status === 'success') {
+                // Reload the page to refresh data and show payment button
+                router.reload({ only: ['invoice', 'paystack'] });
+                // Also update paystack data email
+                paystackData.email = response.data.user.email;
+            }
+        } catch (error) {
+             if (error.response && error.response.status === 422) {
+                emailUpdateForm.setError(error.response.data.errors);
+            } else {
+                // Handle generic error
+                console.error(error);
+            }
+        }
     };
 
     const invoiceNumber = invoiceRefSrc == "System Generated" ? invoice.id : invoice.order.order_number;
@@ -99,6 +272,74 @@
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     });
+
+    // Bank Payment Form
+    const showBankPaymentForm = ref(false);
+    const submittingBankPayment = ref(false);
+    const bankPaymentSuccess = ref('');
+    const bankPaymentError = ref('');
+    const todayDate = new Date().toISOString().split('T')[0];
+    
+    const bankPaymentForm = ref({
+        amount: invoice.order.total_cost,
+        payment_method: '',
+        customer_bank: '',
+        depositor_name: '',
+        transaction_reference: '',
+        payment_date: todayDate,
+    });
+
+    const bankPaymentFormErrors = ref({
+        amount: '',
+        payment_method: '',
+        customer_bank: '',
+        depositor_name: '',
+        transaction_reference: '',
+        payment_date: '',
+    });
+
+    const submitBankPayment = async () => {
+        submittingBankPayment.value = true;
+        bankPaymentError.value = '';
+        bankPaymentSuccess.value = '';
+        
+        // Reset errors
+        Object.keys(bankPaymentFormErrors.value).forEach(key => {
+            bankPaymentFormErrors.value[key] = '';
+        });
+
+        try {
+            const response = await axios.post(route('customer.invoice.submit-bank-payment', invoice.id), bankPaymentForm.value);
+            
+            if (response.data.status === 'success') {
+                bankPaymentSuccess.value = response.data.message;
+                showBankPaymentForm.value = false;
+                // Reset form
+                bankPaymentForm.value = {
+                    amount: invoice.order.total_cost,
+                    payment_method: '',
+                    customer_bank: '',
+                    depositor_name: '',
+                    transaction_reference: '',
+                    payment_date: todayDate,
+                };
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 422) {
+                const errors = error.response.data.errors;
+                Object.keys(errors).forEach(key => {
+                    if (bankPaymentFormErrors.value.hasOwnProperty(key)) {
+                        bankPaymentFormErrors.value[key] = errors[key][0];
+                    }
+                });
+                bankPaymentError.value = error.response.data.message || 'Please correct the errors in the form.';
+            } else {
+                bankPaymentError.value = 'Something went wrong. Please try again later.';
+            }
+        }
+
+        submittingBankPayment.value = false;
+    };
 </script>
 
 <style scoped>

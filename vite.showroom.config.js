@@ -19,4 +19,12 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        commonjsOptions: {
+            transformMixedEsModules: true,
+        },
+    },
+    optimizeDeps: {
+        include: ['jquery'],
+    },
 });

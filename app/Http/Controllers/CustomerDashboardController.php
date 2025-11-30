@@ -79,4 +79,20 @@ class CustomerDashboardController extends Controller
             'totalRecords' => $ordersCount,
         ];
     }
+    public function updateEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . auth()->id(),
+        ]);
+
+        $user = auth()->user();
+        $user->email = $request->email;
+        $user->save();
+
+        return [
+            'status' => 'success',
+            'message' => 'Email updated successfully',
+            'user' => $user
+        ];
+    }
 }

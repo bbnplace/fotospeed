@@ -12,6 +12,7 @@ class TemplateManager
     private $team;
     private $autoSignInUrl;
     private $product;
+    private $password;
 
     public function __construct(array $config)
     {
@@ -20,6 +21,7 @@ class TemplateManager
         $this->nextProcess = $config['nextProcess'] ?? null;
         $this->team = $config['team'] ?? null;
         $this->autoSignInUrl = $config['url'] ?? null;
+        $this->password = $config['password'] ?? null;
     }
 
     private function matchTemplateKeyWithValues()
@@ -29,6 +31,10 @@ class TemplateManager
             $matches['customer_email'] = $this->customer->email;
             $matches['customer_name'] = $this->customer->name;
             $matches['customer_mobile'] = $this->customer->mobile;
+        }
+
+        if (!empty($this->password)) {
+            $matches['password'] = $this->password;
         }
 
         if (!empty($this->order)) {

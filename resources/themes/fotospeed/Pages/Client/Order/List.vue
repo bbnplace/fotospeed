@@ -37,6 +37,7 @@ const dataResources = {
         // delete: "client.orders.delete",
         detail: "client.order.view"
     },
+    addLabel: "New Order",
     headers: [
         {
             title: "Order#",

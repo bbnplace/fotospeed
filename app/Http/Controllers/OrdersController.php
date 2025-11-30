@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use App\Messaging\WhatsAppClient;
 
 class OrdersController extends Controller
@@ -165,6 +166,7 @@ class OrdersController extends Controller
             $this->rules['customerMobile'] = 'required|string|min:7|max:14|unique:users,mobile';
             $this->rules['customerName'] = 'required|string|min:5|max:64';
             $this->rules['customerEmail'] = 'nullable|max:124|email:rfc,dns|unique:users,email';
+            $this->rules['password'] = 'required|string|min:6|max:64';
         }
         $request->validate($this->rules);
 
@@ -185,15 +187,26 @@ class OrdersController extends Controller
 
         // Register customer if this is a new customer
         if ($request->newCustomer) {
-            User::create([
+            $customer = User::create([
                 'role_id' => Role::CUSTOMER,
                 'name' => $request->customerName,
                 'email' => $request->customerEmail,
                 'mobile' => $request->customerMobile,
                 'state_id' => auth()->user()->state_id,
-                'password' => '',
+                'password' => Hash::make($request->password),
                 'branch_id' => auth()->user()->branch_id,
             ]);
+
+            // Send Welcome WhatsApp Message
+            $settings = Setting::first();
+            if (!empty($settings->customer_creation_whatsapp_template)) {
+                $waConfig = [
+                    'customer' => $customer,
+                    'password' => $request->password,
+                ];
+                $waClient = new WhatsAppClient($waConfig);
+                $waClient->sendCustomerMessage($settings->customer_creation_whatsapp_template);
+            }
         }
 
 
@@ -432,6 +445,8 @@ class OrdersController extends Controller
                 , OrderStatus::DELIVERY_FAILED, OrderStatus::DELIVERED, OrderStatus::SHIPPING, OrderStatus::IN_TRANSIT,
             ]),
             'canPrintOrderCard' => $canGenerateInvoice && !empty($order->order_number) && !empty($order->total_cost),
+            'banks' => \App\Models\Bank::all(),
+            'settings' => $settings,
         ];
     }
 
@@ -444,14 +459,14 @@ class OrdersController extends Controller
             'status' => ['required', Rule::in($paymentStatuses)],
             'paymentMethod' => ['required', Rule::in($paymentMethods)],
             'amountPaid' => 'nullable|required_if:status,Paid|integer|digits_between:1,9',
-            'transactionReference' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
-            'customerAccountName' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
-            'customerAccountNumber' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
-            'customerBank' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
+            'transactionReference' => 'nullable|string|max:64',
+            'customerAccountName' => 'nullable|string|max:64',
+            'customerAccountNumber' => 'nullable|string|max:64',
+            'customerBank' => 'nullable|string|max:64',
             'paymentDate' => 'required|string|max:64',
             'organizationBank' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
             'organizationAccountName' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
-            'organizationAccountNumber' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:16',
+            'organizationAccountNumber' => 'nullable|required_if:paymentMethod,Bank Transfer|string|max:64',
             'whoReceivedCash' => 'nullable|required_if:paymentMethod,Cash|string|max:300',
         ]);
 

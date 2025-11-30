@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewCommunicationMessage;
 use App\Models\OrderConversation;
 use Illuminate\Http\Request;
 
@@ -28,10 +29,15 @@ class CommunicationLogController extends Controller
             "message"=> $request->message,
         ]);
 
-        // TODO: Broadcast Notification to all the other users viewing this order.
+        // Load the user relationship for broadcasting
+        $orderConversation->load('user');
+
+        // Broadcast the new message to all users viewing this order
+        broadcast(new NewCommunicationMessage($orderConversation))->toOthers();
 
         return [
-            'status' => 'success'
+            'status' => 'success',
+            'data' => $orderConversation
         ];
     }
 }

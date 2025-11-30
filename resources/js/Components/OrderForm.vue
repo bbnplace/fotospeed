@@ -9,12 +9,14 @@
                 >
                     <VCard class="p-4" width="350">
                         <p class="text-right">Page# {{ pageData.pageNumber }}</p>
-                        <VImg
-                            :src="props.orderImage.imageThumbnail"
-                            cover
-                            class="d-flex"
-                            style="{borderRadius: 5}"
-                        ></VImg>
+                        <template v-if="!isPdf">
+                            <VImg
+                                :src="props.orderImage.imageThumbnail"
+                                cover
+                                class="d-flex"
+                                :style="{borderRadius: '5px'}"
+                            ></VImg>
+                        </template>
                         <h4 class="my-2">{{ props.orderImage.fileInfo.name }}</h4>
                         <p><b>Note</b><br /> {{ pageData.note }}</p>
                         <VCol cols="12">
@@ -46,7 +48,7 @@
                     :height="175"
                     cover
                     class="d-flex cursor-pointer"
-                    style="{borderRadius: 5}"
+                    :style="{borderRadius: '5px'}"
                 ></VImg>
             </div>
             <div>
@@ -79,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue';
+import { reactive, watch, ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
@@ -90,23 +92,24 @@ const downloadURL = route('file.fetch');
 const downloading = ref(false);
 
 interface OrderImage {
-    fileReadCompleted?: Boolean,
-    uploadedFile: String,
+    fileReadCompleted?: boolean,
+    uploadedFile: string,
     codes?: Object,
-    dataURL: String,
-    pageNumber: Number,
-    note: String,
-    id: String,
+    dataURL: string,
+    pageNumber: number,
+    note: string,
+    id: string,
     fileInfo: {
-        name: String,
-        size: String,
-        type: String
-    }
+        name: string,
+        size: string,
+        type: string
+    },
+    imageThumbnail?: string
 }
 
 const props = defineProps<{
     orderImage: OrderImage,
-    view: String
+    view: string
 }>()
 
 const emit = defineEmits(['pageDataUpdated', 'pageRemoved']);
@@ -148,4 +151,10 @@ const getFileExtension = (url) => {
     const extension = url.split('.').pop().split(/\#|\?/)[0];
     return extension;
 }
+
+const isPdf = computed(() => {
+    const ext = getFileExtension(props.orderImage.uploadedFile);
+    return ext.toLowerCase() === 'pdf' || props.orderImage.fileInfo.type === 'application/pdf';
+});
+
 </script>

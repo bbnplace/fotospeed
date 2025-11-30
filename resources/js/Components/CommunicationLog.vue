@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
 import { usePage } from "@inertiajs/vue3";
 import Panel from '@/Layouts/Shared/Panel.vue';
 import moment from 'moment';
@@ -50,6 +50,7 @@ const logMessage = reactive({
 });
 
 const orderLog = ref([]);
+let echoChannel = null;
 
 const sendMessage = async () => {
     const payload = {
@@ -66,9 +67,11 @@ const sendMessage = async () => {
     const data = response.data;
     if (data.status !== undefined) {
         if (data.status == 'success') {
-            // Add the message to the thread and refresh.
+            // Add the message to the thread immediately for the sender
             logMessage.newMessage = "";
-            loadOrderLog();
+            if (data.data) {
+                orderLog.value.push(data.data);
+            }
         }
     }
 }
@@ -79,8 +82,60 @@ const loadOrderLog = async () => {
     orderLog.value = response.data;
 }
 
+const showNotification = (message, userName) => {
+    // Simple browser notification using alert-style notification
+    // You can replace this with a toast library if preferred
+    if (Notification.permission === "granted") {
+        new Notification(`New message from ${userName}`, {
+            body: message,
+            icon: '/favicon.ico'
+        });
+    } else {
+        // Fallback to console log
+        console.log(`New message from ${userName}: ${message}`);
+    }
+}
+
+const subscribeToChannel = () => {
+    // Subscribe to the private channel for this specific order
+    echoChannel = window.Echo.private(`order-chat.${order.id}`);
+    
+    // Listen for new messages
+    echoChannel.listen('.new-message', (event) => {
+        console.log('New message received:', event);
+        
+        // Add the new message to the orderLog
+        orderLog.value.push({
+            id: event.id,
+            message: event.message,
+            created_at: event.created_at,
+            user: event.user
+        });
+        
+        // Show notification
+        showNotification(event.message, event.user.name);
+    });
+}
+
+const unsubscribeFromChannel = () => {
+    if (echoChannel) {
+        window.Echo.leave(`order-chat.${order.id}`);
+        echoChannel = null;
+    }
+}
+
 onMounted(() => {
     loadOrderLog();
+    subscribeToChannel();
+    
+    // Request notification permission
+    if (Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+})
+
+onBeforeUnmount(() => {
+    unsubscribeFromChannel();
 })
 </script>
 

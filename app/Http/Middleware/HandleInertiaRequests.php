@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
                 'name' => $userData->name,
                 'branch_id' => $userData->branch_id,
                 'role' => $role->name,
+                'role_id' => $userData->role_id, // For Pusher channel subscriptions
                 'role_ref' => $userData->role_id,
                 'isAdmin' => $userData->isAdmin(),
                 'isClient' => $userData->isCustomer(),

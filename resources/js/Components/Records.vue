@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-row-reverse mb-2" v-if="props.endpoint.add">
-        <Link :href="route(props.endpoint.add)" class="btn btn-primary">Add {{ props.name.singular }}</Link>
+        <Link :href="route(props.endpoint.add)" class="btn btn-primary fw-bold">{{ props.addLabel || `Add ${props.name.singular}` }}</Link>
     </div>
 
     <div class="mb-2">

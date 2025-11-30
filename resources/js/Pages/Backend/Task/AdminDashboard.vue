@@ -282,6 +282,9 @@ const loadNewTasks = async () => {
   unclaimedTasks.value.forEach(element => {
     showOverlay[element.id] = false;
   })
+  
+  // After loading tasks, subscribe to the appropriate channel
+  subscribeToTaskClaimChannel();
 }
 
 const pickTask = async (task, index) => {
@@ -301,6 +304,63 @@ const pickTask = async (task, index) => {
       unclaimedTasks.value.splice(index, 1);
       loadNewTasks();
       loadPickedTasks();
+    }
+  }
+}
+
+let taskClaimEchoChannel = null;
+
+const subscribeToTaskClaimChannel = () => {
+  // Unsubscribe from previous channel if it exists
+  if (taskClaimEchoChannel) {
+    Echo.leave(taskClaimEchoChannel);
+    taskClaimEchoChannel = null;
+  }
+  
+  // Only subscribe if there are unclaimed tasks
+  if (unclaimedTasks.value.length > 0) {
+    // Get role_id and branch_id from the first unclaimed task
+    // All unclaimed tasks for an order should have the same role/branch
+    const firstTask = unclaimedTasks.value[0];
+    
+    if (firstTask.role_id && firstTask.branch_id) {
+      const channelName = `task-claims.${firstTask.role_id}.${firstTask.branch_id}`;
+      console.log('Admin subscribing to task claim channel:', channelName);
+      console.log('Task role_id:', firstTask.role_id, 'Task branch_id:', firstTask.branch_id);
+      taskClaimEchoChannel = channelName;
+      
+      Echo.private(channelName)
+        .listen('.task-claimed', (event) => {
+          console.log('✅ Task claimed event received in AdminDashboard:', event);
+          
+          // Only process if the claimed task belongs to the current order
+          if (event.order_id === order.id) {
+            const taskIndex = unclaimedTasks.value.findIndex(task => task.id === event.task_id);
+            console.log('Task index in admin unclaimed list:', taskIndex);
+            
+            if (taskIndex !== -1) {
+              console.log('Removing task from admin unclaimed list:', unclaimedTasks.value[taskIndex].name);
+              unclaimedTasks.value.splice(taskIndex, 1);
+              
+              // Show browser notification
+              if (Notification.permission === "granted") {
+                new Notification(`Task Claimed`, {
+                  body: `"${event.task_name}" was claimed by ${event.claimed_by.name}`,
+                  icon: '/images/logo.png'
+                });
+              }
+              
+              // Resubscribe if there are still unclaimed tasks (might have different role/branch)
+              if (unclaimedTasks.value.length > 0) {
+                subscribeToTaskClaimChannel();
+              }
+            } else {
+              console.warn('Task not found in admin unclaimed list. Task ID:', event.task_id);
+            }
+          }
+        });
+    } else {
+      console.warn('Task missing role_id or branch_id:', firstTask);
     }
   }
 }
@@ -374,7 +434,12 @@ onMounted(async () => {
     }
   });
 
-  loadNewTasks();
+  // Request Notification Permission
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+
+  loadNewTasks(); // This will also trigger channel subscription
   loadPickedTasks();
 
   // checkNewTaskInterval = setInterval(function () {
@@ -385,7 +450,11 @@ onMounted(async () => {
 
 onUnmounted(() => {
   // clearInterval(checkNewTaskInterval);
+  if (taskClaimEchoChannel) {
+    Echo.leave(taskClaimEchoChannel);
+  }
 })
+
 
 </script>
 

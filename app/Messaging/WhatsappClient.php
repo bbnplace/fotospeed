@@ -16,12 +16,15 @@ class WhatsAppClient
     private $order;
     private $templateManager;
 
+    private $password;
+
     public function __construct(array $config)
     {
         $this->customer = $config['customer'] ?? null;
         $this->nextProcess = $config['nextProcess'] ?? null;
         $this->team = $config['team'] ?? null;
         $this->order = $config['order'] ?? null; 
+        $this->password = $config['password'] ?? null;
 
         // Load the template into the template manager
         $this->templateManager = new TemplateManager($config);

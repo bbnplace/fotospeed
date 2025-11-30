@@ -14,11 +14,11 @@
         @endphp
 
         @if($routePrefix == '/showroom')
-            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-iUJq-8zk.css">
-            {{--@vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"])--}}
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-D2vqdXq0.css">
+            <!-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) -->
         @else
-            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-10M8oEWk.css">
-            {{--@vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])--}}
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-ji99nVhz.css">
+            <!-- @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"]) -->
         @endif
 
         @routes
@@ -30,9 +30,16 @@
          <div id="mod"></div>
     </body>
     @if($routePrefix == '/showroom')
-        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BQbSImc_.js" type="module"></script>
+        <!-- Load WOW.js before the main bundle to ensure it's available globally -->
+        <script src="{{ env('APP_URL') }}/assets/js/wow.min.js"></script>
+        <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap.js"></script>
+        <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-to-plugin.js"></script>
+        <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-smoother.js"></script>
+        <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-trigger.js"></script>
+        <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-split-text.js"></script>
+        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-D6julI6s.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-Ce_FSW7Q.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app--C5ZPnVQ.js" type="module"></script>
     @endif
     
 </html>

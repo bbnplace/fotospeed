@@ -29,6 +29,27 @@ Broadcast::channel('new-order.{branchId}', function ($user, $branchId) {
     return (int) $user->branch_id === (int) $branchId && ($user->isReception() || $user->isManagement());
 });
 
+// Order Communication Log Channel - Allow authenticated users to listen to order-specific chat
+Broadcast::channel('order-chat.{orderId}', function ($user, $orderId) {
+    // Any authenticated user can listen to order chat
+    // You can add more specific authorization logic here if needed
+    return Auth::check();
+});
+
+// Task Claims Channel - Allow users to listen to task claims for their role and branch
+// Also allow admins to listen to any task claim channel
+Broadcast::channel('task-claims.{roleId}.{branchId}', function ($user, $roleId, $branchId) {
+    // Allow if user's role and branch match
+    $rolesMatch = (int) $user->role_id === (int) $roleId;
+    $branchesMatch = (int) $user->branch_id === (int) $branchId;
+    
+    // Or if user is an admin (admins can monitor any task claims)
+    $isAdmin = $user->isAdmin();
+    
+    return ($rolesMatch && $branchesMatch) || $isAdmin;
+});
+
+
 // Broadcast::channel('App.Models.User.{id}', function($user, $id){
 //     Log::info('User ID: %s, Pair User Id: %s', $user->id, $id);
 //     return (int) $user->id === (int) $id;

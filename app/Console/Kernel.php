@@ -34,6 +34,9 @@ class Kernel extends ConsoleKernel
         $schedule->call(function (){
             Year::initialize();
         })->yearly();
+
+        // Execute Space Management Policy daily at midnight
+        $schedule->command('space:manage')->dailyAt('00:00');
     }
 
     /**

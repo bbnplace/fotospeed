@@ -99,6 +99,7 @@ Route::prefix('showroom')->group(function () {
     Route::middleware(['auth'])->group(function () {
         // Logged-in user routes
         Route::get('/home', [LoggedInController::class, 'loggedIn'])->name('customer.logged-in');
+        Route::put('/client/update-email', [CustomerDashboardController::class, 'updateEmail'])->name('customer.update-email');
 
         Route::get('/client-order/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');
         Route::get('/client-order/my-orders', [CustomerOrdersController::class, 'index'])->name('customer.my-orders');
@@ -112,6 +113,7 @@ Route::prefix('showroom')->group(function () {
         Route::post('/client-invoice/invoices', [CustomerInvoicesController::class, 'records'])->name('customer.invoice-records');
         Route::get('/client-invoice/invoice/{id}', [CustomerInvoicesController::class, 'view'])->name('customer.invoice');
         Route::get('/client-invoice/receipt/{id}', [CustomerInvoicesController::class, 'receipt'])->name('customer.receipt');
+        Route::post('/invoice/{id}/submit-bank-payment', [CustomerInvoicesController::class, 'submitBankPayment'])->name('customer.invoice.submit-bank-payment');
     });
 
 });

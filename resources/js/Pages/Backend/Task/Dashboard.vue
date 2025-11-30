@@ -442,14 +442,49 @@ onMounted(async () => {
       }
     });
 
+  // Listen for task claims on the role/branch-specific channel
+  const taskClaimChannel = `task-claims.${user.role_id}.${user.branch_id}`;
+  console.log('Subscribing to task claim channel:', taskClaimChannel);
+  console.log('User role_id:', user.role_id, 'User branch_id:', user.branch_id);
+  
+  Echo.private(taskClaimChannel)
+    .listen('.task-claimed', (event) => {
+      console.log('✅ Task claimed event received:', event);
+      console.log('Event details - task_id:', event.task_id, 'role_id:', event.role_id, 'branch_id:', event.branch_id);
+      
+      // Find and remove the claimed task from unclaimed tasks
+      const taskIndex = unclaimedTasks.value.findIndex(task => task.id === event.task_id);
+      console.log('Task index in unclaimed list:', taskIndex);
+      
+      if (taskIndex !== -1) {
+        console.log('Removing task from unclaimed tasks:', unclaimedTasks.value[taskIndex].name);
+        unclaimedTasks.value.splice(taskIndex, 1);
+        
+        // Show browser notification
+        if (Notification.permission === "granted") {
+          new Notification(`Task Claimed`, {
+            body: `"${event.task_name}" was claimed by ${event.claimed_by.name}`,
+            icon: '/images/logo.png'
+          });
+        }
+      } else {
+        console.warn('Task not found in unclaimed tasks list. Task ID:', event.task_id);
+      }
+    });
+
   loadNewTasks();
   loadPickedTasks();
 });
 
 onUnmounted(() => {
   // clearInterval(checkNewTaskInterval);
+  const taskClaimChannel = `task-claims.${user.role_id}.${user.branch_id}`;
+  console.log('Unsubscribing from:', taskClaimChannel);
   Echo.leave(`App.Models.User.${user.id}`);
+  Echo.leave(taskClaimChannel);
 })
+
+
 
 </script>
 
