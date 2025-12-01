@@ -1,0 +1,1 @@
+import{c as t,o as a,a as e,u as r,Z as o,F as m}from"./app--C5ZPnVQ.js";import{_ as s}from"./BackendLayout-DQuOEyVd.js";import"./indigo-N-gP5PO5.js";import"./ApplicationLogo-2Bbw0H0W.js";import"./_plugin-vue_export-helper-DlAUqK2U.js";const d={__name:"Detail",setup(c){return(n,_)=>(a(),t(m,null,[e(r(o),{title:""}),e(s)],64))}};export{d as default};
