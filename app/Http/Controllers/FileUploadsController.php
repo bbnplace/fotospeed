@@ -89,7 +89,7 @@ class FileUploadsController extends Controller
 
     public function get($path, $type)
     {
-        $data = Storage::get($path);
+        $data = Storage::disk('public')->get($path);
         return response($data, 200, [
             'Content-Type' => $type
         ]);
