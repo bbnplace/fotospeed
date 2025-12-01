@@ -33,28 +33,28 @@ class FileUploadsController extends Controller
         $fileDirectory = "";
         switch (true) {
             case strstr($file->getMimeType(), 'image/'):
-                $path = $file->store("/images");
+                $path = $file->store("images", "public");
 
-                $srcFile = Storage::get($path);
+                $srcFile = Storage::disk('public')->path($path);
                 $thumbFile = str_replace("images/","images/thumbnails/", $path);
                 
                 // Create thumbnail for the size specified by the user
-                Media::createThumbnail($srcFile, $thumbFile, $settings->thumbnail_size);
-                $thumbnailPath = sprintf('%s/%s', env('APP_URL'), $thumbFile);
+                Media::createThumbnail($srcFile, Storage::disk('public')->path($thumbFile), $settings->thumbnail_size);
+                $thumbnailPath = Storage::disk('public')->url($thumbFile);
 
                 // Create another thumbnail for dropdown
                 $previewImgSize = 100;
                 $previewImageFile = str_replace("images/","images/thumbnails/100/", $path);
-                Media::createThumbnail($srcFile, $previewImageFile, $previewImgSize);
-                $previewImgPath = sprintf('%s/%s', env('APP_URL'), $previewImageFile);
+                Media::createThumbnail($srcFile, Storage::disk('public')->path($previewImageFile), $previewImgSize);
+                $previewImgPath = Storage::disk('public')->url($previewImageFile);
                 break;
             case strstr($file->getMimeType(), 'pdf'):
-                $path = $file->store("/pdfs");
+                $path = $file->store("pdfs", "public");
                 $thumbnailPath = sprintf('%s/%s', env('APP_URL'), 'images/pdf-icon.png');
                 $previewImgPath = $thumbnailPath;
                 break;
             case strstr($file->getMimeType(), 'zip'):
-                $path = $file->store("/zips");
+                $path = $file->store("zips", "public");
                 $thumbnailPath = sprintf('%s/%s', env('APP_URL'), 'images/zip-icon.png');
                 $previewImgPath = $thumbnailPath;
                 break;

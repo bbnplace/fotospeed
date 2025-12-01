@@ -47,23 +47,30 @@ class Media extends Model
             $image = self::find($value);
             if (!empty($image)) {
                 // Delete the main file
-                if (!empty($image->path) && Storage::exists($image->path)) {
-                    Storage::delete($image->path);
+                if (!empty($image->path) && Storage::disk('public')->exists($image->path)) {
+                    Storage::disk('public')->delete($image->path);
                 }
                 
                 // Delete the thumbnail
                 if (!empty($image->thumbnail) && strstr($image->thumbnail, 'thumbnail')) {
-                    $thumbnail_path = __DIR__."/../../public".str_replace(env('APP_URL'), '', $image->thumbnail);
-                    if (File::exists($thumbnail_path)) {
-                        File::delete($thumbnail_path);
+                    // Extract relative path from URL or use stored path logic if available
+                    // Assuming thumbnail path structure matches creation logic
+                    $thumbnail_path = str_replace(Storage::disk('public')->url(''), '', $image->thumbnail);
+                    // Remove leading slash if present
+                    $thumbnail_path = ltrim($thumbnail_path, '/');
+
+                    if (Storage::disk('public')->exists($thumbnail_path)) {
+                        Storage::disk('public')->delete($thumbnail_path);
                     }
                 }
 
                 // Delete the avatar
                 if (!empty($image->thumbnail_100)  && strstr($image->thumbnail_100, 'thumbnail')) {
-                    $avatar_path = __DIR__."/../../public".str_replace(env('APP_URL'), '', $image->thumbnail_100);
-                    if (File::exists($avatar_path)) {
-                        File::delete($avatar_path);
+                     $avatar_path = str_replace(Storage::disk('public')->url(''), '', $image->thumbnail_100);
+                     $avatar_path = ltrim($avatar_path, '/');
+
+                    if (Storage::disk('public')->exists($avatar_path)) {
+                        Storage::disk('public')->delete($avatar_path);
                     }
                 }
 
