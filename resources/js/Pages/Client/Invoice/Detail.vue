@@ -57,17 +57,6 @@
                     <h3>Total: ₦{{ formatter.format(invoice.order.total_cost) }} [{{ invoice.invoice_status.name.toUpperCase() }}]</h3>
                 </VCol>
             </VRow>
-            <VRow>
-                <VCol class="text-right">
-                    <!-- Debug Info -->
-                    <div class="text-left mb-4 p-2 bg-gray-100 border rounded">
-                        <p><strong>Debug Info:</strong></p>
-                        <p>Invoice Status: '{{ invoice.invoice_status.name }}'</p>
-                        <p>Email: '{{ client.email }}'</p>
-                        <p>Is Missing: {{ emailMissing }}</p>
-                    </div>
-                </VCol>
-            </VRow>
             <VRow v-if="invoice.invoice_status.name == 'Unpaid'">
                 <VCol class="text-right">
                     <div v-if="emailMissing">

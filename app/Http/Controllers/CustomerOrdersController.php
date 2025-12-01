@@ -205,6 +205,7 @@ class CustomerOrdersController extends Controller
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
+            'theme' => 'fotospeed',
         ];
     }
 

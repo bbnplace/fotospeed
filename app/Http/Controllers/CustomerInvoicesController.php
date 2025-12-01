@@ -120,6 +120,7 @@ class CustomerInvoicesController extends Controller
                 'account_number' => $settings->account_number,
             ],
             'banks' => \App\Models\Bank::pluck('name')->toArray(),
+            'theme' => 'fotospeed',
         ];
     }
 

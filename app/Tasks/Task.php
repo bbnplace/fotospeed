@@ -131,7 +131,7 @@ class Task
                 $config = [
                     'order' => $order,
                     'customer' => User::where('id', $order->user_id)->first(),
-                    'nextProcess' => property_exists($object, 'nextProcess') ? OrderStatus::where('name', $object->nextProcess)->first() : null,
+                    'nextProcess' => property_exists($object, 'nextProcess') ? OrderStatus::where('name', $object->nextProcess)->with(['emailTemplate', 'customerEmailTemplate'])->first() : null,
                     'url' => URLGenerator::generateAndShortenSignedUrl($order->user_id, $linkExpirationMinutes),
                 ];
 

@@ -25,7 +25,16 @@ class EmailClient
     public function sendTeamEmail($template = null)
     {
         if ($this->team->count() > 0) {
-            $teamEmailTemplate = empty($template) ? $this->nextProcess->emailTemplate->template : $template;
+            // Check if nextProcess exists and has emailTemplate relationship loaded
+            $teamEmailTemplate = $template;
+            if (empty($template) && $this->nextProcess && property_exists($this->nextProcess, 'emailTemplate') && $this->nextProcess->emailTemplate) {
+                $teamEmailTemplate = $this->nextProcess->emailTemplate->template;
+            }
+            
+            if (empty($teamEmailTemplate)) {
+                return false;
+            }
+            
             $emails = [];
             foreach($this->team as $teamMember)
             {
@@ -38,13 +47,22 @@ class EmailClient
 
     public function sendCustomerEmail($template = null)
     {
-        $customerEmailTemplate = empty($template) ? $this->nextProcess->customerEmailTemplate->template : $template;
+        // Check if nextProcess exists and has customerEmailTemplate relationship loaded
+        $customerEmailTemplate = $template;
+        if (empty($template) && $this->nextProcess && property_exists($this->nextProcess, 'customerEmailTemplate') && $this->nextProcess->customerEmailTemplate) {
+            $customerEmailTemplate = $this->nextProcess->customerEmailTemplate->template;
+        }
+        
+        if (empty($customerEmailTemplate)) {
+            return false;
+        }
+        
         $this->sendEmail($customerEmailTemplate, [$this->customer->email]);
     }
 
     public function sendEmail(String $templateName, Array $emails)
     {
-        if (empty($smsTemplate)) {
+        if (empty($templateName)) {
             return false;
         }
 
