@@ -3,7 +3,7 @@
         <div class="shop-items style-2">
             <div class="shop-image">
                 <a :href="route('marketing.product.show', product.slug)">
-                    <img :src="route('media.view', primaryPhoto.id)" alt="img">
+                    <img :src="primaryPhoto?.id ? route('media.view', primaryPhoto.id) : primaryPhoto" alt="img">
                 </a>
                 <ul class="product-icon d-grid justify-content-center align-items-center">
                     <!-- <li>
