@@ -159,7 +159,7 @@ const site = usePage().props.site;
         <div class="container">
             <div class="footer-bottom-wrapper">
                 <p class="wow fadeInUp" data-wow-delay="0.5s">Copyright &copy; {{ new Date().getFullYear() }}. Millewwy International Enterprises Limited. All Right Reserved.</p>
-                <p>Powered by Cecula</p>
+                <p>Powered by <a href="https://cecula.com" target="_blank">Cecula</a></p>
             </div>
         </div>
     </div>
