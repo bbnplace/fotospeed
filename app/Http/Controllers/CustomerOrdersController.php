@@ -195,18 +195,24 @@ class CustomerOrdersController extends Controller
         }]);
 
         $order = $query->first();
-        $orderDetail = json_decode($order->detail);
+    
+    // Check if order exists
+    if (!$order) {
+        abort(404, 'Order not found');
+    }
+    
+    $orderDetail = json_decode($order->detail);
 
-        return [
-            'order' => $order,
-            'orderDetail' => $orderDetail,
-            'items' => Item::getItemsArray(),
-            'orderStatuses' => OrderStatus::getOrderStatusesArray(),
-            'stkn' => csrf_token(),
-            'endpoint' => route('customer.find'),
-            'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
-            'theme' => 'fotospeed',
-        ];
+    return [
+        'order' => $order,
+        'orderDetail' => $orderDetail,
+        'items' => Item::getItemsArray(),
+        'orderStatuses' => OrderStatus::getOrderStatusesArray(),
+        'stkn' => csrf_token(),
+        'endpoint' => route('customer.find'),
+        'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
+        'theme' => 'fotospeed',
+    ];
     }
 
     public function edit($id)
