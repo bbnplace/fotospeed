@@ -85,6 +85,11 @@ class ExecuteSpaceManagementPolicy extends Command
                 continue;
             }
 
+            // Check if media is linked to a product
+            if (isset($data['products']) && !empty($data['products'])) {
+                continue;
+            }
+
             $orderIds = $data['orders'];
             $orders = Order::whereIn('id', $orderIds)->with('orderStatus')->get();
 
