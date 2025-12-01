@@ -93,6 +93,11 @@ class CustomerInvoicesController extends Controller
 
         $invoice = $query->first();
 
+        // Check if invoice exists
+        if (!$invoice) {
+            abort(404, 'Invoice not found');
+        }
+
         $settings = Setting::first();
         $paystack= [
             'key'=> $settings->paystack_public_key,
