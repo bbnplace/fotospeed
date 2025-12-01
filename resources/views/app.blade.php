@@ -15,10 +15,10 @@
 
         @if($routePrefix == '/showroom')
             <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-D2vqdXq0.css">
-            <!-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) -->
+            {{-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) --}}
         @else
             <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-ji99nVhz.css">
-            <!-- @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"]) -->
+            {{-- @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"]) --}}
         @endif
 
         @routes
