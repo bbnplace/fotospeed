@@ -1,5 +1,6 @@
 <script setup>
 import { Head, usePage, useForm, Link } from '@inertiajs/vue3';
+import { onMounted } from 'vue';
 import AnnouncementBar from '../Partials/AnnouncementBar.vue';
 import Header from '../Partials/Header.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
@@ -9,6 +10,16 @@ import Breadcrumb from '../Partials/Breadcrumb.vue';
 import Shop from '../Partials/Shop.vue';
 import Footer from '../Partials/Footer.vue';
 import Cta from '../Partials/Cta.vue';
+
+onMounted(() => {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        preloader.classList.add('loaded');
+        setTimeout(() => {
+            preloader.style.display = 'none';
+        }, 600);
+    }
+});
 
 </script>
 

@@ -62,11 +62,4 @@ createInertiaApp({
         color: '#0594be',
         showSpinner: false
     },
-    finish: () => {
-        // Hide preloader after Inertia finishes initial page load
-        if (typeof $ !== 'undefined') {
-            $(".preloader").addClass('loaded');
-            $(".preloader").delay(600).fadeOut();
-        }
-    },
 });
