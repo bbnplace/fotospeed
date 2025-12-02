@@ -5,11 +5,12 @@
         multi-line
         max-width="300"
         :timeout="_snackbar.timeout"
+        :color="_snackbar.color"
     >
       {{ _snackbar.text }}
       <template v-slot:actions>
         <v-btn
-          color="blue"
+          color="white"
           variant="text"
           @click="_hideSnackbar"
         >
@@ -38,10 +39,12 @@ const _snackbar = reactive({
     show: props.data.show ?? false,
     text: props.data.text ?? "",
     timeout: 7000,
+    color: 'info',
 })
 
-const _showSnackbar = (text) => {
+const _showSnackbar = (text, color = 'info') => {
     _snackbar.text = text;
+    _snackbar.color = color;
     _snackbar.show = true
 }
 
@@ -59,10 +62,16 @@ watch(()=>_snackbar.show, (newVal, oldVal) => {
 })
 
 onMounted(()=>{
-    const status = usePage().props.note;
-    if(status !== null)
+    const note = usePage().props.note;
+    const error = usePage().props.error;
+    
+    if(error !== null && error !== undefined)
     {
-        _showSnackbar(status)
+        _showSnackbar(error, 'error')
+    }
+    else if(note !== null && note !== undefined)
+    {
+        _showSnackbar(note, 'success')
     }
 })
 </script>

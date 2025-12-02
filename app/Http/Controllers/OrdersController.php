@@ -174,15 +174,15 @@ class OrdersController extends Controller
         $item = Item::where('name', $request->item)->first();
         $processData = json_decode($item->process_data);
 
-        if (empty($processData->process)) {
-            // Todo: Redirect to notify customer that something is wrong with the order while notify admin that an initial process is not set
+        if (empty($processData->processes)) {
+            return redirect()->back()->with('error', 'This product cannot be ordered as it has no production process defined. Please contact support.');
         }
 
         $firstProcess = $processData->processes[0];
         $process = Process::where('name', $firstProcess->name)->first();
 
         if (empty($process)) {
-            // Todo: Redirect to notify customer that something is wrong with the order while notify admin that an initial set does not exist
+            return redirect()->back()->with('error', 'The initial process for this product is invalid. Please contact support.');
         }
 
         // Register customer if this is a new customer OR restore soft-deleted customer

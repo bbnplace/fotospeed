@@ -226,33 +226,89 @@ class TasksController extends Controller
 
     private function getTaskAudits($task, $taskName): array | bool
     {
-        $processData = json_decode($task->order->item->process_data, true);
-        $currentProcess = $task->process->name;
-        if (!empty($processData)) {
-            $currentProcessTasks = $processData['tasks'][$currentProcess];
-            $tm = new TemplateManager([
-                'order' => $task->order
+        // Validate task has required relationships
+        if (empty($task->order) || empty($task->order->item) || empty($task->process)) {
+            Log::warning('Task audit lookup failed: Missing required relationships', [
+                'task_id' => $task->id ?? null,
+                'has_order' => !empty($task->order),
+                'has_item' => !empty($task->order->item ?? null),
+                'has_process' => !empty($task->process)
             ]);
-
-            $targetTask = [];
-            foreach ($currentProcessTasks as $currentProcessTask) {
-                if ($taskName == $tm->prepareText($currentProcessTask['name'])) {
-                    $targetTask = $currentProcessTask;
-                    break;
-                }
-            }
-
-            if (empty($targetTask)) {
-                return false; // No Audit
-            }
-            
-            if (isset($targetTask['audit']) && $targetTask['audit']) {
-                return $targetTask['checks'] ?? [];
-            } else {
-                return false; // No Audit
-            }
-        } else {
             return false;
+        }
+
+        // Decode process data with error handling
+        try {
+            $processData = json_decode($task->order->item->process_data, true);
+        } catch (\Exception $e) {
+            Log::error('Failed to decode process_data for task audit', [
+                'task_id' => $task->id,
+                'order_id' => $task->order_id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+
+        if (empty($processData)) {
+            Log::warning('Task audit lookup: Empty process_data', [
+                'task_id' => $task->id,
+                'order_id' => $task->order_id,
+                'item_id' => $task->order->item->id
+            ]);
+            return false;
+        }
+
+        $currentProcess = $task->process->name;
+        
+        // Validate current process exists in tasks configuration
+        if (!isset($processData['tasks'][$currentProcess])) {
+            Log::warning('Task audit lookup: Process not found in configuration', [
+                'task_id' => $task->id,
+                'current_process' => $currentProcess,
+                'available_processes' => array_keys($processData['tasks'] ?? [])
+            ]);
+            return false;
+        }
+
+        $currentProcessTasks = $processData['tasks'][$currentProcess];
+        $tm = new TemplateManager([
+            'order' => $task->order
+        ]);
+
+        $targetTask = [];
+        $attemptedMatches = []; // For debugging
+        
+        foreach ($currentProcessTasks as $currentProcessTask) {
+            $preparedName = $tm->prepareText($currentProcessTask['name']);
+            $attemptedMatches[] = $preparedName;
+            
+            if ($taskName == $preparedName) {
+                $targetTask = $currentProcessTask;
+                break;
+            }
+        }
+
+        if (empty($targetTask)) {
+            Log::warning('Task audit lookup: Task name not found in process configuration', [
+                'task_id' => $task->id,
+                'task_name_from_request' => $taskName,
+                'current_process' => $currentProcess,
+                'configured_task_names' => $attemptedMatches
+            ]);
+            return false; // No matching task found
+        }
+        
+        if (isset($targetTask['audit']) && $targetTask['audit']) {
+            $checks = $targetTask['checks'] ?? [];
+            Log::info('Task audit checks found', [
+                'task_id' => $task->id,
+                'task_name' => $taskName,
+                'checks_count' => count($checks),
+                'checks' => $checks
+            ]);
+            return $checks;
+        } else {
+            return false; // No audit required for this task
         }
     }
 
@@ -288,24 +344,44 @@ class TasksController extends Controller
         if ($newStatus === TaskStatus::STATUS_DONE) {
             $auditables = $this->getTaskAudits($task, $taskName);
             if (is_array($auditables)) {
-                $auditReport = TaskAudit::checkAll($auditables, $task->order);
-                $failedAudits = [];
-                foreach ($auditReport as $key => $value) {
-                    if (!$value) {
-                        array_push($failedAudits, $key);
+                // Audits are configured, perform checks
+                if (!empty($auditables)) {
+                    $auditReport = TaskAudit::checkAll($auditables, $task->order);
+                    $failedAudits = [];
+                    foreach ($auditReport as $key => $value) {
+                        if (!$value) {
+                            array_push($failedAudits, $key);
+                        }
                     }
+                    
+                    if (!empty($failedAudits)) {
+                        Log::info('Task completion blocked by failed audit checks', [
+                            'task_id' => $task->id,
+                            'order_id' => $task->order_id,
+                            'failed_checks' => $failedAudits
+                        ]);
+                        return [
+                            'status' => 'Failed',
+                            'message' => 'The following online activities for this task have not been completed:',
+                            'incompleteTasks' => $failedAudits,
+                            'customer' => [
+                                'id' => $task->order->user_id
+                            ]
+                        ];
+                    }
+                } else {
+                    Log::info('Task has audit enabled but no checks configured', [
+                        'task_id' => $task->id,
+                        'task_name' => $taskName
+                    ]);
                 }
-                
-                if (!empty($failedAudits)) {
-                    return [
-                        'status' => 'Failed',
-                        'message' => 'The following online activities for this task have not been completed:',
-                        'incompleteTasks' => $failedAudits,
-                        'customer' => [
-                            'id' => $task->order->user_id
-                        ]
-                    ];
-                }
+            } else {
+                // Audit lookup returned false - either no audit required OR lookup failed
+                // The getTaskAudits method will have logged if it was a failure
+                Log::debug('No audit checks required for task', [
+                    'task_id' => $task->id,
+                    'task_name' => $taskName
+                ]);
             }
         }
 

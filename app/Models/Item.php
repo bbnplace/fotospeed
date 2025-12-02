@@ -39,11 +39,15 @@ class Item extends Model
     public static function getItemsArray()
     {
         $items = [];
-        $itemsCollection = self::get('name');
+        $itemsCollection = self::get(['name', 'process_data']);
         if(!empty($itemsCollection))
         {
             foreach($itemsCollection as $item){
-                array_push($items, $item->name);
+                // Only include items that have defined processes
+                $processData = json_decode($item->process_data);
+                if (!empty($processData) && !empty($processData->processes)) {
+                    array_push($items, $item->name);
+                }
             }
         }
 

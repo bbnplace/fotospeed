@@ -37,9 +37,9 @@
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-smoother.js"></script>
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-trigger.js"></script>
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-split-text.js"></script>
-        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BzhsrCLS.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-C7vmnsIJ.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-DrNITF1x.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-B7rzD3AJ.js" type="module"></script>
     @endif
     
 </html>
