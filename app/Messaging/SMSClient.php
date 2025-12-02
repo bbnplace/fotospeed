@@ -63,6 +63,12 @@ class SMSClient
             $settings = Setting::first();
             $sms_type = $settings->sms_type;
 
+            Log::info('SMS Client: Attempting to send SMS', [
+                'sms_type' => $sms_type,
+                'recipient_count' => count($processedRecipients),
+                'template' => $templateName,
+            ]);
+
             if ($sms_type == 'SIM') {
 
                 // This is assumin every message is desired to be sent with Cecula Sync
@@ -71,25 +77,36 @@ class SMSClient
                 $syncAccount = new SyncAccount();
                 $balance = (int) $syncAccount->getCeculaBalance();
 
+                Log::info('SMS Client (SIM): Balance check', ['balance' => $balance]);
+
                 if ($balance < 1) {
                     // TODO: If balance is low, notify Admins that the balance on Cecula Sync is low.
+                    Log::warning('SMS Client (SIM): Insufficient balance', ['balance' => $balance]);
                     return false;
                 }
 
                 $syncSms = new SyncSms();
                 $response = $syncSms->sendSMS($message, $processedRecipients);
+                Log::info('SMS Client (SIM): SMS sent', ['response' => $response]);
                 // TODO: Do something with the response - like maintaining a log for auditing purpose
             }
 
             if ($sms_type == 'A2P') {
                 $ceculaA2pApiKey = trim($settings->cecula_a2p_api_key);
 
+                Log::info('SMS Client (A2P): Checking configuration', [
+                    'api_key_length' => strlen($ceculaA2pApiKey),
+                    'identity' => $settings->a2p_identity
+                ]);
+
                 if (strlen($ceculaA2pApiKey) < 32) {
+                    Log::error('SMS Client (A2P): API Key too short', ['length' => strlen($ceculaA2pApiKey)]);
                     // TODO: Notify Admin that the API Key required for sending A2P SMS is not set
                     return false;
                 }
 
                 if (empty($settings->a2p_identity)) {
+                    Log::error('SMS Client (A2P): No identity configured');
                     // TODO: If the Identity has not been set, notify Admin
                     return false;
                 }
@@ -99,15 +116,44 @@ class SMSClient
                 ]);
 
                 // Get balance
-                $balance = (int) $ceculaA2pSmsClient->getBalance();
-                if ($balance < 1) {
+                try {
+                    $balanceResponse = $ceculaA2pSmsClient->getBalance();
+                    Log::info('SMS Client (A2P): Raw balance response', ['response' => $balanceResponse]);
+                    
+                    // Parse JSON response
+                    $balanceData = json_decode($balanceResponse, true);
+                    
+                    if (isset($balanceData['data']['balance'])) {
+                        $balance = (float) $balanceData['data']['balance'];
+                    } else {
+                        // Fallback: try parsing as direct number
+                        $balance = (float) $balanceResponse;
+                    }
+                    
+                    Log::info('SMS Client (A2P): Balance check', ['balance' => $balance]);
+                } catch (\Exception $e) {
+                    Log::error('SMS Client (A2P): Balance check failed', ['error' => $e->getMessage()]);
+                    return false;
+                }
+
+                if ($balance >= 1) {
                     $smsparams = [
                         'sender' => $settings->a2p_identity,
                         'recipients' => $processedRecipients,
                         'text' => $message,
                     ];
 
-                    $response = $ceculaA2pSmsClient->sendSms($smsparams);
+                    Log::info('SMS Client (A2P): Sending SMS', $smsparams);
+
+                    try {
+                        $response = $ceculaA2pSmsClient->sendSms($smsparams);
+                        Log::info('SMS Client (A2P): SMS sent successfully', ['response' => $response]);
+                    } catch (\Exception $e) {
+                        Log::error('SMS Client (A2P): SMS sending failed', ['error' => $e->getMessage()]);
+                        return false;
+                    }
+                } else {
+                    Log::warning('SMS Client (A2P): Insufficient balance', ['balance' => $balance]);
                 }
             }
         }

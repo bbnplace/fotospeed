@@ -14,10 +14,10 @@
         @endphp
 
         @if($routePrefix == '/showroom')
-            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-D2vqdXq0.css">
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/showroom/assets/app-DJw7e_nq.css">
             {{-- @vite(['resources/themes/fotospeed/app.js', "resources/themes/fotospeed/Pages/{$page['component']}.vue"]) --}}
         @else
-            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-ji99nVhz.css">
+            <link rel="stylesheet" href="{{ env('APP_URL') }}/build/oms/assets/app-BJ23ZB7t.css">
             {{-- @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"]) --}}
         @endif
 
@@ -37,9 +37,9 @@
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-smoother.js"></script>
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-scroll-trigger.js"></script>
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-split-text.js"></script>
-        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BzPtnHzn.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BzhsrCLS.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-CN3v_eNs.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-DrNITF1x.js" type="module"></script>
     @endif
     
 </html>

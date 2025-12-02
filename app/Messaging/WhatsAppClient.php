@@ -145,6 +145,64 @@ class WhatsAppClient
         }
     }
 
+    public function sendTextMessage(string $messageBody, array $recipients)
+    {
+        if (count($recipients) > 0) {
+            $settings = Setting::first(['wa_access_token','wa_phone_id']);
+            
+            if (!empty($settings->wa_access_token) && !empty($settings->wa_phone_id)) {
+                $url = "https://graph.facebook.com/v22.0/{$settings->wa_phone_id}/messages";
+                
+                $processedRecipients = [];
+                foreach ($recipients as $mobile) {
+                    array_push($processedRecipients, MobileValidator::formatNigerianNumberToInternationalFormat($mobile, true));
+                }
+
+                foreach ($processedRecipients as $recipient) {
+                    // Send Whatsapp Text Message
+                    $response = Http::withToken($settings->wa_access_token)->post($url, [
+                        'messaging_product' => 'whatsapp',
+                        'recipient_type' => 'individual',
+                        'to' => $recipient,
+                        'type' => 'text',
+                        'text' => [
+                            'preview_url' => false,
+                            'body' => $messageBody
+                        ]
+                    ]);
+
+                    $waResponse = $response->json();
+                    
+                    // Handle success response
+                    if (isset($waResponse['messages'])) {
+                        $contacts = $waResponse['contacts'] ?? [];
+                        $messages = $waResponse['messages'];
+                        
+                        for ($i=0; $i < count($messages); $i++) {
+                            $contactWaId = isset($contacts[$i]['wa_id']) ? $contacts[$i]['wa_id'] : $recipient;
+                            $messageRef = $messages[$i];
+                            
+                            WhatsappMessage::create([
+                                'customer_id' => $this->customer ? $this->customer->id : null,
+                                'recipient' => $contactWaId,
+                                'body' => $messageBody,
+                                'wa_reference' => $messageRef['id'],
+                                'direction' => 'out',
+                                'status' => $messageRef['message_status'] ?? 'sent',
+                                'response' => json_encode($waResponse)
+                            ]);
+                        }
+                    } else {
+                        // Log error response
+                        Log::error('WhatsApp Text Message Failed: ' . $response->body());
+                    }
+                }
+            } else {
+                Log::error('WhatsApp Configuration Missing: Access Token or Phone ID not set.');
+            }
+        }
+    }
+
     private function getComponentHeaderFormat($componentParts)
     {
         $componentFormat = null;

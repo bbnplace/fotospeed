@@ -20,6 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::match(['get', 'post'], '/whatsapp/inbound', [WhatsappController::class, 'inbound']);
+Route::match(['get', 'post'], '/whatsapp/inbound', [WhatsappController::class, 'inbound'])->name('whatsapp.inbound');
 
 Route::post('/payment/done', [CustomerInvoicesController::class, 'paymentCompleted'])->name('paystack.complete');

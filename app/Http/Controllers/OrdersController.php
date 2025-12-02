@@ -163,9 +163,9 @@ class OrdersController extends Controller
     public function store(Request $request)
     {
         if ($request->newCustomer) {
-            $this->rules['customerMobile'] = 'required|string|min:7|max:14|unique:users,mobile';
+            $this->rules['customerMobile'] = 'required|string|min:7|max:14|unique:users,mobile,NULL,id,deleted_at,NULL';
             $this->rules['customerName'] = 'required|string|min:5|max:64';
-            $this->rules['customerEmail'] = 'nullable|max:124|email:rfc,dns|unique:users,email';
+            $this->rules['customerEmail'] = 'nullable|max:124|email:rfc,dns|unique:users,email,NULL,id,deleted_at,NULL';
             $this->rules['password'] = 'required|string|min:6|max:64';
         }
         $request->validate($this->rules);
@@ -185,17 +185,36 @@ class OrdersController extends Controller
             // Todo: Redirect to notify customer that something is wrong with the order while notify admin that an initial set does not exist
         }
 
-        // Register customer if this is a new customer
+        // Register customer if this is a new customer OR restore soft-deleted customer
         if ($request->newCustomer) {
-            $customer = User::create([
-                'role_id' => Role::CUSTOMER,
-                'name' => $request->customerName,
-                'email' => $request->customerEmail,
-                'mobile' => $request->customerMobile,
-                'state_id' => auth()->user()->state_id,
-                'password' => Hash::make($request->password),
-                'branch_id' => auth()->user()->branch_id,
-            ]);
+            // Check if a soft-deleted user exists with this mobile number
+            $existingUser = User::withTrashed()->where('mobile', $request->customerMobile)->first();
+
+            if ($existingUser && $existingUser->trashed()) {
+                // Restore the soft-deleted user
+                $existingUser->restore();
+                
+                // Update user information
+                $existingUser->name = $request->customerName;
+                $existingUser->email = $request->customerEmail;
+                $existingUser->password = Hash::make($request->password);
+                $existingUser->state_id = auth()->user()->state_id;
+                $existingUser->branch_id = auth()->user()->branch_id;
+                $existingUser->save();
+                
+                $customer = $existingUser;
+            } else {
+                // Create new customer
+                $customer = User::create([
+                    'role_id' => Role::CUSTOMER,
+                    'name' => $request->customerName,
+                    'email' => $request->customerEmail,
+                    'mobile' => $request->customerMobile,
+                    'state_id' => auth()->user()->state_id,
+                    'password' => Hash::make($request->password),
+                    'branch_id' => auth()->user()->branch_id,
+                ]);
+            }
 
             // Send Welcome WhatsApp Message
             $settings = Setting::first();

@@ -96,6 +96,15 @@
             ></VTextField>
         </div>
 
+        <div class="mt-4">
+            <VCheckbox
+                v-model="form.send_whatsapp"
+                label="Send Password to Customer Via Whatsapp"
+                density="compact"
+                hide-details
+            ></VCheckbox>
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                 {{ props.user ? 'Save' : 'Register'}}
@@ -139,7 +148,8 @@ const form = useForm({
     password_confirmation: props.user ? props.user.password_confirmation : "",
     state: props.user ? props.user.state.name : "",
     role: props.userType,
-    groups: customerGroups
+    groups: customerGroups,
+    send_whatsapp: false
 });
 
 const submit = () => {
@@ -169,7 +179,7 @@ const handleGroupsError = (errors) =>{
             invalidGroups.push(form.groups[parts[1]])
         }
     });
-    form.errors.groups = invalidGroups.length > 0 ? [`The following values are not supported: ${invalidGroups.join(', ')}`] : []
+    form.errors.groups = invalidGroups.length > 0 ? `The following values are not supported: ${invalidGroups.join(', ')}` : undefined
 }
 
 

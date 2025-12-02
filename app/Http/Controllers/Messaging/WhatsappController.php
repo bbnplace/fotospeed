@@ -14,10 +14,14 @@ class WhatsappController extends Controller
     public function index($customerMobile)
     {
         $query = WhatsappMessage::query();
-        $query->where("recipient", $customerMobile);
-        $query->where("sender", $customerMobile);
+        
+        $query->where(function($q) use ($customerMobile) {
+            $q->where("recipient", $customerMobile)
+              ->orWhere("sender", $customerMobile);
+        });
+
         $query->with("order", function ($query){
-            $query->select("id", "name", "order_name");
+            $query->select("id", "name", "order_number");
         });
         $query->orderBy("created_at","asc");
         $log = $query->get();
@@ -27,17 +31,33 @@ class WhatsappController extends Controller
 
     public function store(Request $request)
     {
-        $orderConversation = WhatsappMessage::create([
-            "recipient"=> $request->mobile,
-            "body" => $request->message,
-            "response"=> "",
+        $request->validate([
+            'mobile' => 'required|string',
+            'message' => 'required|string',
         ]);
 
-        // TODO: Broadcast Notification to all the other users viewing this order.
+        try {
+            // Fetch customer if possible
+            $customer = User::where('mobile', $request->mobile)->first();
+            
+            $config = [
+                'customer' => $customer,
+            ];
 
-        return [
-            'status' => 'success'
-        ];
+            $whatsAppClient = new \App\Messaging\WhatsAppClient($config);
+            $whatsAppClient->sendTextMessage($request->message, [$request->mobile]);
+
+            return [
+                'status' => 'success',
+                'message' => 'WhatsApp message sent successfully'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to send WhatsApp message: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to send message: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function inbound(Request $request)

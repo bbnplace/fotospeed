@@ -1,20 +1,20 @@
 <template>
     <VTabs v-model="tab">
-        <VTab prepend-icon="mdi-sim" value="hostedsim">Hosted SIM</VTab>
+        <!-- <VTab prepend-icon="mdi-sim" value="hostedsim">Hosted SIM</VTab> -->
         <VTab prepend-icon="mdi-whatsapp" value="whatsapp">WhatsApp</VTab>
-        <VTab prepend-icon="mdi-email" value="email">Email</VTab>
+        <!-- <VTab prepend-icon="mdi-email" value="email">Email</VTab> -->
         <VTab prepend-icon="mdi-text" value="a2psms">A2P SMS</VTab>
     </VTabs>
     <VWindow v-model="tab" direction="vertical">
-        <VWindowItem value="hostedsim">
+        <!-- <VWindowItem value="hostedsim">
             <HostedSim />
-        </VWindowItem>
+        </VWindowItem> -->
         <VWindowItem value="whatsapp">
             <Whatsapp />
         </VWindowItem>
-        <VWindowItem value="email">
+        <!-- <VWindowItem value="email">
             <Email />
-        </VWindowItem>
+        </VWindowItem> -->
         <VWindowItem value="a2psms">
             <A2PSms />
         </VWindowItem>
