@@ -224,7 +224,7 @@ class TasksController extends Controller
         return $coordinator;
     }
 
-    private function getTaskAudits($task, $taskName): array | bool
+    private function getTaskAudits($task): array | bool
     {
         // Validate task has required relationships
         if (empty($task->order) || empty($task->order->item) || empty($task->process)) {
@@ -271,38 +271,58 @@ class TasksController extends Controller
         }
 
         $currentProcessTasks = $processData['tasks'][$currentProcess];
-        $tm = new TemplateManager([
-            'order' => $task->order
-        ]);
-
-        $targetTask = [];
-        $attemptedMatches = []; // For debugging
         
-        foreach ($currentProcessTasks as $currentProcessTask) {
-            $preparedName = $tm->prepareText($currentProcessTask['name']);
-            $attemptedMatches[] = $preparedName;
+        // Use task_index for matching (preferred method)
+        if ($task->task_index !== null && isset($currentProcessTasks[$task->task_index])) {
+            $targetTask = $currentProcessTasks[$task->task_index];
             
-            if ($taskName == $preparedName) {
-                $targetTask = $currentProcessTask;
-                break;
-            }
-        }
-
-        if (empty($targetTask)) {
-            Log::warning('Task audit lookup: Task name not found in process configuration', [
+            Log::info('Task audit lookup: Matched by index', [
                 'task_id' => $task->id,
-                'task_name_from_request' => $taskName,
-                'current_process' => $currentProcess,
-                'configured_task_names' => $attemptedMatches
+                'task_index' => $task->task_index,
+                'task_name' => $task->name
             ]);
-            return false; // No matching task found
+        } else {
+            // Fallback: Try name matching for backward compatibility with old tasks
+            $tm = new TemplateManager([
+                'order' => $task->order
+            ]);
+
+            $targetTask = null;
+            $attemptedMatches = [];
+            
+            foreach ($currentProcessTasks as $index => $currentProcessTask) {
+                $preparedName = $tm->prepareText($currentProcessTask['name']);
+                $attemptedMatches[] = $preparedName;
+                
+                if ($task->name == $preparedName) {
+                    $targetTask = $currentProcessTask;
+                    Log::warning('Task audit lookup: Matched by name (fallback for old task)', [
+                        'task_id' => $task->id,
+                        'task_name' => $task->name,
+                        'task_index_missing' => $task->task_index === null
+                    ]);
+                    break;
+                }
+            }
+
+            if (empty($targetTask)) {
+                Log::warning('Task audit lookup: Task not found in process configuration', [
+                    'task_id' => $task->id,
+                    'task_name' => $task->name,
+                    'task_index' => $task->task_index,
+                    'current_process' => $currentProcess,
+                    'configured_task_names' => $attemptedMatches
+                ]);
+                return false;
+            }
         }
         
         if (isset($targetTask['audit']) && $targetTask['audit']) {
             $checks = $targetTask['checks'] ?? [];
             Log::info('Task audit checks found', [
                 'task_id' => $task->id,
-                'task_name' => $taskName,
+                'task_name' => $task->name,
+                'task_index' => $task->task_index,
                 'checks_count' => count($checks),
                 'checks' => $checks
             ]);
@@ -342,7 +362,7 @@ class TasksController extends Controller
         }
         
         if ($newStatus === TaskStatus::STATUS_DONE) {
-            $auditables = $this->getTaskAudits($task, $taskName);
+            $auditables = $this->getTaskAudits($task);
             if (is_array($auditables)) {
                 // Audits are configured, perform checks
                 if (!empty($auditables)) {

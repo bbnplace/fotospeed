@@ -53,7 +53,7 @@ class Task
     private static function showTasksToTeams($tasks, $order, $processName, $targetBranch)
     {
         // Loop through task and drop notification for all teams that should work on the task.
-        foreach ($tasks as $task) {
+        foreach ($tasks as $index => $task) {
             $taskTeam = $task->team;
 
             // Use Primary Branch if order cannot be processed at branch selected by the customer
@@ -78,7 +78,7 @@ class Task
             $taskDescription = $templateManager->prepareText($task->description);
 
             // Drop task for all team members in the category
-            self::createTask($taskName, $taskDescription, $order, $processName, $branch, $team);
+            self::createTask($taskName, $taskDescription, $order, $processName, $branch, $team, $index);
 
             // Broadcast Push Notification to team members within the selected branch
             self::sendTeamNotification($team, $branch, 'App\Notifications\NewTaskNotification', $taskName, $order);
@@ -224,9 +224,10 @@ class Task
      * @param \App\Models\Order $order
      * @param \App\Models\Branch $branch
      * @param \App\Models\Role $team
+     * @param int $taskIndex
      * @return void
      */
-    private static function createTask($taskName, $taskDescription, Order $order, string $processName, Branch $branch, Role $team): void
+    private static function createTask($taskName, $taskDescription, Order $order, string $processName, Branch $branch, Role $team, int $taskIndex): void
     {
         $process = Process::where('name', $processName)->first(['id']);
         
@@ -237,6 +238,7 @@ class Task
         TaskModel::create([
             'name'=> $taskName,
             'description'=> $taskDescription,
+            'task_index' => $taskIndex,
             'process_id' => $process->id,
             'order_id'=> $order->id,
             'branch_id'=> $branch->id,
