@@ -242,6 +242,7 @@ class OrdersController extends Controller
                 $existingUser->name = $request->customerName;
                 $existingUser->email = $request->customerEmail;
                 $existingUser->password = Hash::make($request->password);
+                $existingUser->is_temporary_password = true;
                 $existingUser->state_id = auth()->user()->state_id;
                 $existingUser->branch_id = auth()->user()->branch_id;
                 $existingUser->save();
@@ -256,6 +257,7 @@ class OrdersController extends Controller
                     'mobile' => $request->customerMobile,
                     'state_id' => auth()->user()->state_id,
                     'password' => Hash::make($request->password),
+                    'is_temporary_password' => true,
                     'branch_id' => auth()->user()->branch_id,
                 ]);
             }
