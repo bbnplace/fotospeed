@@ -123,6 +123,7 @@ class CustomerInvoicesController extends Controller
             'bank_account' => [
                 'bank_name' => $settings->bank_name,
                 'account_number' => $settings->account_number,
+                'account_name' => $settings->account_name,
             ],
             'banks' => \App\Models\Bank::pluck('name')->toArray(),
             'theme' => 'fotospeed',
@@ -283,7 +284,7 @@ class CustomerInvoicesController extends Controller
             'paymentDate' => $validated['payment_date'],
             'organizationBank' => $settings->bank_name,
             'organizationAccountNumber' => $settings->account_number,
-            'organizationAccountName' => $settings->org_name,
+            'organizationAccountName' => $settings->account_name ?? $settings->org_name,
             'status' => 'Pending Verification',
             'submitted_at' => now()->toDateTimeString(),
             'submitted_by' => auth()->user()->name,

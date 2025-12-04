@@ -45,6 +45,10 @@ class AuthenticatedSessionController extends Controller
             'ip_address' => $request->ip()
         ]);
 
+        if (auth()->user()->is_temporary_password) {
+            return redirect()->route('password.change');
+        }
+
         return redirect()->intended($role->name == "Customer" ? RouteServiceProvider::CUSTOMER_HOME : RouteServiceProvider::HOME);
     }
 

@@ -267,16 +267,16 @@ class Task
         }
     }
 
-    public static function generateTaskCompletionNotice(Branch $branch, Role $role, string $process, string $nextProcess = null, bool $autoStartNextProcess = false): void
+    public static function generateTaskCompletionNotice(Branch $branch, Role $role, string $process, Order $order, string $nextProcess = null, bool $autoStartNextProcess = false): void
     {
-        $message = sprintf('Please team members have completed all tasks in the %s process. ', $process);
+        $message = sprintf('Team members have completed all tasks in the %s process. ', $process);
         if ($autoStartNextProcess && !empty($nextProcess)) {
             $message .= sprintf('Tasks for %s process has been automatically created.', $nextProcess);
         }
 
         // Todo: If there is a Next Process but is not to start automatically, the coordinator should be notified to start
         if (!$autoStartNextProcess && !empty($nextProcess)) {
-            # code...
+            $message .= sprintf('Tasks for %s process require manual start. <br><a href="%s" class="btn btn-sm btn-primary mt-2">Review Tasks</a>', $nextProcess, route('tasks.order.dashboard', ['orderId' => $order->id]));
         }
 
         // Create Notification for coordinators

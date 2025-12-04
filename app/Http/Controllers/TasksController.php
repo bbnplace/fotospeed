@@ -464,7 +464,7 @@ class TasksController extends Controller
                         
                         // Send notification to coordinators at PRIMARY PROCESSING BRANCH
                         if ($primaryBranch) {
-                            TaskAssigner::generateTaskCompletionNotice($primaryBranch, $projectCoordinatorRole, $currentProcessName, $nextProcess->name ?? null, $autoStartNextProcess);
+                            TaskAssigner::generateTaskCompletionNotice($primaryBranch, $projectCoordinatorRole, $currentProcessName, $order, $nextProcess->name ?? null, $autoStartNextProcess);
                         }
                         
                         // Send WhatsApp Notification to Coordinator at PRIMARY PROCESSING BRANCH

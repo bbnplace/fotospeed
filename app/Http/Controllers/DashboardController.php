@@ -32,9 +32,7 @@ class DashboardController extends Controller
         $reportViewers = json_decode($settings->reports_permission);
         if (in_array(auth()->user()->role->name, $reportViewers)) {
             $hourlyReports = HourlyReport::orderBy('id', 'desc')->take(24)->get();
-            return Inertia::render('Dashboard', [
-                $this->getReports($request, $ref)
-            ]);
+            return Inertia::render('Dashboard', $this->getReports($request, $ref));
         } else {
             // If user is not permitted to view report, the user's assigned task appears
             $query = Task::query();

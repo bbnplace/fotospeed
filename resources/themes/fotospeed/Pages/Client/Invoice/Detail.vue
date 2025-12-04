@@ -95,7 +95,7 @@
                                     <h4 class="mb-2">Bank Account Details</h4>
                                     <p><strong>Bank Name:</strong> {{ bank_account.bank_name }}</p>
                                     <p><strong>Account Number:</strong> {{ bank_account.account_number }}</p>
-                                    <p><strong>Account Name:</strong> {{ company.name }}</p>
+                                    <p><strong>Account Name:</strong> {{ bank_account.account_name || company.name }}</p>
                                 </VCardText>
                             </VCard>
                             

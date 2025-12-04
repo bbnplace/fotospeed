@@ -1,6 +1,7 @@
 <template>
     <li class="dropdown notification-list" v-if="totalNotification > 0">
         <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+            <span v-if="unreadNotifications > 0" class="me-2">{{ unreadNotifications }} Unread</span>
             <i class="ri-notification-3-line fs-22"></i>
             <span v-if="unreadNotifications > 0" class="noti-icon-badge"></span>
         </a>
@@ -30,8 +31,8 @@
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 text-truncate ms-2">
-                                        <h5 class="noti-item-title fw-semibold fs-13">{{ notification.title.substring(0, 23) }} <small class="fw-normal text-muted float-end ms-1">{{ moment(notification.created_at).fromNow() }}</small></h5>
-                                        <small class="noti-item-subtitle text-muted">{{ notification.message.substring(0, 50) }}</small>
+                                        <h5 class="noti-item-title fs-13" :class="notification.read ? 'fw-normal' : 'fw-bold'">{{ notification.title.substring(0, 23) }} <small class="fw-normal text-muted float-end ms-1">{{ moment(notification.created_at).fromNow() }}</small></h5>
+                                        <small class="noti-item-subtitle text-muted">{{ notification.message.replace(/<[^>]*>?/gm, '').substring(0, 50) }}</small>
                                     </div>
                                 </div>
                             </div>

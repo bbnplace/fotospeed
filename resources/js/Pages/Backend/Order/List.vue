@@ -54,7 +54,17 @@ const dataResources = {
     name: {
         singular: "Order",
         plural: "Orders"
-    }
+    },
+    name: {
+        singular: "Order",
+        plural: "Orders"
+    },
+    filters: [
+        { key: 'order_number', label: 'Order #', type: 'text' },
+        { key: 'customer_name', label: 'Customer Name', type: 'text' },
+        { key: 'product', label: 'Product', type: 'select', options: usePage().props.products },
+        { key: 'status', label: 'Status', type: 'select', options: usePage().props.statuses }
+    ]
 }
 
 </script>

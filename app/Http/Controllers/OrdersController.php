@@ -50,7 +50,9 @@ class OrdersController extends Controller
     {
         return Inertia::render('Backend/Order/List', [
             'endpoint' => route('order.records'),
-            'note' => session('note')
+            'note' => session('note'),
+            'products' => \App\Models\Item::select('id', 'name')->get(),
+            'statuses' => \App\Models\OrderStatus::select('id', 'name')->get()
         ]);
     }
 
@@ -67,10 +69,24 @@ class OrdersController extends Controller
         $query = Order::query();
 
         // ADMINISTRATORS CAN VIEW ORDERS ACROSS BRANCHES.
-        // If user is not from Administrative Branch, only fetch order from their branch
+        // If user is not from Administrative Branch, apply branch-based filtering
         if (!auth()->user()->isFromAdministrativeBranch())
         {
-            $query->where('order_branch_id', auth()->user()->branch_id);
+            $query->where(function($q) {
+                // Part 1: Orders from user's branch (origin branch - where order was created)
+                $q->where('order_branch_id', auth()->user()->branch_id);
+                
+                // Part 2: Check if user's role is authorized for expanded visibility
+                $settings = Setting::first();
+                $authorizedRoles = !empty($settings->order_view_roles) 
+                    ? json_decode($settings->order_view_roles) 
+                    : [];
+                
+                if (in_array(auth()->user()->role->name, $authorizedRoles)) {
+                    // Add orders where user's branch is the processing branch
+                    $q->orWhere('branch_id', auth()->user()->branch_id);
+                }
+            });
         }
 
         // MANAGERS SHOULD BE ABLE TO VIEW ALL ORDERS WITHIN THEIR BRANCH
@@ -112,10 +128,38 @@ class OrdersController extends Controller
         }]);
 
         if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
+        // Handle Vue ref object if passed directly
+        $filters = isset($search['_value']) ? $search['_value'] : $search;
+
+        if (is_array($filters)) {
+            if (!empty($filters['order_number'])) {
+                $query->where('order_number', 'like', '%' . $filters['order_number'] . '%');
             }
+            if (!empty($filters['customer_name'])) {
+                $query->whereHas('user', function ($q) use ($filters) {
+                    $q->where('name', 'like', '%' . $filters['customer_name'] . '%');
+                });
+            }
+            if (!empty($filters['product'])) {
+                $query->whereHas('item', function ($q) use ($filters) {
+                    $q->where('name', 'like', '%' . $filters['product'] . '%');
+                });
+            }
+            if (!empty($filters['status'])) {
+                $query->whereHas('orderStatus', function ($q) use ($filters) {
+                    $q->where('name', 'like', '%' . $filters['status'] . '%');
+                });
+            }
+        } elseif (is_string($filters) && !empty($filters)) {
+             // Fallback for single search string if needed in future
+             $query->where(function($q) use ($filters) {
+                $q->where('order_number', 'like', '%' . $filters . '%')
+                  ->orWhereHas('user', function($sq) use ($filters) {
+                      $sq->where('name', 'like', '%' . $filters . '%');
+                  });
+             });
         }
+    }
 
         if (!empty($sortBys)) {
             foreach ($sortBys as $sortBy) {
@@ -263,13 +307,13 @@ class OrdersController extends Controller
         }
 
         // Send WhatsApp Confirmation
-        $customer = auth()->user()->isCustomer() ? auth()->user() : $customerData;
-        $waConfig = [
-            'order' => $order,
-            'customer' => $customer,
-        ];
-        $waClient = new WhatsAppClient($waConfig);
-        $waClient->sendCustomerMessage('order_management_6');
+        // $customer = auth()->user()->isCustomer() ? auth()->user() : $customerData;
+        // $waConfig = [
+        //     'order' => $order,
+        //     'customer' => $customer,
+        // ];
+        // $waClient = new WhatsAppClient($waConfig);
+        // $waClient->sendCustomerMessage('order_management_6');
 
         // Trigger the first task for this order
         Task::assignProcessTasks($item, $order, $firstProcess->name);
@@ -303,10 +347,24 @@ class OrdersController extends Controller
         $isFromAdministrativeBranch = auth()->user()->isFromAdministrativeBranch();
         $query = Order::query();
 
-        // If user is not from Administrative branch only show order from their branch
+        // If user is not from Administrative branch, apply branch-based filtering
         if (!$isFromAdministrativeBranch)
         {
-            $query->where('order_branch_id', auth()->user()->branch_id);
+            $query->where(function($q) {
+                // Part 1: Orders from user's origin branch
+                $q->where('order_branch_id', auth()->user()->branch_id);
+                
+                // Part 2: Check if user's role is authorized for expanded visibility
+                $settings = Setting::first();
+                $authorizedRoles = !empty($settings->order_view_roles) 
+                    ? json_decode($settings->order_view_roles) 
+                    : [];
+                
+                if (in_array(auth()->user()->role->name, $authorizedRoles)) {
+                    // Add orders where user's branch is the processing branch
+                    $q->orWhere('branch_id', auth()->user()->branch_id);
+                }
+            });
         }
 
         $query->where('id', $id);
@@ -421,6 +479,15 @@ class OrdersController extends Controller
             ->where('user_id', auth()->id())
             ->exists();
         
+        // Determine if user is viewing from processing branch (not origin branch)
+        $isViewingFromProcessingBranch = !$isFromAdministrativeBranch && 
+                                         $order->branch_id == auth()->user()->branch_id && 
+                                         $order->order_branch_id != auth()->user()->branch_id;
+        
+        // Get processing branch privacy settings
+        $showPriceToProcessingBranch = $settings->processing_branch_show_price == 1;
+        $showInvoiceToProcessingBranch = $settings->processing_branch_show_invoice == 1;
+        
         // dd($canApproveOfflinePayment);
         return [
             'order' => $order,
@@ -463,6 +530,9 @@ class OrdersController extends Controller
                 OrderStatus::ON_HOLD, OrderStatus::DISPATCHED, OrderStatus::CANCELLED
                 , OrderStatus::DELIVERY_FAILED, OrderStatus::DELIVERED, OrderStatus::SHIPPING, OrderStatus::IN_TRANSIT,
             ]),
+            'isViewingFromProcessingBranch' => $isViewingFromProcessingBranch,
+            'showPriceToProcessingBranch' => $showPriceToProcessingBranch,
+            'showInvoiceToProcessingBranch' => $showInvoiceToProcessingBranch,
             'canPrintOrderCard' => $canGenerateInvoice && !empty($order->order_number) && !empty($order->total_cost),
             'banks' => \App\Models\Bank::all(),
             'settings' => $settings,

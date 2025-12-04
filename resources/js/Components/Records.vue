@@ -12,8 +12,35 @@
             closable
         ></v-alert>
     </div>
-    <div class="d-flex mb-2 bg-white rounded shadow">
-        <v-sheet class="ma-2 pa-2 d-none d-sm-flex">Filter {{ props.name.singular }}</v-sheet>
+    <div class="d-flex mb-2 bg-white rounded shadow flex-wrap">
+        <v-sheet class="ma-2 pa-2 d-none d-sm-flex align-center">Filter {{ props.name.singular }}</v-sheet>
+        
+        <template v-if="props.filters">
+            <div v-for="(filter, index) in props.filters" :key="index" class="ma-2" style="min-width: 150px;">
+                <v-text-field
+                    v-if="filter.type === 'text'"
+                    v-model="search[filter.key]"
+                    :label="filter.label"
+                    hide-details
+                    density="compact"
+                    variant="outlined"
+                    clearable
+                ></v-text-field>
+                <v-select
+                    v-if="filter.type === 'select'"
+                    v-model="search[filter.key]"
+                    :label="filter.label"
+                    :items="filter.options"
+                    item-title="name"
+                    item-value="name"
+                    hide-details
+                    density="compact"
+                    variant="outlined"
+                    clearable
+                ></v-select>
+            </div>
+        </template>
+        <template v-else>
             <v-text-field
                 v-model="search"
                 append-inner-icon="mdi-magnify"
@@ -24,6 +51,7 @@
                 density="compact"
                 variant="outlined"
             ></v-text-field>
+        </template>
     </div>
     <div class="flex flex-row ml-5" v-if="selected.value && selected.value.length > 0">
         <v-icon  v-if="props.endpoint.delete"
@@ -48,7 +76,8 @@
                 item-value="id"
                 @click:row="rowClicked"
                 @update:options="loadRecords"
-                :show-select="props.endpoint.delete">
+                :show-select="props.endpoint.delete"
+                :item-selectable="(item) => !item.protected">
                 <template v-slot:item.actions="{ item }">
                         <!-- <v-icon v-if="props.endpoint.detail"
                             size="small"
@@ -84,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Link, router } from "@inertiajs/vue3";
 import Dialog from '@/Components/Dialog.vue';
 import Snackbar from '@/Components/Snackbar.vue';
@@ -105,34 +134,27 @@ const itemsPerPage = ref(25);
 const totalRecords = ref(0);
 const loadedRecords = ref([]);
 let loading = ref(false);
-const search = ref("");
+
+// Initialize search as object if filters exist, else string
+const search = ref(props.filters ? {} : "");
+
 const pageNo = ref(1);
 const errorMessage = ref("");
 
-// const actions = {
-//     edit: true,
-//     delete: true,
-//     view: true
-// }
-
-// if(props.actions != undefined) {
-//     if (props.actions.edit != undefined) {
-//         actions.edit = props.actions.edit
-//     }
-
-//     if (props.actions.view != undefined) {
-//         actions.view = props.actions.view
-//     }
-
-//     if (props.actions.delete != undefined) {
-//         actions.delete = props.actions.delete
-//     }
-// }
+// Store current options for reloading
+const currentOptions = ref({
+    page: 1,
+    itemsPerPage: 25,
+    sortBy: []
+});
 
 // Function for loading and filtering records from datasource
 let source = null;
 const loadRecords = async ({page, itemsPerPage, sortBy}) => {
-    const payload = {page, itemsPerPage, sortBy, search}
+    // Update current options
+    currentOptions.value = { page, itemsPerPage, sortBy };
+
+    const payload = {page, itemsPerPage, sortBy, search: search.value}
     loading = true;
     pageNo.value = page;
     if(source) source.cancel('Request cancelled by user');
@@ -148,6 +170,12 @@ const loadRecords = async ({page, itemsPerPage, sortBy}) => {
     errorMessage.value = response.data.error ? response.data.error.message : "";
     loading = false;
 }
+
+// Watch search for changes (deep watch for object)
+watch(search, () => {
+    loadRecords(currentOptions.value);
+}, { deep: true });
+
 
 // Link to the Edit Item View
 const editItem = item => {

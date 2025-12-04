@@ -34,11 +34,11 @@ const dataResources = {
             key: "mobile",
             sortable: true
         },
-        // {
-        //     title: "Email",
-        //     key: "email",
-        //     sortable: true
-        // },
+        {
+            title: "Email",
+            key: "email",
+            sortable: true
+        },
         {
             title: "State",
             key: "state.name",
@@ -50,11 +50,23 @@ const dataResources = {
             sortable: false,
             align: "end"
         },
+        {
+            title: "Status",
+            key: "account_status",
+            sortable: true
+        },
     ],
     name: {
         singular: "customer",
         plural: "customers"
-    }
+    },
+    filters: [
+        { key: 'name', label: 'Name', type: 'text' },
+        { key: 'mobile', label: 'Mobile', type: 'text' },
+        { key: 'email', label: 'Email', type: 'text' },
+        { key: 'state', label: 'State', type: 'select', options: usePage().props.states },
+        { key: 'account_status', label: 'Status', type: 'select', options: ['Active', 'Inactive', 'Temporarily Suspended', 'Permanently Suspended'] }
+    ]
 }
 
 </script>

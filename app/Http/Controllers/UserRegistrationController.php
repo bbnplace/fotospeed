@@ -26,6 +26,8 @@ class UserRegistrationController extends Controller
             'groups' => 'nullable|array',
             'groups.*' => sprintf('in:%s', implode(',', Group::getGroupsArray())),
             'send_whatsapp' => 'nullable|boolean',
+            'account_status' => 'nullable|string|in:Active,Inactive,Temporarily Suspended,Permanently Suspended',
+            'intended_use' => 'nullable|string|max:1000',
         ];
     }
 
@@ -60,7 +62,10 @@ class UserRegistrationController extends Controller
                 'email' => $request->email,
                 'mobile' => $request->mobile,
                 'password' => Hash::make($request->password),
-                'state_id' => $state->id
+                'state_id' => $state->id,
+                'account_status' => $request->account_status ?? User::STATUS_ACTIVE,
+                'intended_use' => $request->intended_use,
+                'is_temporary_password' => true,
             ]);
         }
 

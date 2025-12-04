@@ -39,6 +39,11 @@ const dataResources = {
             sortable: false
         },
         {
+            title: "Status",
+            key: "invoice_status.name",
+            sortable: false
+        },
+        {
             title: "Issue Date",
             key: "created_at",
             sortable: false,
@@ -50,6 +55,29 @@ const dataResources = {
         //     sortable: false,
         //     width: '100px'
         // },
+    ],
+    filters: [
+        {
+            type: 'text',
+            key: 'invoice_number',
+            label: 'Invoice Number'
+        },
+        {
+            type: 'text',
+            key: 'order_name',
+            label: 'Order Name'
+        },
+        {
+            type: 'text',
+            key: 'amount',
+            label: 'Amount'
+        },
+        {
+            type: 'select',
+            key: 'status',
+            label: 'Status',
+            options: usePage().props.invoice_statuses
+        }
     ],
     name: {
         singular: "Invoice",

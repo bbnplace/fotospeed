@@ -39,6 +39,32 @@
             ></VTextField>
         </div>
         <div class="mt-4">
+            <VSelect
+                v-if="props.user"
+                id="account_status"
+                label="Account Status"
+                v-model="form.account_status"
+                :items="['Active', 'Inactive', 'Temporarily Suspended', 'Permanently Suspended']"
+                variant="outlined"
+                :hide-details="form.errors.account_status == undefined"
+                :error-messages="form.errors.account_status"
+                density="compact"
+            >
+            </VSelect>
+        </div>
+        <div class="mt-4">
+            <VTextarea
+                id="intended_use"
+                v-model="form.intended_use"
+                label="Intended Use"
+                variant="outlined"
+                :hide-details="form.errors.intended_use == undefined"
+                :error-messages="form.errors.intended_use"
+                density="compact"
+                rows="3"
+            ></VTextarea>
+        </div>
+        <div class="mt-4">
             <VAutocomplete
                 id="state"
                 label="State"
@@ -128,7 +154,9 @@ interface UserEditor {
         id: Number,
         name: String
     },
-    groups: String
+    groups: String,
+    account_status: String,
+    intended_use: String
 }
 
 const props = defineProps<{
@@ -149,7 +177,9 @@ const form = useForm({
     state: props.user ? props.user.state.name : "",
     role: props.userType,
     groups: customerGroups,
-    send_whatsapp: false
+    send_whatsapp: false,
+    account_status: props.user ? props.user.account_status : 'Active',
+    intended_use: props.user ? props.user.intended_use : ""
 });
 
 const submit = () => {

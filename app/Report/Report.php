@@ -197,58 +197,73 @@ class Report
 
     private static function augmentMonthlyReport(array $reportables, $record, $months)
     {
-        $totalRecords = count($record);
-        if ($totalRecords < $months) {
-            $requiredRecords = $months - $totalRecords;
-            $minDate = $record[0]->month;
-
-            $additionalRecords = [];
-            for ($i=$requiredRecords; $i > 0; $i--) {
-                array_push($additionalRecords, [
-                    'month' => self::getPastMonth($minDate, $i),
-                    ...self::initializeReportables($reportables),
-                ]);
-            }
-
-            $collection = collect($additionalRecords);
-            $objectsarray = $collection->map(function ($item) {
-                return (object)$item;
-            });
+        // 1. Create a map of existing records indexed by month
+        $existingRecords = [];
+        foreach ($record as $item) {
+            $existingRecords[$item->month] = $item;
         }
 
-        return count($record) ? $objectsarray->merge($record) : $objectsarray;
+        // 2. Generate the full timeline of expected months
+        $fullTimeline = [];
+        $currentDate = Carbon::now('Africa/Lagos');
+
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $targetDate = $currentDate->copy()->subMonths($i);
+            $monthKey = $targetDate->format('Y-m');
+
+            if (isset($existingRecords[$monthKey])) {
+                $fullTimeline[] = $existingRecords[$monthKey];
+            } else {
+                $emptyRecord = [
+                    'month' => $monthKey,
+                    ...self::initializeReportables($reportables),
+                ];
+                $fullTimeline[] = (object)$emptyRecord;
+            }
+        }
+
+        return collect($fullTimeline);
     }
 
 
     private static function augmentHourlyReport(array $reportables, $record, $hours)
     {
-        $totalRecords = count($record);
-        if ($totalRecords < $hours) {
-            $requiredRecords = $hours - $totalRecords;
-            $minDate = isset($record[0]) ? $record[0]->hour : date('Y-m-d H');
-
-            $additionalRecords = [];
-            for ($i=$requiredRecords; $i > 0; $i--) {
-                array_push($additionalRecords, [
-                    'hour' => self::getPastHour($minDate, $i),
-                    ...self::initializeReportables($reportables),
-                ]);
-            }
-
-            $collection = collect($additionalRecords);
-            $objectsarray = $collection->map(function ($item) {
-                return (object)$item;
-            });
+        // 1. Create a map of existing records indexed by hour
+        $existingRecords = [];
+        foreach ($record as $item) {
+            $existingRecords[$item->hour] = $item;
         }
 
-        return count($record) ? $objectsarray->merge($record) : $objectsarray;
+        // 2. Generate the full timeline of expected hours
+        $fullTimeline = [];
+        $currentDate = Carbon::now('Africa/Lagos'); // Using the timezone from getPastHour
+        
+        // We want the last $hours hours, ending with the current hour
+        for ($i = $hours - 1; $i >= 0; $i--) {
+            $targetDate = $currentDate->copy()->subHours($i);
+            $hourKey = $targetDate->format('Y-m-d H');
+            
+            if (isset($existingRecords[$hourKey])) {
+                $fullTimeline[] = $existingRecords[$hourKey];
+            } else {
+                // Create a zero-filled record
+                $emptyRecord = [
+                    'hour' => $hourKey,
+                    ...self::initializeReportables($reportables),
+                ];
+                $fullTimeline[] = (object)$emptyRecord;
+            }
+        }
+
+        return collect($fullTimeline);
     }
 
 
     private static function getHourlyReport(array $reportables, int $hours)
     {
         $record = self::getHourlyReportData($reportables, $hours);
-        return self::generateLineChartData($reportables, (count($record) < $hours ? self::augmentHourlyReport($reportables, $record, $hours)  : $record), 'hour');
+        // Always augment to ensure gaps are filled
+        return self::generateLineChartData($reportables, self::augmentHourlyReport($reportables, $record, $hours), 'hour');
     }
 
 
@@ -292,39 +307,48 @@ class Report
 
     private static function augmentDailyReport(array $reportables, $record, $days)
     {
-        $totalRecords = count($record);
-        if ($totalRecords < $days) {
-            $requiredRecords = $days - $totalRecords;
-            $minDate = $record[0]->date;
-            $additionalRecords = [];
-            for ($i=$requiredRecords; $i > 0; $i--) {
-                array_push($additionalRecords, [
-                    ...self::initializeReportables($reportables),
-                    'date' => self::getPastDay($minDate, $i),
-                ]);
-            }
-
-            $collection = collect($additionalRecords);
-            $objectsarray = $collection->map(function ($item) {
-                return (object)$item;
-            });
+        // 1. Create a map of existing records indexed by date
+        $existingRecords = [];
+        foreach ($record as $item) {
+            $existingRecords[$item->date] = $item;
         }
 
-        return count($record) ? $objectsarray->merge($record) : $objectsarray;
+        // 2. Generate the full timeline of expected days
+        $fullTimeline = [];
+        $currentDate = Carbon::now('Africa/Lagos');
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $targetDate = $currentDate->copy()->subDays($i);
+            $dateKey = $targetDate->format('Y-m-d');
+
+            if (isset($existingRecords[$dateKey])) {
+                $fullTimeline[] = $existingRecords[$dateKey];
+            } else {
+                $emptyRecord = [
+                    'date' => $dateKey,
+                    ...self::initializeReportables($reportables),
+                ];
+                $fullTimeline[] = (object)$emptyRecord;
+            }
+        }
+
+        return collect($fullTimeline);
     }
 
 
     private static function getDailyReport(array $reportables, int $days): array
     {
         $record = self::getDailyReportData($reportables, $days);
-        return self::generateLineChartData($reportables, (count($record) < $days ? self::augmentDailyReport($reportables, $record, $days) : $record), 'date');
+        // Always augment to ensure gaps are filled
+        return self::generateLineChartData($reportables, self::augmentDailyReport($reportables, $record, $days), 'date');
     }
 
 
     private static function getMonthlyReport(array $reportables, int $months): array
     {
         $record = self::getMonthlyReportData($reportables, $months);
-        return self::generateLineChartData($reportables, $record, 'month');
+        // Always augment to ensure gaps are filled
+        return self::generateLineChartData($reportables, self::augmentMonthlyReport($reportables, $record, $months), 'month');
     }
 
     private static function generateLineChartData(array $reportables, $records, $xkey): array

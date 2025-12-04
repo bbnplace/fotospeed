@@ -79,4 +79,15 @@ class NotificationsController extends Controller
             'unread' => $unreadNotification,
         ];
     }
+    public function markAllRead()
+    {
+        Notification::where('user_id', auth()->user()->id)->update(['read' => 1]);
+        return back()->with('note', 'All notifications marked as read.');
+    }
+
+    public function deleteAll()
+    {
+        Notification::where('user_id', auth()->user()->id)->delete();
+        return back()->with('note', 'All notifications deleted.');
+    }
 }

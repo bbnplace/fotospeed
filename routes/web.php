@@ -190,18 +190,8 @@ Route::prefix('ng')->group(function () {
         return view('marketing.cart');
     })->name('cart');
 
-    Route::get('/signup', function () {
-        return view('marketing.signup', [
-            'title' => 'Sign Up',
-            'description' => 'Create an account to get started with Fotospeed.',
-            'page' => 'signup',
-        ]);
-    })->middleware('guest')->name('signup');
-
-    Route::post('/signup', function () {
-        // Handle signup logic here
-        return redirect()->route('home')->with('success', 'Signup successful!');
-    })->middleware('guest')->name('signup');
+    Route::get('/signup', [App\Http\Controllers\CustomerRegistrationController::class, 'create'])->middleware('guest')->name('signup');
+    Route::post('/signup', [App\Http\Controllers\CustomerRegistrationController::class, 'store'])->middleware('guest')->name('signup.store');
 
     Route::get('/signin', function () {
         return view('marketing.signin', [

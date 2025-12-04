@@ -15,6 +15,11 @@ class User extends Authenticatable
 
     protected $username = 'mobile';
 
+    const STATUS_ACTIVE = 'Active';
+    const STATUS_INACTIVE = 'Inactive';
+    const STATUS_SUSPENDED_TEMP = 'Temporarily Suspended';
+    const STATUS_SUSPENDED_PERM = 'Permanently Suspended';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -29,7 +34,10 @@ class User extends Authenticatable
         'state_id',
         'branch_id',
         'auto_login_token_expires_at',
-        'auto_login_token'
+        'auto_login_token',
+        'account_status',
+        'intended_use',
+        'is_temporary_password'
     ];
 
     /**
@@ -50,6 +58,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_temporary_password' => 'boolean',
     ];
 
     public function role()

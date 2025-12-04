@@ -92,6 +92,11 @@ class SettingsController extends Controller
             'customer_creation_whatsapp_template' => 'nullable|string|max:64',
             'bank_name' => 'nullable|string|max:128',
             'account_number' => 'nullable|string|max:20',
+            'account_name' => 'nullable|string|max:128',
+            'order_view_roles' => 'required|array',
+            'order_view_roles.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
+            'processing_branch_show_price' => 'nullable|boolean',
+            'processing_branch_show_invoice' => 'nullable|boolean',
         ];
 
         $request->validate($rules);
@@ -146,6 +151,10 @@ class SettingsController extends Controller
         $settings->customer_creation_whatsapp_template = $request->customer_creation_whatsapp_template == 'None' ? null : $request->customer_creation_whatsapp_template;
         $settings->bank_name = $request->bank_name;
         $settings->account_number = $request->account_number;
+        $settings->account_name = $request->account_name;
+        $settings->order_view_roles = json_encode($request->order_view_roles);
+        $settings->processing_branch_show_price = $request->processing_branch_show_price ?? false;
+        $settings->processing_branch_show_invoice = $request->processing_branch_show_invoice ?? false;
         $settings->save();
 
         return redirect(route('settings'));

@@ -20,7 +20,8 @@ class CustomersController extends Controller
         if (auth()->user()->isAdmin()) {
             return Inertia::render('Backend/Customer/List', [
                 'endpoint' => route('customers.records'),
-                'note' => session('note')
+                'note' => session('note'),
+                'states' => State::all(['name'])
             ]);
         } else {
             return Inertia::render('Backend/Customer/Finder', [
@@ -50,12 +51,33 @@ class CustomersController extends Controller
         }
 
         if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
-                $query->where(function($query) use ($searchTerm){
-                    $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm))
-                        ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $searchTerm))
-                        ->orWhere('email', 'LIKE', sprintf('%%%s%%', $searchTerm));
+            // Handle Vue ref object if passed directly
+            $filters = isset($search['_value']) ? $search['_value'] : $search;
+
+            if (is_array($filters)) {
+                if (!empty($filters['name'])) {
+                    $query->where('name', 'LIKE', '%' . $filters['name'] . '%');
+                }
+                if (!empty($filters['mobile'])) {
+                    $query->where('mobile', 'LIKE', '%' . $filters['mobile'] . '%');
+                }
+                if (!empty($filters['email'])) {
+                    $query->where('email', 'LIKE', '%' . $filters['email'] . '%');
+                }
+                if (!empty($filters['state'])) {
+                    $query->whereHas('state', function ($q) use ($filters) {
+                        $q->where('name', $filters['state']);
+                    });
+                }
+                if (!empty($filters['account_status'])) {
+                    $query->where('account_status', $filters['account_status']);
+                }
+            } elseif (is_string($filters) && !empty($filters)) {
+                // Fallback for single search string
+                $query->where(function($query) use ($filters){
+                    $query->where('name', 'LIKE', sprintf('%%%s%%', $filters))
+                        ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $filters))
+                        ->orWhere('email', 'LIKE', sprintf('%%%s%%', $filters));
                 });
             }
         }
@@ -146,6 +168,8 @@ class CustomersController extends Controller
             'role' => 'required|string|min:5|max:64|exists:roles,name',
             'groups' => 'nullable|array',
             'groups.*' => sprintf('in:%s', implode(',', Group::getGroupsArray())),
+            'account_status' => 'required|string|in:Active,Inactive,Temporarily Suspended,Permanently Suspended',
+            'intended_use' => 'nullable|string|max:1000',
         ];
 
         $request->validate($rules);
@@ -158,9 +182,12 @@ class CustomersController extends Controller
         $user->state_id = $state->id;
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->account_status = $request->account_status;
+        $user->intended_use = $request->intended_use;
 
         if (!empty($request->password)) {
             $user->password = Hash::make($request->password);
+            $user->is_temporary_password = true;
         }
 
         $user->save();

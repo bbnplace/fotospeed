@@ -99,7 +99,7 @@
                                     {{ order.name }}
                                 </VCol>
                             </VRow>
-                            <VRow>
+                            <VRow v-if="shouldShowPrice">
                                 <VCol v-if="$page.props.auth.user.role != 'Customer'">
                                     <b>Price</b><br />
                                     ₦{{ price ? formatter.format(price) : " --:--" }} <VBtn
@@ -154,7 +154,7 @@
                                     >Issue Invoice</VBtn>
                                 </VCol>
                             </VRow>
-                            <VRow v-if="hasInvoice">
+                            <VRow v-if="shouldShowInvoice && hasInvoice">
                                 <VCol cols="12">
                                     <b>Invoice Status</b><br />
                                     {{ invoicePaid ? "Paid" : "Unpaid" }}
@@ -457,6 +457,15 @@ const canEditPrice = usePage().props.canEditPrice;
 const canEditWaybill = usePage().props.canEditWaybill;
 const canForwardToNextProcess = usePage().props.canForwardToNextProcess;
 const showOverlay = ref(false);
+
+// Processing branch viewing context and privacy settings
+const isViewingFromProcessingBranch = usePage().props.isViewingFromProcessingBranch;
+const showPriceToProcessingBranch = usePage().props.showPriceToProcessingBranch;
+const showInvoiceToProcessingBranch = usePage().props.showInvoiceToProcessingBranch;
+
+// Determine if we should show price and invoice
+const shouldShowPrice = !isViewingFromProcessingBranch || showPriceToProcessingBranch;
+const shouldShowInvoice = !isViewingFromProcessingBranch || showInvoiceToProcessingBranch;
 
 const orderCancelResponse = ref("");
 const cancellingOrderProgress = ref(false);

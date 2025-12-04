@@ -83,6 +83,38 @@ const reportRequester = props.clientRoute;
 const reportables = props.reportables;
 
 const header = [];
+
+// Determine time column from first record
+let timeKey = 'date';
+let timeTitle = 'Date';
+
+if (props.records && props.records.length > 0) {
+    const firstRecord = props.records[0];
+    if ('hour' in firstRecord) {
+        timeKey = 'hour';
+        timeTitle = 'Time';
+    } else if ('month' in firstRecord) {
+        timeKey = 'month';
+        timeTitle = 'Month';
+    } else if ('year' in firstRecord) {
+        timeKey = 'year';
+        timeTitle = 'Year';
+    }
+} else {
+    // Fallback based on key prop if no records
+    if (key === '24hrs') {
+        timeKey = 'hour';
+        timeTitle = 'Time';
+    }
+}
+
+// Add Time/Date column first
+header.push({
+    title: timeTitle,
+    key: timeKey,
+    sortable: true
+});
+
 for (let index = 0; index < reportables.length; index++) {
     const element = reportables[index];
     const title = element.replace('_', ' ').replace(/\b\w/g, function (char) {

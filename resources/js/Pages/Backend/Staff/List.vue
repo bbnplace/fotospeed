@@ -34,11 +34,11 @@ const dataResources = {
             key: "mobile",
             sortable: true
         },
-        // {
-        //     title: "Email",
-        //     key: "email",
-        //     sortable: true
-        // },
+        {
+            title: "Email",
+            key: "email",
+            sortable: true
+        },
         {
             title: "Branch",
             key: "branch.name",
@@ -54,6 +54,13 @@ const dataResources = {
     name: {
         singular: "Staff",
         plural: "Staff"
-    }
+    },
+    filters: [
+        { key: 'name', label: 'Name', type: 'text' },
+        { key: 'mobile', label: 'Mobile', type: 'text' },
+        { key: 'email', label: 'Email', type: 'text' },
+        { key: 'role', label: 'Role', type: 'select', options: usePage().props.roles },
+        { key: 'branch', label: 'Branch', type: 'select', options: usePage().props.branches }
+    ]
 }
 </script>

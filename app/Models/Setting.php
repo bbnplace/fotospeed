@@ -56,5 +56,8 @@ class Setting extends Model
         'customer_creation_whatsapp_template',
         'bank_name',
         'account_number',
+        'order_view_roles',
+        'processing_branch_show_price',
+        'processing_branch_show_invoice',
     ];
 }

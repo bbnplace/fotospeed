@@ -496,6 +496,51 @@
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VCombobox
+                                        id="order_view_roles"
+                                        v-model="form.order_view_roles"
+                                        label="Roles That Can View Processing Branch Orders"
+                                        :items="roles"
+                                        variant="outlined"
+                                        :hide-details="form.errors.order_view_roles == undefined"
+                                        :error-messages="form.errors.order_view_roles"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        density="compact"
+                                    ></VCombobox>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Users with selected roles will see orders from their origin branch (where order was created) 
+                                        PLUS orders where their branch is the processing branch (regardless of where order originated).
+                                    </p>
+                                </VCol>
+                            </VRow>
+                            <h4 class="my-3">Processing Branch Privileges</h4>
+                            <p class="text-sm text-gray-600 mb-3">
+                                Control what users can see when viewing orders where their branch is the processing branch (not the origin branch).
+                            </p>
+                            <VRow>
+                                <VCol cols="12" md="6">
+                                    <VCheckbox
+                                        id="processing_branch_show_price"
+                                        v-model="form.processing_branch_show_price"
+                                        label="Show Price"
+                                        :hide-details="form.errors.processing_branch_show_price == undefined"
+                                        :error-messages="form.errors.processing_branch_show_price"
+                                    ></VCheckbox>
+                                </VCol>
+                                <VCol cols="12" md="6">
+                                    <VCheckbox
+                                        id="processing_branch_show_invoice"
+                                        v-model="form.processing_branch_show_invoice"
+                                        label="Show Invoice Link"
+                                        :hide-details="form.errors.processing_branch_show_invoice == undefined"
+                                        :error-messages="form.errors.processing_branch_show_invoice"
+                                    ></VCheckbox>
+                                </VCol>
+                            </VRow>
                         </VCard>
                     </v-window-item>
                     <v-window-item value="payment">
@@ -601,6 +646,18 @@
                                         variant="outlined"
                                         :hide-details="form.errors.account_number == undefined"
                                         :error-messages="form.errors.account_number"
+                                        density="compact"
+                                        type="text"
+                                    ></VTextField>
+                                </VCol>
+                                <VCol cols="12" sm="6">
+                                    <VTextField
+                                        id="account_name"
+                                        v-model="form.account_name"
+                                        label="Account Name"
+                                        variant="outlined"
+                                        :hide-details="form.errors.account_name == undefined"
+                                        :error-messages="form.errors.account_name"
                                         density="compact"
                                         type="text"
                                     ></VTextField>
@@ -822,6 +879,12 @@ const form = useForm({
     auto_delete_order_files_after: settings.auto_delete_order_files_after ?? 'Two Weeks',
     bank_name: settings.bank_name,
     account_number: settings.account_number,
+    account_name: settings.account_name,
+    order_view_roles: settings.order_view_roles 
+        ? JSON.parse(settings.order_view_roles) 
+        : ['Reception', 'Management', 'Administrator', 'System Admin'],
+    processing_branch_show_price: settings.processing_branch_show_price == 1,
+    processing_branch_show_invoice: settings.processing_branch_show_invoice == 1,
 });
 
 const loadingIdentities = ref(false);
@@ -853,6 +916,7 @@ const submit = () =>{
         onError: (errors) => {
             handleReportablesError(errors);
             handleReportViewersError(errors);
+            handleOrderViewRolesError(errors);
         }
     })
 }
@@ -879,6 +943,20 @@ const handleReportViewersError = (errors) =>{
         }
     })
     form.errors.reportViewers = invalidReportViewers.length > 0 ? [`The following values are not supported: ${invalidReportViewers.join(', ')}`] : []
+}
+
+const handleOrderViewRolesError = (errors) => {
+    const errorKeys = Object.keys(errors);
+    const invalidRoles = [];
+    errorKeys.forEach(element => {
+        if (element.indexOf('order_view_roles.') === 0) {
+            const parts = element.split('.');
+            invalidRoles.push(form.order_view_roles[parts[1]]);
+        }
+    });
+    form.errors.order_view_roles = invalidRoles.length > 0 
+        ? [`The following values are not supported: ${invalidRoles.join(', ')}`] 
+        : [];
 }
 
 onMounted(() => {

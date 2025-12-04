@@ -10,7 +10,7 @@
                             {{ notification.title }}
                         </VCardTitle>
                         <VCardText>
-                            <p>{{ notification.message }}</p>
+                            <p v-html="notification.message"></p>
                             <div class="text-grey">{{ moment(notification.created_at).calendar() }}</div>
                         </VCardText>
                     </v-card>

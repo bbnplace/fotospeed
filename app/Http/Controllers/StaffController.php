@@ -27,7 +27,9 @@ class StaffController extends Controller
     {
         return Inertia::render('Backend/Staff/List', [
             'endpoint' => route('staff.records'),
-            'note' => session('note')
+            'note' => session('note'),
+            'roles' => Role::where('name', '!=', 'Customer')->get(['name']),
+            'branches' => Branch::all(['name'])
         ]);
     }
 
@@ -47,12 +49,35 @@ class StaffController extends Controller
         // $query->whereNot('role_id', $systemAdminRole->id);
 
         if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
-               $query->where(function($query) use($searchTerm){
-                    $query->where('name', 'LIKE', sprintf('%%%s%%', $searchTerm))
-                         ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $searchTerm))
-                         ->orWhere('email', 'LIKE', sprintf('%%%s%%', $searchTerm));
+            // Handle Vue ref object if passed directly
+            $filters = isset($search['_value']) ? $search['_value'] : $search;
+
+            if (is_array($filters)) {
+                if (!empty($filters['name'])) {
+                    $query->where('name', 'LIKE', '%' . $filters['name'] . '%');
+                }
+                if (!empty($filters['mobile'])) {
+                    $query->where('mobile', 'LIKE', '%' . $filters['mobile'] . '%');
+                }
+                if (!empty($filters['email'])) {
+                    $query->where('email', 'LIKE', '%' . $filters['email'] . '%');
+                }
+                if (!empty($filters['role'])) {
+                    $query->whereHas('role', function ($q) use ($filters) {
+                        $q->where('name', $filters['role']);
+                    });
+                }
+                if (!empty($filters['branch'])) {
+                    $query->whereHas('branch', function ($q) use ($filters) {
+                        $q->where('name', $filters['branch']);
+                    });
+                }
+            } elseif (is_string($filters) && !empty($filters)) {
+                // Fallback for single search string
+               $query->where(function($query) use($filters){
+                    $query->where('name', 'LIKE', sprintf('%%%s%%', $filters))
+                         ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $filters))
+                         ->orWhere('email', 'LIKE', sprintf('%%%s%%', $filters));
                });
             }
         }

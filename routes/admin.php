@@ -71,6 +71,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::post('panel/invoices', [InvoicesController::class, 'records'])->name('invoice.records');
     Route::get('/panel/invoice/{id}', [InvoicesController::class, 'view'])->name('invoice');
     Route::post('panel/invoice/create', [InvoicesController::class, 'create'])->name('invoice.create');
+    Route::post('panel/invoice/{id}/submit-payment', [InvoicesController::class, 'submitPayment'])->name('invoice.submit-payment');
 
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');
@@ -132,6 +133,8 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/notifications', [NotificationsController::class,'index'])->name('notifications');
     Route::get('/notification/{id}', [NotificationsController::class,'notification'])->name('notification.view');
     Route::get('/recent-notifications', [NotificationsController::class,'recent'])->name('notifications.recent');
+    Route::post('/notifications/mark-all-read', [NotificationsController::class,'markAllRead'])->name('notifications.mark-all-read');
+    Route::delete('/notifications/delete-all', [NotificationsController::class,'deleteAll'])->name('notifications.delete-all');
 
     // Manage Order
     Route::put('/order/{id}/hold', [OrdersController::class, 'hold'])->name('order.hold');

@@ -52,6 +52,12 @@ class RolesController extends Controller
                 'name',
             ]);
 
+        // Mark protected roles that cannot be deleted
+        $protectedRoles = ['Customer', 'Administrator', 'System Admin'];
+        foreach ($roles as $role) {
+            $role->protected = in_array($role->name, $protectedRoles);
+        }
+
         return [
             'records' => $roles,
             'totalRecords' => $rolesCount,
@@ -121,6 +127,17 @@ class RolesController extends Controller
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
+            // Define protected roles that cannot be deleted
+            $protectedRoles = ['Customer', 'Administrator', 'System Admin'];
+            
+            // Check if any of the selected roles are protected
+            $selectedRoles = Role::whereIn('id', $request->ids)->pluck('name')->toArray();
+            $protectedFound = array_intersect($selectedRoles, $protectedRoles);
+            
+            if (!empty($protectedFound)) {
+                return redirect()->route('roles')->with('note', 'Cannot delete protected system roles: ' . implode(', ', $protectedFound));
+            }
+            
             Role::whereIn('id', $request->ids)->delete();
 
             return redirect()->route('roles')->with('note', 'Selected roles have been deleted');
