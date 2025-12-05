@@ -58,7 +58,9 @@ const markAllRead = () => {
 
 const deleteAll = () => {
     if (confirm('Are you sure you want to delete all notifications? This cannot be undone.')) {
-        router.delete(route('notifications.delete-all'));
+        router.delete(route('notifications.delete-all'), {
+            onSuccess: () => window.location.reload()
+        });
     }
 }
 

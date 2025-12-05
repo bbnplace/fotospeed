@@ -173,79 +173,93 @@ class InvoicesController extends Controller
     public function submitPayment(Request $request, $id)
     {
         // Validate the request
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|string|in:Transfer,USSD,Bank Deposit',
-            'customer_bank' => 'required|string|max:128',
-            'depositor_name' => 'required|string|max:128',
-            'transaction_reference' => 'nullable|string|max:128',
-            'payment_date' => 'required|date|before_or_equal:today',
-        ]);
+    $validated = $request->validate([
+        'amount' => 'required|numeric|min:0',
+        'payment_method' => 'required|string|in:Transfer,USSD,Bank Deposit,Cash',
+        'customer_bank' => 'required_unless:payment_method,Cash|nullable|string|max:128',
+        'depositor_name' => 'required_unless:payment_method,Cash|nullable|string|max:128',
+        'transaction_reference' => 'nullable|string|max:128',
+        'payment_date' => 'required|date|before_or_equal:today',
+        'who_received_cash' => 'required_if:payment_method,Cash|nullable|string|max:128',
+    ]);
 
-        // Check if invoice exists
-        $invoice = Invoice::findOrFail($id);
+    // Check if invoice exists
+    $invoice = Invoice::findOrFail($id);
 
-        if ($invoice->invoiceStatus->name != 'Unpaid') {
-            return response()->json(['message' => 'Invoice is already paid or cancelled.'], 403);
-        }
+    if ($invoice->invoiceStatus->name != 'Unpaid') {
+        return response()->json(['message' => 'Invoice is already paid or cancelled.'], 403);
+    }
 
-        $settings = Setting::first();
+    $settings = Setting::first();
 
-        // Prepare payment data
-        $paymentData = [
-            'amountPaid' => $validated['amount'],
-            'paymentMethod' => 'Bank Transfer', // Normalized for admin view check
-            'subMethod' => $validated['payment_method'], // Store specific method (Transfer, USSD, etc)
-            'customerBank' => $validated['customer_bank'],
-            'customerAccountName' => $validated['depositor_name'],
-            'customerAccountNumber' => null, // Not collected
-            'transactionReference' => $validated['transaction_reference'],
-            'paymentDate' => $validated['payment_date'],
-            'organizationBank' => $settings->bank_name,
-            'organizationAccountNumber' => $settings->account_number,
-            'organizationAccountName' => $settings->account_name ?? $settings->org_name,
-            'status' => 'Pending Verification',
-            'submitted_at' => now()->toDateTimeString(),
-            'submitted_by' => auth()->user()->name . ' (Staff)',
-        ];
+    // Prepare payment data
+    $isCash = $validated['payment_method'] === 'Cash';
+    
+    $paymentData = [
+        'amountPaid' => $validated['amount'],
+        'paymentMethod' => $isCash ? 'Cash' : 'Bank Transfer',
+        'subMethod' => $validated['payment_method'], // Store specific method (Transfer, USSD, etc)
+        'customerBank' => $isCash ? null : $validated['customer_bank'],
+        'customerAccountName' => $isCash ? null : $validated['depositor_name'],
+        'customerAccountNumber' => null, // Not collected
+        'transactionReference' => $validated['transaction_reference'],
+        'paymentDate' => $validated['payment_date'],
+        'organizationBank' => $settings->bank_name,
+        'organizationAccountNumber' => $settings->account_number,
+        'organizationAccountName' => $settings->account_name ?? $settings->org_name,
+        'whoReceivedCash' => $isCash ? $validated['who_received_cash'] : null,
+        'status' => 'Pending Verification',
+        'submitted_at' => now()->toDateTimeString(),
+        'submitted_by' => auth()->user()->name . ' (Staff)',
+    ];
 
-        // Update invoice
-        $invoice->payment_method = 'Bank Transfer';
-        $invoice->customer_payment_proof = json_encode($paymentData);
-        $invoice->save();
+    // Update invoice
+    $invoice->payment_method = $isCash ? 'Cash' : 'Bank Transfer';
+    $invoice->customer_payment_proof = json_encode($paymentData);
+    $invoice->save();
 
-        // Send notification to approvers
-        $order = $invoice->order;
-        $approvalRoleName = $settings->who_approves_offline_payment ?? 'Administrator';
-        $approvalRole = \App\Models\Role::where('name', $approvalRoleName)->first();
+    // Send notification to approvers
+    $order = $invoice->order;
+    $approvalRoleName = $settings->who_approves_offline_payment ?? 'Administrator';
+    $approvalRole = \App\Models\Role::where('name', $approvalRoleName)->first();
+    
+    if (!empty($approvalRole)) {
+        $eligibleApprovers = \App\Models\User::where('role_id', $approvalRole->id)
+            ->where('branch_id', $order->branch_id)
+            ->get();
         
-        if (!empty($approvalRole)) {
-            $eligibleApprovers = \App\Models\User::where('role_id', $approvalRole->id)
-                ->where('branch_id', $order->branch_id)
-                ->get();
-            
-            if (!empty($eligibleApprovers)) {
-                foreach ($eligibleApprovers as $approver) {
-                    $approver->notify(new \App\Notifications\GenericNotification([
-                        'message' => sprintf(
-                            'Staff %s submitted bank transfer payment for Invoice #%s. Amount: ₦%s, Bank: %s, Reference: %s. View Details.',
-                            auth()->user()->name,
-                            $invoice->id,
-                            number_format($validated['amount'], 2),
-                            $validated['customer_bank'],
-                            $validated['transaction_reference']
-                        ),
-                        'url' => route('invoice', $invoice->id),
-                        'user' => $approver,
-                        'type' => ['broadcast', 'database']
-                    ]));
-                }
+        if (!empty($eligibleApprovers)) {
+            $message = $isCash 
+                ? sprintf(
+                    'Staff %s submitted CASH payment for Invoice #%s. Amount: ₦%s, Received By: %s. View Details.',
+                    auth()->user()->name,
+                    $invoice->id,
+                    number_format($validated['amount'], 2),
+                    $validated['who_received_cash']
+                )
+                : sprintf(
+                    'Staff %s submitted bank transfer payment for Invoice #%s. Amount: ₦%s, Bank: %s, Reference: %s. View Details.',
+                    auth()->user()->name,
+                    $invoice->id,
+                    number_format($validated['amount'], 2),
+                    $validated['customer_bank'],
+                    $validated['transaction_reference']
+                );
+
+            foreach ($eligibleApprovers as $approver) {
+                $approver->notify(new \App\Notifications\GenericNotification([
+                    'message' => $message,
+                    'url' => route('invoice', $invoice->id),
+                    'user' => $approver,
+                    'type' => ['broadcast', 'database']
+                ]));
             }
         }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Payment submitted successfully! The payment is pending verification.'
-        ]);
     }
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Payment submitted successfully! The payment is pending verification.'
+    ]);
+}
 }

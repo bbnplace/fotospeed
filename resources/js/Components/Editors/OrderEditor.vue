@@ -57,7 +57,6 @@
                             variant="outlined"
                             density="comfortable"
                             type="number"
-                            prefix="₦ "
                             :hide-details="masterForm.errors.price == undefined"
                             :error-messages="masterForm.errors.price"
                             prepend-inner-icon="mdi-currency-ngn"
@@ -71,8 +70,10 @@
                     <VCol cols="12">
                         <VAutocomplete
                             v-model="masterForm.branch"
-                            label="Processing Branch"
+                            label="Pickup Branch"
                             :items="branches"
+                            item-title="name"
+                            item-value="name"
                             variant="outlined"
                             density="comfortable"
                             :hide-details="masterForm.errors.branch == undefined"
@@ -80,6 +81,10 @@
                             prepend-inner-icon="mdi-office-building"
                             class="modern-input"
                         ></VAutocomplete>
+                        <div v-if="selectedBranchAddress" class="text-caption text-grey ml-2 mt-1">
+                            <v-icon size="small" class="mr-1">mdi-map-marker</v-icon>
+                            {{ selectedBranchAddress }}
+                        </div>
                     </VCol>
                 </VRow>
 
@@ -294,7 +299,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { Head, usePage, useForm } from '@inertiajs/vue3';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
 import OrderForm from '@/Components/OrderForm.vue';
@@ -335,6 +340,12 @@ const masterForm = useForm({
     customerName: null,
     customerEmail: null,
     password: null,
+});
+
+const selectedBranchAddress = computed(() => {
+    if (!masterForm.branch || masterForm.branch === 'Select') return null;
+    const branch = branches.find(b => b.name === masterForm.branch);
+    return branch ? branch.address : null;
 });
 
 const handleData = data => {

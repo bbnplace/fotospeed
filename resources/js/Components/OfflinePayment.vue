@@ -6,7 +6,7 @@
     <v-overlay
         v-model="showPaymentConfirmationOverlay"
         activator="parent"
-        scroll-strategy="static"
+        scroll-strategy="block"
         location-strategy="connected"
     >
         <v-card min-width="250" max-width="500" class="p-2" >

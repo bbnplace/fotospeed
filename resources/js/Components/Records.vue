@@ -71,12 +71,12 @@
                 :loading="loading"
                 :items-length="totalRecords"
                 v-model:items-per-page="itemsPerPage"
-                :search="search"
+                :search="typeof search === 'string' ? search : undefined"
                 :headers="props.headers"
                 item-value="id"
                 @click:row="rowClicked"
                 @update:options="loadRecords"
-                :show-select="props.endpoint.delete"
+                :show-select="!!props.endpoint.delete"
                 :item-selectable="(item) => !item.protected">
                 <template v-slot:item.actions="{ item }">
                         <!-- <v-icon v-if="props.endpoint.detail"

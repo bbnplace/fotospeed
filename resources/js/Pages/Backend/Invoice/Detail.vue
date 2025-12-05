@@ -105,34 +105,46 @@
                                             <VSelect
                                                 v-model="bankPaymentForm.payment_method"
                                                 label="Payment Method"
-                                                :items="['Transfer', 'USSD', 'Bank Deposit']"
+                                                :items="['Transfer', 'USSD', 'Bank Deposit', 'Cash']"
                                                 variant="outlined"
                                                 density="compact"
                                                 :error-messages="bankPaymentFormErrors.payment_method"
                                                 required
                                             ></VSelect>
                                         </VCol>
-                                        <VCol cols="12" sm="6">
-                                            <VAutocomplete
-                                                v-model="bankPaymentForm.customer_bank"
-                                                label="Customer Bank"
-                                                :items="banks"
-                                                variant="outlined"
-                                                density="compact"
-                                                :error-messages="bankPaymentFormErrors.customer_bank"
-                                                required
-                                            ></VAutocomplete>
-                                        </VCol>
-                                        <VCol cols="12" sm="6">
+                                        <VCol cols="12" sm="6" v-if="bankPaymentForm.payment_method == 'Cash'">
                                             <VTextField
-                                                v-model="bankPaymentForm.depositor_name"
-                                                label="Depositor/Account Name"
+                                                v-model="bankPaymentForm.who_received_cash"
+                                                label="Who Received Cash"
                                                 variant="outlined"
                                                 density="compact"
-                                                :error-messages="bankPaymentFormErrors.depositor_name"
+                                                :error-messages="bankPaymentFormErrors.who_received_cash"
                                                 required
                                             ></VTextField>
                                         </VCol>
+                                        <template v-else>
+                                            <VCol cols="12" sm="6">
+                                                <VAutocomplete
+                                                    v-model="bankPaymentForm.customer_bank"
+                                                    label="Bank"
+                                                    :items="banks"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.customer_bank"
+                                                    required
+                                                ></VAutocomplete>
+                                            </VCol>
+                                            <VCol cols="12" sm="6">
+                                                <VTextField
+                                                    v-model="bankPaymentForm.depositor_name"
+                                                    label="Depositor/Account Name"
+                                                    variant="outlined"
+                                                    density="compact"
+                                                    :error-messages="bankPaymentFormErrors.depositor_name"
+                                                    required
+                                                ></VTextField>
+                                            </VCol>
+                                        </template>
                                         <VCol cols="12" sm="6">
                                             <VTextField
                                                 v-model="bankPaymentForm.transaction_reference"
@@ -218,6 +230,10 @@
                              <VListItem>
                                 <template v-slot:prepend><b class="mr-2">Date:</b></template>
                                 {{ bankPaymentForm.payment_date }}
+                            </VListItem>
+                            <VListItem v-if="bankPaymentForm.payment_method == 'Cash'">
+                                <template v-slot:prepend><b class="mr-2">Received By:</b></template>
+                                {{ bankPaymentForm.who_received_cash }}
                             </VListItem>
                         </VList>
                     </VCardText>
@@ -308,34 +324,45 @@
         </Panel>
 
         <Panel snippet-title="Customer Payment Proof" v-if="customerPaymentProof">
-            <VRow class="mb-3">
-                <VCol cols="12" sm="6" md="4">
-                    <h5 class="my-3 text-blue">Customer</h5>
-                    <VRow>
-                        <VCol cols="12" class="pb-0"><b>Name</b><br />{{ customerPaymentProof.customerAccountName ?? '-' }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ customerPaymentProof.customerBank }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ customerPaymentProof.customerAccountNumber ?? '-' }}</VCol>
-                    </VRow>
-                </VCol>
-                <VCol cols="12" sm="6" md="4">
-                    <h5 class="my-3 text-blue">Receiving Account</h5>
-                    <VRow>
-                        <VCol cols="12" class="pb-0"><b>Name</b><br />{{ customerPaymentProof.organizationAccountName ?? '-' }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ customerPaymentProof.organizationBank }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ customerPaymentProof.organizationAccountNumber }}</VCol>
-                    </VRow>
-                </VCol>
-                <VCol cols="12" sm="6" md="4">
-                    <h5 class="my-3 text-blue">Transaction</h5>
-                    <VRow>
-                        <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ customerPaymentProof.transactionReference ?? '-' }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Amount</b><br />₦{{ customerPaymentProof.currency ?? '' }} {{ formatter.format(customerPaymentProof.amountPaid) }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(customerPaymentProof.paymentDate).calendar() }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ customerPaymentProof.paymentMethod }}</VCol>
-                        <VCol cols="12" class="pb-0"><b>Status</b><br />{{ invoice.invoice_status.name == 'Paid' ? 'Confirmed' : customerPaymentProof.status }}</VCol>
-                    </VRow>
-                </VCol>
-            </VRow>
+            <template v-if="customerPaymentProof.paymentMethod == 'Cash'">
+                <VRow class="mb-3">
+                    <VCol cols="12" md="4" class="pb-0"><b>Payment Method</b><br />{{ customerPaymentProof.paymentMethod }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Amount</b><br />₦{{ formatter.format(customerPaymentProof.amountPaid) }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Cash Received By</b><br />{{ customerPaymentProof.whoReceivedCash }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Date</b><br />{{ moment(customerPaymentProof.paymentDate).calendar() }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0"><b>Status</b><br />{{ invoice.invoice_status.name == 'Paid' ? 'Confirmed' : customerPaymentProof.status }}</VCol>
+                </VRow>
+            </template>
+            <template v-else>
+                <VRow class="mb-3">
+                    <VCol cols="12" sm="6" md="4">
+                        <h5 class="my-3 text-blue">Customer</h5>
+                        <VRow>
+                            <VCol cols="12" class="pb-0"><b>Name</b><br />{{ customerPaymentProof.customerAccountName ?? '-' }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ customerPaymentProof.customerBank }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ customerPaymentProof.customerAccountNumber ?? '-' }}</VCol>
+                        </VRow>
+                    </VCol>
+                    <VCol cols="12" sm="6" md="4">
+                        <h5 class="my-3 text-blue">Receiving Account</h5>
+                        <VRow>
+                            <VCol cols="12" class="pb-0"><b>Name</b><br />{{ customerPaymentProof.organizationAccountName ?? '-' }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Bank</b><br />{{ customerPaymentProof.organizationBank }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Account Number</b><br />{{ customerPaymentProof.organizationAccountNumber }}</VCol>
+                        </VRow>
+                    </VCol>
+                    <VCol cols="12" sm="6" md="4">
+                        <h5 class="my-3 text-blue">Transaction</h5>
+                        <VRow>
+                            <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ customerPaymentProof.transactionReference ?? '-' }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Amount</b><br />₦{{ customerPaymentProof.currency ?? '' }} {{ formatter.format(customerPaymentProof.amountPaid) }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(customerPaymentProof.paymentDate).calendar() }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ customerPaymentProof.paymentMethod }}</VCol>
+                            <VCol cols="12" class="pb-0"><b>Status</b><br />{{ invoice.invoice_status.name == 'Paid' ? 'Confirmed' : customerPaymentProof.status }}</VCol>
+                        </VRow>
+                    </VCol>
+                </VRow>
+            </template>
         </Panel>
 
 
@@ -467,6 +494,7 @@
         depositor_name: '',
         transaction_reference: '',
         payment_date: todayDate,
+        who_received_cash: '',
     });
 
     const bankPaymentFormErrors = ref({
@@ -476,6 +504,7 @@
         depositor_name: '',
         transaction_reference: '',
         payment_date: '',
+        who_received_cash: '',
     });
 
     const confirmSubmission = () => {
@@ -505,7 +534,7 @@
                     countdown.value--;
                     if (countdown.value <= 0) {
                         clearInterval(timer);
-                        router.reload();
+                        window.location.reload();
                     }
                 }, 1000);
             }

@@ -106,7 +106,7 @@ class CustomerOrdersController extends Controller
         // TODO: Define a setting that will allow Administrator to setup the minimum delivery date.
         return Inertia::render('Client/Order/Add', [
             'items' => Item::getItemsArray(),
-            'branches' => Branch::getBranchesArray(),
+            'branches' => Branch::getBranchesWithAddress(),
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),

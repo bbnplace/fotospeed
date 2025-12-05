@@ -37,13 +37,13 @@
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Origin Branch</b><br />
+                                    <b>Processing Branch</b><br />
                                     {{ order.source_branch ? order.source_branch.name : "-" }}
                                 </VCol>
                             </VRow>
                             <VRow>
                                 <VCol>
-                                    <b>Processing Branch</b><br />
+                                    <b>Origin Branch</b><br />
                                     {{ order.processing_branch.name }}
                                 </VCol>
                             </VRow>
@@ -171,11 +171,11 @@
                             </VRow>
 
                             
-                            <VRow v-if="canApproveOfflinePayment">
+                            <!-- <VRow v-if="canApproveOfflinePayment">
                                 <VCol cols="12">
                                     <OfflinePayment @statusUpdated="handleOfflinePaymentConfirmation"/>
                                 </VCol>
-                            </VRow>
+                            </VRow> -->
                         </VCol>
 
                         <VCol cols="12" md="6">
@@ -1066,11 +1066,11 @@ const printOrderCard = () => {
                         <div class="section-title">Processing Information</div>
                         <div class="info-grid">
                             <div class="info-item">
-                                <div class="info-label">Origin Branch</div>
+                                <div class="info-label">Processing Branch</div>
                                 <div class="info-value">${originBranch}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">Processing Branch</div>
+                                <div class="info-label">Origin Branch</div>
                                 <div class="info-value">${processingBranch}</div>
                             </div>
                             <div class="info-item">

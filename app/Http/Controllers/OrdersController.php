@@ -199,7 +199,7 @@ class OrdersController extends Controller
             'stkn' => csrf_token(),
             'endpoint' => route('customer.find'),
             'deliveryDate' => $this->getMinAndMaxDeliveryDate(),
-            'branches' => Branch::getBranchesArray(),
+            'branches' => Branch::getBranchesWithAddress(),
         ]);
     }
 
@@ -472,7 +472,9 @@ class OrdersController extends Controller
         $offlinePaymentApprover = null;
         if(!empty($settings->who_approves_offline_payment)){
             $approverRole = Role::where('name', $settings->who_approves_offline_payment)->first();
-            $offlinePaymentApprover = $approverRole->id;
+            if ($approverRole) {
+                $offlinePaymentApprover = $approverRole->id;
+            }
         }
         $canApproveOfflinePayment = $isFromAdministrativeBranch && $hasInvoice && !$invoicePaid && $settings->support_offline_payment && (auth()->user()->isAdmin() || auth()->user()->role_id == $offlinePaymentApprover);
         

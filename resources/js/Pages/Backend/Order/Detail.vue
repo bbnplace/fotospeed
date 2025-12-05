@@ -9,20 +9,20 @@
                 <OrderCard />
                 <Panel snippet-title="Activities" v-if="activities.length">
                     <VTable>
-                        <THead>
+                        <thead>
                             <tr>
                                 <td>Process</td>
                                 <td>Completed by</td>
                                 <td>Date</td>
                             </tr>
-                        </THead>
-                        <TBody>
+                        </thead>
+                        <tbody>
                             <tr v-for="activity in activities" :key="activity.id">
                                 <td>{{ activity.process.name }}</td>
                                 <td>{{ activity.staff.name }}</td>
                                 <td>{{ moment(activity.created_at).format('MM/DD/YYYY, h:mm A') }}</td>
                             </tr>
-                        </TBody>
+                        </tbody>
                     </VTable>
                 </Panel>
             </VCol>

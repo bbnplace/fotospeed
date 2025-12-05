@@ -124,6 +124,7 @@ import Pusher from 'pusher-js';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import NotificationsDropdown from '@/Components/NotificationsDropdown.vue';
+import Snackbar from '@/Components/Snackbar.vue';
 
 const userProps = usePage().props.auth.user;
 const name = userProps.name;
@@ -182,7 +183,6 @@ const showBrowserNotification = notification => {
         }
     } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then((permission) => {
-            console.log("Notification permission:", permission);
             if (permission === 'granted') {
                 showBrowserNotification(notification);
             }
@@ -193,25 +193,21 @@ const showBrowserNotification = notification => {
 }
 
 onMounted(() => {
-    console.log('Topbar mounted - Echo listening for user:', userId);
     
     // Listening for branch event as message is passed through different processing stages.
     echo.private(`notify.${branchId}`)
         .listen('JobReceived', (e) => {
-            console.log('JobReceived event:', e);
             showSnackbar(e.message);
         });
 
     // Notifying user when there is a new order
     echo.private(`new-order.${branchId}`)
         .listen('AnnounceNewOrder', (e) => {
-            console.log('AnnounceNewOrder event:', e);
             showSnackbar(e.message);
         });
 
     echo.private(`App.Models.User.${userId}`)
         .notification((notification) => {
-            console.log('Notification received:', notification);
             showBrowserNotification(notification);
         });
 

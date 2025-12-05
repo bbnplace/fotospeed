@@ -36,4 +36,9 @@ class Branch extends Model
 
         return $branchesArray;
     }
+
+    public static function getBranchesWithAddress()
+    {
+        return self::orderBy('name', 'asc')->get(['name', 'address']);
+    }
 }
