@@ -136,6 +136,7 @@ class StaffController extends Controller
             'state_id' => $branch->state_id,
             'password' => Hash::make($request->password),
             'branch_id' => $branch->id,
+            'account_status' => User::STATUS_ACTIVE,
         ]);
 
         // TODO: Send login link to the customer's mobile number and email.

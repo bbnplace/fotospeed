@@ -245,6 +245,7 @@ class OrdersController extends Controller
                 $existingUser->is_temporary_password = true;
                 $existingUser->state_id = auth()->user()->state_id;
                 $existingUser->branch_id = auth()->user()->branch_id;
+                $existingUser->account_status = User::STATUS_ACTIVE;
                 $existingUser->save();
                 
                 $customer = $existingUser;
@@ -259,6 +260,7 @@ class OrdersController extends Controller
                     'password' => Hash::make($request->password),
                     'is_temporary_password' => true,
                     'branch_id' => auth()->user()->branch_id,
+                    'account_status' => User::STATUS_ACTIVE,
                 ]);
             }
 

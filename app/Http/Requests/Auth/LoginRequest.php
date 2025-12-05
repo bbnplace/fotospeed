@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
 
 class LoginRequest extends FormRequest
 {
@@ -46,6 +47,29 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'mobile' => trans('auth.failed'),
+            ]);
+        }
+
+        // Check account status after successful credential validation
+        $user = Auth::user();
+        
+        if ($user->account_status !== User::STATUS_ACTIVE) {
+            // Log the user out immediately
+            Auth::logout();
+            
+            // Provide specific error messages based on status
+            $whoToContact = $user->isCustomer() ? 'Support' : 'an Administrator';
+            $errorMessage = match($user->account_status) {
+                User::STATUS_INACTIVE => "Your account is inactive. Please contact $whoToContact for assistance.",
+                User::STATUS_SUSPENDED_TEMP => "Your account has been temporarily suspended. Please contact $whoToContact for assistance.",
+                User::STATUS_SUSPENDED_PERM => "Your account has been permanently suspended. Please contact $whoToContact for assistance.",
+                default => "our account is not active. Please contact $whoToContact for assistance.",
+            };
+            
+            RateLimiter::hit($this->throttleKey());
+            
+            throw ValidationException::withMessages([
+                'mobile' => $errorMessage,
             ]);
         }
 
