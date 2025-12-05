@@ -39,7 +39,7 @@
         <script src="{{ env('APP_URL') }}/assets/js/gsap/gsap-split-text.js"></script>
         <script src="{{ env('APP_URL') }}/build/showroom/assets/app-BFvSN1Gt.js" type="module"></script>
     @else
-        <script src="{{ env('APP_URL') }}/build/oms/assets/app-JSN9MNkT.js" type="module"></script>
+        <script src="{{ env('APP_URL') }}/build/oms/assets/app-Bkqqm29C.js" type="module"></script>
     @endif
     
 </html>

@@ -8,6 +8,11 @@ use Inertia\Inertia;
 
 class RolesController extends Controller
 {
+    /**
+     * List of protected roles that cannot be deleted or renamed
+     */
+    protected array $protectedRoles = ['Customer', 'Administrator', 'System Admin', 'Reception', 'Receptionist', 'Accountant', 'Cashier', 'Production', 'Management'];
+
     public function index()
     {
         return Inertia::render('Backend/Role/List', [
@@ -52,10 +57,9 @@ class RolesController extends Controller
                 'name',
             ]);
 
-        // Mark protected roles that cannot be deleted
-        $protectedRoles = ['Customer', 'Administrator', 'System Admin', 'Reception', 'Receptionist', 'Accountant', 'Cashier', 'Production', 'Management'];
+        // Mark protected roles that cannot be deleted or renamed
         foreach ($roles as $role) {
-            $role->protected = in_array($role->name, $protectedRoles);
+            $role->protected = in_array($role->name, $this->protectedRoles);
         }
 
         return [
@@ -91,8 +95,15 @@ class RolesController extends Controller
 
     private function getRole($roleId)
     {
+        $role = Role::where('id', $roleId)->first();
+        
+        // Mark protected roles that cannot be renamed
+        if ($role) {
+            $role->protected = in_array($role->name, $this->protectedRoles);
+        }
+        
         return [
-            'role' => Role::where('id', $roleId)->first()
+            'role' => $role
         ];
     }
 
@@ -114,6 +125,11 @@ class RolesController extends Controller
             return redirect()->route('roles')->with('note', 'Select a role to edit');
         }
 
+        // Check if this is a protected role and the name is being changed
+        if (in_array($role->name, $this->protectedRoles) && $request->name != $role->name) {
+            return redirect()->route('role.edit', [$ref])->with('note', 'Cannot rename protected system role: ' . $role->name);
+        }
+
         $request->validate([
             'name' => $request->name != $role->name ? 'required|string|unique:roles,name|min:2|max:64' : 'required|string|min:2|max:64',
         ]);
@@ -127,12 +143,10 @@ class RolesController extends Controller
     public function delete(Request $request)
     {
         if (!empty($request->ids)) {
-            // Define protected roles that cannot be deleted
-            $protectedRoles = ['Customer', 'Administrator', 'System Admin'];
             
             // Check if any of the selected roles are protected
             $selectedRoles = Role::whereIn('id', $request->ids)->pluck('name')->toArray();
-            $protectedFound = array_intersect($selectedRoles, $protectedRoles);
+            $protectedFound = array_intersect($selectedRoles, $this->protectedRoles);
             
             if (!empty($protectedFound)) {
                 return redirect()->route('roles')->with('note', 'Cannot delete protected system roles: ' . implode(', ', $protectedFound));
