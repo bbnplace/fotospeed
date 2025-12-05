@@ -13,7 +13,7 @@ class Day
         ]);
     }
 
-    public static function build(String $field, int $ordersCount = 1)
+    public static function build(String $field, int $ordersCount = 0)
     {
         $dailyReport = DailyReport::firstOrCreate([
             'date' => date("Y-m-d")

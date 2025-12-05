@@ -14,7 +14,7 @@ class Month
         ]);
     }
 
-    public static function build(String $field, int $ordersCount = 1)
+    public static function build(String $field, int $ordersCount = 0)
     {
         $monthlyReport = MonthlyReport::firstOrCreate([
             'month' => date("Y-m")

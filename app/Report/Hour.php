@@ -14,7 +14,7 @@ class Hour
         ]);
     }
 
-    public static function build(string $field, int $ordersCount = 1)
+    public static function build(string $field, int $ordersCount = 0)
     {
         // Log::info(date("Y-m-d H"));
         $hourlyReport = HourlyReport::firstOrCreate([

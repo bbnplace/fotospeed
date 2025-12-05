@@ -14,7 +14,7 @@ class Year
         ]);
     }
 
-    public static function build(String $field, int $ordersCount = 1)
+    public static function build(String $field, int $ordersCount = 0)
     {
         $yearlyReport = YearlyReport::firstOrCreate([
             'year' => date("Y")
