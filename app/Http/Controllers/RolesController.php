@@ -53,7 +53,7 @@ class RolesController extends Controller
             ]);
 
         // Mark protected roles that cannot be deleted
-        $protectedRoles = ['Customer', 'Administrator', 'System Admin'];
+        $protectedRoles = ['Customer', 'Administrator', 'System Admin', 'Reception', 'Receptionist', 'Accountant', 'Cashier', 'Production', 'Management'];
         foreach ($roles as $role) {
             $role->protected = in_array($role->name, $protectedRoles);
         }

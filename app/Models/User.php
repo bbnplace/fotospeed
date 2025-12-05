@@ -109,7 +109,7 @@ class User extends Authenticatable
 
     public function isReception()
     {
-        return $this->role->name == 'Reception';
+        return $this->role->name == 'Reception' || $this->role->name == 'Receptionist';
     }
 
     public function isSysAdmin()
