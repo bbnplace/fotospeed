@@ -100,6 +100,100 @@
                 </VCard>
             </div>
         </Panel>
+        
+        <!-- Cancelled Tasks Panel -->
+        <Panel snippet-title="My Cancelled & Held Tasks" v-if="cancelledTasks.length > 0 ||  heldTasks.length > 0">
+            <div class="kanban-board">
+                <VCard class="column" title="Held" v-if="heldTasks.length > 0">
+                    <div class="task-list">
+                        <div
+                          v-for="task in heldTasks"
+                          :key="task.id"
+                          class="task-card task-card-held"
+                        >
+                          <h5 class="mb-0 py-0">{{ task.name }}</h5>
+                          <p class="my-0 flex"><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>ON HOLD</b></p>
+                          <VOverlay
+                            v-model="showHeldTaskOverlay[task.id]"
+                            activator="parent"
+                            location-strategy="connected"
+                            scroll-strategy="static">
+                            <VCard class="px-3 py-8 w-96" :title="task.name">
+                              <VCardText>
+                                <p class="mb-2">{{ task.description }}</p>
+                                <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                                <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
+                                
+                                <!-- Hold Reason -->
+                                <VAlert type="warning" density="compact" class="mt-3" v-if="task.order.hold_reason">
+                                  <b>Hold Reason:</b> {{ task.order.hold_reason }}
+                                </VAlert>
+                                
+                                <VAlert type="info" density="compact" class="mt-3">
+                                  This task is on hold and cannot be worked on until the order is reactivated.
+                                </VAlert>
+                              </VCardText>
+                              <VCardActions>
+                                <VBtn
+                                  color="blue"
+                                  @click="showClickedTask(task)"
+                                >Open Order</VBtn>
+                                <VBtn
+                                  color="red"
+                                  @click="showHeldTaskOverlay[task.id] = false"
+                                >Close</VBtn>
+                              </VCardActions>
+                            </VCard>
+                          </VOverlay>
+                        </div>
+                    </div>
+                </VCard>
+                <VCard class="column" title="Cancelled" v-if="cancelledTasks.length > 0">
+                    <div class="task-list">
+                        <div
+                          v-for="task in cancelledTasks"
+                          :key="task.id"
+                          class="task-card task-card-cancelled"
+                        >
+                          <h5 class="mb-0 py-0">{{ task.name }}</h5>
+                          <p class="my-0 flex"><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>CANCELLED</b></p>
+                          <VOverlay
+                            v-model="showCancelledTaskOverlay[task.id]"
+                            activator="parent"
+                            location-strategy="connected"
+                            scroll-strategy="static">
+                            <VCard class="px-3 py-8 w-96" :title="task.name">
+                              <VCardText>
+                                <p class="mb-2">{{ task.description }}</p>
+                                <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                                <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
+                                
+                                <!-- Cancellation Reason -->
+                                <VAlert type="error" density="compact" class="mt-3" v-if="task.order.cancellation_reason">
+                                  <b>Cancellation Reason:</b> {{ task.order.cancellation_reason }}
+                                </VAlert>
+                                
+                                <VAlert type="info" density="compact" class="mt-3">
+                                  This task was cancelled and cannot be transferred or modified.
+                                </VAlert>
+                              </VCardText>
+                              <VCardActions>
+                                <VBtn
+                                  color="blue"
+                                  @click="showClickedTask(task)"
+                                >Open Order</VBtn>
+                                <VBtn
+                                  color="red"
+                                  @click="showCancelledTaskOverlay[task.id] = false"
+                                >Close</VBtn>
+                              </VCardActions>
+                            </VCard>
+                          </VOverlay>
+                        </div>
+                    </div>
+                </VCard>
+            </div>
+        </Panel>
 
         <!-- Cross-branch transfer confirmation dialog -->
         <v-dialog v-model="showCrossBranchDialog" max-width="500px">
@@ -135,6 +229,8 @@ const endpoints = usePage().props.endpoints;
 const unclaimedTasks = ref([]);
 const showOverlay = ref([]);
 const showAcceptedTaskOverlay = ref([]);
+const showCancelledTaskOverlay = ref([]);
+const showHeldTaskOverlay = ref([]);
 const taskAuditError = ref({});
 
 const showTaskTransferField = ref([]);
@@ -145,6 +241,12 @@ const columns = ref({
   Done: [],
 });
 let statusKeys = Object.keys(columns.value);
+
+// Cancelled tasks are displayed separately, not in the Kanban board
+const cancelledTasks = ref([]);
+
+// Held tasks are displayed separately
+const heldTasks = ref([]);
 
 
 // Ref container to hold references
@@ -287,7 +389,17 @@ const updateTaskStatus = async (task, fromStatus, toStatus, event) => {
 // Used to load tasks after the components mount
 const loadPickedTasks = async () => {
   const response = await axios.get(endpoints.accepted);
-  columns.value = response.data;
+  const data = response.data;
+  
+  // Separate cancelled and held tasks from active Kanban columns
+  cancelledTasks.value = data.Cancelled || [];
+  heldTasks.value = data.Held || [];
+  
+  columns.value = {
+    Todo: data.Todo || [],
+    Doing: data.Doing || [],
+    Done: data.Done || [],
+  };
 }
 
 const loadNewTasks = async () => {
@@ -421,13 +533,18 @@ onMounted(async () => {
   // Listen for new tasks
   Echo.private(`App.Models.User.${user.id}`)
     .notification((notification) => {
-      if (notification.type === 'App\\Notifications\\NewTaskNotification' || notification.type === 'App\\Notifications\\TaskTransferNotification') {
+      
+      if (notification.type === 'App\\Notifications\\NewTaskNotification' || 
+          notification.type === 'App\\Notifications\\TaskTransferNotification' ||
+          notification.type === 'App\\Notifications\\OrderHoldNotification' ||
+          notification.type === 'App\\Notifications\\OrderReactivatedNotification') {
+        
         // Play sound (optional, simple beep)
         // const audio = new Audio('/path/to/sound.mp3'); audio.play();
         
         // Show Browser Notification
         if (Notification.permission === "granted") {
-           new Notification("New Task Assigned", {
+           new Notification("Task Update", {
               body: notification.message,
               icon: '/images/logo.png' // Adjust path as needed
            });
@@ -493,5 +610,17 @@ onUnmounted(() => {
     pointer-events: none;
     background: #374151;
     color: white;
+  }
+  
+  .task-card-cancelled {
+    background: #374151;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .task-card-held {
+    background: #d97706;
+    color: white;
+    cursor: pointer;
   }
 </style>

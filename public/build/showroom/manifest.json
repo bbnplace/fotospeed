@@ -1,6 +1,6 @@
 {
-  "_DefaultLayout-Bk5YXyFR.js": {
-    "file": "assets/DefaultLayout-Bk5YXyFR.js",
+  "_DefaultLayout-Cr4ESsFg.js": {
+    "file": "assets/DefaultLayout-Cr4ESsFg.js",
     "name": "DefaultLayout",
     "imports": [
       "resources/themes/fotospeed/app.js",
@@ -10,15 +10,15 @@
       "assets/logo-B9xom2Yo.png"
     ]
   },
-  "_Panel.vue_vue_type_script_setup_true_lang-C3yUhVG9.js": {
-    "file": "assets/Panel.vue_vue_type_script_setup_true_lang-C3yUhVG9.js",
+  "_Panel.vue_vue_type_script_setup_true_lang-DUk_fIcz.js": {
+    "file": "assets/Panel.vue_vue_type_script_setup_true_lang-DUk_fIcz.js",
     "name": "Panel.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/themes/fotospeed/app.js"
     ]
   },
-  "_Records-Chz3XKDc.js": {
-    "file": "assets/Records-Chz3XKDc.js",
+  "_Records-DVzHwSrs.js": {
+    "file": "assets/Records-DVzHwSrs.js",
     "name": "Records",
     "imports": [
       "resources/themes/fotospeed/app.js",
@@ -33,8 +33,8 @@
     "file": "assets/moment--fyrORtG.js",
     "name": "moment"
   },
-  "_usePrimaryPhoto-C1tiY9by.js": {
-    "file": "assets/usePrimaryPhoto-C1tiY9by.js",
+  "_usePrimaryPhoto-0CVc8ZIw.js": {
+    "file": "assets/usePrimaryPhoto-0CVc8ZIw.js",
     "name": "usePrimaryPhoto",
     "imports": [
       "resources/themes/fotospeed/app.js"
@@ -134,13 +134,13 @@
     ]
   },
   "resources/themes/fotospeed/Pages/Client/Invoice/Detail.vue": {
-    "file": "assets/Detail-YvFmax1n.js",
+    "file": "assets/Detail-CS4oaQCU.js",
     "name": "Detail",
     "src": "resources/themes/fotospeed/Pages/Client/Invoice/Detail.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/themes/fotospeed/app.js",
-      "_DefaultLayout-Bk5YXyFR.js",
+      "_DefaultLayout-Cr4ESsFg.js",
       "_moment--fyrORtG.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
@@ -149,26 +149,26 @@
     ]
   },
   "resources/themes/fotospeed/Pages/Client/Invoice/List.vue": {
-    "file": "assets/List-b8w2d9se.js",
+    "file": "assets/List-DyBT20VE.js",
     "name": "List",
     "src": "resources/themes/fotospeed/Pages/Client/Invoice/List.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_DefaultLayout-Bk5YXyFR.js",
+      "_DefaultLayout-Cr4ESsFg.js",
       "resources/themes/fotospeed/app.js",
-      "_Records-Chz3XKDc.js",
+      "_Records-DVzHwSrs.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_moment--fyrORtG.js"
     ]
   },
   "resources/themes/fotospeed/Pages/Client/Invoice/Receipt.vue": {
-    "file": "assets/Receipt-DOa_SN3Z.js",
+    "file": "assets/Receipt-DAGJR7Lu.js",
     "name": "Receipt",
     "src": "resources/themes/fotospeed/Pages/Client/Invoice/Receipt.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/themes/fotospeed/app.js",
-      "_DefaultLayout-Bk5YXyFR.js",
+      "_DefaultLayout-Cr4ESsFg.js",
       "_moment--fyrORtG.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
@@ -177,7 +177,7 @@
     ]
   },
   "resources/themes/fotospeed/Pages/Client/LoggedIn.vue": {
-    "file": "assets/LoggedIn-DqFE-gLC.js",
+    "file": "assets/LoggedIn-KKcefccz.js",
     "name": "LoggedIn",
     "src": "resources/themes/fotospeed/Pages/Client/LoggedIn.vue",
     "isDynamicEntry": true,
@@ -186,72 +186,72 @@
     ]
   },
   "resources/themes/fotospeed/Pages/Client/Order/Add.vue": {
-    "file": "assets/Add-DLdlq-G7.js",
+    "file": "assets/Add-C9a3kHd-.js",
     "name": "Add",
     "src": "resources/themes/fotospeed/Pages/Client/Order/Add.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_DefaultLayout-Bk5YXyFR.js",
+      "_DefaultLayout-Cr4ESsFg.js",
       "resources/themes/fotospeed/app.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
-      "_Panel.vue_vue_type_script_setup_true_lang-C3yUhVG9.js"
+      "_Panel.vue_vue_type_script_setup_true_lang-DUk_fIcz.js"
     ],
     "css": [
-      "assets/Add-v5jpv60_.css"
+      "assets/Add-dXd8Ytre.css"
     ]
   },
   "resources/themes/fotospeed/Pages/Client/Order/Detail.vue": {
-    "file": "assets/Detail-DoAHOKsM.js",
+    "file": "assets/Detail-D91dLWiy.js",
     "name": "Detail",
     "src": "resources/themes/fotospeed/Pages/Client/Order/Detail.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/themes/fotospeed/app.js",
-      "_DefaultLayout-Bk5YXyFR.js",
-      "_Panel.vue_vue_type_script_setup_true_lang-C3yUhVG9.js",
+      "_DefaultLayout-Cr4ESsFg.js",
+      "_Panel.vue_vue_type_script_setup_true_lang-DUk_fIcz.js",
       "_moment--fyrORtG.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/themes/fotospeed/Pages/Client/Order/List.vue": {
-    "file": "assets/List-BW53nsUa.js",
+    "file": "assets/List-vAV20Us2.js",
     "name": "List",
     "src": "resources/themes/fotospeed/Pages/Client/Order/List.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/themes/fotospeed/app.js",
-      "_DefaultLayout-Bk5YXyFR.js",
-      "_Records-Chz3XKDc.js",
+      "_DefaultLayout-Cr4ESsFg.js",
+      "_Records-DVzHwSrs.js",
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "_moment--fyrORtG.js"
     ]
   },
   "resources/themes/fotospeed/Pages/ProductDetails.vue": {
-    "file": "assets/ProductDetails-BCmMjT1t.js",
+    "file": "assets/ProductDetails-CLWI-Ru8.js",
     "name": "ProductDetails",
     "src": "resources/themes/fotospeed/Pages/ProductDetails.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/themes/fotospeed/app.js",
-      "_DefaultLayout-Bk5YXyFR.js",
-      "_usePrimaryPhoto-C1tiY9by.js",
+      "_DefaultLayout-Cr4ESsFg.js",
+      "_usePrimaryPhoto-0CVc8ZIw.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/themes/fotospeed/Pages/Shop.vue": {
-    "file": "assets/Shop-D1_i1O5m.js",
+    "file": "assets/Shop-CLAnnOmM.js",
     "name": "Shop",
     "src": "resources/themes/fotospeed/Pages/Shop.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/themes/fotospeed/app.js",
-      "_DefaultLayout-Bk5YXyFR.js",
-      "_usePrimaryPhoto-C1tiY9by.js",
+      "_DefaultLayout-Cr4ESsFg.js",
+      "_usePrimaryPhoto-0CVc8ZIw.js",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/themes/fotospeed/app.js": {
-    "file": "assets/app-BFvSN1Gt.js",
+    "file": "assets/app-D8vWIVHz.js",
     "name": "app",
     "src": "resources/themes/fotospeed/app.js",
     "isEntry": true,

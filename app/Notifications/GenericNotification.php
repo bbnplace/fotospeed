@@ -70,7 +70,8 @@ class GenericNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => $this->message,
+            'url' => $this->url,
         ];
     }
 }

@@ -17,6 +17,7 @@ class Item extends Model
         'height',
         'width',
         'weight',
+        'starting_price',
         'print_price',
         'sheet_price',
         'cover_print_price',
@@ -39,14 +40,17 @@ class Item extends Model
     public static function getItemsArray()
     {
         $items = [];
-        $itemsCollection = self::get(['name', 'process_data']);
+        $itemsCollection = self::get(['name', 'starting_price', 'process_data']);
         if(!empty($itemsCollection))
         {
             foreach($itemsCollection as $item){
                 // Only include items that have defined processes
                 $processData = json_decode($item->process_data);
                 if (!empty($processData) && !empty($processData->processes)) {
-                    array_push($items, $item->name);
+                    array_push($items, [
+                        'name' => $item->name,
+                        'starting_price' => $item->starting_price
+                    ]);
                 }
             }
         }

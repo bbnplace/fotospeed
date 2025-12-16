@@ -12,6 +12,8 @@ class TaskStatus extends Model
     const STATUS_TODO = 1;
     const STATUS_DOING = 2;
     const STATUS_DONE = 3;
+    const STATUS_CANCELLED = 4;
+    const STATUS_HELD = 5;
 
     protected $fillable = [
         'name'
@@ -39,6 +41,10 @@ class TaskStatus extends Model
                 return self::STATUS_DOING;
             case 'done':
                 return self::STATUS_DONE;
+            case 'cancelled':
+                return self::STATUS_CANCELLED;
+            case 'held':
+                return self::STATUS_HELD;
             default:
                 return 0;
         }

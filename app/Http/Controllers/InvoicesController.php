@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\HandlesRewardPointRedemption;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Order;
@@ -12,6 +13,7 @@ use Inertia\Inertia;
 
 class InvoicesController extends Controller
 {
+    use HandlesRewardPointRedemption;
     public function index()
     {
         $settings = Setting::first();
@@ -32,13 +34,21 @@ class InvoicesController extends Controller
         $order = Order::find($order_id);
         
         if (!empty($order)) {
-            $invoice = Invoice::create([
+            // Check if order_number is numeric and use it as invoice ID
+            $invoiceData = [
                 'user_id' => $order->user_id,
                 'order_id' => $order_id,
                 'track_id' => (string) Uuid::uuid4(),
                 'invoice_status_id' => InvoiceStatus::STATUS_NEW,
                 'description' => 'Invoice for Order ' . $order->name
-            ]);
+            ];
+            
+            // If order_number is numeric, use it as the invoice ID
+            if (is_numeric($order->order_number)) {
+                $invoiceData['id'] = (int) $order->order_number;
+            }
+            
+            $invoice = Invoice::create($invoiceData);
 
             return redirect(route('invoice', [$invoice->id]))->with('note','Invoice Successfully Generated');
         }
@@ -140,6 +150,25 @@ class InvoicesController extends Controller
             'amount' => $invoice->order->total_cost,
         ];
 
+        // Check if user can handle refunds
+        $canHandleRefunds = false;
+        if (!empty($settings->who_handles_refunds)) {
+            $canHandleRefunds = auth()->user()->role->name === $settings->who_handles_refunds;
+        }
+
+        // Get customer account info from payment proof for pre-filling
+        $customerAccountInfo = null;
+        if (!empty($invoice->customer_payment_proof)) {
+            $paymentData = json_decode($invoice->customer_payment_proof, true);
+            if (isset($paymentData['customerBank']) && isset($paymentData['customerAccountName'])) {
+                $customerAccountInfo = [
+                    'bank_name' => $paymentData['customerBank'],
+                    'account_name' => $paymentData['customerAccountName'],
+                    'account_number' => $paymentData['customerAccountNumber'] ?? null,
+                ];
+            }
+        }
+
         return [
             'invoice' => $invoice,
             'invoice_no_src' => $settings->invoice_no_src,
@@ -161,6 +190,10 @@ class InvoicesController extends Controller
             'banks' => \App\Models\Bank::pluck('name')->toArray(),
             'approverRole' => $settings->who_approves_offline_payment ?? 'Administrator',
             'userRole' => auth()->user()->role->name ?? '',
+            'availablePoints' => \App\Models\RewardPoint::getAvailablePoints($invoice->user_id),
+            'settings' => $settings,
+            'canHandleRefunds' => $canHandleRefunds,
+            'customerAccountInfo' => $customerAccountInfo,
         ];
     }
 
@@ -181,6 +214,7 @@ class InvoicesController extends Controller
         'transaction_reference' => 'nullable|string|max:128',
         'payment_date' => 'required|date|before_or_equal:today',
         'who_received_cash' => 'required_if:payment_method,Cash|nullable|string|max:128',
+        'points_to_redeem' => 'nullable|integer|min:0',
     ]);
 
     // Check if invoice exists
@@ -191,6 +225,56 @@ class InvoicesController extends Controller
     }
 
     $settings = Setting::first();
+    $invoiceAmount = $invoice->order->total_cost;
+
+    // Process points redemption if requested (pass null for amount paid to validate raw input first)
+    $redemption = $this->processPointsRedemption(
+        $invoice->user_id,
+        $invoice->id,
+        $invoiceAmount,
+        $validated['points_to_redeem'] ?? null,
+        null 
+    );
+
+    if ($redemption['error']) {
+        return response()->json(['message' => $redemption['error']], 400);
+    }
+
+    // Ensure total payment (Cash/Transfer + Points Discount) covers the invoice amount
+    $totalPaymentValue = $validated['amount'] + $redemption['discount_amount'];
+    
+    // Use a small epsilon for float comparison
+    if ($totalPaymentValue < ($invoiceAmount - 0.01)) {
+        return response()->json([
+            'message' => sprintf(
+                'The payment amount (₦%s) plus points discount (₦%s) is insufficient. Total needed: ₦%s.',
+                number_format($validated['amount'], 2),
+                number_format($redemption['discount_amount'], 2),
+                number_format($invoiceAmount, 2)
+            )
+        ], 422);
+    }
+
+    // Calculate tolerance: if points are used, allow rounding variance up to the value of 1 point
+    $pointsRatio = $settings->points_to_currency_ratio ?? 1.0;
+    $tolerance = ($validated['points_to_redeem'] ?? 0) > 0 ? $pointsRatio : 0.01;
+
+    if ($totalPaymentValue > ($invoiceAmount + $tolerance)) {
+        return response()->json([
+            'message' => sprintf(
+                'The total payment (₦%s) exceeds the invoice amount (₦%s). Please input the exact amount.',
+                number_format($totalPaymentValue, 2),
+                number_format($invoiceAmount, 2)
+            )
+        ], 422);
+    }
+
+    // Update invoice with points redemption
+    if ($redemption['points_redeemed'] > 0) {
+        $invoice->points_redeemed = $redemption['points_redeemed'];
+        $invoice->points_discount_amount = $redemption['discount_amount'];
+        $invoice->save();
+    }
 
     // Prepare payment data
     $isCash = $validated['payment_method'] === 'Cash';
@@ -198,16 +282,18 @@ class InvoicesController extends Controller
     $paymentData = [
         'amountPaid' => $validated['amount'],
         'paymentMethod' => $isCash ? 'Cash' : 'Bank Transfer',
-        'subMethod' => $validated['payment_method'], // Store specific method (Transfer, USSD, etc)
+        'subMethod' => $validated['payment_method'],
         'customerBank' => $isCash ? null : $validated['customer_bank'],
         'customerAccountName' => $isCash ? null : $validated['depositor_name'],
-        'customerAccountNumber' => null, // Not collected
+        'customerAccountNumber' => null,
         'transactionReference' => $validated['transaction_reference'],
         'paymentDate' => $validated['payment_date'],
         'organizationBank' => $settings->bank_name,
         'organizationAccountNumber' => $settings->account_number,
         'organizationAccountName' => $settings->account_name ?? $settings->org_name,
         'whoReceivedCash' => $isCash ? $validated['who_received_cash'] : null,
+        'pointsRedeemed' => $redemption['points_redeemed'],
+        'pointsDiscount' => $redemption['discount_amount'],
         'status' => 'Pending Verification',
         'submitted_at' => now()->toDateTimeString(),
         'submitted_by' => auth()->user()->name . ' (Staff)',
@@ -262,4 +348,78 @@ class InvoicesController extends Controller
         'message' => 'Payment submitted successfully! The payment is pending verification.'
     ]);
 }
+
+    public function processRefund(Request $request, $id)
+    {
+        // Validate request
+        $validated = $request->validate([
+            'refund_amount' => 'required|numeric|min:0',
+            'refund_points' => 'boolean',
+            'refund_account_name' => 'required|string|max:128',
+            'refund_account_number' => 'required|string|max:20',
+            'refund_bank_name' => 'required|string|max:128',
+            'refund_transaction_reference' => 'required|string|max:128',
+        ]);
+
+        $invoice = Invoice::findOrFail($id);
+
+        // Check if invoice is cancelled
+        if ($invoice->invoice_status_id != InvoiceStatus::STATUS_CANCELLED) {
+            return response()->json(['message' => 'Only cancelled invoices can be refunded.'], 403);
+        }
+
+        // Check if already refunded
+        if ($invoice->refunded) {
+            return response()->json(['message' => 'This invoice has already been refunded.'], 403);
+        }
+
+        // Check authorization
+        $settings = Setting::first();
+        if (!empty($settings->who_handles_refunds)) {
+            if (auth()->user()->role->name !== $settings->who_handles_refunds) {
+                return response()->json(['message' => 'You are not authorized to process refunds.'], 403);
+            }
+        }
+
+        // Update invoice with refund details
+        $invoice->refunded = true;
+        $invoice->refund_amount = $validated['refund_amount'];
+        $invoice->refund_points = $validated['refund_points'] ?? false;
+        $invoice->refund_account_name = $validated['refund_account_name'];
+        $invoice->refund_account_number = $validated['refund_account_number'];
+        $invoice->refund_bank_name = $validated['refund_bank_name'];
+        $invoice->refund_transaction_reference = $validated['refund_transaction_reference'];
+        $invoice->refunded_by = auth()->id();
+        $invoice->refunded_at = now();
+        
+        // Handle points refund if requested
+        $pointsRefunded = 0;
+        if ($invoice->refund_points) {
+            // Get points used from payment data
+            $paymentProof = json_decode($invoice->customer_payment_proof, true);
+            if ($paymentProof && isset($paymentProof['pointsRedeemed']) && $paymentProof['pointsRedeemed'] > 0) {
+                $pointsRefunded = $paymentProof['pointsRedeemed'];
+                
+                // Restore points to customer balance by creating a new earned transaction
+                \App\Models\RewardPoint::create([
+                    'user_id' => $invoice->user_id,
+                    'invoice_id' => $invoice->id,
+                    'points' => $pointsRefunded,
+                    'transaction_type' => 'earned', // Treat refund as earning back the points
+                    'description' => 'Refund for cancelled invoice #' . $invoice->id,
+                    // No expiry for refunded points? Or should it inherit old expiry? defaulting to null (never) or new expiry is safer.
+                ]);
+                
+                $invoice->refunded_points = $pointsRefunded;
+            }
+        }
+        
+        $invoice->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Refund processed successfully!',
+            'invoice' => $invoice
+        ]);
+    }
 }

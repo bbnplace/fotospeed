@@ -143,6 +143,9 @@ Route::middleware(['auth'])->group(function () {
     // Payment Providers
     Route::get('/payments/paystackk', [PaystackController::class, 'getConfig'])->name('paystack.config');
 
+    // Session heartbeat to prevent 419 errors
+    Route::get('/heartbeat', [\App\Http\Controllers\HeartbeatController::class, 'ping'])->name('heartbeat');
+
     
 });
 

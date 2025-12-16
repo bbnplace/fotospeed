@@ -72,6 +72,7 @@ Route::middleware(['auth', 'team.console'])->group(function (){
     Route::get('/panel/invoice/{id}', [InvoicesController::class, 'view'])->name('invoice');
     Route::post('panel/invoice/create', [InvoicesController::class, 'create'])->name('invoice.create');
     Route::post('panel/invoice/{id}/submit-payment', [InvoicesController::class, 'submitPayment'])->name('invoice.submit-payment');
+    Route::post('panel/invoice/{id}/process-refund', [InvoicesController::class, 'processRefund'])->name('invoice.process-refund');
 
 
     Route::post('register', [UserRegistrationController::class, 'register'])->name('user.register');

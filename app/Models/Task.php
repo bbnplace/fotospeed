@@ -21,6 +21,7 @@ class Task extends Model
         'role_id',
         'user_id',
         'task_status_id',
+        'previous_status_id',
         'time_accepted',
         'time_completed',
     ] ;

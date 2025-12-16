@@ -10,12 +10,23 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'user_id',
         'order_id',
         'invoice_status_id',
         'description',
         'track_id',
         'customer_payment_proof',
+        'refunded',
+        'refund_amount',
+        'refund_points',
+        'refunded_points',
+        'refund_account_name',
+        'refund_account_number',
+        'refund_bank_name',
+        'refund_transaction_reference',
+        'refunded_by',
+        'refunded_at',
     ];
 
     public function order()

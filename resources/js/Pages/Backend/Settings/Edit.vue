@@ -517,6 +517,41 @@
                                     </p>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VCombobox
+                                        id="order_cancel_roles"
+                                        v-model="form.order_cancel_roles"
+                                        label="Roles That Can Cancel Orders"
+                                        :items="roles"
+                                        variant="outlined"
+                                        :hide-details="form.errors.order_cancel_roles == undefined"
+                                        :error-messages="form.errors.order_cancel_roles"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        density="compact"
+                                    ></VCombobox>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Users with selected roles will be authorized to cancel orders.
+                                    </p>
+                                </VCol>
+                            </VRow>
+
+                            <VRow>
+                                <VCol>
+                                    <VAutocomplete
+                                        id="order_cancellation_whatsapp_template"
+                                        v-model="form.order_cancellation_whatsapp_template"
+                                        label="Order Cancellation WhatsApp Message"
+                                        :items="whatsappTemplates"
+                                        variant="outlined"
+                                        :hide-details="form.errors.order_cancellation_whatsapp_template == undefined"
+                                        :error-messages="form.errors.order_cancellation_whatsapp_template"
+                                        density="compact"
+                                    ></VAutocomplete>
+                                </VCol>
+                            </VRow>
                             <h4 class="my-3">Processing Branch Privileges</h4>
                             <p class="text-sm text-gray-600 mb-3">
                                 Control what users can see when viewing orders where their branch is the processing branch (not the origin branch).
@@ -624,6 +659,20 @@
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VAutocomplete
+                                        id="who_handles_refunds"
+                                        v-model="form.who_handles_refunds"
+                                        label="Who Handles Refunds?"
+                                        :items="roles"
+                                        variant="outlined"
+                                        :hide-details="form.errors.who_handles_refunds == undefined"
+                                        :error-messages="form.errors.who_handles_refunds"
+                                        density="compact"
+                                    ></VAutocomplete>
+                                </VCol>
+                            </VRow>
                             <h4 class="my-3">Bank Account Details</h4>
                             <VRow>
                                 <VCol cols="12" sm="6">
@@ -665,15 +714,83 @@
                             </VRow>
                             <h4 class="my-3">Loyalty Reward</h4>
                             <VRow>
-                                <VCol>
+                                <VCol cols="12" md="6">
                                     <VTextField
-                                    id="loyalty_reward_formula"
-                                    v-model="form.loyalty_reward_formula"
-                                    label="Price Multiplier"
+                                    id="loyalty_reward_multiplier"
+                                    v-model="form.loyalty_reward_multiplier"
+                                    label="Points Multiplier"
                                     variant="outlined"
-                                    :hide-details="form.errors.loyalty_reward_formula == undefined"
-                                    :error-messages="form.errors.loyalty_reward_formula"
-                                    hint="Do something"
+                                    type="number"
+                                    step="0.001"
+                                    min="0"
+                                    max="1"
+                                    :hide-details="form.errors.loyalty_reward_multiplier == undefined"
+                                    :error-messages="form.errors.loyalty_reward_multiplier"
+                                    hint="e.g., 0.01 means customer earns 1% of invoice amount as points"
+                                    persistent-hint
+                                ></VTextField>
+                                </VCol>
+                                <VCol cols="12" md="6">
+                                    <VTextField
+                                    id="points_to_currency_ratio"
+                                    v-model="form.points_to_currency_ratio"
+                                    label="Points to Currency Ratio"
+                                    variant="outlined"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    :hide-details="form.errors.points_to_currency_ratio == undefined"
+                                    :error-messages="form.errors.points_to_currency_ratio"
+                                    hint="e.g., 1 means 1 point = ₦1"
+                                    persistent-hint
+                                ></VTextField>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol cols="12" md="6">
+                                    <VTextField
+                                    id="points_expiry_months"
+                                    v-model="form.points_expiry_months"
+                                    label="Points Expiry (Months)"
+                                    variant="outlined"
+                                    type="number"
+                                    min="0"
+                                    :hide-details="form.errors.points_expiry_months == undefined"
+                                    :error-messages="form.errors.points_expiry_months"
+                                    hint="Set to 0 for points that never expire"
+                                    persistent-hint
+                                ></VTextField>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol cols="12" md="6">
+                                    <VTextField
+                                    id="min_points_redeemable"
+                                    v-model="form.min_points_redeemable"
+                                    label="Minimum Points Redeemable"
+                                    variant="outlined"
+                                    type="number"
+                                    min="0"
+                                    :hide-details="form.errors.min_points_redeemable == undefined"
+                                    :error-messages="form.errors.min_points_redeemable"
+                                    hint="Minimum number of points a customer must redeem at once"
+                                    persistent-hint
+                                ></VTextField>
+                                </VCol>
+                                <VCol cols="12" md="6">
+                                    <VTextField
+                                    id="max_invoice_percentage_payable_by_points"
+                                    v-model="form.max_invoice_percentage_payable_by_points"
+                                    label="Max Invoice % Payable by Points"
+                                    variant="outlined"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    suffix="%"
+                                    :hide-details="form.errors.max_invoice_percentage_payable_by_points == undefined"
+                                    :error-messages="form.errors.max_invoice_percentage_payable_by_points"
+                                    hint="e.g., 50 means maximum 50% of invoice can be paid with points"
+                                    persistent-hint
                                 ></VTextField>
                                 </VCol>
                             </VRow>
@@ -855,7 +972,11 @@ const form = useForm({
     a2p_identity: settings.a2p_identity,
     paystack_secret_key: settings.paystack_secret_key,
     paystack_public_key: settings.paystack_public_key,
-    loyalty_reward_formula: settings.loyalty_reward_formula,
+    loyalty_reward_multiplier: settings.loyalty_reward_multiplier,
+    points_to_currency_ratio: settings.points_to_currency_ratio ?? 1.00,
+    points_expiry_months: settings.points_expiry_months ?? 12,
+    min_points_redeemable: settings.min_points_redeemable ?? 100,
+    max_invoice_percentage_payable_by_points: settings.max_invoice_percentage_payable_by_points ?? 100,
     wa_app_id: settings.wa_app_id,
     wa_phone_id: settings.wa_phone_id,
     wa_business_account_id: settings.wa_business_account_id,
@@ -870,11 +991,13 @@ const form = useForm({
     payment_sms_temp: settings.payment_sms_temp ?? 'None',
     payment_email_temp: settings.payment_email_temp ?? 'None',
     customer_creation_whatsapp_template: settings.customer_creation_whatsapp_template ?? 'None',
-    reportables: normalizeReportables(settings.reportables),
+    order_cancellation_whatsapp_template: settings.order_cancellation_whatsapp_template ?? 'None',
+    reportables: settings.reportables ? normalizeReportables(settings.reportables) : [],
     reportViewers: JSON.parse(settings.reports_permission),
     processing: false,
     support_offline_payment: settings.support_offline_payment == 1,
     who_approves_offline_payment: settings.who_approves_offline_payment,
+    who_handles_refunds: settings.who_handles_refunds,
     order_file_delible_states: settings.order_file_delible_states ? JSON.parse(settings.order_file_delible_states) : ['Delivered'],
     auto_delete_order_files_after: settings.auto_delete_order_files_after ?? 'Two Weeks',
     bank_name: settings.bank_name,
@@ -883,6 +1006,9 @@ const form = useForm({
     order_view_roles: settings.order_view_roles 
         ? JSON.parse(settings.order_view_roles) 
         : ['Reception', 'Management', 'Administrator', 'System Admin'],
+    order_cancel_roles: settings.order_cancel_roles
+        ? JSON.parse(settings.order_cancel_roles)
+        : ['Administrator', 'Reception'],
     processing_branch_show_price: settings.processing_branch_show_price == 1,
     processing_branch_show_invoice: settings.processing_branch_show_invoice == 1,
 });
@@ -917,6 +1043,7 @@ const submit = () =>{
             handleReportablesError(errors);
             handleReportViewersError(errors);
             handleOrderViewRolesError(errors);
+            handleCancelRolesError(errors);
         }
     })
 }
@@ -957,6 +1084,20 @@ const handleOrderViewRolesError = (errors) => {
     form.errors.order_view_roles = invalidRoles.length > 0 
         ? [`The following values are not supported: ${invalidRoles.join(', ')}`] 
         : [];
+}
+
+const handleCancelRolesError = (errors) => {
+    const errorKeys = Object.keys(errors);
+    const invalidRoles = [];
+    errorKeys.forEach(element => {
+        if (element.indexOf('order_cancel_roles.') === 0) {
+            const parts = element.split('.');
+            invalidRoles.push(form.order_cancel_roles[parts[1]]);
+        }
+    })
+    form.errors.order_cancel_roles = invalidRoles.length > 0 
+        ? [`The following values are not supported: ${invalidRoles.join(', ')}`] 
+        : []
 }
 
 onMounted(() => {

@@ -25,6 +25,8 @@
                             v-model="masterForm.item"
                             label="Select Product"
                             :items="items"
+                            item-title="name"
+                            item-value="name"
                             variant="outlined"
                             density="comfortable"
                             :hide-details="masterForm.errors.item == undefined"
@@ -57,10 +59,12 @@
                             variant="outlined"
                             density="comfortable"
                             type="number"
-                            :hide-details="masterForm.errors.price == undefined"
+
                             :error-messages="masterForm.errors.price"
                             prepend-inner-icon="mdi-currency-ngn"
                             disabled
+                            hint="Note: This is a base price. Final cost may vary."
+                            persistent-hint
                             class="modern-input"
                         ></VTextField>
                     </VCol>
@@ -298,8 +302,10 @@
     </div>
 </template>
 
+
+
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { Head, usePage, useForm } from '@inertiajs/vue3';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
 import OrderForm from '@/Components/OrderForm.vue';
@@ -340,6 +346,16 @@ const masterForm = useForm({
     customerName: null,
     customerEmail: null,
     password: null,
+});
+
+// Watch for item changes to update base price
+watch(() => masterForm.item, (newItemName) => {
+    if (newItemName && newItemName !== 'Select') {
+        const selectedItem = items.find(i => i.name === newItemName);
+        if (selectedItem && selectedItem.starting_price) {
+            masterForm.price = selectedItem.starting_price;
+        }
+    }
 });
 
 const selectedBranchAddress = computed(() => {
@@ -423,7 +439,10 @@ const getProductDetails = async () => {
         
         if (response.data && response.data.status === 'success') {
             const product = response.data.product;
-            masterForm.price = (product.print_price ?? 0) + (product.sheet_price ?? 0) + (product.cover_print_price ?? 0);
+            // Only update if we haven't already set it from the list
+            if (masterForm.price === 0) {
+                 masterForm.price = (product.print_price ?? 0) + (product.sheet_price ?? 0) + (product.cover_print_price ?? 0);
+            }
         }
     } catch (error) {
         // Handle error

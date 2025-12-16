@@ -9,7 +9,9 @@ class Notification extends Model
 {
     use HasFactory;
 
+    protected $table = "custom_notifications";
+
     protected $fillable = [
-        "user_id","title","message"
+        "user_id", "title", "message", "url"
     ] ;
 }

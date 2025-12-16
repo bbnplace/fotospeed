@@ -57,6 +57,50 @@
                     <h3>Total: ₦{{ formatter.format(invoice.order.total_cost) }} [{{ invoice.invoice_status.name.toUpperCase() }}]</h3>
                 </VCol>
             </VRow>
+
+            <!-- Loyalty Points Redemption Section -->
+            <VRow v-if="invoice.invoice_status.name == 'Unpaid'">
+                <VCol>
+                    <VCard class="mb-4" color="blue-lighten-5" variant="outlined">
+                        <VCardText>
+                            <div class="d-flex align-center justify-space-between mb-2">
+                                <div>
+                                    <strong class="text-h6">🎁 Loyalty Points Available: {{ availablePoints }}</strong>
+                                    <p class="text-caption text-grey-darken-1 mb-0">Redeem points to reduce your invoice amount</p>
+                                </div>
+                            </div>
+                            
+                            <div v-if="availablePoints >= minPointsRedeemable">
+                                <VTextField
+                                    v-model.number="pointsToRedeem"
+                                    label="Points to Redeem"
+                                    type="number"
+                                    :min="0"
+                                    :max="maxRedeemablePoints"
+                                    variant="outlined"
+                                    density="compact"
+                                    class="mt-3"
+                                    :hint="`Min: ${minPointsRedeemable} | Max: ${maxRedeemablePoints} points`"
+                                    persistent-hint
+                                    @input="calculateDiscount"
+                                ></VTextField>
+                                
+                                <VAlert v-if="pointsDiscount > 0" type="success" class="mt-3" density="compact">
+                                    <strong>Discount: ₦{{ formatter.format(pointsDiscount) }}</strong><br>
+                                    Final Amount: ₦{{ formatter.format(finalAmount) }}
+                                </VAlert>
+                                <VAlert v-if="redemptionError" type="error" class="mt-3" density="compact">
+                                    {{ redemptionError }}
+                                </VAlert>
+                            </div>
+                            <VAlert v-else type="info" density="compact">
+                                You need at least {{ minPointsRedeemable }} points to redeem rewards.
+                            </VAlert>
+                        </VCardText>
+                    </VCard>
+                </VCol>
+            </VRow>
+
             <VRow v-if="invoice.invoice_status.name == 'Unpaid'">
                 <VCol class="text-right">
                     <div v-if="emailMissing">
@@ -207,15 +251,94 @@
 <script setup>
     import { usePage, Head, router, useForm } from "@inertiajs/vue3";
     import ClientLayout from "@/Layouts/ClientLayout.vue";
-    import { ref, computed } from 'vue';
+    import { ref, computed, watch } from 'vue';
     import Paystack from '@/Components/Paystack.vue';
     import moment from 'moment';
     import axios from 'axios';
 
     const invoice = usePage().props.invoice;
-    const paystackData = usePage().props.paystack;
     const invoiceRefSrc = usePage().props.invoice_no_src;
-    const bank_account = usePage().props.bank_account;
+    const client = {
+        name: invoice.user.name,
+        address: invoice.order.delivery_address,
+        email: invoice.user.email
+    };
+    const company = usePage().props.company;
+    const bankAccount = usePage().props.bank_account;
+    const paystackData = usePage().props.paystack;
+    const banks = usePage().props.banks;
+
+    // Loyalty Points Redemption
+    const availablePoints = ref(usePage().props.availablePoints || 0);
+    const settings = usePage().props.settings || {};
+    const minPointsRedeemable = settings.min_points_redeemable || 100;
+    const pointsRatio = settings.points_to_currency_ratio || 1.0;
+    const maxPercentage = settings.max_invoice_percentage_payable_by_points || 100;
+    const invoiceAmount = invoice.order.total_cost;
+    
+    const pointsToRedeem = ref(0);
+    const pointsDiscount = ref(0);
+    const finalAmount = ref(invoiceAmount);
+    const redemptionError = ref('');
+
+    const maxRedeemablePoints = computed(() => {
+        const maxByPercentage = Math.floor((invoiceAmount * maxPercentage / 100) / pointsRatio);
+        const maxByInvoice = Math.floor(invoiceAmount / pointsRatio);
+        const maxByAvailable = availablePoints.value;
+        return Math.min(maxByPercentage, maxByInvoice, maxByAvailable);
+    });
+
+    const calculateDiscount = () => {
+        redemptionError.value = '';
+        const points = pointsToRedeem.value || 0;
+
+        if (points < 0) {
+            pointsToRedeem.value = 0;
+            return;
+        }
+
+        if (points > 0 && points < minPointsRedeemable) {
+            redemptionError.value = `Minimum ${minPointsRedeemable} points required`;
+            pointsDiscount.value = 0;
+            finalAmount.value = invoiceAmount;
+            return;
+        }
+
+        if (points > maxRedeemablePoints.value) {
+            pointsToRedeem.value = maxRedeemablePoints.value;
+            redemptionError.value = `Maximum ${maxRedeemablePoints.value} points allowed`;
+        }
+
+        const discount = pointsToRedeem.value * pointsRatio;
+        pointsDiscount.value = discount;
+        finalAmount.value = Math.max(0, invoiceAmount - discount);
+
+        // Update Paystack amount
+        paystackData.amount = finalAmount.value;
+    };
+
+    // Watch for changes to auto-calculate
+    watch(pointsToRedeem, calculateDiscount);
+
+    // Watch amount paid to prevent overpayment
+    watch(() => bankPaymentForm.value.amount, (newAmount) => {
+        if (!newAmount || newAmount <= 0 || pointsToRedeem.value === 0) return;
+        
+        const currentDiscount = pointsToRedeem.value * pointsRatio;
+        const totalPayment = parseFloat(newAmount) + currentDiscount;
+        
+        // If total payment exceeds invoice, adjust points
+        if (totalPayment > invoiceAmount) {
+            const maxPointsForAmount = Math.floor((invoiceAmount - newAmount) / pointsRatio);
+            if (maxPointsForAmount >= 0) {
+                pointsToRedeem.value = Math.max(0, maxPointsForAmount);
+                redemptionError.value = 'Points adjusted to prevent overpayment';
+            } else {
+                pointsToRedeem.value = 0;
+                redemptionError.value = 'Amount paid exceeds invoice total';
+            }
+        }
+    });
 
     const handlePaymentCompletion = data => {
         setTimeout(()=>{
@@ -223,19 +346,7 @@
         }, 1000);
     }
 
-    // Other data
-    const company = usePage().props.company;
-
-    const client = computed(() => {
-        const inv = usePage().props.invoice;
-        return {
-            name: inv.user.name,
-            address: inv.order.delivery_address,
-            email: inv.user.email
-        }
-    });
-
-    const emailMissing = computed(() => !client.value.email || client.value.email == null || client.value.email == '');
+    const emailMissing = computed(() => !client.email || client.email == null || client.email == '');
 
     const emailUpdateForm = useForm({
         email: ''
@@ -287,6 +398,7 @@
         depositor_name: '',
         transaction_reference: '',
         payment_date: todayDate,
+        points_to_redeem: pointsToRedeem.value || 0,
     });
 
     const bankPaymentFormErrors = ref({

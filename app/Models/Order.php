@@ -27,6 +27,9 @@ class Order extends Model
         'order_number',
         'quantity',
         'process_id',
+        'cancelled_by',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     public function user()

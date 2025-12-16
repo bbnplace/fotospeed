@@ -135,7 +135,7 @@ class CustomersController extends Controller
         $user = $query->first();
 
         // Loyalty Reward Points
-        $points = RewardPoint::where('user_id', $user->id)->sum('points');
+        $points = RewardPoint::getPointsBreakdown($user->id);
 
         return [
             'states' => State::getStatesArray(),

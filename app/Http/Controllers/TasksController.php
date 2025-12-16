@@ -80,13 +80,15 @@ class TasksController extends Controller
             'Todo' => [],
             'Doing' => [],
             'Done'=> [],
+            'Cancelled' => [],
+            'Held' => [],
         ];
 
         $query = Task::query();
         $query->where('user_id', auth()->user()->id);
-        $query->with('order', function ($query){
-            $query->select('id','name','order_number','paused');
-        });
+        $query->with(['order' => function ($query){
+            $query->select('id','name','order_number','paused','cancellation_reason','hold_reason');
+        }, 'taskStatus']);
         $query->orderBy('id','desc');
         // $records = Task::where('user_id', auth()->user()->id)->get();
         $records = $query->get();
@@ -110,6 +112,8 @@ class TasksController extends Controller
                 'Todo' => [],
                 'Doing' => [],
                 'Done' => [],
+                'Cancelled' => [],
+                'Held' => [],
                 'message' => 'Order not found.'
             ];
         }
@@ -123,6 +127,8 @@ class TasksController extends Controller
                 'Todo' => [],
                 'Doing' => [],
                 'Done' => [],
+                'Cancelled' => [],
+                'Held' => [],
                 'message' => 'Tasks for this order are not accessible from your branch.'
             ];
         }
@@ -131,6 +137,8 @@ class TasksController extends Controller
             'Todo' => [],
             'Doing' => [],
             'Done'=> [],
+            'Cancelled' => [],
+            'Held' => [],
         ];
 
         $query =  Task::query();
@@ -142,7 +150,7 @@ class TasksController extends Controller
             $query->select('id', 'name');
         });
         $query->with('order', function ($query){
-            $query->select('id','order_number','name','paused');
+            $query->select('id','order_number','name','paused','cancellation_reason','hold_reason');
         });
 
         // $records = Task::where('order_id', $orderId)->get();

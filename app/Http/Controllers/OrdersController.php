@@ -17,6 +17,8 @@ use App\Models\TaskStatus;
 use App\Models\User;
 use App\Models\Setting;
 use App\Notifications\GenericNotification;
+use App\Notifications\OrderHoldNotification;
+use App\Notifications\OrderReactivatedNotification;
 use App\Report\ReportBuilder;
 use App\Tasks\Task;
 use App\Models\Task as TaskModel;
@@ -27,10 +29,15 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use App\Http\Traits\HandlesRewardPointRedemption;
 use App\Messaging\WhatsAppClient;
+use App\Events\InvoicePaymentVerified;
 
 class OrdersController extends Controller
 {
+    use HandlesRewardPointRedemption;
+
     protected $rules = [
         'item' => 'string|required|exists:items,name|min:2|max:64',
         'files' => 'nullable|array',
@@ -433,6 +440,13 @@ class OrdersController extends Controller
         $canGenerateInvoice = $isFromAdministrativeBranch && (!$hasInvoice && ($canEditOrder || auth()->user()->isCashier()));
         $canRegenerateInvoice = $isFromAdministrativeBranch && $hasInvoice && !$invoicePaid;
 
+        // Get settings for order cancellation roles
+        $settings = Setting::first();
+        $authorizedCancelRoles = !empty($settings->order_cancel_roles) 
+            ? json_decode($settings->order_cancel_roles) 
+            : ['Administrator', 'Reception'];
+        $userCanCancelByRole = in_array(auth()->user()->role->name, $authorizedCancelRoles);
+
         $orderProcessCoordinatorRole = $this->getOrderProcessCoordinatorRole($order);
         
         // Check if all tasks for current process are complete
@@ -523,9 +537,10 @@ class OrdersController extends Controller
             'canHoldOrder' => $canEditOrder && !in_array($order->order_status_id, [
                 OrderStatus::DELIVERED, OrderStatus::CANCELLED, OrderStatus::DELIVERY_FAILED
             ]),
-            'canCancelOrder' => $canEditOrder && in_array($order->order_status_id, [
+            'canCancelOrder' => $userCanCancelByRole && in_array($order->order_status_id, [
                 OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED, OrderStatus::AWAITING_PAYMENT, OrderStatus::PAYMENT_CONFIRMED
             ]),
+            'canReactivateOrder' => $userCanCancelByRole && $order->paused,
             'canEditReferenceNumber' => $canEditOrder && in_array($order->order_status_id, [
                 OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED
             ]),
@@ -582,14 +597,59 @@ class OrdersController extends Controller
             'organizationAccountNumber' => $request->organizationAccountNumber,
             'whoReceivedCash' => $request->whoReceivedCash,
             'currency' => $request->currency ?? 'NGN',
+            'pointsRedeemed' => $invoice->points_redeemed ?? 0,
+            'pointsDiscount' => $invoice->points_discount_amount ?? 0,
         ]);
         $invoice->save();
+
+        // Award loyalty reward points when offline payment is approved
+        if ($request->status == 'Paid') {
+            $order = Order::find($request->orderId);
+            $settings = Setting::first();
+            
+            if ($order && $settings && !empty($settings->loyalty_reward_multiplier)) {
+                $this->saveLoyaltyRewardPoints($order, $invoice, $settings->loyalty_reward_multiplier);
+            }
+        }
+
+        // Dispatch event if paid
+        if ($request->status == 'Paid') {
+            event(new InvoicePaymentVerified($invoice->id));
+        }
 
         return [
             'status' => 'success',
             'message' => 'Successfully Updated'
         ];
 
+    }
+
+    private function saveLoyaltyRewardPoints($order, $invoice, $rewardMultiplier)
+    {
+        // Secure calculation without eval()
+        if (!empty($rewardMultiplier) && is_numeric($rewardMultiplier) && $rewardMultiplier > 0) {
+            // Get the actual cash amount paid from payment data
+            $paymentData = json_decode($invoice->offline_payment_data ?? $invoice->customer_payment_proof, true);
+            $cashPaid = $paymentData['amountPaid'] ?? $order->total_cost;
+            
+            // Calculate points based ONLY on the cash amount paid (not on points used)
+            // This encourages customers to use their points without penalty
+            $rewardPoints = round($cashPaid * $rewardMultiplier, 2);
+            
+            // Get expiration date from settings
+            $settings = Setting::first();
+            $expiryMonths = $settings->points_expiry_months ?? 12;
+            $expiresAt = $expiryMonths > 0 ? now()->addMonths($expiryMonths) : null;
+            
+            \App\Models\RewardPoint::create([
+                'user_id' => $order->user_id,
+                'invoice_id' => $invoice->id,
+                'points' => $rewardPoints,
+                'transaction_type' => \App\Models\RewardPoint::TYPE_EARNED,
+                'description' => "Earned from Invoice #{$invoice->id} (Offline Payment)",
+                'expires_at' => $expiresAt,
+            ]);
+        }
     }
 
     public function edit($id)
@@ -681,54 +741,161 @@ class OrdersController extends Controller
 
     public function cancel(Request $request, $orderId)
     {
+        // Validate cancellation reason is required
+        $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
         $order = Order::find($orderId);
-       
-        if ($this->canCancelOrder($order)) {
+        
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        // Authorization: Check if user's role is allowed to cancel orders
+        $settings = Setting::first();
+        $authorizedRoles = !empty($settings->order_cancel_roles) 
+            ? json_decode($settings->order_cancel_roles) 
+            : ['Administrator', 'Reception']; // Fallback to defaults
+        
+        $isAuthorized = in_array(auth()->user()->role->name, $authorizedRoles);
+        
+        if (!$isAuthorized) {
+            return response()->json([
+                'error' => 'Unauthorized. You do not have permission to cancel orders.',
+                'authorizedRoles' => $authorizedRoles
+            ], 403);
+        }
+
+        // Check if order can be cancelled based on process configuration
+        if (!$this->canCancelOrder($order)) {
+            return [
+                'response' => sprintf('Cannot cancel %s order during %s.', $order->item->name, $order->process->name),
+                'orderStatus' => $order->process->name,
+            ];
+        }
+
+        // Use database transaction for safety
+        DB::beginTransaction();
+        try {
             // Set Order status to Cancelled
             $order->order_status_id = OrderStatus::CANCELLED;
+            
+            // Track audit fields
+            $order->cancelled_by = auth()->id();
+            $order->cancelled_at = now();
+            $order->cancellation_reason = $request->reason;
+            
             $order->save();
+
+            // Update invoice status to CANCELLED if invoice exists
+            // Store original status first for refund notification check
+            $invoiceWasPaid = false;
+            $invoice = Invoice::where('order_id', $order->id)->first();
+            if ($invoice) {
+                $invoiceWasPaid = $invoice->invoice_status_id == InvoiceStatus::STATUS_PAID;
+                $invoice->invoice_status_id = InvoiceStatus::STATUS_CANCELLED;
+                $invoice->save();
+            }
 
             // Update report that order is cancelled
             ReportBuilder::build('cancelled', $order->quantity);
-
-            // Todo: Log the ID of the user that cancelled the order
 
             // Send notification to all team members with uncompleted tasks that order has been cancelled
             $tasks = $this->getOrderTasksInProcess($order);
             if (!empty($tasks)) {
                 foreach ($tasks as $task) {
-                    $message = sprintf('Stop Work. Order %s has been cancelled. See details.', $order->order_number ?? $order->name);
+                    $message = sprintf('Stop Work. Order %s has been cancelled. Reason: %s', 
+                        $order->order_number ?? $order->name,
+                        $request->reason
+                    );
                     $task->user->notify(new GenericNotification([
                         'message' => $message,
                         'type' => ['broadcast'],
                         'user' => $task->user,
                         'url' => route('order.view', $order->id)
                     ]));
+                    
+                    // Mark task as cancelled
+                    $task->task_status_id = TaskStatus::STATUS_CANCELLED;
+                    $task->save();
                 }
             }
 
-            // if (!$tasks->isEmpty()) {
-            //     $tasks->each(function ($task) use ($order) {
-            //         $user = $task->user;
-            //         Notification::create([
-            //             'user_id'=> $user->id,
-            //             'title' => sprintf('%s[%s] is Cancelled', $order->name, $order->order_number),
-            //             'message' => sprintf('Hello %s,<br /> this is to inform you that order[%s] has been cancelled.', $order->name, $order->order_number),
-            //         ]);
-            //     });
-            // }
-            // Todo: Send notification to customer that order has been cancelled.
+            // Send WhatsApp notification to customer if template is configured
+            if (!empty($settings->order_cancellation_whatsapp_template)) {
+                try {
+                    $waClient = new WhatsAppClient([
+                        'customer' => $order->user,
+                        'order' => $order,
+                        'team' => collect(),
+                        'nextProcess' => null
+                    ]);
+                    
+                    $waClient->sendMessage(
+                        $settings->order_cancellation_whatsapp_template,
+                        [$order->user->mobile]
+                    );
+                } catch (\Exception $e) {
+                    Log::error('Failed to send WhatsApp cancellation notification: ' . $e->getMessage());
+                    // Don't fail the cancellation if WhatsApp fails
+                }
+            }
+
+            // Notify refund handlers if invoice was paid before cancellation
+            if ($invoiceWasPaid && $invoice) {
+                // Get users with refund handler role
+                if (!empty($settings->who_handles_refunds)) {
+                    $refundHandlerRole = Role::where('name', $settings->who_handles_refunds)->first();
+                    
+                    if ($refundHandlerRole) {
+                        $refundHandlers = User::where('role_id', $refundHandlerRole->id)->get();
+                        
+                        foreach ($refundHandlers as $handler) {
+                            $invoiceUrl = route('invoice', $invoice->id);
+                            
+                            $message = sprintf(
+                                'Order %s has been cancelled and requires refund processing.<br><br><strong>Customer:</strong> %s<br><strong>Amount:</strong> ₦%s<br><strong>Reason:</strong> %s<br><br><a href="%s" class="btn bg-primary text-white px-4 py-2 rounded" style="display: inline-block; text-decoration: none; background-color: #1976d2; color: white; padding: 8px 16px; border-radius: 4px; font-weight: 500;">Process Refund</a>',
+                                $order->order_number ?? $order->name,
+                                $order->user->name,
+                                number_format($order->total_cost, 2),
+                                $request->reason,
+                                $invoiceUrl
+                            );
+                            
+                            // Create persistent notification in custom_notifications table
+                            \App\Models\Notification::create([
+                                'user_id' => $handler->id,
+                                'title' => 'Refund Required',
+                                'message' => $message,
+                                'url' => $invoiceUrl,
+                            ]);
+                            
+                            // Also send browser notification
+                            $handler->notify(new GenericNotification([
+                                'message' => strip_tags($message), // Remove HTML for browser notification
+                                'type' => ['broadcast'],
+                                'user' => $handler,
+                                'url' => $invoiceUrl,
+                            ]));
+                        }
+                    }
+                }
+            }
             
+            DB::commit();
 
             return [
                 'response' => 'Success',
                 'orderStatus' => 'Cancelled',
             ];
-        } else {
-            return [
-                'response' => sprintf('Cannot cancel %s order during %s.', $order->item->name, $order->process->name),
-                'orderStatus' => $order->process->name,
-            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Order cancellation failed: ' . $e->getMessage());
+            
+            return response()->json([
+                'error' => 'Cancellation failed. Please try again.'
+            ], 500);
         }
     }
 
@@ -738,22 +905,37 @@ class OrdersController extends Controller
             'reason' => 'nullable|string|max:1000',
         ]);
         
+        // Authorization: Check if user's role is allowed to hold orders
+        $settings = Setting::first();
+        $authorizedRoles = !empty($settings->order_cancel_roles) 
+            ? json_decode($settings->order_cancel_roles) 
+            : ['Administrator', 'Reception']; // Same roles that can cancel
+        
+        $isAuthorized = in_array(auth()->user()->role->name, $authorizedRoles);
+        
+        if (!$isAuthorized) {
+            return response()->json([
+                'error' => 'Unauthorized. You do not have permission to hold orders.',
+                'authorizedRoles' => $authorizedRoles
+            ], 403);
+        }
+        
         $order = Order::find($orderId);
         $order->paused = true;
         $order->hold_reason = $request->reason;
         $order->save();
 
-        // Send stop work notice to all team members that have task for this order
+        // Get all tasks for this order and move them to HELD status
         $tasks = $this->getOrderTasksInProcess($order);
-        if (!empty($tasks)) {
+        if ($tasks->isNotEmpty()) {
             foreach ($tasks as $task) {
-                $message = sprintf('Stop Work. Order %s has been placed on hold. Click to see reason.', $order->order_number ?? $order->name);
-                $task->user->notify(new GenericNotification([
-                    'message' => $message,
-                    'type' => ['broadcast'],
-                    'user' => $task->user,
-                    'url' => route('order.view', $order->id)
-                ]));
+                // Save current status before holding
+                $task->previous_status_id = $task->task_status_id;
+                $task->task_status_id = TaskStatus::STATUS_HELD;
+                $task->save();
+                
+                // Send stop work notice
+                $task->user->notify(new OrderHoldNotification($order, $request->reason, $task->user));
             }
         }
 
@@ -765,22 +947,46 @@ class OrdersController extends Controller
 
     public function reactivate(Request $request, $orderId)
     {
+        // Authorization: Check if user's role is allowed to reactivate orders
+        $settings = Setting::first();
+        $authorizedRoles = !empty($settings->order_cancel_roles) 
+            ? json_decode($settings->order_cancel_roles) 
+            : ['Administrator', 'Reception']; // Same roles that can cancel
+        
+        $isAuthorized = in_array(auth()->user()->role->name, $authorizedRoles);
+        
+        if (!$isAuthorized) {
+            return response()->json([
+                'error' => 'Unauthorized. You do not have permission to reactivate orders.',
+                'authorizedRoles' => $authorizedRoles
+            ], 403);
+        }
+        
         $order = Order::find($orderId);
         $order->paused = false;
         $order->hold_reason = null;
         $order->save();
 
-        // Send order reactivation notice to all team members that have task for this order
-        $tasks = $this->getOrderTasksInProcess($order);
-        if (!empty($tasks)) {
+        // Get all held tasks for this order and restore to previous status
+        $tasks = TaskModel::where('order_id', $order->id)
+            ->where('task_status_id', TaskStatus::STATUS_HELD)
+            ->whereNotNull('user_id')
+            ->get();
+            
+        if ($tasks->isNotEmpty()) {
             foreach ($tasks as $task) {
-                $message = sprintf('Resume Work. Order %s has been reactivated. Open Order.', $order->order_number ?? $order->name);
-                $task->user->notify(new GenericNotification([
-                    'message' => $message,
-                    'type' => ['broadcast'],
-                    'user' => $task->user,
-                    'url' => route('order.view', $order->id)
-                ]));
+                // Restore to previous status
+                if ($task->previous_status_id) {
+                    $task->task_status_id = $task->previous_status_id;
+                    $task->previous_status_id = null;
+                } else {
+                    // If no previous status (legacy held tasks), default to Todo
+                    $task->task_status_id = TaskStatus::STATUS_TODO;
+                }
+                $task->save();
+                
+                // Send reactivation notice
+                $task->user->notify(new OrderReactivatedNotification($order, $task->user));
             }
         }
 
@@ -794,7 +1000,7 @@ class OrdersController extends Controller
     {
         // Log::info('Order ID: '. $orderId .', Waybill No: '. $request->waybillNo );
         $request->validate([
-            'waybillNumber' => 'required|unique:orders,waybill_number|string|max:32'
+            'waybillNumber' => 'required|string|max:32'
         ]);
 
         $order = Order::find($orderId);

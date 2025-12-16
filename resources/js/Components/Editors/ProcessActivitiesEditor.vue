@@ -393,7 +393,7 @@ if(processData.processes) {
 }
 
 const taskNameRule = value => value.length <= 20;
-const taskDetailRule = value => value.length <= 75;
+const taskDetailRule = value => !value || value.length <= 75;
 
 const form = reactive({
     name: "",

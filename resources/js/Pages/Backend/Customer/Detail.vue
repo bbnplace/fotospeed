@@ -14,7 +14,29 @@
                         <VCol cols="6"><b>Mobile</b><br />{{ customer.mobile }}</VCol>
                     </VRow>
                     <VRow>
-                        <VCol cols="6"><b>Reward Points</b><br />{{ loyaltyPoints }}</VCol>
+                        <VCol cols="6"><b>Reward Points</b><br />
+                            <div class="d-flex flex-column text-caption mt-2">
+                                <div class="d-flex align-center mb-1">
+                                    <v-icon icon="mdi-arrow-up-circle" color="success" size="x-small" class="mr-2"></v-icon>
+                                    <span class="text-medium-emphasis mr-2" style="min-width: 60px;">Earned:</span>
+                                    <span class="font-weight-bold">{{ Number(loyaltyPoints.total_earned).toLocaleString() }}</span>
+                                    <span class="text-grey ml-1">(₦{{ Number(loyaltyPoints.total_earned_currency).toLocaleString() }})</span>
+                                </div>
+                                <div class="d-flex align-center mb-1">
+                                    <v-icon icon="mdi-arrow-down-circle" color="error" size="x-small" class="mr-2"></v-icon>
+                                    <span class="text-medium-emphasis mr-2" style="min-width: 60px;">Used:</span>
+                                    <span class="font-weight-bold">{{ Number(loyaltyPoints.total_redeemed).toLocaleString() }}</span>
+                                    <span class="text-grey ml-1">(₦{{ Number(loyaltyPoints.total_redeemed_currency).toLocaleString() }})</span>
+                                </div>
+                                <v-divider class="my-1 border-dashed"></v-divider>
+                                <div class="d-flex align-center">
+                                    <v-icon icon="mdi-wallet" color="primary" size="x-small" class="mr-2"></v-icon>
+                                    <span class="text-medium-emphasis mr-2" style="min-width: 60px;">Available:</span>
+                                    <span class="font-weight-bold text-high-emphasis">{{ Number(loyaltyPoints.available).toLocaleString() }}</span>
+                                    <span class="text-primary font-weight-bold ml-1">(₦{{ Number(loyaltyPoints.available_currency).toLocaleString() }})</span>
+                                </div>
+                            </div>
+                        </VCol>
                         <VCol cols="6" ><b>Groups</b><br />
                             <v-chip-group
                                 selected-class="text-primary"

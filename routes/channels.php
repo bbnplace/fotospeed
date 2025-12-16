@@ -33,6 +33,12 @@ Broadcast::channel('new-order.{branchId}', function ($user, $branchId) {
 Broadcast::channel('order-chat.{orderId}', function ($user, $orderId) {
     // Any authenticated user can listen to order chat
     // You can add more specific authorization logic here if needed
+    // You can add more specific authorization logic here if needed
+    return Auth::check();
+});
+
+// Order Status Updates Channel - Allow authenticated users to listen to order updates
+Broadcast::channel('order.{orderId}', function ($user, $orderId) {
     return Auth::check();
 });
 
@@ -55,3 +61,10 @@ Broadcast::channel('task-claims.{roleId}.{branchId}', function ($user, $roleId, 
 //     return (int) $user->id === (int) $id;
 // });
 
+
+Broadcast::channel('invoice.{id}', function ($user, $id) {
+    // Only allow users related to the invoice or admins to listen
+    // For now, we'll allow any authenticated user to keep it simple, similar to order-chat
+    // You can refine this to check if $user->id == invoice->user_id or if user is admin
+    return Auth::check();
+});

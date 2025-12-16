@@ -84,17 +84,25 @@ class SettingsController extends Controller
             'reportViewers' => 'required|array',
             'reportViewers.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
             'invoice_no_src' => 'required|string|max:64',
-            'loyalty_reward_formula' => 'nullable|string|max:64',
+            'loyalty_reward_multiplier' => 'nullable|numeric|min:0|max:1',
+            'points_to_currency_ratio' => 'nullable|numeric|min:0',
+            'points_expiry_months' => 'nullable|integer|min:0',
+            'min_points_redeemable' => 'nullable|integer|min:0',
+            'max_invoice_percentage_payable_by_points' => 'nullable|integer|min:0|max:100',
             'support_offline_payment' => 'nullable|boolean',
             'who_approves_offline_payment' => 'nullable|string|max:64',
+            'who_handles_refunds' => 'nullable|string|max:64',
             'order_file_delible_states' => 'nullable|array',
             'auto_delete_order_files_after' => 'nullable|string|max:32',
             'customer_creation_whatsapp_template' => 'nullable|string|max:64',
+            'order_cancellation_whatsapp_template' => 'nullable|string|max:64',
             'bank_name' => 'nullable|string|max:128',
             'account_number' => 'nullable|string|max:20',
             'account_name' => 'nullable|string|max:128',
             'order_view_roles' => 'required|array',
             'order_view_roles.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
+            'order_cancel_roles' => 'required|array',
+            'order_cancel_roles.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
             'processing_branch_show_price' => 'nullable|boolean',
             'processing_branch_show_invoice' => 'nullable|boolean',
         ];
@@ -143,16 +151,23 @@ class SettingsController extends Controller
         $settings->reportables = json_encode($this->snakeCaseReportables($request->reportables));
         $settings->reports_permission = json_encode($request->reportViewers);
         $settings->invoice_no_src = $request->invoice_no_src;
-        $settings->loyalty_reward_formula = $request->loyalty_reward_formula;
+        $settings->loyalty_reward_multiplier = $request->loyalty_reward_multiplier;
+        $settings->points_to_currency_ratio = $request->points_to_currency_ratio ?? 1.00;
+        $settings->points_expiry_months = $request->points_expiry_months ?? 12;
+        $settings->min_points_redeemable = $request->min_points_redeemable ?? 100;
+        $settings->max_invoice_percentage_payable_by_points = $request->max_invoice_percentage_payable_by_points ?? 100;
         $settings->support_offline_payment = $request->support_offline_payment;
         $settings->who_approves_offline_payment = $request->who_approves_offline_payment;
+        $settings->who_handles_refunds = $request->who_handles_refunds;
         $settings->order_file_delible_states = json_encode($request->order_file_delible_states);
         $settings->auto_delete_order_files_after = $request->auto_delete_order_files_after;
         $settings->customer_creation_whatsapp_template = $request->customer_creation_whatsapp_template == 'None' ? null : $request->customer_creation_whatsapp_template;
+        $settings->order_cancellation_whatsapp_template = $request->order_cancellation_whatsapp_template == 'None' ? null : $request->order_cancellation_whatsapp_template;
         $settings->bank_name = $request->bank_name;
         $settings->account_number = $request->account_number;
         $settings->account_name = $request->account_name;
         $settings->order_view_roles = json_encode($request->order_view_roles);
+        $settings->order_cancel_roles = json_encode($request->order_cancel_roles);
         $settings->processing_branch_show_price = $request->processing_branch_show_price ?? false;
         $settings->processing_branch_show_invoice = $request->processing_branch_show_invoice ?? false;
         $settings->save();

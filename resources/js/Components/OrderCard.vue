@@ -353,7 +353,7 @@
                                 color="white"
                                 class="mr-2 mb-2"
                                 prepend-icon="mdi-play"
-                                v-if="orderOnHold && user.isAdmin && orderStatus != 'Cancelled'"
+                                v-if="orderOnHold && canReactivateOrder && orderStatus != 'Cancelled'"
                             >
                                 Reactivate
                                 <VOverlay
@@ -403,28 +403,32 @@
                                     scroll-strategy="close"
                                 >
                                     <VCard max-width="400" class="p-3">
-                                        <VCardTitle>Heads Up!</VCardTitle>
+                                        <VCardTitle>Cancel Order</VCardTitle>
                                         <VCardText>
-                                            <p>Are you sure you want to cancel this order?</p>
-                                            <p class="text-center" v-if="cancellingOrderProgress">
-                                                <v-progress-circular
-                                                    color="red"
-                                                    indeterminate
-                                                ></v-progress-circular>
+                                            <p>
+                                                Why do you want to cancel this order?<br />
                                             </p>
-                                            <p v-if="orderCancelResponse.length" class="text-center font-bold">{{ orderCancelResponse }}</p>
+                                            <VTextarea
+                                                v-model="orderCancelReason"
+                                                hide-details
+                                                id="cancel-order-reason"
+                                                variant="outlined"
+                                                label="Reason for cancellation *"
+                                                :loading="cancellingOrderProgress"
+                                            ></VTextarea>
+                                            <p v-if="orderCancelResponse.length" class="text-center font-bold pt-2">{{ orderCancelResponse }}</p>
                                             <p v-if="orderCancelError && orderCancelError.length"  class="text-center text-red mt-1 mb-0">{{ orderCancelError }}</p>
                                         </VCardText>
                                         <VCardActions>
                                             <VBtn
-                                                color="red-darken-1 m-1"
+                                                color="red-darken-1"
                                                 @click="cancelOrder"
-                                                :disabled="cancellingOrderProgress"
-                                            >Yes Proceed</VBtn>
+                                                :disabled="cancellingOrderProgress || !orderCancelReason"
+                                            >Cancel Order</VBtn>
                                             <VBtn
-                                                color="blue-darken-1 m-1"
+                                                color="blue-darken-1"
                                                 @click="showOverlay = false"
-                                            >Don't</VBtn>
+                                            >Close</VBtn>
                                         </VCardActions>
                                     </VCard>
                                 </VOverlay>
@@ -451,6 +455,7 @@ const invoicePaid = ref(usePage().props.invoicePaid);
 const invoice = ref(usePage().props.invoice);
 const canEditOrder = usePage().props.canEditOrder;
 const canHoldOrder = usePage().props.canHoldOrder;
+const canReactivateOrder = usePage().props.canReactivateOrder;
 const canCancelOrder = usePage().props.canCancelOrder;
 const canEditReferenceNumber = usePage().props.canEditReferenceNumber;
 const canEditPrice = usePage().props.canEditPrice;
@@ -490,13 +495,21 @@ const formatter = new Intl.NumberFormat('en-US', {
     });
 
 const orderCancelError = ref("");
+const orderCancelReason = ref("");
 let source = null;
 const cancelOrder = async () => {
     orderCancelResponse.value = "";
     orderCancelError.value = "";
+    
+    if (!orderCancelReason.value || orderCancelReason.value.trim() === "") {
+        orderCancelError.value = "Please provide a reason for cancellation.";
+        return;
+    }
+    
     cancellingOrderProgress.value = true;
     const payload = {
-        orderId: order.id
+        orderId: order.id,
+        reason: orderCancelReason.value
     };
     if(source) source.cancel('Request cancelled by user');
     source = axios.CancelToken.source();
@@ -515,16 +528,21 @@ const cancelOrder = async () => {
     } catch (error) {
         cancellingOrderProgress.value = false;
         if (error.response && error.response.status === 422) {
-            orderCancelError.value = error.response.data.message;
+            orderCancelError.value = error.response.data.errors?.reason?.[0] || error.response.data.message;
+        } else if (error.response && error.response.status === 403) {
+            orderCancelError.value = error.response.data.error || "You do not have permission to cancel orders.";
         } else {
-            orderCancelError.value = "Something went wrong! Pls try again later.";
+            orderCancelError.value = error.response?.data?.error || "Something went wrong! Pls try again later.";
         }
     }
 
     setTimeout(()=>{
-        orderCancelResponse.value = "";
+        if (orderCancelResponse.value) {
+            orderCancelResponse.value = "";
+            orderCancelReason.value = "";
+            showOverlay.value = false;
+        }
         orderCancelError.value = "";
-        showOverlay.value = false;
     }, 5000);
 }
 

@@ -6,6 +6,7 @@ use App\Messaging\EmailClient;
 use App\Messaging\SMSClient;
 use App\Models\EmailTemplate;
 use App\Models\RewardPoint;
+use App\Http\Traits\HandlesRewardPointRedemption;
 use App\Models\Role;
 use App\Models\SmsTemplate;
 use App\Models\Setting;
@@ -15,11 +16,14 @@ use App\Models\Order;
 use App\Models\User;
 use App\Notifications\GenericNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CustomerInvoicesController extends Controller
 {
+    use HandlesRewardPointRedemption;
     public function index()
     {
         return Inertia::render('Client/Invoice/List', [
@@ -228,18 +232,62 @@ class CustomerInvoicesController extends Controller
         }
     }
 
-    private function saveLoyaltyRewardPoints($order, $invoice, $rewardPointsFormula)
+    public function handlePaystackPaymentCompletion(Request $request, $invoiceId)
     {
-        $invoiceAmountPlaceholder = '[invoice_amount]';
-        if(!empty($rewardPointsFormula) && strstr($rewardPointsFormula, $invoiceAmountPlaceholder))
-        {
-            $calculation = str_replace($invoiceAmountPlaceholder, $order->total_cost, $rewardPointsFormula);
-            $rewardPoint = eval('return '. $calculation .';');
+        // This method is called after successful Paystack payment
+        $invoice = Invoice::with('order')->findOrFail($invoiceId);
+        
+        // Verify payment with Paystack
+        $reference = $request->reference;
+        
+        // Award loyalty points based on ACTUAL amount paid to Paystack
+        // Not on any discount from points redemption
+        $settings = Setting::first();
+        if ($settings && !empty($settings->loyalty_reward_multiplier)) {
+            // For Paystack, the actual amount paid is stored in the transaction
+            // This is the amount AFTER points discount was applied
+            $order = $invoice->order;
+            
+            // Get the actual Paystack payment amount (this is finalAmount after points discount)
+            $paystackAmount = $invoice->order->total_cost - ($invoice->points_discount_amount ?? 0);
+            
+            // Calculate points on the cash amount paid to Paystack
+            $rewardPoints = round($paystackAmount * $settings->loyalty_reward_multiplier, 2);
+            
+            $expiryMonths = $settings->points_expiry_months ?? 12;
+            $expiresAt = $expiryMonths > 0 ? now()->addMonths($expiryMonths) : null;
+            
+            \App\Models\RewardPoint::create([
+                'user_id' => $order->user_id,
+                'invoice_id' => $invoice->id,
+                'points' => $rewardPoints,
+                'transaction_type' => \App\Models\RewardPoint::TYPE_EARNED,
+                'description' => "Earned from Invoice #{$invoice->id} (Paystack Payment)",
+                'expires_at' => $expiresAt,
+            ]);
+        }
+        
+        return response()->json(['status' => 'success']);
+    }
+
+    private function saveLoyaltyRewardPoints($order, $invoice, $rewardMultiplier)
+    {
+        // Secure calculation without eval()
+        if (!empty($rewardMultiplier) && is_numeric($rewardMultiplier) && $rewardMultiplier > 0) {
+            $rewardPoints = round($order->total_cost * $rewardMultiplier, 2);
+            
+            // Get expiration date from settings
+            $settings = Setting::first();
+            $expiryMonths = $settings->points_expiry_months ?? 12;
+            $expiresAt = $expiryMonths > 0 ? now()->addMonths($expiryMonths) : null;
             
             RewardPoint::create([
                 'user_id' => $order->user_id,
                 'invoice_id' => $invoice->id,
-                'points' => $rewardPoint,
+                'points' => $rewardPoints,
+                'transaction_type' => RewardPoint::TYPE_EARNED,
+                'description' => "Earned from Invoice #{$invoice->id}",
+                'expires_at' => $expiresAt,
             ]);
         }
     }
@@ -259,6 +307,7 @@ class CustomerInvoicesController extends Controller
             'depositor_name' => 'required|string|max:128',
             'transaction_reference' => 'nullable|string|max:128',
             'payment_date' => 'required|date|before_or_equal:today',
+            'points_to_redeem' => 'nullable|integer|min:0',
         ]);
 
         // Check if invoice exists and belongs to user
@@ -271,8 +320,29 @@ class CustomerInvoicesController extends Controller
         }
 
         $settings = Setting::first();
+        $invoiceAmount = $invoice->order->total_cost;
 
-        // Prepare payment data
+        // Process points redemption if requested (pass amount paid for overpayment check)
+        $redemption = $this->processPointsRedemption(
+            auth()->id(),
+            $invoice->id,
+            $invoiceAmount,
+            $validated['points_to_redeem'] ?? null,
+            $validated['amount'] ?? null
+        );
+
+        if ($redemption['error']) {
+            return response()->json(['message' => $redemption['error']], 400);
+        }
+
+        // Update invoice with points redemption
+        if ($redemption['points_redeemed'] > 0) {
+            $invoice->points_redeemed = $redemption['points_redeemed'];
+            $invoice->points_discount_amount = $redemption['discount_amount'];
+            $invoice->save();
+        }
+
+        // Prepare payment data (using final amount after discount)
         $paymentData = [
             'amountPaid' => $validated['amount'],
             'paymentMethod' => 'Bank Transfer', // Normalized for admin view check
@@ -285,6 +355,8 @@ class CustomerInvoicesController extends Controller
             'organizationBank' => $settings->bank_name,
             'organizationAccountNumber' => $settings->account_number,
             'organizationAccountName' => $settings->account_name ?? $settings->org_name,
+            'pointsRedeemed' => $redemption['points_redeemed'],
+            'pointsDiscount' => $redemption['discount_amount'],
             'status' => 'Pending Verification',
             'submitted_at' => now()->toDateTimeString(),
             'submitted_by' => auth()->user()->name,
@@ -307,13 +379,18 @@ class CustomerInvoicesController extends Controller
                 ->get();
             
             if (!empty($eligibleApprovers)) {
+                $pointsInfo = $redemption['points_redeemed'] > 0 
+                    ? sprintf(' (₦%s after ₦%s points discount)', number_format($redemption['final_amount'], 2), number_format($redemption['discount_amount'], 2))
+                    : '';
+
                 foreach ($eligibleApprovers as $approver) {
                     $approver->notify(new GenericNotification([
                         'message' => sprintf(
-                            '%s submitted bank transfer payment for Invoice #%s. Amount: ₦%s, Bank: %s, Reference: %s. View Details.',
+                            '%s submitted bank transfer payment for Invoice #%s. Amount: ₦%s%s, Bank: %s, Reference: %s. View Details.',
                             $invoice->user->name,
                             $invoice->id,
                             number_format($validated['amount'], 2),
+                            $pointsInfo,
                             $validated['customer_bank'],
                             $validated['transaction_reference']
                         ),

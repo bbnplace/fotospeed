@@ -103,6 +103,105 @@
                 </VCard>
             </div>
         </Panel>
+        
+        <!-- Cancelled Tasks Panel -->
+        <Panel snippet-title="Cancelled & Held Tasks" v-if="cancelledTasks.length > 0 || heldTasks.length > 0">
+            <div class="kanban-board">
+                <VCard class="column" title="Held" v-if="heldTasks.length > 0">
+                    <div class="task-list">
+                        <div
+                          v-for="task in heldTasks"
+                          :key="task.id"
+                          class="task-card task-card-held"
+                        >
+                          <h5 class="mb-0 py-0">{{ task.name }}</h5>
+                          <p class="my-0 flex"><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>ON HOLD</b></p>
+                          <VOverlay
+                            v-model="showHeldTaskOverlay[task.id]"
+                            activator="parent"
+                            location-strategy="connected"
+                            scroll-strategy="static">
+                            <VCard class="px-3 py-8 w-96" :title="task.name">
+                              <VCardText>
+                                <p class="mb-2">{{ task.description }}</p>
+                                <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                                <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
+                                <p class="mt-3" v-if="task.user"><b>Assigned To:</b> {{ task.user.name }}</p>
+                                <p class="mt-3" v-else><b>Status:</b> Unassigned</p>
+                                
+                                <!-- Hold Reason -->
+                                <VAlert type="warning" density="compact" class="mt-3" v-if="task.order.hold_reason">
+                                  <b>Hold Reason:</b> {{ task.order.hold_reason }}
+                                </VAlert>
+                                
+                                <VAlert type="info" density="compact" class="mt-3">
+                                  This task is on hold and cannot be worked on until the order is reactivated.
+                                </VAlert>
+                              </VCardText>
+                              <VCardActions>
+                                <VBtn
+                                  color="blue"
+                                  @click="showClickedTask(task)"
+                                >Open Order</VBtn>
+                                <VBtn
+                                  color="red"
+                                  @click="showHeldTaskOverlay[task.id] = false"
+                                >Close</VBtn>
+                              </VCardActions>
+                            </VCard>
+                          </VOverlay>
+                        </div>
+                    </div>
+                </VCard>
+                <VCard class="column" title="Cancelled" v-if="cancelledTasks.length > 0">
+                    <div class="task-list">
+                        <div
+                          v-for="task in cancelledTasks"
+                          :key="task.id"
+                          class="task-card task-card-cancelled"
+                        >
+                          <h5 class="mb-0 py-0">{{ task.name }}</h5>
+                          <p class="my-0 flex"><span class="flex-1"><b>Created</b> {{ moment(task.created_at).calendar() }}</span> <b>CANCELLED</b></p>
+                          <VOverlay
+                            v-model="showCancelledTaskOverlay[task.id]"
+                            activator="parent"
+                            location-strategy="connected"
+                            scroll-strategy="static">
+                            <VCard class="px-3 py-8 w-96" :title="task.name">
+                              <VCardText>
+                                <p class="mb-2">{{ task.description }}</p>
+                                <p><b>Created:</b> {{ moment(task.created_at).calendar() }}</p>
+                                <p><b>Updated:</b> {{ moment(task.updated_at).calendar() }}</p>
+                                <p class="mt-3" v-if="task.user"><b>Was Assigned To:</b> {{ task.user.name }}</p>
+                                <p class="mt-3" v-else><b>Status:</b> Unassigned when cancelled</p>
+                                
+                                <!-- Cancellation Reason -->
+                                <VAlert type="error" density="compact" class="mt-3" v-if="task.order.cancellation_reason">
+                                  <b>Cancellation Reason:</b> {{ task.order.cancellation_reason }}
+                                </VAlert>
+                                
+                                <!-- Transfer disabled for cancelled tasks -->
+                                <VAlert type="info" density="compact" class="mt-3">
+                                  This task was cancelled and cannot be transferred or modified.
+                                </VAlert>
+                              </VCardText>
+                              <VCardActions>
+                                <VBtn
+                                  color="blue"
+                                  @click="showClickedTask(task)"
+                                >Open Order</VBtn>
+                                <VBtn
+                                  color="red"
+                                  @click="showCancelledTaskOverlay[task.id] = false"
+                                >Close</VBtn>
+                              </VCardActions>
+                            </VCard>
+                          </VOverlay>
+                        </div>
+                    </div>
+                </VCard>
+            </div>
+        </Panel>
     </BackendLayout>
 </template>
 
@@ -122,6 +221,8 @@ const endpoints = usePage().props.endpoints;
 const unclaimedTasks = ref([]);
 const showOverlay = ref([]);
 const showAcceptedTaskOverlay = ref([]);
+const showCancelledTaskOverlay = ref([]);
+const showHeldTaskOverlay = ref([]);
 const taskAuditError = ref({});
 
 const showTaskTransferField = ref([]);
@@ -132,6 +233,12 @@ const columns = ref({
   Done: [],
 });
 let statusKeys = Object.keys(columns.value);
+
+// Cancelled tasks are displayed separately
+const cancelledTasks = ref([]);
+
+// Held tasks are displayed separately
+const heldTasks = ref([]);
 
 
 // Ref container to hold references
@@ -270,10 +377,20 @@ const updateTaskStatus = async (task, fromStatus, toStatus, event) => {
     }
 }
 
-// Used to load tasks after the components mount
+// Used to load tasks for the specific order
 const loadPickedTasks = async () => {
   const response = await axios.get(endpoints.accepted);
-  columns.value = response.data;
+  const data = response.data;
+  
+  // Separate cancelled and held tasks from active Kanban columns
+  cancelledTasks.value = data.Cancelled || [];
+  heldTasks.value = data.Held || [];
+  
+  columns.value = {
+    Todo: data.Todo || [],
+    Doing: data.Doing || [],
+    Done: data.Done || [],
+  };
 }
 
 const loadNewTasks = async () => {
@@ -439,6 +556,39 @@ onMounted(async () => {
     Notification.requestPermission();
   }
 
+  // Listen for notifications on User Channel (for personal assignments)
+  Echo.private(`App.Models.User.${user.id}`)
+    .notification((notification) => {
+      
+      if (notification.type === 'App\\Notifications\\NewTaskNotification' || 
+          notification.type === 'App\\Notifications\\TaskTransferNotification') {
+        
+        loadNewTasks();
+        loadPickedTasks();
+      }
+    });
+
+  // Listen for Order Updates on Order Channel (for everyone viewing the order)
+  const orderChannel = `order.${order.id}`;
+  
+  Echo.private(orderChannel)
+    .notification((notification) => {
+
+      if (notification.type === 'App\\Notifications\\OrderHoldNotification' ||
+          notification.type === 'App\\Notifications\\OrderReactivatedNotification') {
+        
+         if (Notification.permission === "granted") {
+           new Notification("Order Update", {
+              body: notification.message,
+              icon: '/images/logo.png'
+           });
+        }
+
+        loadNewTasks();
+        loadPickedTasks();
+      }
+    });
+
   loadNewTasks(); // This will also trigger channel subscription
   loadPickedTasks();
 
@@ -464,6 +614,16 @@ onUnmounted(() => {
     background: #374151;
     color: white;
   }
-
   
+  .task-card-cancelled {
+    background: #374151;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .task-card-held {
+    background: #d97706;
+    color: white;
+    cursor: pointer;
+  }
 </style>

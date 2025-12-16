@@ -66,6 +66,9 @@
             <VRow>
                 <VCol class="text-right">
                     <h3>Total: ₦{{ formatter.format(invoice.order.total_cost) }} [{{ invoice.invoice_status.name.toUpperCase() }}]</h3>
+                    <VChip v-if="availablePoints > 0" color="success" class="mt-2" prepend-icon="mdi-gift">
+                        Customer has {{ availablePoints }} loyalty points available
+                    </VChip>
                 </VCol>
             </VRow>
             <VRow v-if="invoice.invoice_status.name == 'Unpaid' && user.isCustomer">
@@ -91,7 +94,8 @@
                                     <VRow>
                                         <VCol cols="12" sm="6">
                                             <VTextField
-                                                v-model="bankPaymentForm.amount"
+                                                v-model.number="bankPaymentForm.amount"
+                                                @update:model-value="handleAmountChange"
                                                 label="Amount Paid"
                                                 prefix="₦"
                                                 type="number"
@@ -165,6 +169,19 @@
                                                 :error-messages="bankPaymentFormErrors.payment_date"
                                                 :max="todayDate"
                                                 required
+                                            ></VTextField>
+                                        </VCol>
+                                        <VCol v-if="availablePoints >= minPointsRedeemable" cols="12" sm="6">
+                                            <VTextField
+                                                v-model.number="bankPaymentForm.points_to_redeem"
+                                                label="Customer Points to Redeem (Optional)"
+                                                type="number"
+                                                variant="outlined"
+                                                density="compact"
+                                                :min="0"
+                                                :max="maxRedeemablePoints"
+                                                :hint="pointsHint"
+                                                persistent-hint
                                             ></VTextField>
                                         </VCol>
                                         <VCol cols="12" class="text-right">
@@ -306,7 +323,8 @@
                             <h5 class="my-3 text-blue">Transaction</h5>
                             <VRow>
                                 <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ offlinePaymentData.transactionReference ?? '-' }}</VCol>
-                                <VCol cols="12" class="pb-0"><b>Amount</b><br />₦{{ offlinePaymentData.currency ?? '' }} {{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                                <VCol cols="12" class="pb-0"><b>Amount</b><br />{{ offlinePaymentData.currency ?? '' }} {{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                                <VCol cols="12" class="pb-0" v-if="offlinePaymentData.pointsRedeemed && offlinePaymentData.pointsRedeemed > 0"><b>Loyalty Points Used</b><br />{{ formatter.format(offlinePaymentData.pointsRedeemed) }} points (₦{{ formatter.format(offlinePaymentData.pointsDiscount) }})</VCol>
                                 <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(offlinePaymentData.paymentDate).calendar() }}</VCol>
                                 <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ offlinePaymentData.paymentMethod }}</VCol>
                                 <VCol cols="12" class="pb-0"><b>Status</b><br />{{ offlinePaymentData.status }}</VCol>
@@ -318,6 +336,7 @@
                 <VRow class="mb-3">
                     <VCol cols="12" md="4" class="pb-0"><b>Payment Method</b><br />{{ offlinePaymentData.paymentMethod }}</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Amount</b><br />₦{{ formatter.format(offlinePaymentData.amountPaid) }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0" v-if="offlinePaymentData.pointsRedeemed && offlinePaymentData.pointsRedeemed > 0"><b>Loyalty Points Used</b><br />{{ formatter.format(offlinePaymentData.pointsRedeemed) }} points (₦{{ formatter.format(offlinePaymentData.pointsDiscount) }})</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Cash Received By</b><br />{{ offlinePaymentData.whoReceivedCash }}</VCol>
                 </VRow>
             </template>
@@ -328,6 +347,7 @@
                 <VRow class="mb-3">
                     <VCol cols="12" md="4" class="pb-0"><b>Payment Method</b><br />{{ customerPaymentProof.paymentMethod }}</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Amount</b><br />₦{{ formatter.format(customerPaymentProof.amountPaid) }}</VCol>
+                    <VCol cols="12" md="4" class="pb-0" v-if="customerPaymentProof.pointsRedeemed && customerPaymentProof.pointsRedeemed > 0"><b>Loyalty Points Used</b><br />{{ formatter.format(customerPaymentProof.pointsRedeemed) }} points (₦{{ formatter.format(customerPaymentProof.pointsDiscount) }})</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Cash Received By</b><br />{{ customerPaymentProof.whoReceivedCash }}</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Date</b><br />{{ moment(customerPaymentProof.paymentDate).calendar() }}</VCol>
                     <VCol cols="12" md="4" class="pb-0"><b>Status</b><br />{{ invoice.invoice_status.name == 'Paid' ? 'Confirmed' : customerPaymentProof.status }}</VCol>
@@ -356,6 +376,7 @@
                         <VRow>
                             <VCol cols="12" class="pb-0"><b>Transaction Reference</b><br />{{ customerPaymentProof.transactionReference ?? '-' }}</VCol>
                             <VCol cols="12" class="pb-0"><b>Amount</b><br />₦{{ customerPaymentProof.currency ?? '' }} {{ formatter.format(customerPaymentProof.amountPaid) }}</VCol>
+                            <VCol cols="12" class="pb-0" v-if="customerPaymentProof.pointsRedeemed && customerPaymentProof.pointsRedeemed > 0"><b>Loyalty Points Used</b><br />{{ formatter.format(customerPaymentProof.pointsRedeemed) }} points (₦{{ formatter.format(customerPaymentProof.pointsDiscount) }})</VCol>
                             <VCol cols="12" class="pb-0"><b>Date</b><br />{{ moment(customerPaymentProof.paymentDate).calendar() }}</VCol>
                             <VCol cols="12" class="pb-0"><b>Payment Method</b><br />{{ customerPaymentProof.paymentMethod }}</VCol>
                             <VCol cols="12" class="pb-0"><b>Status</b><br />{{ invoice.invoice_status.name == 'Paid' ? 'Confirmed' : customerPaymentProof.status }}</VCol>
@@ -384,6 +405,109 @@
                 </VCardActions>
             </VCard>
         </VDialog>
+
+        <!-- Refund Section for Cancelled Invoices -->
+        <div class="my-4 text-right" v-if="invoice.invoice_status.name == 'Cancelled' && !invoice.refunded && canHandleRefunds">
+             <VBtn color="warning" @click="showRefundModal = true">Process Refund</VBtn>
+        </div>
+
+        <Panel snippet-title="Refund Information" v-if="invoice.refunded">
+            <VRow class="mb-3">
+                <VCol cols="12" md="6" class="pb-0"><b>Refund Amount</b><br />₦{{ formatter.format(invoice.refund_amount) }}</VCol>
+                <VCol cols="12" md="6" class="pb-0" v-if="invoice.refund_points && invoice.refunded_points"><b>Loyalty Points Refunded</b><br />{{ formatter.format(invoice.refunded_points) }} points</VCol>
+                <VCol cols="12" md="6" class="pb-0"><b>Account Name</b><br />{{ invoice.refund_account_name }}</VCol>
+                <VCol cols="12" md="6" class="pb-0"><b>Account Number</b><br />{{ invoice.refund_account_number }}</VCol>
+                <VCol cols="12" md="6" class="pb-0"><b>Bank</b><br />{{ invoice.refund_bank_name }}</VCol>
+                <VCol cols="12" md="6" class="pb-0"><b>Transaction Reference</b><br />{{ invoice.refund_transaction_reference }}</VCol>
+                <VCol cols="12" md="6" class="pb-0"><b>Refunded At</b><br />{{ moment(invoice.refunded_at).calendar() }}</VCol>
+            </VRow>
+        </Panel>
+
+        <VDialog v-model="showRefundModal" max-width="600">
+            <VCard>
+                <VCardTitle>Process Refund</VCardTitle>
+                <VCardText>
+                    <VAlert type="info" class="mb-4">
+                        Enter the customer's account details where the refund was sent and the transaction reference.
+                    </VAlert>
+                    
+                    <VAlert v-if="refundError" type="error" class="mb-4" closable @click:close="refundError = ''">{{ refundError }}</VAlert>
+
+                    <VForm @submit.prevent="submitRefund">
+                        <VRow>
+                            <VCol cols="12">
+                                <VTextField
+                                    v-model.number="refundForm.refund_amount"
+                                    label="Refund Amount *"
+                                    variant="outlined"
+                                    density="compact"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    prefix="₦"
+                                    required
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12">
+                                <VTextField
+                                    v-model="refundForm.refund_account_name"
+                                    label="Account Name *"
+                                    variant="outlined"
+                                    density="compact"
+                                    required
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="6">
+                                <VTextField
+                                    v-model="refundForm.refund_account_number"
+                                    label="Account Number *"
+                                    variant="outlined"
+                                    density="compact"
+                                    required
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="6">
+                                <VAutocomplete
+                                    v-model="refundForm.refund_bank_name"
+                                    label="Bank *"
+                                    :items="banks"
+                                    variant="outlined"
+                                    density="compact"
+                                    required
+                                ></VAutocomplete>
+                            </VCol>
+                            <VCol cols="12">
+                                <VTextField
+                                    v-model="refundForm.refund_transaction_reference"
+                                    label="Transaction Reference *"
+                                    variant="outlined"
+                                    density="compact"
+                                    required
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" v-if="getPointsUsed() > 0">
+                                <VAlert type="info" density="compact" class="mb-2">
+                                    <b>Loyalty Points Used:</b> {{ formatter.format(getPointsUsed()) }} points (₦{{ formatter.format(getPointsValue()) }})
+                                </VAlert>
+                                <VCheckbox
+                                    v-model="refundForm.refund_points"
+                                    label="Also refund the loyalty points used to the customer's account"
+                                    color="primary"
+                                    density="compact"
+                                    hide-details
+                                ></VCheckbox>
+                            </VCol>
+
+                        </VRow>
+                    </VForm>
+                </VCardText>
+                <VCardActions>
+                    <VSpacer></VSpacer>
+                    <VBtn color="error" text @click="showRefundModal = false">Cancel</VBtn>
+                    <VBtn color="success" text @click="submitRefund" :loading="processingRefund">Confirm Refund</VBtn>
+                </VCardActions>
+            </VCard>
+        </VDialog>
     </BackendLayout>
 </template>
 
@@ -393,7 +517,7 @@
     import Panel from '@/Layouts/Shared/Panel.vue'
     import Paystack from '@/Components/Paystack.vue';
     import moment from 'moment';
-    import { ref, computed } from 'vue';
+    import { ref, computed, watch, nextTick } from 'vue';
     import axios from 'axios';
 
     const user = usePage().props.auth.user;
@@ -409,10 +533,94 @@
     const banks = usePage().props.banks;
     const approverRole = usePage().props.approverRole;
     const userRole = usePage().props.userRole;
+    const canHandleRefunds = usePage().props.canHandleRefunds || false;
+    const customerAccountInfo = usePage().props.customerAccountInfo || null;
 
     const canApprovePayment = computed(() => {
         return user.isAdmin || userRole === approverRole;
     });
+
+    // Refund functionality
+    const showRefundModal = ref(false);
+    const processingRefund = ref(false);
+    const refundError = ref('');
+    
+    // Calculate actual cash amount paid (excluding loyalty points)
+    const getActualCashPaid = () => {
+        // Check offline payment data first (staff-submitted payments)
+        if (offlinePaymentData && offlinePaymentData.amountPaid) {
+            return offlinePaymentData.amountPaid;
+        }
+        
+        // Check customer payment proof (customer-submitted payments)
+        if (customerPaymentProof && customerPaymentProof.amountPaid) {
+            return customerPaymentProof.amountPaid;
+        }
+        
+        // Check paystack payment details (online card payments)
+        if (paystackPaymentDetails && paystackPaymentDetails.amount) {
+            return paystackPaymentDetails.amount / 100; // Paystack stores in kobo
+        }
+        
+        // Fallback to total cost if no payment data available
+        return invoice.order.total_cost || 0;
+    };
+    
+    // Get loyalty points used in payment
+    const getPointsUsed = () => {
+        if (offlinePaymentData && offlinePaymentData.pointsRedeemed) {
+            return offlinePaymentData.pointsRedeemed;
+        }
+        if (customerPaymentProof && customerPaymentProof.pointsRedeemed) {
+            return customerPaymentProof.pointsRedeemed;
+        }
+        return 0;
+    };
+    
+    // Get monetary value of points used
+    const getPointsValue = () => {
+        if (offlinePaymentData && offlinePaymentData.pointsDiscount) {
+            return offlinePaymentData.pointsDiscount;
+        }
+        if (customerPaymentProof && customerPaymentProof.pointsDiscount) {
+            return customerPaymentProof.pointsDiscount;
+        }
+        return 0;
+    };
+    
+    const refundForm = ref({
+        refund_amount: getActualCashPaid(),
+        refund_points: false,
+        refund_account_name: customerAccountInfo?.account_name || '',
+        refund_account_number: customerAccountInfo?.account_number || '',
+        refund_bank_name: customerAccountInfo?.bank_name || '',
+        refund_transaction_reference: '',
+    });
+
+    const submitRefund = async () => {
+        processingRefund.value = true;
+        refundError.value = '';
+
+        try {
+            const response = await axios.post(route('invoice.process-refund', invoice.id), refundForm.value);
+            
+            if (response.data.status === 'success') {
+                showRefundModal.value = false;
+                // Reload page to show refund information
+                window.location.reload();
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 422) {
+                refundError.value = error.response.data.errors ? 
+                    Object.values(error.response.data.errors).flat().join(', ') : 
+                    error.response.data.message;
+            } else {
+                refundError.value = error.response?.data?.message || 'Failed to process refund. Please try again.';
+            }
+        } finally {
+            processingRefund.value = false;
+        }
+    };
 
     const handlePaymentCompletion = data => {
         setTimeout(()=>{
@@ -446,6 +654,7 @@
             const response = await axios.post(route('order.update-payment'), payload);
             if (response.data && response.data.status == "success") {
                 showAcknowledgeModal.value = false;
+                console.log('Payment updated successfully')
                 router.reload();
             }
         } catch (error) {
@@ -487,6 +696,25 @@
     const showConfirmationDialog = ref(false);
     const countdown = ref(7);
     
+    // Loyalty Points Redemption
+    const availablePoints = ref(Math.round(usePage().props.availablePoints || 0));
+    const settings = usePage().props.settings || {};
+    const minPointsRedeemable = settings.min_points_redeemable || 100;
+    const pointsRatio = parseFloat(settings.points_to_currency_ratio) || 1.0;
+    const maxPercentage = parseFloat(settings.max_invoice_percentage_payable_by_points) || 100;
+    const invoiceAmount = parseFloat(invoice.order.total_cost);
+
+    const maxRedeemablePoints = computed(() => {
+        const maxByPercentage = Math.floor((invoiceAmount * maxPercentage / 100) / pointsRatio);
+        const maxByInvoice = Math.floor(invoiceAmount / pointsRatio);
+        const maxByAvailable = availablePoints.value;
+        return Math.min(maxByPercentage, maxByInvoice, maxByAvailable);
+    });
+
+    const pointsHint = computed(() => {
+        return `Customer has ${formatter.format(availablePoints.value)} points | Min: ${formatter.format(minPointsRedeemable)} | Max: ${formatter.format(maxRedeemablePoints.value)}`;
+    });
+    
     const bankPaymentForm = ref({
         amount: invoice.order.total_cost,
         payment_method: '',
@@ -495,6 +723,7 @@
         transaction_reference: '',
         payment_date: todayDate,
         who_received_cash: '',
+        points_to_redeem: 0,
     });
 
     const bankPaymentFormErrors = ref({
@@ -510,6 +739,32 @@
     const confirmSubmission = () => {
         showConfirmationDialog.value = true;
     }
+
+    // Handle amount changes to auto-adjust points
+    const handleAmountChange = () => {
+        const amount = parseFloat(bankPaymentForm.value.amount) || 0;
+        
+        if (amount < 0 || isNaN(amount)) return;
+
+        // Calculate how much is left to pay
+        const remaining = invoiceAmount - amount;
+        
+        if (remaining <= 0) {
+            // Amount covers the full invoice, no points needed
+            console.log('Amount covers invoice, setting points to 0');
+            bankPaymentForm.value.points_to_redeem = 0;
+            return;
+        }
+
+        // Calculate points needed to cover the remaining amount
+        const pointsNeeded = Math.ceil(remaining / pointsRatio);
+        
+        // Cap at maximum redeemable points
+        const maxPoints = Math.round(maxRedeemablePoints.value);
+        const pointsToSet = Math.round(Math.min(pointsNeeded, maxPoints, availablePoints.value));
+        
+        bankPaymentForm.value.points_to_redeem = pointsToSet;
+    };
 
     const submitBankPayment = async () => {
         submittingBankPayment.value = true;
@@ -542,11 +797,13 @@
             showConfirmationDialog.value = false; // Close dialog on error
             if (error.response && error.response.status === 422) {
                 const errors = error.response.data.errors;
-                Object.keys(errors).forEach(key => {
-                    if (bankPaymentFormErrors.value.hasOwnProperty(key)) {
-                        bankPaymentFormErrors.value[key] = errors[key][0];
-                    }
-                });
+                if (errors) {
+                    Object.keys(errors).forEach(key => {
+                        if (bankPaymentFormErrors.value.hasOwnProperty(key)) {
+                            bankPaymentFormErrors.value[key] = errors[key][0];
+                        }
+                    });
+                }
                 bankPaymentError.value = error.response.data.message || 'Please correct the errors in the form.';
             } else {
                 bankPaymentError.value = error.response?.data?.message || 'Something went wrong. Please try again later.';
@@ -555,6 +812,22 @@
 
         submittingBankPayment.value = false;
     };
+
+    // Listen for real-time invoice updates
+    import { onMounted, onUnmounted } from 'vue';
+
+    onMounted(() => {
+        Echo.private(`invoice.${invoice.id}`)
+            .listen('InvoicePaymentVerified', (e) => {
+                console.log('Invoice payment verified received:', e);
+                // Reload the page to reflect the new status
+                window.location.reload();
+            });
+    });
+
+    onUnmounted(() => {
+        Echo.leave(`invoice.${invoice.id}`);
+    });
 </script>
 
 <style scoped>
