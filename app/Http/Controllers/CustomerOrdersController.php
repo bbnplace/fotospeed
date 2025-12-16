@@ -38,6 +38,7 @@ class CustomerOrdersController extends Controller
             'endpoint' => route('customer.order-records'),
             'note' => session('note'),
             'theme' => 'fotospeed',
+            'order_statuses' => OrderStatus::all(['name']),
         ]);
     }
 
@@ -63,9 +64,49 @@ class CustomerOrdersController extends Controller
             $query->select('id', 'name');
         }]);
 
+        \Log::info('Orders Filter Debug', [
+            'search_raw' => $search,
+            'is_array' => is_array($search),
+            'user_id' => auth()->user()->id
+        ]);
+
         if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
+            if (is_array($search)) {
+                // Apply individual filters
+                if (!empty($search['status'])) {
+                    $query->whereHas('orderStatus', function ($q) use ($search) {
+                        $q->where('name', $search['status']);
+                    });
+                }
+                if (!empty($search['order_number'])) {
+                    $query->where('id', 'like', "%{$search['order_number']}%");
+                }
+                if (!empty($search['item_name'])) {
+                    $query->whereHas('item', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search['item_name']}%");
+                    });
+                }
+                if (!empty($search['start_date'])) {
+                    $query->whereDate('created_at', '>=', $search['start_date']);
+                }
+                if (!empty($search['end_date'])) {
+                    $query->whereDate('created_at', '<=', $search['end_date']);
+                }
+                if (!empty($search['min_amount'])) {
+                    $query->where('total_cost', '>=', $search['min_amount']);
+                }
+                if (!empty($search['max_amount'])) {
+                    $query->where('total_cost', '<=', $search['max_amount']);
+                }
+            } else {
+                // Fallback for simple search
+                $searchTerm = $search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhereHas('item', function ($subQ) use ($searchTerm) {
+                          $subQ->where('name', 'like', "%{$searchTerm}%");
+                      });
+                });
             }
         }
 

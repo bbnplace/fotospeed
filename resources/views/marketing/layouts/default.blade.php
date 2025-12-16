@@ -95,7 +95,7 @@
                     <div class="mobile-menu fix mb-3"></div>
                     <div class="offcanvas__contact">
                         <div class="header-button mt-4">
-                            <a href="shop-details.html" class="theme-btn">Shop Now <i class="far fa-arrow-right"></i></a>
+                            <a href="{{ route('marketing.products') }}" class="theme-btn">Shop Now <i class="far fa-arrow-right"></i></a>
                         </div>
                         <div class="social-icon d-flex align-items-center">
                             <a href="https://www.facebook.com/Syntheticalbum" target="_blank"><i class="fab fa-facebook-f"></i></a>

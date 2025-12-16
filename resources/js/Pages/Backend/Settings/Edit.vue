@@ -537,6 +537,26 @@
                                     </p>
                                 </VCol>
                             </VRow>
+                            <VRow>
+                                <VCol>
+                                    <VCombobox
+                                        id="order_waybill_roles"
+                                        v-model="form.order_waybill_roles"
+                                        label="Roles That Can Set Waybill Number"
+                                        :items="roles"
+                                        variant="outlined"
+                                        :hide-details="form.errors.order_waybill_roles == undefined"
+                                        :error-messages="form.errors.order_waybill_roles"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        density="compact"
+                                    ></VCombobox>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Users with selected roles will be authorized to set or update the waybill number on orders.
+                                    </p>
+                                </VCol>
+                            </VRow>
 
                             <VRow>
                                 <VCol>
@@ -1009,6 +1029,9 @@ const form = useForm({
     order_cancel_roles: settings.order_cancel_roles
         ? JSON.parse(settings.order_cancel_roles)
         : ['Administrator', 'Reception'],
+    order_waybill_roles: settings.order_waybill_roles
+        ? JSON.parse(settings.order_waybill_roles)
+        : ['Administrator', 'Reception'],
     processing_branch_show_price: settings.processing_branch_show_price == 1,
     processing_branch_show_invoice: settings.processing_branch_show_invoice == 1,
 });
@@ -1044,6 +1067,7 @@ const submit = () =>{
             handleReportViewersError(errors);
             handleOrderViewRolesError(errors);
             handleCancelRolesError(errors);
+            handleWaybillRolesError(errors);
         }
     })
 }
@@ -1096,6 +1120,20 @@ const handleCancelRolesError = (errors) => {
         }
     })
     form.errors.order_cancel_roles = invalidRoles.length > 0 
+        ? [`The following values are not supported: ${invalidRoles.join(', ')}`] 
+        : []
+}
+
+const handleWaybillRolesError = (errors) => {
+    const errorKeys = Object.keys(errors);
+    const invalidRoles = [];
+    errorKeys.forEach(element => {
+        if (element.indexOf('order_waybill_roles.') === 0) {
+            const parts = element.split('.');
+            invalidRoles.push(form.order_waybill_roles[parts[1]]);
+        }
+    })
+    form.errors.order_waybill_roles = invalidRoles.length > 0 
         ? [`The following values are not supported: ${invalidRoles.join(', ')}`] 
         : []
 }

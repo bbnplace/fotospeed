@@ -9,6 +9,10 @@ defineProps({
     status: {
         type: String,
     },
+    submitRoute: {
+        type: String,
+        default: 'profile.update'
+    }
 });
 
 const user = usePage().props.auth.user;
@@ -16,6 +20,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     mobile: user.mobile,
+    email: user.email,
 });
 </script>
 
@@ -29,7 +34,7 @@ const form = useForm({
             </p>
         </header>
 
-        <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
+        <form @submit.prevent="form.patch(route(submitRoute))" class="mt-6 space-y-6">
             <div>
                 <VTextField
                     v-model="form.name"
@@ -51,6 +56,18 @@ const form = useForm({
                     variant="outlined"
                     :hide-details="form.errors.mobile == undefined"
                     :error-messages="form.errors.mobile"
+                ></VTextField>
+            </div>
+
+            <div>
+                <VTextField
+                    v-model="form.email"
+                    id="email"
+                    label="Email Address"
+                    type="email"
+                    variant="outlined"
+                    :hide-details="form.errors.email == undefined"
+                    :error-messages="form.errors.email"
                 ></VTextField>
             </div>
 

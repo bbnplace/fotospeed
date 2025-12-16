@@ -103,6 +103,8 @@ class SettingsController extends Controller
             'order_view_roles.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
             'order_cancel_roles' => 'required|array',
             'order_cancel_roles.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
+            'order_waybill_roles' => 'nullable|array',
+            'order_waybill_roles.*' => sprintf('in:%s', implode(',', Role::getRolesArray())),
             'processing_branch_show_price' => 'nullable|boolean',
             'processing_branch_show_invoice' => 'nullable|boolean',
         ];
@@ -168,6 +170,7 @@ class SettingsController extends Controller
         $settings->account_name = $request->account_name;
         $settings->order_view_roles = json_encode($request->order_view_roles);
         $settings->order_cancel_roles = json_encode($request->order_cancel_roles);
+        $settings->order_waybill_roles = json_encode($request->order_waybill_roles);
         $settings->processing_branch_show_price = $request->processing_branch_show_price ?? false;
         $settings->processing_branch_show_invoice = $request->processing_branch_show_invoice ?? false;
         $settings->save();

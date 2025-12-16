@@ -99,6 +99,12 @@ Route::prefix('showroom')->group(function () {
     Route::middleware(['auth'])->group(function () {
         // Logged-in user routes
         Route::get('/home', [LoggedInController::class, 'loggedIn'])->name('customer.logged-in');
+        
+        // Customer Profile
+        Route::get('/profile', [ProfileController::class, 'customerEdit'])->name('customer.profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'updateProfile'])->name('customer.profile.update');
+        Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('customer.password.update');
+
         Route::put('/client/update-email', [CustomerDashboardController::class, 'updateEmail'])->name('customer.update-email');
 
         Route::get('/client-order/create-order', [CustomerOrdersController::class, 'add'])->name('customer.new-order');

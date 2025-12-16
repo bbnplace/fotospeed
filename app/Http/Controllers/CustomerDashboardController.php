@@ -53,11 +53,42 @@ class CustomerDashboardController extends Controller
         }]);
 
         if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
-            //    $query->where('source', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('receiver', 'LIKE', sprintf('%%%s%%', $searchTerm));
-            //    $query->where('order', 'LIKE', sprintf('%%%s%%', $searchTerm));
+            if (is_array($search)) {
+                // Apply individual filters
+                if (!empty($search['status'])) {
+                    $query->whereHas('orderStatus', function ($q) use ($search) {
+                        $q->where('name', $search['status']);
+                    });
+                }
+                if (!empty($search['order_number'])) {
+                    $query->where('id', 'like', "%{$search['order_number']}%");
+                }
+                if (!empty($search['item_name'])) {
+                    $query->whereHas('item', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search['item_name']}%");
+                    });
+                }
+                if (!empty($search['start_date'])) {
+                    $query->whereDate('created_at', '>=', $search['start_date']);
+                }
+                if (!empty($search['end_date'])) {
+                    $query->whereDate('created_at', '<=', $search['end_date']);
+                }
+                if (!empty($search['min_amount'])) {
+                    $query->where('total_cost', '>=', $search['min_amount']);
+                }
+                if (!empty($search['max_amount'])) {
+                    $query->where('total_cost', '<=', $search['max_amount']);
+                }
+            } else {
+                // Simple string search
+                $searchTerm = $search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhereHas('item', function ($subQ) use ($searchTerm) {
+                          $subQ->where('name', 'like', "%{$searchTerm}%");
+                      });
+                });
             }
         }
 

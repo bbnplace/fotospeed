@@ -1,6 +1,6 @@
 <script setup>
 import { Head, usePage, useForm, Link } from '@inertiajs/vue3';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import AnnouncementBar from '../Partials/AnnouncementBar.vue';
 import Header from '../Partials/Header.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
@@ -21,6 +21,9 @@ onMounted(() => {
     }
 });
 
+const isMobileMenuOpen = ref(false);
+const toggleMobileMenu = () => isMobileMenuOpen.value = !isMobileMenuOpen.value;
+const closeMobileMenu = () => isMobileMenuOpen.value = false;
 </script>
 
 <template>
@@ -29,30 +32,7 @@ onMounted(() => {
             <div class="spinner">                
             </div>
             <div class="txt-loading">
-                <span data-text-preloader="P" class="letters-loading">
-                    P
-                </span>
-                <span data-text-preloader="R" class="letters-loading">
-                    R
-                </span>
-                <span data-text-preloader="I" class="letters-loading">
-                    I
-                </span>
-                <span data-text-preloader="N" class="letters-loading">
-                    N
-                </span>
-                <span data-text-preloader="T" class="letters-loading">
-                    T
-                </span>
-                <span data-text-preloader="N" class="letters-loading">
-                    N
-                </span>
-                <span data-text-preloader="0" class="letters-loading">
-                    O
-                </span>
-                <span data-text-preloader="W" class="letters-loading">
-                    W
-                </span>
+                
             </div>
             <p class="text-center">Loading</p>
         </div>
@@ -87,85 +67,61 @@ onMounted(() => {
 
     <!-- Offcanvas Area Start -->
     <div class="fix-area">
-        <div class="offcanvas__info">
+        <div class="offcanvas__info" :class="{ 'info-open': isMobileMenuOpen }">
             <div class="offcanvas__wrapper">
                 <div class="offcanvas__content">
                     <div class="offcanvas__top mb-5 d-flex justify-content-between align-items-center">
-                        <div class="offcanvas__logo">
-                            <a href="index.html">
-                                <ApplicationLogo />
-                                <!-- <img src="assets/img/logo/logo.svg" alt="logo-img"> -->
-                            </a>
-                        </div>
-                        <div class="offcanvas__close">
-                            <button>
-                            <i class="fas fa-times"></i>
-                            </button>
+                        
+                    </div>
+                    <p class="text d-none d-xl-block py-4">
+                        
+                    </p>
+                    <div class="mobile-menu fix mb-3 mean-container">
+                        <div class="mean-bar">
+                            <nav class="mean-nav">
+                                <ul>
+                                    <li v-if="$page.props.auth.user" class="d-md-none pb-4">
+                                        <a href="#">
+                                            <i class="fas fa-gem me-1" style="color: #DAA520;"></i> 
+                                            Loyalty Rewards: {{ Number($page.props.auth.user.points).toLocaleString('en-US', {maximumFractionDigits: 0}) }} Pts
+                                        </a>
+                                    </li>
+                                    <li></li>
+                                    <li><a :href="route('marketing.home')">Home</a></li>
+                                    <li><a :href="route('marketing.products')">Showroom</a></li>
+                                    <li><a :href="route('customer.my-orders')">Orders</a></li>
+                                    <li><a :href="route('customer.invoices')">Invoices</a></li>
+                                    <li><a :href="route('customer.profile.edit')">My Profile</a></li>
+                                    <li class="mt-5"><Link :href="route('logout')" method="post" as="button">Logout</Link></li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
-                    <p class="text d-none d-xl-block">
-                        This involves interactions between a business and its customers. It's about meeting customers' needs and resolving their problems. Effective customer service is crucial.
-                    </p>
-                    <div class="mobile-menu fix mb-3"></div>
                     <div class="offcanvas__contact">
-                        <h4>Contact Info</h4>
-                        <ul>
-                            <li class="d-flex align-items-center">
-                                <div class="offcanvas__contact-icon">
-                                    <i class="fal fa-map-marker-alt"></i>
-                                </div>
-                                <div class="offcanvas__contact-text">
-                                    <a target="_blank" href="#">Main Street, Melbourne, Australia</a>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center">
-                                <div class="offcanvas__contact-icon mr-15">
-                                    <i class="fal fa-envelope"></i>
-                                </div>
-                                <div class="offcanvas__contact-text">
-                                     <a href="mailto:info@example.com"><span class="mailto:info@azent.com">info@example.com</span></a>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center">
-                                <div class="offcanvas__contact-icon mr-15">
-                                    <i class="fal fa-clock"></i>
-                                </div>
-                                <div class="offcanvas__contact-text">
-                                    <a target="_blank" href="#">Mod-friday, 09am -05pm</a>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center">
-                                <div class="offcanvas__contact-icon mr-15">
-                                    <i class="far fa-phone"></i>
-                                </div>
-                                <div class="offcanvas__contact-text">
-                                    <a href="tel:+11002345909">+11002345909</a>
-                                </div>
-                            </li>
-                        </ul>
-                        <div class="header-button mt-4">
-                            <a href="shop-details.html" class="theme-btn">Shop Now <i class="far fa-arrow-right"></i></a>
-                        </div>
                         <div class="social-icon d-flex align-items-center">
-                            <a href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-youtube"></i></a>
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="https://www.facebook.com/Syntheticalbum" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.instagram.com/photobooknigeria/" target="_blank"><i class="fab fa-instagram"></i></a>
+                            <a href="https://go.wa.link/photobooknigeria" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://www.youtube.com/@indigoafrica" target="_blank"><i class="fab fa-youtube"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="offcanvas__overlay"></div>
+    <div class="offcanvas__overlay" :class="{ 'overlay-open': isMobileMenuOpen }" @click="closeMobileMenu"></div>
 
     <!-- <AnnouncementBar></AnnouncementBar> -->
-    <Header></Header>
+    <div style="display: flex; flex-direction: column; min-height: 100vh;">
+        <Header @toggleMobileMenu="toggleMobileMenu"></Header>
 
-    <Sidebar></Sidebar>
-    <Search></Search>
-    
-    <slot />
-    <Footer></Footer>
+        <Sidebar></Sidebar>
+        <Search></Search>
+        
+        <div style="flex: 1;">
+            <slot />
+        </div>
+        <Footer></Footer>
+    </div>
   
 </template>

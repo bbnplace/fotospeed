@@ -12,47 +12,77 @@
             closable
         ></v-alert>
     </div>
-    <div class="d-flex mb-2 bg-white rounded shadow flex-wrap">
-        <v-sheet class="ma-2 pa-2 d-none d-sm-flex align-center">Filter {{ props.name.singular }}</v-sheet>
-        
-        <template v-if="props.filters">
-            <div v-for="(filter, index) in props.filters" :key="index" class="ma-2" style="min-width: 150px;">
-                <v-text-field
-                    v-if="filter.type === 'text'"
-                    v-model="search[filter.key]"
-                    :label="filter.label"
-                    hide-details
-                    density="compact"
-                    variant="outlined"
-                    clearable
-                ></v-text-field>
-                <v-select
-                    v-if="filter.type === 'select'"
-                    v-model="search[filter.key]"
-                    :label="filter.label"
-                    :items="filter.options"
-                    item-title="name"
-                    item-value="name"
-                    hide-details
-                    density="compact"
-                    variant="outlined"
-                    clearable
-                ></v-select>
-            </div>
-        </template>
-        <template v-else>
-            <v-text-field
-                v-model="search"
-                append-inner-icon="mdi-magnify"
-                hide-details
-                :placeholder="`Filter ${props.name.singular}`"
-                type="text"
-                class="ma-2"
-                density="compact"
-                variant="outlined"
-            ></v-text-field>
-        </template>
-    </div>
+    <v-card class="mb-4" variant="flat" border>
+        <v-card-text class="pa-2">
+            <v-row dense align="center">
+                <v-col 
+                    cols="12" 
+                    md="auto" 
+                    class="d-flex align-center py-2 px-4 bg-light rounded cursor-pointer"
+                    @click="showFilters = !showFilters"
+                >
+                    <v-icon start icon="mdi-filter-variant" size="small"></v-icon>
+                    <span class="text-subtitle-2 font-weight-bold mr-2">Filter {{ props.name.plural }}</span>
+                    <v-icon :icon="showFilters ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="small"></v-icon>
+                </v-col>
+                
+                <template v-if="showFilters">
+                    <template v-if="props.filters">
+                        <v-col v-for="(filter, index) in props.filters" :key="index" cols="12" sm="6" md="4" lg="3">
+                            <v-text-field
+                                v-if="filter.type === 'text'"
+                                v-model="search[filter.key]"
+                                :label="filter.label"
+                                hide-details
+                                density="compact"
+                                variant="outlined"
+                                clearable
+                                bg-color="white"
+                            ></v-text-field>
+                            <v-select
+                                v-if="filter.type === 'select'"
+                                v-model="search[filter.key]"
+                                :label="filter.label"
+                                :items="filter.options"
+                                item-title="name"
+                                item-value="name"
+                                hide-details
+                                density="compact"
+                                variant="outlined"
+                                clearable
+                                bg-color="white"
+                            ></v-select>
+                            <v-text-field
+                                v-if="filter.type === 'date'"
+                                v-model="search[filter.key]"
+                                :label="filter.label"
+                                hide-details
+                                density="compact"
+                                variant="outlined"
+                                type="date"
+                                clearable
+                                bg-color="white"
+                            ></v-text-field>
+                        </v-col>
+                    </template>
+                    <template v-else>
+                        <v-col cols="12" sm>
+                            <v-text-field
+                                v-model="search"
+                                append-inner-icon="mdi-magnify"
+                                hide-details
+                                :placeholder="`Filter ${props.name.singular}`"
+                                type="text"
+                                density="compact"
+                                variant="outlined"
+                                bg-color="white"
+                            ></v-text-field>
+                        </v-col>
+                    </template>
+                </template>
+            </v-row>
+        </v-card-text>
+    </v-card>
     <div class="flex flex-row ml-5" v-if="selected.value && selected.value.length > 0">
         <v-icon  v-if="props.endpoint.delete"
             size="large"
@@ -65,7 +95,9 @@
     </div>
     <VRow>
         <VCol>
+            <!-- Desktop Table View -->
             <VDataTableServer
+                v-if="!mobile"
                 v-model="selected.value"
                 :items="loadedRecords"
                 :loading="loading"
@@ -73,34 +105,83 @@
                 v-model:items-per-page="itemsPerPage"
                 :search="typeof search === 'string' ? search : undefined"
                 :headers="props.headers"
+                :sort-by="props.sortBy"
                 item-value="id"
                 @click:row="rowClicked"
                 @update:options="loadRecords"
                 :show-select="!!props.endpoint.delete"
                 :item-selectable="(item) => !item.protected">
+                
+                <template v-for="(_, name) in $slots" v-slot:[name]="slotData">
+                    <slot :name="name" v-bind="slotData" />
+                </template>
+
                 <template v-slot:item.actions="{ item }">
-                        <!-- <v-icon v-if="props.endpoint.detail"
-                            size="small"
-                            class="me-2"
-                            @click="viewDetail(item)"
-                        >
-                            mdi-eye
-                        </v-icon> -->
-                        <!-- <v-icon v-if="props.endpoint.edit"
-                            size="small"
-                            class="me-2"
-                            @click="editItem(item)"
-                        >
-                            mdi-pencil
-                        </v-icon> -->
-                    </template>
-                    <template v-slot:item.created_at="{ item }">
-                        {{ moment(item.created_at).calendar() }}
-                    </template>
-                    <template v-slot:item.updated_at="{ item }">
-                        {{ moment(item.updated_at).calendar() }}
-                    </template>
+                        <!-- Actions slot content -->
+                </template>
+                <template v-slot:item.created_at="{ item }">
+                    {{ moment(item.created_at).calendar() }}
+                </template>
+                <template v-slot:item.updated_at="{ item }">
+                    {{ moment(item.updated_at).calendar() }}
+                </template>
             </VDataTableServer>
+
+            <!-- Mobile Card View -->
+            <v-data-iterator
+                v-else
+                :items="loadedRecords"
+                :items-per-page="itemsPerPage"
+                :page="pageNo"
+            >
+                <template v-slot:default="{ items }">
+                    <v-row>
+                        <v-col v-for="item in items" :key="item.raw.id" cols="12">
+                            <slot name="mobile-item" :item="item.raw">
+                                <v-card class="mb-3 rounded-lg" @click="viewDetail(item.raw)" variant="elevated" elevation="1">
+                                    <v-card-text class="pa-0">
+                                        <div 
+                                            v-for="(header, index) in props.headers" 
+                                            :key="index" 
+                                            class="d-flex justify-space-between align-center py-3 px-4"
+                                            :class="{ 'border-b': index !== props.headers.length - 1 }"
+                                        >
+                                            <div class="text-caption text-medium-emphasis font-weight-bold text-uppercase">{{ header.title }}</div>
+                                            <div class="text-body-2 font-weight-medium text-right ml-4">
+                                                <!-- Check if specialized slot exists for this header key -->
+                                                <slot 
+                                                    v-if="$slots[`item.${header.key}`]" 
+                                                    :name="`item.${header.key}`" 
+                                                    :item="item.raw" 
+                                                />
+                                                <!-- Fallback formatting for dates -->
+                                                <span v-else-if="header.key === 'created_at' || header.key === 'updated_at'">
+                                                    {{ moment(item.raw[header.key]).calendar() }}
+                                                </span>
+                                                <!-- Default text display (handling nested keys) -->
+                                                <span v-else>
+                                                    {{ header.key.split('.').reduce((o, i) => o?.[i], item.raw) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </v-card-text>
+                                </v-card>
+                            </slot>
+                        </v-col>
+                    </v-row>
+                </template>
+                
+                <!-- Use same pagination as table -->
+                <template v-slot:footer>
+                     <v-pagination
+                        v-model="pageNo"
+                        :length="Math.ceil(totalRecords / itemsPerPage)"
+                        rounded="circle"
+                        class="mt-4"
+                        @update:model-value="(val) => loadRecords({ page: val, itemsPerPage, sortBy: currentOptions.sortBy })"
+                    ></v-pagination>
+                </template>
+            </v-data-iterator>
         </VCol>
     </VRow>
     <Dialog
@@ -113,18 +194,43 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link, router } from "@inertiajs/vue3";
 import Dialog from '@/Components/Dialog.vue';
 import Snackbar from '@/Components/Snackbar.vue';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
 import moment from 'moment';
 
+const mobile = ref(false);
+
+let mql = null;
+
+const updateMobile = (e) => {
+    mobile.value = e.matches;
+};
+
+onMounted(() => {
+    mql = window.matchMedia('(max-width: 512px)');
+    mobile.value = mql.matches;
+    mql.addEventListener('change', updateMobile);
+    
+    if (mobile.value) {
+        loadRecords(currentOptions.value);
+    }
+});
+
+onUnmounted(() => {
+    if (mql) mql.removeEventListener('change', updateMobile);
+    window.removeEventListener('resize', updateWidth);
+});
+
 // Load record data from props
 const recordProps = defineProps({
     data: Object
 });
 const props = recordProps.data;
+
+const showFilters = ref(!props.collapseFilters);
 
 
 
@@ -145,7 +251,7 @@ const errorMessage = ref("");
 const currentOptions = ref({
     page: 1,
     itemsPerPage: 25,
-    sortBy: []
+    sortBy: props.sortBy || []
 });
 
 // Function for loading and filtering records from datasource
@@ -154,7 +260,19 @@ const loadRecords = async ({page, itemsPerPage, sortBy}) => {
     // Update current options
     currentOptions.value = { page, itemsPerPage, sortBy };
 
-    const payload = {page, itemsPerPage, sortBy, search: search.value}
+    // Clean search object - remove empty, null, or undefined values
+    let cleanedSearch = search.value;
+    if (typeof search.value === 'object' && search.value !== null) {
+        cleanedSearch = Object.fromEntries(
+            Object.entries(search.value).filter(([_, v]) => v != null && v !== '')
+        );
+        // If no valid filters remain, set to empty object
+        if (Object.keys(cleanedSearch).length === 0) {
+            cleanedSearch = null;
+        }
+    }
+
+    const payload = {page, itemsPerPage, sortBy, search: cleanedSearch}
     loading = true;
     pageNo.value = page;
     if(source) source.cancel('Request cancelled by user');

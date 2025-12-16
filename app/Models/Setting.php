@@ -64,6 +64,7 @@ class Setting extends Model
         'order_view_roles',
         'order_cancel_roles',
         'order_cancellation_whatsapp_template',
+        'order_waybill_roles',
         'processing_branch_show_price',
         'processing_branch_show_invoice',
     ];

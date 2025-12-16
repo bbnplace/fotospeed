@@ -547,10 +547,37 @@ class OrdersController extends Controller
             'canEditPrice' => $canGenerateInvoice && !$hasInvoice && in_array($order->order_status_id, [
                 OrderStatus::PENDING, OrderStatus::ORDER_CONFIRMED
             ]),
-            'canEditWaybill' => $canEditOrder && !in_array($order->order_status_id, [
-                OrderStatus::ON_HOLD, OrderStatus::DISPATCHED, OrderStatus::CANCELLED
-                , OrderStatus::DELIVERY_FAILED, OrderStatus::DELIVERED, OrderStatus::SHIPPING, OrderStatus::IN_TRANSIT,
-            ]),
+            'canEditWaybill' => !in_array($order->order_status_id, [
+                OrderStatus::ON_HOLD, OrderStatus::DISPATCHED, OrderStatus::CANCELLED,
+                OrderStatus::DELIVERY_FAILED, OrderStatus::DELIVERED, OrderStatus::SHIPPING, OrderStatus::IN_TRANSIT,
+            ]) && (function() use ($settings) {
+                // Check if user is in authorized roles for waybill editing 
+                \Illuminate\Support\Facades\Log::info('Waybill Auth Debug', [
+                    'user_role' => auth()->user()->role->name,
+                    'settings_raw' => $settings->order_waybill_roles,
+                ]);
+
+                // Check if user is in authorized roles for waybill editing
+                // If setting is missing or empty, default to NO ONE allowed (strict security)
+                // Unless it is 'null' string which might happen if saved explicitly as null? No, SettingsController validates array.
+                
+                $authorizedRoles = [];
+                if (!empty($settings->order_waybill_roles)) {
+                    $decoded = json_decode($settings->order_waybill_roles);
+                    if (is_array($decoded)) {
+                        $authorizedRoles = $decoded;
+                    }
+                }
+                
+                $result = in_array(auth()->user()->role->name, $authorizedRoles);
+                
+                \Illuminate\Support\Facades\Log::info('Waybill Auth Result', [
+                    'authorized_roles' => $authorizedRoles,
+                    'result' => $result
+                ]);
+
+                return $result;
+            })(),
             'isViewingFromProcessingBranch' => $isViewingFromProcessingBranch,
             'showPriceToProcessingBranch' => $showPriceToProcessingBranch,
             'showInvoiceToProcessingBranch' => $showInvoiceToProcessingBranch,
@@ -1003,6 +1030,25 @@ class OrdersController extends Controller
             'waybillNumber' => 'required|string|max:32'
         ]);
 
+        // Authorization: Check if user's role is allowed to set waybill number
+        $settings = Setting::first();
+        $authorizedRoles = [];
+        if (!empty($settings->order_waybill_roles)) {
+            $decoded = json_decode($settings->order_waybill_roles);
+            if (is_array($decoded)) {
+                $authorizedRoles = $decoded;
+            }
+        }
+        
+        $isAuthorized = in_array(auth()->user()->role->name, $authorizedRoles);
+        
+        if (!$isAuthorized) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized. You do not have permission to set waybill number.'
+            ], 403);
+        }
+
         $order = Order::find($orderId);
         $order->waybill_number = $request->waybillNumber;
         $order->save();
@@ -1034,6 +1080,24 @@ class OrdersController extends Controller
         $request->validate([
             'orderNumber' => 'required|unique:orders,order_number|string|max:16'
         ]);
+
+        // Additional check: If order number is numeric, verify no invoice exists with that ID
+        // (except for invoices belonging to the current order)
+        if (is_numeric($request->orderNumber)) {
+            $numericId = (int) $request->orderNumber;
+            $existingInvoice = Invoice::where('id', $numericId)
+                ->where('order_id', '!=', $orderId)
+                ->first();
+            
+            if ($existingInvoice) {
+                return response()->json([
+                    'message' => sprintf(
+                        'An invoice already exists with order number %s. Please use a different order number.',
+                        $request->orderNumber
+                    )
+                ], 422);
+            }
+        }
 
         $order = Order::find($orderId);
         $order->order_number = $request->orderNumber;

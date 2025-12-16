@@ -25,6 +25,18 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display the customer's profile form.
+     */
+    public function customerEdit(Request $request): Response
+    {
+        return Inertia::render('Customer/Profile', [
+            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'status' => session('status'),
+            'loyalty' => \App\Models\RewardPoint::getPointsBreakdown($request->user()->id),
+        ]);
+    }
+
+    /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
@@ -44,12 +56,18 @@ class ProfileController extends Controller
     {
         $request->validate([
             'mobile'=> 'required|numeric|digits_between:10,15|unique:users,mobile,'.$request->user()->id,
-            'name' => 'required|string|min:5|max:64'
+            'name' => 'required|string|min:5|max:64',
+            'email' => 'required|email|max:255|unique:users,email,'.$request->user()->id,
         ]);
 
         $request->user()->mobile = $request->mobile;
         $request->user()->name = $request->name;
+        $request->user()->email = $request->email;
         $request->user()->save();
+
+        if ($request->user()->isCustomer()) {
+            return Redirect::route('customer.profile.edit');
+        }
 
         return Redirect::route('profile.edit');
     }

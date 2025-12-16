@@ -45,6 +45,7 @@ class HandleInertiaRequests extends Middleware
                 'isAdmin' => $userData->isAdmin(),
                 'isClient' => $userData->isCustomer(),
                 'isAdminBranch' => $userData->branch ? $userData->branch->is_administrative == 1 : false,
+                'points' => \App\Models\RewardPoint::getAvailablePoints($userData->id),
             ];
         }
 
@@ -59,6 +60,7 @@ class HandleInertiaRequests extends Middleware
                 'currency' => config('app.currency', '₦'),
                 'currencyCode' => 'NGN',
                 'locale' => config('app.locale', 'en'),
+                'org_name' => \App\Models\Setting::first()->org_name ?? config('app.name'),
             ],
             'auth' => [
                 'user' => $userData,

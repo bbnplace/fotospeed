@@ -26,10 +26,13 @@ class CustomerInvoicesController extends Controller
     use HandlesRewardPointRedemption;
     public function index()
     {
+        $settings = Setting::first();
         return Inertia::render('Client/Invoice/List', [
             'endpoint' => route('customer.invoice-records'),
             'note' => session('note'),
-            'theme' => 'fotospeed', // Assuming you want to pass the theme here
+            'theme' => 'fotospeed',
+            'invoice_statuses' => InvoiceStatus::select('name')->get(),
+            'invoice_no_src' => $settings->invoice_no_src ?? 'System Generated',
         ]);
     }
 
@@ -56,16 +59,68 @@ class CustomerInvoicesController extends Controller
         }]);
 
         if (!empty($search)) {
-            $searchTerm = $search['_value'];
-            if (!empty($searchTerm)) {
+            if (is_array($search)) {
+                if (!empty($search['status'])) {
+                    $query->whereHas('invoiceStatus', function ($q) use ($search) {
+                        $q->where('name', $search['status']);
+                    });
+                }
+                if (!empty($search['invoice_number'])) {
+                    $query->where('id', 'like', "%{$search['invoice_number']}%");
+                }
+                if (!empty($search['order_name'])) {
+                    $query->whereHas('order', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search['order_name']}%");
+                    });
+                }
+                if (!empty($search['min_amount'])) {
+                    $query->whereHas('order', function ($q) use ($search) {
+                        $q->where('total_cost', '>=', $search['min_amount']);
+                    });
+                }
+                if (!empty($search['max_amount'])) {
+                    $query->whereHas('order', function ($q) use ($search) {
+                        $q->where('total_cost', '<=', $search['max_amount']);
+                    });
+                }
+                if (!empty($search['start_date'])) {
+                    $query->whereDate('created_at', '>=', $search['start_date']);
+                }
+                if (!empty($search['end_date'])) {
+                    $query->whereDate('created_at', '<=', $search['end_date']);
+                }
+            } else {
+                $searchTerm = $search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhereHas('order', function ($subQ) use ($searchTerm) {
+                          $subQ->where('order_number', 'like', "%{$searchTerm}%");
+                      });
+                });
             }
         }
 
         if (!empty($sortBys)) {
             foreach ($sortBys as $sortBy) {
-                $query->orderBy($sortBy['key'], $sortBy['order']);
+                $key = $sortBy['key'];
+                $order = $sortBy['order'];
+                
+                // Handle nested relationship sorting
+                if (str_contains($key, 'order.')) {
+                    // Join with orders table for sorting
+                    $query->leftJoin('orders', 'invoices.order_id', '=', 'orders.id')
+                        ->select('invoices.*')
+                        ->orderBy(str_replace('order.', 'orders.', $key), $order);
+                } elseif (str_contains($key, 'invoice_status.')) {
+                    // Join with invoice_statuses table for sorting
+                    $query->leftJoin('invoice_statuses', 'invoices.invoice_status_id', '=', 'invoice_statuses.id')
+                        ->select('invoices.*')
+                        ->orderBy(str_replace('invoice_status.', 'invoice_statuses.', $key), $order);
+                } else {
+                    $query->orderBy($key, $order);
+                }
             }
-        }else{
+        } else {
             $query->orderBy('id', 'desc');
         }
 
@@ -112,6 +167,9 @@ class CustomerInvoicesController extends Controller
             'amount' => $invoice->order->total_cost,
         ];
 
+        // Get customer's available loyalty points
+        $availablePoints = RewardPoint::getAvailablePoints($invoice->user_id);
+
         return [
             'invoice' => $invoice,
             'invoice_no_src' => $settings->invoice_no_src,
@@ -130,6 +188,12 @@ class CustomerInvoicesController extends Controller
                 'account_name' => $settings->account_name,
             ],
             'banks' => \App\Models\Bank::pluck('name')->toArray(),
+            'availablePoints' => $availablePoints,
+            'settings' => [
+                'min_points_redeemable' => $settings->min_points_redeemable ?? 100,
+                'points_to_currency_ratio' => $settings->points_to_currency_ratio ?? 1,
+                'max_invoice_percentage_payable_by_points' => $settings->max_invoice_percentage_payable_by_points ?? 100,
+            ],
             'theme' => 'fotospeed',
         ];
     }
@@ -307,7 +371,7 @@ class CustomerInvoicesController extends Controller
             'depositor_name' => 'required|string|max:128',
             'transaction_reference' => 'nullable|string|max:128',
             'payment_date' => 'required|date|before_or_equal:today',
-            'points_to_redeem' => 'nullable|integer|min:0',
+            'use_loyalty_points' => 'nullable|boolean',
         ]);
 
         // Check if invoice exists and belongs to user
@@ -321,25 +385,69 @@ class CustomerInvoicesController extends Controller
 
         $settings = Setting::first();
         $invoiceAmount = $invoice->order->total_cost;
+        $amountPaid = $validated['amount'];
+        $useLoyaltyPoints = $validated['use_loyalty_points'] ?? false;
 
-        // Process points redemption if requested (pass amount paid for overpayment check)
-        $redemption = $this->processPointsRedemption(
-            auth()->id(),
-            $invoice->id,
-            $invoiceAmount,
-            $validated['points_to_redeem'] ?? null,
-            $validated['amount'] ?? null
-        );
+        // Calculate shortfall
+        $shortfall = $invoiceAmount - $amountPaid;
+        $pointsToRedeem = 0;
+        $discountAmount = 0;
 
-        if ($redemption['error']) {
-            return response()->json(['message' => $redemption['error']], 400);
-        }
+        // If there's a shortfall and customer wants to use loyalty points
+        if ($shortfall > 0 && $useLoyaltyPoints) {
+            // Get available points
+            $availablePoints = RewardPoint::getAvailablePoints(auth()->id());
+            $minPointsRedeemable = $settings->min_points_redeemable ?? 100;
+            $pointsToCurrencyRatio = $settings->points_to_currency_ratio ?? 1;
+            $maxPercentage = $settings->max_invoice_percentage_payable_by_points ?? 100;
 
-        // Update invoice with points redemption
-        if ($redemption['points_redeemed'] > 0) {
-            $invoice->points_redeemed = $redemption['points_redeemed'];
-            $invoice->points_discount_amount = $redemption['discount_amount'];
+            // Check if customer has enough points
+            if ($availablePoints < $minPointsRedeemable) {
+                return response()->json([
+                    'message' => 'Insufficient loyalty points. You need at least ' . $minPointsRedeemable . ' points to redeem rewards.',
+                    'errors' => ['amount' => ['Insufficient loyalty points to cover the shortfall.']]
+                ], 422);
+            }
+
+            // Calculate maximum points that can be used based on settings
+            $maxPointsByPercentage = floor(($invoiceAmount * $maxPercentage / 100) / $pointsToCurrencyRatio);
+            $maxPointsByInvoiceTotal = floor($invoiceAmount / $pointsToCurrencyRatio);
+            $maxPointsUsable = min($maxPointsByPercentage, $maxPointsByInvoiceTotal, $availablePoints);
+
+            // Calculate points needed to cover shortfall
+            $pointsNeededForShortfall = ceil($shortfall / $pointsToCurrencyRatio);
+
+            // Validate that we can cover the shortfall
+            if ($pointsNeededForShortfall > $maxPointsUsable) {
+                return response()->json([
+                    'message' => 'Cannot use loyalty points to cover this amount. Maximum points usable: ' . $maxPointsUsable,
+                    'errors' => ['amount' => ['Payment amount too low. Add ₦' . number_format($shortfall - ($maxPointsUsable * $pointsToCurrencyRatio), 2) . ' more or increase your payment.']]
+                ], 422);
+            }
+
+            // Deduct the points
+            $pointsToRedeem = $pointsNeededForShortfall;
+            $discountAmount = $pointsToRedeem * $pointsToCurrencyRatio;
+
+            // Create redemption record
+            RewardPoint::create([
+                'user_id' => auth()->id(),
+                'invoice_id' => $invoice->id,
+                'points' => -$pointsToRedeem, // Negative for redemption
+                'transaction_type' => RewardPoint::TYPE_REDEEMED,
+                'description' => 'Points redeemed for Invoice #' . $invoice->id,
+            ]);
+
+            // Update invoice with points redemption
+            $invoice->points_redeemed = $pointsToRedeem;
+            $invoice->points_discount_amount = $discountAmount;
             $invoice->save();
+        } elseif ($shortfall > 0 && !$useLoyaltyPoints) {
+            // Customer didn't opt to use points and amount is insufficient
+            return response()->json([
+                'message' => 'Payment amount is less than invoice total.',
+                'errors' => ['amount' => ['Full invoice amount required: ₦' . number_format($invoiceAmount, 2)]]
+            ], 422);
         }
 
         // Prepare payment data (using final amount after discount)
@@ -355,12 +463,18 @@ class CustomerInvoicesController extends Controller
             'organizationBank' => $settings->bank_name,
             'organizationAccountNumber' => $settings->account_number,
             'organizationAccountName' => $settings->account_name ?? $settings->org_name,
-            'pointsRedeemed' => $redemption['points_redeemed'],
-            'pointsDiscount' => $redemption['discount_amount'],
+            'pointsRedeemed' => $pointsToRedeem,
+            'pointsDiscount' => $discountAmount,
             'status' => 'Pending Verification',
             'submitted_at' => now()->toDateTimeString(),
             'submitted_by' => auth()->user()->name,
         ];
+
+        // Update invoice status to Awaiting Verification
+        $awaitingVerificationStatus = InvoiceStatus::where('name', 'Awaiting Verification')->first();
+        if ($awaitingVerificationStatus) {
+            $invoice->invoice_status_id = $awaitingVerificationStatus->id;
+        }
 
         // Update invoice
         $invoice->payment_method = 'Bank Transfer';
@@ -379,8 +493,9 @@ class CustomerInvoicesController extends Controller
                 ->get();
             
             if (!empty($eligibleApprovers)) {
-                $pointsInfo = $redemption['points_redeemed'] > 0 
-                    ? sprintf(' (₦%s after ₦%s points discount)', number_format($redemption['final_amount'], 2), number_format($redemption['discount_amount'], 2))
+                $finalAmount = $invoiceAmount - $discountAmount;
+                $pointsInfo = $pointsToRedeem > 0 
+                    ? sprintf(' (₦%s after ₦%s points discount)', number_format($finalAmount, 2), number_format($discountAmount, 2))
                     : '';
 
                 foreach ($eligibleApprovers as $approver) {

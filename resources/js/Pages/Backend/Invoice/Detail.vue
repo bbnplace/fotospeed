@@ -388,7 +388,7 @@
 
 
 
-        <div class="my-4 text-right" v-if="customerPaymentProof && invoice.invoice_status.name == 'Unpaid'">
+        <div class="my-4 text-right" v-if="customerPaymentProof && (invoice.invoice_status.name == 'Unpaid' || invoice.invoice_status.name == 'Awaiting Verification')">
              <VBtn color="success" @click="showAcknowledgeModal = true" v-if="canApprovePayment">Acknowledge Payment</VBtn>
         </div>
 

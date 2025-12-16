@@ -14,6 +14,8 @@ class InvoiceStatus extends Model
     const STATUS_FAILED = 3;
     const STATUS_CANCELLED = 4;
 
+    protected $fillable = ['name'];
+
     public static function getInvoiceStatusesArray()
     {
         $invoiceStatuses = [];
