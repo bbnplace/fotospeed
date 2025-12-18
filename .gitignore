@@ -28,3 +28,4 @@ yarn-error.log
 /notifications.json
 /test.sql
 /specs.md
+.DS_Store

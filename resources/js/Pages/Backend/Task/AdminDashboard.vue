@@ -560,8 +560,8 @@ onMounted(async () => {
   Echo.private(`App.Models.User.${user.id}`)
     .notification((notification) => {
       
-      if (notification.type === 'App\\Notifications\\NewTaskNotification' || 
-          notification.type === 'App\\Notifications\\TaskTransferNotification') {
+      if (notification.type === 'Cecula\\Flow\\Notifications\\NewTaskNotification' || 
+          notification.type === 'Cecula\\Flow\\Notifications\\TaskTransferNotification') {
         
         loadNewTasks();
         loadPickedTasks();
@@ -574,8 +574,8 @@ onMounted(async () => {
   Echo.private(orderChannel)
     .notification((notification) => {
 
-      if (notification.type === 'App\\Notifications\\OrderHoldNotification' ||
-          notification.type === 'App\\Notifications\\OrderReactivatedNotification') {
+      if (notification.type === 'Cecula\\Flow\\Notifications\\OrderHoldNotification' ||
+          notification.type === 'Cecula\\Flow\\Notifications\\OrderReactivatedNotification') {
         
          if (Notification.permission === "granted") {
            new Notification("Order Update", {

@@ -534,10 +534,10 @@ onMounted(async () => {
   Echo.private(`App.Models.User.${user.id}`)
     .notification((notification) => {
       
-      if (notification.type === 'App\\Notifications\\NewTaskNotification' || 
-          notification.type === 'App\\Notifications\\TaskTransferNotification' ||
-          notification.type === 'App\\Notifications\\OrderHoldNotification' ||
-          notification.type === 'App\\Notifications\\OrderReactivatedNotification') {
+      if (notification.type === 'Cecula\\Flow\\Notifications\\NewTaskNotification' || 
+          notification.type === 'Cecula\\Flow\\Notifications\\TaskTransferNotification' ||
+          notification.type === 'Cecula\\Flow\\Notifications\\OrderHoldNotification' ||
+          notification.type === 'Cecula\\Flow\\Notifications\\OrderReactivatedNotification') {
         
         // Play sound (optional, simple beep)
         // const audio = new Audio('/path/to/sound.mp3'); audio.play();

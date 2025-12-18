@@ -20,16 +20,5 @@ export default defineConfig({
                 },
             },
         }),
-    ],
-    server: {
-        host: '192.168.1.106',
-        https: {
-            key: fs.readFileSync('certs/server.key'),
-            cert: fs.readFileSync('certs/server.crt'),
-        },
-        cors: true,
-        hmr: {
-            host: '192.168.1.106',
-        },
-    },
+    ]
 });

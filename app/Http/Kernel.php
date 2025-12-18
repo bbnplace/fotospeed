@@ -36,9 +36,9 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\HandleInertiaRequests::class,
+            \Cecula\Flow\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            \App\Http\Middleware\CheckTemporaryPassword::class,
+            \Cecula\Flow\Http\Middleware\CheckTemporaryPassword::class,
         ],
 
         'api' => [
@@ -66,8 +66,8 @@ class Kernel extends HttpKernel
         'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'admin.only' => \App\Http\Middleware\AdminPanelGuard::class,
-        'team.console' => \App\Http\Middleware\TeamConsoleGuard::class,
+        'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+        'admin.only' => \Cecula\Flow\Http\Middleware\AdminPanelGuard::class,
+        'team.console' => \Cecula\Flow\Http\Middleware\TeamConsoleGuard::class,
     ];
 }

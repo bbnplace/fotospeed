@@ -221,7 +221,6 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (mql) mql.removeEventListener('change', updateMobile);
-    window.removeEventListener('resize', updateWidth);
 });
 
 // Load record data from props

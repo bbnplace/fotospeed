@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\CustomerInvoicesController;
-use App\Http\Controllers\Messaging\WhatsappController;
+use Cecula\Flow\Http\Controllers\CustomerInvoicesController;
+use Cecula\Flow\Http\Controllers\Messaging\WhatsappController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

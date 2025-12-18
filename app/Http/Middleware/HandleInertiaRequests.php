@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\Role;
+use Cecula\Flow\Models\RewardPoint;
+use Cecula\Flow\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -20,7 +22,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function version(Request $request): string|null
     {
-        return parent::version($request);
+       return parent::version($request);
     }
 
     /**
@@ -45,7 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'isAdmin' => $userData->isAdmin(),
                 'isClient' => $userData->isCustomer(),
                 'isAdminBranch' => $userData->branch ? $userData->branch->is_administrative == 1 : false,
-                'points' => \App\Models\RewardPoint::getAvailablePoints($userData->id),
+                'points' => RewardPoint::getAvailablePoints($userData->id),
             ];
         }
 
@@ -60,7 +62,7 @@ class HandleInertiaRequests extends Middleware
                 'currency' => config('app.currency', '₦'),
                 'currencyCode' => 'NGN',
                 'locale' => config('app.locale', 'en'),
-                'org_name' => \App\Models\Setting::first()->org_name ?? config('app.name'),
+                'org_name' => Setting::first()->org_name ?? config('app.name'),
             ],
             'auth' => [
                 'user' => $userData,

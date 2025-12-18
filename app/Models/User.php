@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Cecula\Flow\Models\Customer;
+use Cecula\Flow\Models\Branch;
+use Cecula\Flow\Models\State;
+use Cecula\Flow\Models\Role;
+
 
 class User extends Authenticatable
 {
