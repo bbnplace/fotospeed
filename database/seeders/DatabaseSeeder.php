@@ -19,17 +19,6 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        $this->call([
-            StatesSeeder::class,
-            RolesSeeder::class,
-            BranchSeeder::class,
-            OrderStatusesSeeder::class,
-            ReportsInitializationSeeder::class,
-            SettingsSeeder::class,
-            TaskStatusesSeeder::class,
-            InvoiceStatusSeeder::class,
-            BankSeeder::class,
-            // NotificationsTemplateSeeder::class,
-        ]);
+        $this->call([Cecula\Flow\Database\Seeders\DatabaseSeeder::class]);
     }
 }
