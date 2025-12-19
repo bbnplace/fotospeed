@@ -1,0 +1,1 @@
+import{Q as r}from"./app-B68t2wHO.js";const c={__name:"LoggedIn",setup(t){const o=r().props;return window.location.href=route("customer.new-order",{product:o.product}),(e,n)=>null}};export{c as default};
