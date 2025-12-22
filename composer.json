@@ -16,7 +16,7 @@
     "require": {
         "php": "^8.2",
         "ashallendesign/short-url": "^8.1",
-        "cecula/flow": "1.0.11",
+        "cecula/flow": "^1.0",
         "cecula/messaging-api": "^1.0",
         "cecula/sync-api-client": "^1.0",
         "guzzlehttp/guzzle": "^7.8",

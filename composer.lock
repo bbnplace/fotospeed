@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a8f35006675c0e44ab26c68554a53742",
+    "content-hash": "5b4120fa16f331e9133639851758df27",
     "packages": [
         {
             "name": "ashallendesign/laravel-config-validator",
@@ -289,16 +289,16 @@
         },
         {
             "name": "cecula/flow",
-            "version": "1.0.11",
+            "version": "1.0.12",
             "source": {
                 "type": "git",
                 "url": "git@github.com:bbnplace/cecula-flow.git",
-                "reference": "113e5e09b63a770bc3fd1c644f6a83a38bee7f33"
+                "reference": "5bd5cb80b1bf5a033cd168072bfc8efd704854cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bbnplace/cecula-flow/zipball/113e5e09b63a770bc3fd1c644f6a83a38bee7f33",
-                "reference": "113e5e09b63a770bc3fd1c644f6a83a38bee7f33",
+                "url": "https://api.github.com/repos/bbnplace/cecula-flow/zipball/5bd5cb80b1bf5a033cd168072bfc8efd704854cc",
+                "reference": "5bd5cb80b1bf5a033cd168072bfc8efd704854cc",
                 "shasum": ""
             },
             "require": {
@@ -340,10 +340,10 @@
                 "task-management"
             ],
             "support": {
-                "source": "https://github.com/bbnplace/cecula-flow/tree/v1.0.11",
+                "source": "https://github.com/bbnplace/cecula-flow/tree/v1.0.12",
                 "issues": "https://github.com/bbnplace/cecula-flow/issues"
             },
-            "time": "2025-12-22T06:09:16+00:00"
+            "time": "2025-12-22T08:51:09+00:00"
         },
         {
             "name": "cecula/messaging-api",
