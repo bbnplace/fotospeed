@@ -28,7 +28,10 @@
                     <!-- </template> -->
                     </VDataIterator>
                     <div class="text-center">
-                        <Link v-for="(link, i) in links" :key="i" :href="link.url" v-html="link.label" :class="`btn${link.active ? ' btn-dark' : ''}`"></Link> 
+                        <template v-for="(link, i) in links" :key="i">
+                            <Link v-if="link.url" :href="link.url" v-html="link.label" :class="`btn${link.active ? ' btn-dark' : ''}`"></Link>
+                            <span v-else v-html="link.label" :class="`btn opacity-50${link.active ? ' btn-dark' : ''}`"></span>
+                        </template>
                     </div>
                 </Panel>
             </VCol>

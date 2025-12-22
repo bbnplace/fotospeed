@@ -27,8 +27,6 @@ const props = defineProps({
     menus: Object
 });
 
-let heartbeatInterval = null;
-
 // Function to ping server and keep session alive
 const pingHeartbeat = async () => {
     try {
@@ -39,6 +37,7 @@ const pingHeartbeat = async () => {
             if (metaTag) {
                 metaTag.setAttribute('content', response.data.csrf_token);
             }
+
             // Update axios default header
             axios.defaults.headers.common['X-CSRF-TOKEN'] = response.data.csrf_token;
         }
@@ -50,18 +49,16 @@ const pingHeartbeat = async () => {
 onMounted(()=>{
     new ThemeCustomizer().init();
     
-    // Start heartbeat - ping every 10 minutes (600000ms)
+    // Start heartbeat - ping every 10 seconds (600000ms)
     // Session lifetime is typically 120 minutes, so 10 min interval keeps it fresh
-    heartbeatInterval = setInterval(pingHeartbeat, 10 * 60 * 1000);
-    
-    // Initial ping after 1 minute
-    setTimeout(pingHeartbeat, 60 * 1000);
+    window.heartbeatInterval = setInterval(pingHeartbeat, 30 * 60 * 1000);
 })
 
 onUnmounted(() => {
     // Clear interval when component is destroyed
-    if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
+    if (window.heartbeatInterval) {
+        clearInterval(window.heartbeatInterval);
+        window.heartbeatInterval = null;
     }
 })
 </script>

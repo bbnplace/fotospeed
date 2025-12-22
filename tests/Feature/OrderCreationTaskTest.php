@@ -19,7 +19,7 @@ class OrderCreationTaskTest extends TestCase
     public function test_tasks_are_created_when_order_is_created()
     {
         // 1. Setup Data
-        \App\Models\OrderStatus::create(['id' => 1, 'name' => 'Pending']);
+        \Cecula\Flow\Models\OrderStatus::create(['id' => 1, 'name' => 'Pending']);
         $state = \App\Models\State::create(['name' => 'Lagos']);
         $branch = Branch::create(['name' => 'Main Branch', 'address' => 'Test Address', 'contacts' => '1234567890', 'state_id' => $state->id]);
         $role = Role::create(['name' => 'Production']);

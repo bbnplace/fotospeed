@@ -14,25 +14,25 @@
       ></v-text-field>
     </template>
 
-    <v-data-table
+<v-data-table
+      v-if="headers.length"
       :headers="headers"
       :items="records"
       :search="form.search"
+      :items-per-page="10"
+      item-value="id"
     ></v-data-table>
   </v-card>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 const props = defineProps({
     data: Object
 })
 
-const data = props.data;
-
-const records = data.records;
-const title = data.title;
-const headers = data.header;
+const records = computed(() => props.data?.records || [])
+const headers = computed(() => props.data?.header || [])
 
 const form = reactive({
     search: ""

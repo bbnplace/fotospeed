@@ -96,7 +96,7 @@
         <div v-if="props.user" :style="{color: 'orange', backgroundColor: '#3d3d3d', padding: '5px 10px', borderRadius: '5px'}">Leave the Password fields empty if you do not intend to change the Customer's password.</div>
         <div class="mt-4">
             <VTextField
-                id="password"
+                id="user_password"
                 type="password"
                 v-model="form.password"
                 label="Password"
@@ -110,7 +110,7 @@
 
         <div class="mt-4">
             <VTextField
-                id="password_confirmation"
+                id="user_password_confirmation"
                 type="password"
                 v-model="form.password_confirmation"
                 label="Confirm Password"

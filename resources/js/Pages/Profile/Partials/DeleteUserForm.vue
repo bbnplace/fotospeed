@@ -62,10 +62,10 @@ const closeModal = () => {
                 </p>
 
                 <div class="mt-6">
-                    <InputLabel for="password" value="Password" class="sr-only" />
+                    <InputLabel for="delete_user_password" value="Password" class="sr-only" />
 
                     <TextInput
-                        id="password"
+                        id="delete_user_password"
                         ref="passwordInput"
                         v-model="form.password"
                         type="password"

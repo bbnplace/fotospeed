@@ -6,15 +6,13 @@
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content: blob:; script-src * 'self' 'unsafe-inline' 'unsafe-eval' blob:; connect-src * 'self' 'unsafe-inline' blob:;">
 
 
         <!-- Scripts -->
         @php
-        // dd(session('theme'));
             $routePrefix = request()->route() ? request()->route()->getPrefix() : '';
-            // dd($routePrefix);
-            // $theme = session('theme', 'default'); // Or get from user/settings
         @endphp
 
         @if($routePrefix == '/showroom')

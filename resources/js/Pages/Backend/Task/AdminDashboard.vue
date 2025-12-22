@@ -430,7 +430,7 @@ let taskClaimEchoChannel = null;
 const subscribeToTaskClaimChannel = () => {
   // Unsubscribe from previous channel if it exists
   if (taskClaimEchoChannel) {
-    Echo.leave(taskClaimEchoChannel);
+    window.Echo.leave(taskClaimEchoChannel);
     taskClaimEchoChannel = null;
   }
   
@@ -446,7 +446,7 @@ const subscribeToTaskClaimChannel = () => {
       console.log('Task role_id:', firstTask.role_id, 'Task branch_id:', firstTask.branch_id);
       taskClaimEchoChannel = channelName;
       
-      Echo.private(channelName)
+      window.Echo.private(channelName)
         .listen('.task-claimed', (event) => {
           console.log('✅ Task claimed event received in AdminDashboard:', event);
           
@@ -557,7 +557,7 @@ onMounted(async () => {
   }
 
   // Listen for notifications on User Channel (for personal assignments)
-  Echo.private(`App.Models.User.${user.id}`)
+  window.Echo.private(`App.Models.User.${user.id}`)
     .notification((notification) => {
       
       if (notification.type === 'Cecula\\Flow\\Notifications\\NewTaskNotification' || 
@@ -571,7 +571,7 @@ onMounted(async () => {
   // Listen for Order Updates on Order Channel (for everyone viewing the order)
   const orderChannel = `order.${order.id}`;
   
-  Echo.private(orderChannel)
+  window.Echo.private(orderChannel)
     .notification((notification) => {
 
       if (notification.type === 'Cecula\\Flow\\Notifications\\OrderHoldNotification' ||
@@ -601,7 +601,7 @@ onMounted(async () => {
 onUnmounted(() => {
   // clearInterval(checkNewTaskInterval);
   if (taskClaimEchoChannel) {
-    Echo.leave(taskClaimEchoChannel);
+    window.Echo.leave(taskClaimEchoChannel);
   }
 })
 

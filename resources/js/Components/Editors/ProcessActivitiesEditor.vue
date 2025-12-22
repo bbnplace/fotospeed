@@ -16,7 +16,7 @@
                             <VRow>
                                 <VCol>
                                     <VTextField
-                                        :id="`task${index}`"
+                                        :id="`task-${process.name}-${index}`"
                                         v-model="productProcessActivities[process.name][index].name"
                                         label="Task Name"
                                         variant="outlined"
@@ -25,13 +25,14 @@
                                         autocomplete="off"
                                         bg-color="white"
                                         @blur="updateProcesses"
+                                        data-testid="task-name-input"
                                     ></VTextField>
                                 </VCol>
                             </VRow>
                             <VRow>
                                 <VCol>
                                     <VTextarea
-                                        :id="`description${index}`"
+                                        :id="`description-${process.name}-${index}`"
                                         v-model="productProcessActivities[process.name][index].description"
                                         label="Brief Guidelines (Optional)"
                                         variant="outlined"
@@ -45,6 +46,7 @@
                                         :rules="[taskDetailRule]"
                                         @blur="updateProcesses"
                                         clearable
+                                        data-testid="task-description-input"
                                     ></VTextarea>
                                 </VCol>
                             </VRow>
@@ -97,6 +99,7 @@
                                     prepend-icon="mdi-minus"
                                     color="grey-darken-3"
                                     @click="removeActivity(process.name, index)"
+                                    data-testid="remove-task-btn"
                                     >Remove
                                 </VBtn>
                             </div>
@@ -109,6 +112,7 @@
                             prepend-icon="mdi-plus"
                             color="blue-darken-3"
                             @click="addActivity(process.name)"
+                            data-testid="add-task-btn"
                             >Add Task
                         </VBtn>
                     </div>
@@ -120,6 +124,7 @@
                                 label="Allow Order Cancellation during this process"
                                 @blur="updateProcesses"
                                 hide-details
+                                data-testid="can-cancel-checkbox"
                             ></v-checkbox>
                         </VCol>
                     </VRow>
@@ -144,6 +149,7 @@
                                         autocomplete="off"
                                         bg-color="white"
                                         @blur="updateProcesses"
+                                        data-testid="order-status-input"
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
@@ -154,6 +160,7 @@
                                         label="Trigger Next Process"
                                         hide-details
                                         @change="updateProcesses"
+                                        data-testid="auto-start-checkbox"
                                     ></v-checkbox>
                                 </VCol>
                             </VRow>
@@ -178,6 +185,7 @@
                                 autocomplete="off"
                                 bg-color="white"
                                 @blur="updateProcesses"
+                                data-testid="coordinator-input"
                             ></VAutocomplete>
                         </VCol>
                     </VRow>
@@ -194,6 +202,7 @@
                                 autocomplete="off"
                                 bg-color="white"
                                 @blur="updateProcesses"
+                                data-testid="team-whatsapp-input"
                             ></VAutocomplete>
                         </VCol>
                     </VRow>
@@ -208,7 +217,7 @@
                             <VRow>
                                 <VCol cols="12" sm="7">
                                     <VAutocomplete
-                                        :id="`smsTemplate[${index}]`"
+                                        :id="`smsTemplate-${index}`"
                                         v-model="productProcesses[index].smsTemplate"
                                         label="SMS Template"
                                         :items="smsTemplates"
@@ -220,11 +229,12 @@
                                         bg-color="white"
                                         color="black"
                                         @blur="updateProcesses"
+                                        data-testid="sms-template-input"
                                     ></VAutocomplete>
                                 </VCol>
                                 <VCol cols="12" sm="5">
                                     <VAutocomplete
-                                        :id="`sendSmsAt[${index}]`"
+                                        :id="`sendSmsAt-${index}`"
                                         v-model="productProcesses[index].sendSmsAt"
                                         label="Send At"
                                         :items="sendAt"
@@ -236,13 +246,14 @@
                                         bg-color="white"
                                         color="black"
                                         @blur="updateProcesses"
+                                        data-testid="send-sms-at-input"
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
                             <VRow>
                                 <VCol cols="12" sm="7">
                                     <VAutocomplete
-                                        :id="`whatsappTemplate[${index}]`"
+                                        :id="`whatsappTemplate-${index}`"
                                         v-model="productProcesses[index].whatsappTemplate"
                                         label="WhatsApp Template"
                                         :items="whatsappTemplates"
@@ -254,11 +265,12 @@
                                         bg-color="white"
                                         color="black"
                                         @blur="updateProcesses"
+                                        data-testid="whatsapp-template-input"
                                     ></VAutocomplete>
                                 </VCol>
                                 <VCol cols="12" sm="5">
                                     <VAutocomplete
-                                        :id="`sendWhatsappAt[${index}]`"
+                                        :id="`sendWhatsappAt-${index}`"
                                         v-model="productProcesses[index].sendWhatsappAt"
                                         label="Send At"
                                         :items="sendAt"
@@ -270,13 +282,14 @@
                                         bg-color="white"
                                         color="black"
                                         @blur="updateProcesses"
+                                        data-testid="send-whatsapp-at-input"
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
                             <VRow>
                                 <VCol cols="12" sm="7">
                                     <VAutocomplete
-                                        :id="`emailTemplate[${index}]`"
+                                        :id="`emailTemplate-${index}`"
                                         v-model="productProcesses[index].emailTemplate"
                                         label="Email Template"
                                         :items="emailTemplates"
@@ -288,11 +301,12 @@
                                         bg-color="white"
                                         color="black"
                                         @blur="updateProcesses"
+                                        data-testid="email-template-input"
                                     ></VAutocomplete>
                                 </VCol>
                                 <VCol cols="12" sm="5">
                                     <VAutocomplete
-                                        :id="`sendEmailAt[${index}]`"
+                                        :id="`sendEmailAt-${index}`"
                                         v-model="productProcesses[index].sendEmailAt"
                                         label="Send At"
                                         :items="sendAt"
@@ -304,6 +318,7 @@
                                         bg-color="white"
                                         color="black"
                                         @blur="updateProcesses"
+                                        data-testid="send-email-at-input"
                                     ></VAutocomplete>
                                 </VCol>
                             </VRow>
@@ -315,6 +330,7 @@
                                             prepend-icon="mdi-minus"
                                             color="red"
                                             @click="RemoveProcess(index)"
+                                            data-testid="remove-process-btn"
                                         >Remove Process</VBtn>
                                     </div>
                                 </VCol>
@@ -343,6 +359,7 @@
                 bg-color="white"
                 color="black"
                 @blur="updateProcesses"
+                data-testid="process-select"
             ></VAutocomplete>
             <div class="mt-3">
                 <VBtn
@@ -350,10 +367,36 @@
                     color="blue-darken-3"
                     :disabled="form.name == ''"
                     @click="saveProcess"
+                    data-testid="add-process-btn"
                     >Add
                 </VBtn>
             </div>
         </VCard>
+
+        <!-- Auto-save notification positioned at the bottom to avoid layout shift -->
+        <div class="d-flex align-center justify-end mt-4" style="min-height: 20px;">
+            <VFadeTransition>
+                <div v-if="isSaving || saveStatus" class="d-flex align-center">
+                    <v-progress-circular
+                        v-if="isSaving"
+                        indeterminate
+                        size="14"
+                        width="2"
+                        color="grey"
+                        class="mr-2"
+                    ></v-progress-circular>
+                    <span v-if="isSaving" class="text-caption text-grey">Saving changes...</span>
+                    <span v-else-if="saveStatus === 'Saved'" class="text-caption text-success">
+                        <v-icon size="small" class="mr-1">mdi-check-circle</v-icon>
+                        All changes saved
+                    </span>
+                    <span v-else-if="saveStatus === 'Error'" class="text-caption text-error">
+                        <v-icon size="small" class="mr-1">mdi-alert-circle</v-icon>
+                        Failed to save
+                    </span>
+                </div>
+            </VFadeTransition>
+        </div>
     </Panel>
 </template>
 
@@ -369,11 +412,17 @@ const processes = reactive(usePage().props.processes);
 const orderStatuses = usePage().props.orderStatuses;
 const teams = reactive(usePage().props.teams);
 const retrievedData = usePage().props.item.process_data;
-const processData = retrievedData == undefined ? [] : JSON.parse(retrievedData);
+const processData = (retrievedData == undefined || retrievedData == null) 
+    ? { processes: [], tasks: {} } 
+    : (typeof retrievedData === 'string' ? JSON.parse(retrievedData) : retrievedData);
+
 const emailTemplates = usePage().props.emailTemplates;
 const smsTemplates = usePage().props.smsTemplates;
 const whatsappTemplates = usePage().props.whatsappTemplates;
 const verifiables = usePage().props.verifiables;
+
+const isSaving = ref(false);
+const saveStatus = ref('');
 
 const productProcesses = ref(processData.processes || []); // Initial Value to be Populated with fetched data
 let productProcessActivities = reactive(processData.tasks || {});
@@ -445,6 +494,7 @@ const addActivity = processName => {
         description: "",
         team: "",
     });
+    updateProcesses();
 }
 
 // Remove Activity: This function is used to remove activity from a Process
@@ -455,23 +505,50 @@ const removeActivity = (process, index) => {
 
 let source = null;
 const updateProcesses = async () => {
+    isSaving.value = true;
+    saveStatus.value = 'Saving';
+
+    // Ensure tasks is a plain object to avoid JSON.stringify issues (e.g. if it became an array)
+    const tasksPayload = {};
+    if (productProcessActivities) {
+        Object.keys(productProcessActivities).forEach(key => {
+            tasksPayload[key] = productProcessActivities[key];
+        });
+    }
+
     const payload = {
         data: {
             processes: productProcesses.value,
-            tasks: JSON.parse(JSON.stringify(productProcessActivities))
+            tasks: tasksPayload
         }
     }
 
     if(source) source.cancel('Request cancelled by user');
     source = axios.CancelToken.source();
-    const response = await axios.put(route('item.saveprocess', [usePage().props.item.id]), payload, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        cancelToken: source.token
-    });
-
-    // Todo: If the save was not successful notify
+    try {
+        const response = await axios.put(route('item.saveprocess', [usePage().props.item.id]), payload, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            cancelToken: source.token
+        });
+        
+        if (response.data.status === 'Saved') {
+            saveStatus.value = 'Saved';
+            setTimeout(() => {
+                if (saveStatus.value === 'Saved') saveStatus.value = '';
+            }, 3000);
+        } else {
+            saveStatus.value = 'Error';
+        }
+    } catch (error) {
+        if (!axios.isCancel(error)) {
+            console.error('Failed to save processes:', error);
+            saveStatus.value = 'Error';
+        }
+    } finally {
+        isSaving.value = false;
+    }
 }
 
 const sendAt = ['Start', 'Completion'];

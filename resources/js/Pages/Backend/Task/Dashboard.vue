@@ -531,7 +531,7 @@ onMounted(async () => {
   }
 
   // Listen for new tasks
-  Echo.private(`App.Models.User.${user.id}`)
+  window.Echo.private(`App.Models.User.${user.id}`)
     .notification((notification) => {
       
       if (notification.type === 'Cecula\\Flow\\Notifications\\NewTaskNotification' || 
@@ -564,7 +564,7 @@ onMounted(async () => {
   console.log('Subscribing to task claim channel:', taskClaimChannel);
   console.log('User role_id:', user.role_id, 'User branch_id:', user.branch_id);
   
-  Echo.private(taskClaimChannel)
+  window.Echo.private(taskClaimChannel)
     .listen('.task-claimed', (event) => {
       console.log('✅ Task claimed event received:', event);
       console.log('Event details - task_id:', event.task_id, 'role_id:', event.role_id, 'branch_id:', event.branch_id);
@@ -597,8 +597,8 @@ onUnmounted(() => {
   // clearInterval(checkNewTaskInterval);
   const taskClaimChannel = `task-claims.${user.role_id}.${user.branch_id}`;
   console.log('Unsubscribing from:', taskClaimChannel);
-  Echo.leave(`App.Models.User.${user.id}`);
-  Echo.leave(taskClaimChannel);
+  window.Echo.leave(`App.Models.User.${user.id}`);
+  window.Echo.leave(taskClaimChannel);
 })
 
 

@@ -6,7 +6,7 @@ import '@mdi/font/css/materialdesignicons.css';;
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
+import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/index.esm.js';
 
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
@@ -17,7 +17,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const vuetify = createVuetify({
     components,
     directives,
-  })
+})
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

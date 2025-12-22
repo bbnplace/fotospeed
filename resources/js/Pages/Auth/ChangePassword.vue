@@ -12,7 +12,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route('password.update'), {
+    form.put(route('password.change'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };

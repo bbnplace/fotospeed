@@ -114,9 +114,20 @@
                     </VRow>
                     <VRow>
                         <VCol cols="12" class="text-center mt-2">
-                            <Link v-for="(pageLink, index) in paginationLinks" :key="index" :href="pageLink.url" :class="`btn rounded ${pageLink.active ? 'bg-black' : ''}`">
-                                <span v-html="pageLink.label"></span>
-                            </Link>
+                            <template v-for="(pageLink, index) in paginationLinks" :key="index">
+                                <Link 
+                                    v-if="pageLink.url" 
+                                    :href="pageLink.url" 
+                                    :class="`btn rounded ${pageLink.active ? 'bg-black' : ''}`"
+                                    v-html="pageLink.label"
+                                >
+                                </Link>
+                                <span 
+                                    v-else 
+                                    :class="`btn rounded disabled opacity-50 ${pageLink.active ? 'bg-black' : ''}`" 
+                                    v-html="pageLink.label"
+                                ></span>
+                            </template>
                         </VCol>
                     </VRow>
                 </Panel>
@@ -220,10 +231,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue'
-import { usePage, Link, router } from '@inertiajs/vue3';
+import { usePage, Link, Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import moment from 'moment';
 import DropzoneUploader from '@/Components/DropzoneUploader.vue';
@@ -233,14 +244,22 @@ const showMediaUploader = ref(false);
 const enableSelection= ref(false)
 const selected = ref([]);
 const selectAll = ref(false);
-const mediaRecords = usePage().props.records.records;
-const loadedRecords = ref(mediaRecords.data);
-const paginationLinks = mediaRecords.links;
+
+const mediaRecords = computed(() => usePage().props.records?.records || {});
+const loadedRecords = ref([]);
+const paginationLinks = computed(() => mediaRecords.value.links || []);
+
+// Update loadedRecords when mediaRecords change
+watch(() => mediaRecords.value.data, (newData) => {
+    if (newData) {
+        loadedRecords.value = JSON.parse(JSON.stringify(newData));
+    }
+}, { immediate: true });
 
 let loading = ref(false);
-const search = ref(usePage().props.records.searchPhrase);
+const search = ref(usePage().props.records?.searchPhrase || "");
 const page = ref(1);
-const mediaUsages = usePage().props.usage;
+const mediaUsages = computed(() => usePage().props.usage || []);
 const mediaProducts = ref([]);
 const mediaOrders = ref([]);
 

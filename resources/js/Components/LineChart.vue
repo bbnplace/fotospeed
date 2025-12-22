@@ -1,5 +1,5 @@
 <template>
-    <Line :data="chartData" :options="chartOptions" />
+    <Line v-if="data" :data="data" :options="chartOptions" />
   </template>
   
   <script setup>
@@ -19,6 +19,9 @@
   // Register Chart.js components
   ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
   
+  const props = defineProps({
+      data: Object
+  })
   
   const chartOptions = ref({
     responsive: true,

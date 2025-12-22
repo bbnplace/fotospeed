@@ -83,7 +83,7 @@
             </v-row>
         </v-card-text>
     </v-card>
-    <div class="flex flex-row ml-5" v-if="selected.value && selected.value.length > 0">
+    <div class="flex flex-row ml-5" v-if="selected && selected.length > 0">
         <v-icon  v-if="props.endpoint.delete"
             size="large"
             title="Delete"
@@ -98,7 +98,7 @@
             <!-- Desktop Table View -->
             <VDataTableServer
                 v-if="!mobile"
-                v-model="selected.value"
+                v-model="selected"
                 :items="loadedRecords"
                 :loading="loading"
                 :items-length="totalRecords"
@@ -187,7 +187,7 @@
     <Dialog
         :dialogData="deleteDialog"
         :show="dialog"
-        @deleteConfirmed="deleteRecords(selected.value)"
+        @deleteConfirmed="deleteRecords(selected)"
         @deleteCancelled="closeDialog"
     ></Dialog>
     <Snackbar :data="snackbarOption"></Snackbar>
@@ -329,16 +329,31 @@ const deleteRecords = (items) => {
 
 // Dialog
 const dialog = ref(false);
-const deleteDialog = {
+const deleteDialog = ref({
     title: "Confirm Delete",
     body: `Are you sure you want to delete the selected ${props.name.plural.toLowerCase()}?`
-}
+})
 
 const closeDialog = () => {
     dialog.value = false
 }
 
 const showDialog = () => {
+    const selectedItemsWithProducts = loadedRecords.value.filter(record => 
+        selected.value.includes(record.id) && (record.items_count > 0 || record.products_count > 0)
+    );
+
+    if (selectedItemsWithProducts.length > 0) {
+        deleteDialog.value.body = `One or more selected ${props.name.plural.toLowerCase()} contain products. Proceeding with this action will result in the products getting deleted, along with their setup production workflows. Are you sure you want to proceed?`;
+        deleteDialog.value.puzzle = 'DELETE';
+        deleteDialog.value.confirmLabel = 'Proceed';
+        deleteDialog.value.confirmColor = 'error';
+    } else {
+        deleteDialog.value.body = `Are you sure you want to delete the selected ${props.name.plural.toLowerCase()}?`;
+        deleteDialog.value.puzzle = null;
+        deleteDialog.value.confirmLabel = 'Yes';
+        deleteDialog.value.confirmColor = 'primary';
+    }
     dialog.value = true;
 }
 

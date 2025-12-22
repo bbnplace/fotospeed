@@ -203,7 +203,11 @@ const form = useForm({
     print_price: props.item ? props.item.print_price : "",
     sheet_price: props.item ? props.item.sheet_price : "",
     cover_print_price: props.item ? props.item.cover_print_price : "",
-    production_branches: props.item ? JSON.parse(props.item.order_processing_branches) : [],
+    production_branches: props.item 
+        ? (typeof props.item.order_processing_branches === 'string' 
+            ? JSON.parse(props.item.order_processing_branches) 
+            : props.item.order_processing_branches) 
+        : [],
     primary_production_branch: props.item ? props.item.primary_order_processing_branch : ""
 });
 

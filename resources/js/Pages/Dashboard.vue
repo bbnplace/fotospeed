@@ -57,12 +57,13 @@
             <LineChart :data="chartData" />
         </Panel>
         <Panel :snippetTitle="`${key} Records`">
-            <static-records :data="records"></static-records>
+            <static-records :data="recordsData"></static-records>
         </Panel>
     </BackendLayout>
 </template>
 
 <script setup>
+import { computed, reactive, ref } from 'vue';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
@@ -74,102 +75,119 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import axios from 'axios';
 import moment from 'moment';
 
-const props = usePage().props[0] ?? usePage().props;
-const key = props.key;
-const chartData = props.reports[key];
-const periods = props.periods;
-const minDate = props.startDate;
-const reportRequester = props.clientRoute;
-const reportables = props.reportables;
+const props = computed(() => usePage().props[0] ?? usePage().props);
+const key = computed(() => props.value.key);
+const chartData = computed(() => props.value.reports[key.value]);
+const periods = computed(() => props.value.periods);
+const minDate = computed(() => props.value.startDate);
+const reportRequester = computed(() => props.value.clientRoute);
+const reportables = computed(() => props.value.reportables);
 
-const header = [];
+const user = computed(() => usePage().props.auth.user);
+const userEmail = computed(() => user.value?.email);
+const isEndUser = computed(() => user.value?.role?.name === 'Customer');
 
-// Determine time column from first record
-let timeKey = 'date';
-let timeTitle = 'Date';
+const headers = computed(() => {
+    const header = [];
+    
+    // Determine time column from first record
+    let timeKey = 'date';
+    let timeTitle = 'Date';
 
-if (props.records && props.records.length > 0) {
-    const firstRecord = props.records[0];
-    if ('hour' in firstRecord) {
-        timeKey = 'hour';
-        timeTitle = 'Time';
-    } else if ('month' in firstRecord) {
-        timeKey = 'month';
-        timeTitle = 'Month';
-    } else if ('year' in firstRecord) {
-        timeKey = 'year';
-        timeTitle = 'Year';
+    if (props.value.records && props.value.records.length > 0) {
+        const firstRecord = props.value.records[0];
+        if ('hour' in firstRecord) {
+            timeKey = 'hour';
+            timeTitle = 'Time';
+        } else if ('month' in firstRecord) {
+            timeKey = 'month';
+            timeTitle = 'Month';
+        } else if ('year' in firstRecord) {
+            timeKey = 'year';
+            timeTitle = 'Year';
+        }
+    } else {
+        // Fallback based on key prop if no records
+        if (key.value === '24hrs') {
+            timeKey = 'hour';
+            timeTitle = 'Time';
+        }
     }
-} else {
-    // Fallback based on key prop if no records
-    if (key === '24hrs') {
-        timeKey = 'hour';
-        timeTitle = 'Time';
-    }
-}
 
-// Add Time/Date column first
-header.push({
-    title: timeTitle,
-    key: timeKey,
-    sortable: true
+    // Add Time/Date column first
+    header.push({
+        title: timeTitle,
+        key: timeKey,
+        sortable: true
+    });
+
+    if (reportables.value) {
+        for (let index = 0; index < reportables.value.length; index++) {
+            const element = reportables.value[index];
+            const title = element.replace('_', ' ').replace(/\b\w/g, function (char) {
+                return char.toUpperCase();
+            }); 
+            header.push({
+                title: title,
+                key: element,
+                sortable: true
+            })
+        }
+    }
+    
+    return header;
 });
 
-for (let index = 0; index < reportables.length; index++) {
-    const element = reportables[index];
-    const title = element.replace('_', ' ').replace(/\b\w/g, function (char) {
-        return char.toUpperCase();
-    }); 
-    // console.log(title)
-    header.push({
-        title: title,
-        key: element,
-        sortable: true
-    })
-}
-
-const records = {
-    records: props.records,
+const recordsData = computed(() => ({
+    records: props.value.records,
     search: "",
-    title: `${key} Report`,
-    header: header
-}
+    title: `${key.value} Report`,
+    header: headers.value
+}))
 
 // console.log(records)
 
 
 
-const items = [];
-for (const key in periods) {
-    items.push({
-        title: periods[key],
-        slug: key
-    });
-}
+const items = computed(() => {
+    const list = [];
+    if (periods.value) {
+        for (const k in periods.value) {
+            list.push({
+                title: periods.value[k],
+                slug: k
+            });
+        }
+    }
+    return list;
+});
 
 const url = new URL(window.location.href);
 const form = useForm({
-    start: key == 'custom' ? url.searchParams.get('start') : "",
+    start: key.value == 'custom' ? url.searchParams.get('start') : "",
     stop: url.searchParams.get('stop') ?? new Date()
 })
 
 // Submiting Search Field
 const submitForm = () => {
-    form.get(isEndUser ? route(reportRequester, key) : route(reportRequester, {
-        email: userEmail,
-        ref: key
+    form.get(isEndUser.value ? route(reportRequester.value, key.value) : route(reportRequester.value, {
+        email: userEmail.value,
+        ref: key.value
     }));
 }
 
 // Exporting Reports to File
 const exportReport = async () => {
     const payload = {
-        period: key,
+        period: key.value,
         start: form.start,
         stop: form.stop,
     }
 
-    const response = await axios.post(reportProps.exportEndpoint, payload, {
+    // Assuming reportProps or similar is defined elsewhere or should be from props
+    const exportEndpoint = props.value.exportEndpoint;
+
+    const response = await axios.post(exportEndpoint, payload, {
         headers: {
             "Content-Type": "application/json"
         }
@@ -178,9 +196,12 @@ const exportReport = async () => {
     showSnackbar(response.data.message);
 }
 
+const snackbarText = ref('');
+const snackbar = ref(false);
+
 const showSnackbar = text => {
-    elements.snackbarText = text;
-    elements.snackbar = true;
+    snackbarText.value = text;
+    snackbar.value = true;
 }
 
 </script>

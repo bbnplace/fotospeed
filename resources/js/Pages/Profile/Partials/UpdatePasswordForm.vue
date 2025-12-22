@@ -73,7 +73,7 @@ const updatePassword = () => {
             <div>
                 <VTextField
                     v-model="form.password_confirmation"
-                    id="password"
+                    id="password_confirmation"
                     label="Confirm Password"
                     type="password"
                     variant="outlined"

@@ -35,7 +35,7 @@ import "@/../../public/assets/js/main.js"
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { ZiggyVue } from '@/../../vendor/tightenco/ziggy/dist/vue.m';
+import { ZiggyVue } from '@/../../vendor/tightenco/ziggy/dist/index.esm.js';
 
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'

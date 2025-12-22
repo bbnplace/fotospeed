@@ -77,6 +77,7 @@ import BackendLayout from "@/Layouts/BackendLayout.vue";
 import Dialog from '@/Components/Dialog.vue';
 import Snackbar from '@/Components/Snackbar.vue';
 import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
+import axios from 'axios';
 
 const selected = ref([]);
 const itemsPerPage = ref(25);

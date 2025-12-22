@@ -266,7 +266,7 @@
                                     <div>
                                         <h5>Hint:</h5>
                                         Type any word into the field above, then login to <b><a href="https://developers.facebook.com" target="_blank">Meta Developer</a></b> and navigate to <b>WhatsApp > Configuration > Webhook</b>.<br />
-                                        In the Callback URL field enter <B>THIS_WEBSITE_ADDRESS/api/whatsapp/inbound</B>.<br />
+                                        In the Callback URL field enter <b>THIS_WEBSITE_ADDRESS/api/whatsapp/inbound</b>.<br />
                                         In the <b>Verify token</b> field, enter the <b>Webhook Verification Token</b> you created above. Then click the <b>Verify and Save</b> button.
                                     </div>
                                 </VCol>
@@ -876,6 +876,9 @@ import { Head, usePage, useForm } from '@inertiajs/vue3';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import Panel from '@/Layouts/Shared/Panel.vue';
 import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue';
+import Snackbar from '@/Components/Snackbar.vue';
+import { snackbarOption, showSnackbar } from '@/Composables/snackbarOptions.js';
+import axios from 'axios';
 
 const tab = ref(null);
 

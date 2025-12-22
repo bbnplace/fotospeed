@@ -1,7 +1,18 @@
 <template>
     <Head title="Branches"></Head>
     <BackendLayout>
-        <Records :data="dataResources"></Records>
+        <Records :data="dataResources">
+            <template v-slot:item.name="{ item }">
+                {{ item.name }}
+                <v-chip
+                    v-if="item.is_administrative"
+                    color="primary"
+                    size="x-small"
+                    label
+                    class="ml-2"
+                >Administrative</v-chip>
+            </template>
+        </Records>
     </BackendLayout>
 </template>
 

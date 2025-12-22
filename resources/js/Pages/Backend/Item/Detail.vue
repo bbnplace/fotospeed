@@ -134,7 +134,9 @@ import TemplateCodes from '@/Components/TemplateCodes.vue'
 import axios from 'axios';
 
 const item = usePage().props.item;
-const processingCenters = item.order_processing_branches ? JSON.parse(item.order_processing_branches) : []
+const processingCenters = (item.order_processing_branches == null) 
+    ? [] 
+    : (typeof item.order_processing_branches === 'string' ? JSON.parse(item.order_processing_branches) : item.order_processing_branches);
 
 const modifyProduct = () => {
     router.visit(route('item.edit', item.id));

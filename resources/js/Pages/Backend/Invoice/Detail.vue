@@ -817,7 +817,7 @@
     import { onMounted, onUnmounted } from 'vue';
 
     onMounted(() => {
-        Echo.private(`invoice.${invoice.id}`)
+        window.Echo.private(`invoice.${invoice.id}`)
             .listen('InvoicePaymentVerified', (e) => {
                 console.log('Invoice payment verified received:', e);
                 // Reload the page to reflect the new status
@@ -826,7 +826,7 @@
     });
 
     onUnmounted(() => {
-        Echo.leave(`invoice.${invoice.id}`);
+        window.Echo.leave(`invoice.${invoice.id}`);
     });
 </script>
 

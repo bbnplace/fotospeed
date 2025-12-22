@@ -59,6 +59,7 @@ const dataResources = {
         edit: "process.edit",
         // delete: "processes.delete",
     },
+    addLabel: "Add Process",
     headers: [
         {
             title: "Order #",
