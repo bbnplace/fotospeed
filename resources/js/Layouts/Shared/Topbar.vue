@@ -160,7 +160,7 @@ const showBrowserNotification = notification => {
             
             const notif = new Notification('OMS Notification', {
                 body: notification.message,
-                icon: window.location.origin + '/images/logo.png',
+                icon: window.location.origin + '/brand/logo.png',
                 data: { url: notification.url },
                 tag: uniqueTag,
                 // Remove requireInteraction for better Chrome compatibility

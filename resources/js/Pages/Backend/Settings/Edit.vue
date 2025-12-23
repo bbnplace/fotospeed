@@ -667,6 +667,22 @@
                             </VRow>
                             <VRow>
                                 <VCol>
+                                    <VCheckbox
+                                        id="bypass_org_account_validation"
+                                        v-model="form.bypass_org_account_validation"
+                                        label="Bypass Organization Account Validation"
+                                        :true-value="true"
+                                        :false-value="false"
+                                        :hide-details="form.errors.bypass_org_account_validation == undefined"
+                                        :error-messages="form.errors.bypass_org_account_validation"
+                                    ></VCheckbox>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        When enabled, organization account details (receiving bank, account name, account number) become optional when acknowledging bank transfer payments
+                                    </p>
+                                </VCol>
+                            </VRow>
+                            <VRow>
+                                <VCol>
                                     <VAutocomplete
                                         id="who_approves_offline_payment"
                                         v-model="form.who_approves_offline_payment"
@@ -1019,6 +1035,7 @@ const form = useForm({
     reportViewers: JSON.parse(settings.reports_permission),
     processing: false,
     support_offline_payment: settings.support_offline_payment == 1,
+    bypass_org_account_validation: settings.bypass_org_account_validation == 1,
     who_approves_offline_payment: settings.who_approves_offline_payment,
     who_handles_refunds: settings.who_handles_refunds,
     order_file_delible_states: settings.order_file_delible_states ? JSON.parse(settings.order_file_delible_states) : ['Delivered'],
@@ -1049,13 +1066,21 @@ const getIdentities = async () => {
             approvedIdentities.value = responseData.data;
         }
     } catch (error) {
-        // console.log(error)
+        //
     }
     loadingIdentities.value = false;
 }
 
 const submit = () =>{
-    form.post(route('settings'), {
+    const settingsRoute = route('settings');
+
+    form.post(settingsRoute, {
+        onSuccess: (response) => {
+            saveStatus.value = "Saved Changes";
+        },
+        onError: (errors) => {
+            console.error('Settings save failed', errors);
+        },
         onFinish: () => {
             saveStatus.value = "Saved Changes";
             setTimeout(()=>{

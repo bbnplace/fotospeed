@@ -463,7 +463,7 @@ const subscribeToTaskClaimChannel = () => {
               if (Notification.permission === "granted") {
                 new Notification(`Task Claimed`, {
                   body: `"${event.task_name}" was claimed by ${event.claimed_by.name}`,
-                  icon: '/images/logo.png'
+                  icon: '/brand/logo.png'
                 });
               }
               

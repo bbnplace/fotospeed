@@ -546,7 +546,7 @@ onMounted(async () => {
         if (Notification.permission === "granted") {
            new Notification("Task Update", {
               body: notification.message,
-              icon: '/images/logo.png' // Adjust path as needed
+              icon: '/brand/logo.png' // Adjust path as needed
            });
         }
 
@@ -581,7 +581,7 @@ onMounted(async () => {
         if (Notification.permission === "granted") {
           new Notification(`Task Claimed`, {
             body: `"${event.task_name}" was claimed by ${event.claimed_by.name}`,
-            icon: '/images/logo.png'
+            icon: '/brand/logo.png'
           });
         }
       } else {

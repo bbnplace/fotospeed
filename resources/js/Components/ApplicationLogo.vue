@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import image from '@/assets/logo.png';
+const image = '/brand/logo.png';
 </script>

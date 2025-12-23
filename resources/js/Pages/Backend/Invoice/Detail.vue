@@ -406,6 +406,30 @@
             </VCard>
         </VDialog>
 
+        <!-- Validation Error Modal -->
+        <VDialog v-model="showValidationErrorModal" max-width="500">
+            <VCard>
+                <VCardTitle class="d-flex align-center">
+                    <VIcon color="error" class="mr-2">mdi-alert-circle-outline</VIcon>
+                    Validation Error
+                </VCardTitle>
+                <VCardText>
+                    <VAlert type="error" class="mb-3">
+                        <div class="font-weight-bold mb-2">Unable to acknowledge payment</div>
+                        <div style="white-space: pre-line;">{{ validationErrorMessage }}</div>
+                    </VAlert>
+                    <p class="text-body-2 text-grey-darken-1">
+                        Please ensure all required fields are filled correctly before acknowledging the payment.
+                    </p>
+                </VCardText>
+                <VCardActions>
+                    <VSpacer></VSpacer>
+                    <VBtn color="primary" variant="text" @click="showValidationErrorModal = false">Close</VBtn>
+                </VCardActions>
+            </VCard>
+        </VDialog>
+
+
         <!-- Refund Section for Cancelled Invoices -->
         <div class="my-4 text-right" v-if="invoice.invoice_status.name == 'Cancelled' && !invoice.refunded && canHandleRefunds">
              <VBtn color="warning" @click="showRefundModal = true">Process Refund</VBtn>
@@ -630,6 +654,8 @@
 
     const showAcknowledgeModal = ref(false);
     const processingPayment = ref(false);
+    const showValidationErrorModal = ref(false);
+    const validationErrorMessage = ref('');
 
     const confirmPayment = async () => {
         processingPayment.value = true;
@@ -659,7 +685,48 @@
             }
         } catch (error) {
             console.error(error);
-            alert("Failed to update payment status. Please try again.");
+            processingPayment.value = false;
+            
+            // Handle validation errors (422)
+            if (error.response && error.response.status === 422) {
+                const errors = error.response.data.errors;
+                if (errors) {
+                    // Custom field label mapping for clarity
+                    const fieldLabels = {
+                        'organizationBank': 'Receiving Bank',
+                        'organizationAccountName': 'Receiving Account Name',
+                        'organizationAccountNumber': 'Receiving Account Number',
+                        'customerBank': 'Customer Bank',
+                        'customerAccountName': 'Customer Account Name',
+                        'customerAccountNumber': 'Customer Account Number',
+                        'paymentMethod': 'Payment Method',
+                        'amountPaid': 'Amount Paid',
+                        'paymentDate': 'Payment Date',
+                        'whoReceivedCash': 'Cash Receiver',
+                        'transactionReference': 'Transaction Reference',
+                    };
+                    
+                    // Format validation errors into a readable message
+                    const errorMessages = Object.keys(errors)
+                        .map(field => {
+                            const fieldLabel = fieldLabels[field] || field
+                                .replace(/([A-Z])/g, ' $1')
+                                .replace(/^./, str => str.toUpperCase())
+                                .trim();
+                            return `• ${fieldLabel}: ${errors[field].join(', ')}`;
+                        })
+                        .join('\n');
+                    validationErrorMessage.value = errorMessages;
+                } else {
+                    validationErrorMessage.value = error.response.data.message || 'Validation failed. Please check the form and try again.';
+                }
+            } else {
+                // Handle other errors
+                validationErrorMessage.value = error.response?.data?.message || 'Failed to update payment status. Please try again.';
+            }
+            
+            showAcknowledgeModal.value = false;
+            showValidationErrorModal.value = true;
         } finally {
             processingPayment.value = false;
         }

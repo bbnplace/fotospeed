@@ -1,0 +1,1 @@
+import{c as o,o as t}from"./app-Ddx7qBNM.js";const e="/brand/logo.png",r={__name:"ApplicationLogo",setup(a){return(c,s)=>(t(),o("img",{src:e,alt:"logo-img",class:"logo",style:{width:"200",height:"auto"}}))}};export{r as _};
